@@ -1,6 +1,5 @@
 import os
 
-
 def parse_fasta2(handle):
     # Modified parse fasta to return a dictionary of lists containing the reference [0] and the query [1]
     res = {}
@@ -30,7 +29,6 @@ def parse_fasta2(handle):
     res[h].append(nt)
     return res
 
-
 #GP120 Reference sequence file
 ref_file = open("hxb2_gp120_sequence.txt", 'r')
 
@@ -44,23 +42,22 @@ v2 = gp120[469:588]
 v3 = gp120[885:993]
 v4 = gp120[1152:1254]
 v5 = gp120[1377:1410]
-
 v_region = {0:v1,1:v2,2:v3,3:v4,4:v5}
 
+'''
+#File testing
 print(v1, len(v1))
 print(v2, len(v2))
 print(v3, len(v3))
 print(v4, len(v4))
 print(v5, len(v5))
 
-'''
-#Single file testing
 fasta_in = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/Alignments/CD_pairwise.fasta", 'r')
 data = parse_fasta(fasta_in)
 output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/VRegions/V1-sequences.txt",'w')
 '''
 
-'''
+
 #Slice one variable region at a time
 for t in v_region:
     output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/VRegions/V" + str(t + 1) + "-sequences.txt",'w')
@@ -93,7 +90,6 @@ for t in v_region:
 
                         back_count = 0
                         nt_count = 0
-
                         #Count  backwards on the query to find the start position
                         for a in reversed(query[0:end]):
                             back_count += 1
@@ -104,4 +100,3 @@ for t in v_region:
 
             output.write(query[end-back_count:end])
             output.write("\n")
-'''
