@@ -1,5 +1,7 @@
 import os
-
+from glob import glob
+import re
+import sys
 
 def parse_fasta2(handle):
     # Modified parse fasta to return a dictionary of lists containing the reference [0] and the query [1]
@@ -30,9 +32,10 @@ def parse_fasta2(handle):
     res[h].append(nt)
     return res
 
+    
 
 #GP120 Reference sequence file
-ref_file = open("hxb2_gp120_sequence.txt", 'r')
+ref_file = open("data/hxb2_gp120_sequence.txt", 'r')
 
 gp120 = ''
 for i in ref_file:
@@ -46,6 +49,7 @@ v4 = gp120[1152:1254]
 v5 = gp120[1377:1410]
 
 v_region = {0:v1,1:v2,2:v3,3:v4,4:v5}
+regions = [(0,390), (390,469), (469,588), (885,993), (1152,1254), (1377,1410)]
 
 print(v1, len(v1))
 print(v2, len(v2))
@@ -61,46 +65,63 @@ output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/VRegions/V1-s
 '''
 
 
-#Slice one variable region at a time
-for t in v_region:
-    output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/VRegions/V" + str(t + 1) + "-sequencesTEST2.txt",'w')
+alignments = glob('data/Alignments/*.fasta')
+print(alignments)
 
-    #Read and parse all subtype alignments
-    for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/Alignments"):
 
-        fasta_in = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/Alignments/" + filename, 'r')
 
-        data = parse_fasta2(fasta_in)
+gap_prefix = re.compile('^[-]+')
+gap_suffix = re.compile('[-]+$')
 
-        for i in data:
-            #Extract the reference and query sequences
-            ref = data[i][0]
-            query = data[i][1]
 
-            nt = ''
-            once = 0
+def get_boundaries (str):
+    # return a tuple giving indices of subsequence without gap prefix and suffix
+    res = [0,len(str)]
+    left = gap_prefix.findall(str)
+    right = gap_suffix.findall(str)
+    if left:
+        res[0] = len(left[0])
+    if right:
+        res[1] = len(str) - len(right[0])
 
-            #Scan the reference for the variable region location
-            for n, x in enumerate(ref):
+    return res
 
-                if x.isalpha():
-                    nt += x
 
-                    #Record the end and start locations of the V region (one iteration)
-                    if v_region[t] in nt and once == 0:
-                        once = 1
-                        end = n + 1
 
-                        back_count = 0
-                        nt_count = 0
+#Read and parse all subtype alignments
+for file in alignments:
 
-                        #Count  backwards on the query to find the start position
-                        for a in reversed(ref[0:end]):
-                            back_count += 1
-                            if a.isalpha():
-                                nt_count += 1
-                            if nt_count == len(v_region[t]):
-                                break
+    with open(file) as handle:
+        data = parse_fasta2(handle)
 
-            output.write(query[end-back_count:end])
-            output.write("\n")
+    for header, seq in data.items():
+        #Extract the reference and query sequences
+        #ref = data[i][0]
+        #query = data[i][1]
+        ref, query = seq
+        left, right = get_boundaries(ref)
+        r120 = ref[left:right]  # cut down to gp120
+        q120 = query[left:right]
+        
+        # generate map from alignment to reference coordinates
+        ri = 0  # reference index
+        index = {}
+        #Scan the reference for the variable region location
+        for ai, x in enumerate(r120):
+            # ai = alignment index
+            if x != '-':
+                # otherwise alignment has a gap, do not increment reference index
+                index.update({ri: ai})
+                ri += 1
+        
+        for left, right in regions:
+            print(index[left])
+            print(index[right])
+            print(q120[index[left]:index[right]])
+            print(gp120[left:right])
+        sys.exit()
+            
+
+
+
+
