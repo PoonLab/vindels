@@ -7,5 +7,6 @@ Developing an empirical model of sequence insertion and deletion in virus genome
 4) Cut and output the pairwise-aligned Variable and Conserved Regions by reading in frame [V_region_slicing2.py]
 5) Concatenated and output the conserved regions by subtype [V_region_slicing3.py]
 6) Multiple sequence alignment in MAFFT by subtype [MSA.py]
-
+7) Converted .fasta file to .phy file [fasta2phylip.py]
+8) Created phylo trees in PhyML 
       
