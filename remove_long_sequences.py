@@ -3,45 +3,50 @@ from glob import glob
 from seqUtils import *
 
 
+folder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/5_1_nogaps/*.fasta")
 
-input = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/5MSAlignments/C_MSA_edit.fasta",'r')
+for file in folder:
+    input = open(file,'r')
+    name = file.split("/")[6].split("_MSA_.fasta")[0]
 
-#list format
-fasta = convert_fasta(input)
+    #list format
+    transposed = transpose_fasta(convert_fasta(input))
 
-transposed = transpose_fasta(fasta)
+    pos = 0
 
-pos = 0
+    freqlist = {}
+    for x in transposed:
+        pos += 1
 
-for x in transposed:
-    pos += 1
+        gaps = x.count("-")
 
-    length = len(x)
-    gaps = x.count("-")
+        freq = float(gaps)/len(x)
 
-    freq = float(gaps)/length
-    print(freq, pos)
-    if freq < 0.2:
+        freqlist[pos] = ("%.2f" %freq)
 
-        print('Cut Point:'+ str(pos))
-        break
-print(pos)
+        if freq < 0.2:
+            stop = pos
+            #print(file + "\n" + "Cut Point:" + str(stop))
+            break
 
-input.close()
-
-input = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/5MSAlignments/C_MSA_edit.fasta",'r')
-data = parse_fasta(input)
-
-output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/5MSAlignments/C_MSA_shortened.fasta",'w')
+    #used to print the lists of gap frequencies of each MSA
 
 
-#dictionary format
+    input.close()
 
 
-for i in data.keys():
-    data[i] = data[i][pos-1:]
+    input = open(file, 'r')
+    data = parse_fasta(input)
 
-    output.write(">" + i + "\n")
-    output.write(data[i] + "\n")
+    output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/5_2_Shortened/"+ name +"_MSA--.fasta",'w')
 
-input.close()
+
+    #dictionary format
+
+    for i in data.keys():
+        data[i] = data[i][pos-1:]
+
+        output.write(">" + i + "\n")
+        output.write(data[i] + "\n")
+
+    input.close()
