@@ -56,7 +56,7 @@ for (i in 1:length(tfolder)){
       Alength <- nchar(Avr)
       Blength <- nchar(Bvr)
       
-      indels[x,diff] <- Alength != Blength
+      indels[x,diff] <- Alength == Blength
       indels[x,nt] <- abs(Alength - Blength)
       
     }
