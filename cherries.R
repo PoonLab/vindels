@@ -1,8 +1,9 @@
 require(ape)
-setwd("~/PycharmProjects/hiv-evolution-master/9_indels")
-tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_1_Trees", full.names=TRUE)
-vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions2", full.names=TRUE)
+setwd("~/PycharmProjects/hiv-evolution-master/9_1_indels")
+tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_1_Trees_cut", full.names=TRUE)
+vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions3", full.names=TRUE)
 
+zeros <- data.frame()
 
 for (i in 1:length(tfolder)){
   tre <- read.tree(tfolder[i])
@@ -41,10 +42,23 @@ for (i in 1:length(tfolder)){
   
   
   indels <- df[,c(6:9)]
+  
+  indels$total.length <- indels$tip1.len + indels$tip2.len
+  
+  
+  filtered.indels <- indels
+  # for (y in 1:nrow(indels)){
+  #   value <- indels$total.length[y]
+  #   if (value != 0){
+  #      filtered.indels <- rbind(filtered.indels, data.frame(indels[y,]))
+  #   }
+  # }
 
-  for (x in 1:nrow(indels)){
-    idxA <- match(indels$tip1.label[x], csv$accno)
-    idxB <- match(indels$tip2.label[x], csv$accno)
+
+  
+  for (x in 1:nrow(filtered.indels)){
+    idxA <- match(filtered.indels$tip1.label[x], csv$accno)
+    idxB <- match(filtered.indels$tip2.label[x], csv$accno)
     
     for (t in 2:ncol(csv)){
       Avr <- as.character(csv[idxA,t])
@@ -56,15 +70,23 @@ for (i in 1:length(tfolder)){
       Alength <- nchar(Avr)
       Blength <- nchar(Bvr)
       
-      indels[x,diff] <- Alength == Blength
-      indels[x,nt] <- abs(Alength - Blength)
+      filtered.indels[x,diff] <- Alength == Blength
+      filtered.indels[x,nt] <- abs(Alength - Blength)
       
     }
 
   }
+  
+  for (y in 1:nrow(filtered.indels)){
+    value <- filtered.indels$total.length[y]
+    if (value == 0){
+      zeros <- rbind(zeros, data.frame(filtered.indels[y,]))
+    }
+  }
+  
   name <- strsplit(tfolder[i], "/")[[1]][7]
   filename <- paste0(strsplit(name, "\\.")[[1]][1], ".csv" )
-  
-  write.csv(indels, filename)
+
+  #write.csv(filtered.indels, filename)
 
 }
