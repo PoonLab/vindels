@@ -8,3 +8,8 @@ Call:
 Coefficients:
   rate 
 0.01421269 
+
+> confint(mle.result, level=0.95)
+Profiling...
+Error in prof[[pi]] <- data.frame(z = zi[si]) : 
+  attempt to select less than one element in OneIndex
