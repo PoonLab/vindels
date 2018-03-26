@@ -1,15 +1,9 @@
-> mle.result <- mle (obj.f, start=list(rate=1), method = "Brent", lower=1e-12, upper = 1)
-> mle.result
+times <- c(21.22928, 57.7856, 62.8058, 74.4789, 68.8528, 12.14486, 58.6085, 
+  79.2953, 97.4896, 97.3225, 15.59132, 9.74537, 14.84264, 11.21054, 
+  7.67147, 5.77482, 12.04697, 11.17393, 34.0371, 45.2803, 55.354, 
+  58.552, 24.753, 82.7364)
 
-Call:
-  mle(minuslogl = obj.f, start = list(rate = 1), method = "Brent", 
-      lower = 1e-12, upper = 1)
+outcomes <- c(TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, 
+              FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 
+              TRUE, FALSE, TRUE, TRUE, FALSE)
 
-Coefficients:
-  rate 
-0.01421269 
-
-> confint(mle.result, level=0.95)
-Profiling...
-Error in prof[[pi]] <- data.frame(z = zi[si]) : 
-  attempt to select less than one element in OneIndex

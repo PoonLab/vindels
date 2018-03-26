@@ -4,13 +4,20 @@ tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_1_Trees_cut
 vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions3", full.names=TRUE)
 
 zeros <- data.frame()
+len.diff <- data.frame()
 
 for (i in 1:length(tfolder)){
   tre <- read.tree(tfolder[i])
   csv <- read.csv(vfolder[i], header=FALSE)
   
+  #for output 
+  name <- strsplit(tfolder[i], "/")[[1]][7]
+  filename <- paste0(strsplit(name, "\\.")[[1]][1], ".csv" )
+  
+  #naming the csv 
   names(csv) <- c('accno', 'VR1', 'VR2','VR3', 'VR4', 'VR5')
   
+  #counting tips
   n <- Ntip(tre)
   
   # number of tips per internal node
@@ -42,7 +49,6 @@ for (i in 1:length(tfolder)){
   
   
   indels <- df[,c(6:9)]
-  
   indels$total.length <- indels$tip1.len + indels$tip2.len
   
   
@@ -54,7 +60,7 @@ for (i in 1:length(tfolder)){
   #   }
   # }
 
-
+  
   
   for (x in 1:nrow(filtered.indels)){
     idxA <- match(filtered.indels$tip1.label[x], csv$accno)
@@ -64,14 +70,24 @@ for (i in 1:length(tfolder)){
       Avr <- as.character(csv[idxA,t])
       Bvr <- as.character(csv[idxB,t])
       
-      diff <- paste0("VR",as.character(t-1),".indel")
-      nt <- paste0("VR",as.character(t-1),".nt")
+      bln <- paste0("VR",as.character(t-1),".indel")
+      num <- paste0("VR",as.character(t-1),".nt")
       
       Alength <- nchar(Avr)
       Blength <- nchar(Bvr)
       
-      filtered.indels[x,diff] <- Alength == Blength
-      filtered.indels[x,nt] <- abs(Alength - Blength)
+      # a.count <- str_count(q.data$string, "a")
+      # t.count <- str_count(q.data$string, "t")
+      # c.count <- str_count(q.data$string, "c")
+      # g.count <- str_count(q.data$string, "g")
+      *************************
+      diff <- abs(Alength - Blength)
+      # if (diff != 0){
+      #   len.diff[,paste0(filename, ".",as.character(t-1))] <- 
+      # }
+      
+      filtered.indels[x,bln] <- Alength == Blength
+      filtered.indels[x,num] <- diff
       
     }
 
@@ -84,8 +100,7 @@ for (i in 1:length(tfolder)){
     }
   }
   
-  name <- strsplit(tfolder[i], "/")[[1]][7]
-  filename <- paste0(strsplit(name, "\\.")[[1]][1], ".csv" )
+  
 
   #write.csv(filtered.indels, filename)
 
