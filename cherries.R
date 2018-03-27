@@ -4,7 +4,8 @@ tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_1_Trees_cut
 vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions3", full.names=TRUE)
 
 zeros <- data.frame()
-len.diff <- data.frame()
+len.diff.1 <- list()
+
 
 for (i in 1:length(tfolder)){
   tre <- read.tree(tfolder[i])
