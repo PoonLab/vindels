@@ -1,10 +1,10 @@
 require(ape)
-setwd("~/PycharmProjects/hiv-evolution-master/9_1_indels")
+setwd("~/PycharmProjects/hiv-evolution-master/9_2_indels")
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_1_Trees_cut", full.names=TRUE)
 vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions3", full.names=TRUE)
 
 zeros <- data.frame()
-len.diff.1 <- list()
+len.diff <- list()
 
 
 for (i in 1:length(tfolder)){
@@ -14,6 +14,7 @@ for (i in 1:length(tfolder)){
   #for output 
   name <- strsplit(tfolder[i], "/")[[1]][7]
   filename <- paste0(strsplit(name, "\\.")[[1]][1], ".csv" )
+  
   
   #naming the csv 
   names(csv) <- c('accno', 'VR1', 'VR2','VR3', 'VR4', 'VR5')
@@ -81,11 +82,10 @@ for (i in 1:length(tfolder)){
       # t.count <- str_count(q.data$string, "t")
       # c.count <- str_count(q.data$string, "c")
       # g.count <- str_count(q.data$string, "g")
-      *************************
       diff <- abs(Alength - Blength)
-      # if (diff != 0){
-      #   len.diff[,paste0(filename, ".",as.character(t-1))] <- 
-      # }
+      
+      
+      
       
       filtered.indels[x,bln] <- Alength == Blength
       filtered.indels[x,num] <- diff
@@ -93,16 +93,32 @@ for (i in 1:length(tfolder)){
     }
 
   }
-  
-  for (y in 1:nrow(filtered.indels)){
-    value <- filtered.indels$total.length[y]
-    if (value == 0){
-      zeros <- rbind(zeros, data.frame(filtered.indels[y,]))
-    }
+  for (j in 1:5){
+    len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] == 3
+    len.diff[[paste0(filename, ".VR",j,".six+")]] <-  filtered.indels[,paste0("VR",j,".nt")] >= 6
   }
   
   
-
+  # for (y in 1:nrow(filtered.indels)){
+  #   value <- filtered.indels$total.length[y]
+  #   if (value == 0){
+  #     zeros <- rbind(zeros, data.frame(filtered.indels[y,]))
+  #   }
+  # }
   #write.csv(filtered.indels, filename)
 
+}
+for (z in 1:length(len.diff)){
+  indel.sizes[[z]] <- sum(len.diff[[z]])
+  
+}
+names(indel.sizes) <- names(len.diff)
+
+indel.sizes2 <- data.frame(stringsAsFactors = FALSE)
+
+for (p in 1:9){
+  
+  for (m in 1:10){
+    indel.sizes2 <- rbind(indel.sizes2, data.frame(indel.sizes()))
+  }
 }
