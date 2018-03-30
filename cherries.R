@@ -108,9 +108,17 @@ for (i in 1:length(tfolder)){
   #write.csv(filtered.indels, filename)
 
 }
+indel.sizes <- data.frame(stringsAsFactors = FALSE)
+count <- 1
 for (z in 1:length(len.diff)){
-  indel.sizes[[z]] <- sum(len.diff[[z]])
-  
+  subtype <- strsplit(names(len.diff)[[z]], "\\.")[[1]][1]
+  vregion <- strsplit(names(len.diff)[[z]], "\\.")[[1]][3]
+  size <- strsplit(names(len.diff)[[z]], "\\.")[[1]][4]
+  indel.sizes[count,paste0(vregion, "_", size)] <- sum(len.diff[[z]])
+  if ((z - 1) %% 10 == 9){
+    indel.sizes[count,1] <- subtype
+    count <- count + 1
+  }
 }
 names(indel.sizes) <- names(len.diff)
 
