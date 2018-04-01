@@ -80,10 +80,10 @@ for (i in 1:length(tfolder)){
       bln <- Alength == Blength
       
       A.B <- paste0(Avr,Bvr)
-      temp[x,paste0("VR",(t-1),".A")] <- str_count(A.B, "A")/nchar(A.B)
-      temp[x,paste0("VR",(t-1),".C")] <- str_count(A.B, "C")/nchar(A.B)
-      temp[x,paste0("VR",(t-1),".T")] <- str_count(A.B, "T")/nchar(A.B)
-      temp[x,paste0("VR",(t-1),".G")] <- str_count(A.B, "G")/nchar(A.B)
+      temp[x,paste0("VR",(t-1),".A")] <- str_count(A.B, "A")
+      temp[x,paste0("VR",(t-1),".C")] <- str_count(A.B, "C")
+      temp[x,paste0("VR",(t-1),".T")] <- str_count(A.B, "T")
+      temp[x,paste0("VR",(t-1),".G")] <- str_count(A.B, "G")
       temp[x,paste0("VR",(t-1),".indel")] <- bln
       
       
@@ -107,10 +107,10 @@ for (i in 1:length(tfolder)){
     nt.prop[i,paste0('VR',g,'.T.no')] <- sum(temp[,paste0('VR',g,'.T')][no])/length(no)
     nt.prop[i,paste0('VR',g,'.C.no')] <- sum(temp[,paste0('VR',g,'.C')][no])/length(no)
     if (length(yes) == 0){
-      nt.prop[i,paste0('VR',g,'.A.yes')] <- 0
-      nt.prop[i,paste0('VR',g,'.G.yes')] <- 0
-      nt.prop[i,paste0('VR',g,'.T.yes')] <- 0
-      nt.prop[i,paste0('VR',g,'.C.yes')] <- 0
+      nt.prop[i,paste0('VR',g,'.A.yes')] <- NULL
+      nt.prop[i,paste0('VR',g,'.G.yes')] <- NULL
+      nt.prop[i,paste0('VR',g,'.T.yes')] <- NULL
+      nt.prop[i,paste0('VR',g,'.C.yes')] <- NULL
     }else{
       nt.prop[i,paste0('VR',g,'.A.yes')] <- sum(temp[,paste0('VR',g,'.A')][yes])/length(yes)
       nt.prop[i,paste0('VR',g,'.G.yes')] <- sum(temp[,paste0('VR',g,'.G')][yes])/length(yes)
