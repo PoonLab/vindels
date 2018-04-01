@@ -1,11 +1,12 @@
 require(ape)
-setwd("~/PycharmProjects/hiv-evolution-master/9_2_indels")
+require(stringr)
+setwd("~/PycharmProjects/hiv-evolution-master/")
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_1_Trees_cut", full.names=TRUE)
 vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions3", full.names=TRUE)
 
 zeros <- data.frame()
 len.diff <- list()
-
+nt.prop <- data.frame(subtype=character(),stringsAsFactors = F)
 
 for (i in 1:length(tfolder)){
   tre <- read.tree(tfolder[i])
@@ -13,7 +14,8 @@ for (i in 1:length(tfolder)){
   
   #for output 
   name <- strsplit(tfolder[i], "/")[[1]][7]
-  filename <- paste0(strsplit(name, "\\.")[[1]][1], ".csv" )
+  subtype <- strsplit(name, "\\.")[[1]][1]
+  filename <- paste0(subtype, ".csv" )
   
   
   #naming the csv 
@@ -64,6 +66,7 @@ for (i in 1:length(tfolder)){
 
   
   
+  temp <- data.frame(stringsAsFactors = F)
   for (x in 1:nrow(filtered.indels)){
     idxA <- match(filtered.indels$tip1.label[x], csv$accno)
     idxB <- match(filtered.indels$tip2.label[x], csv$accno)
@@ -72,33 +75,58 @@ for (i in 1:length(tfolder)){
       Avr <- as.character(csv[idxA,t])
       Bvr <- as.character(csv[idxB,t])
       
-      bln <- paste0("VR",as.character(t-1),".indel")
-      num <- paste0("VR",as.character(t-1),".nt")
-      
       Alength <- nchar(Avr)
       Blength <- nchar(Bvr)
+      bln <- Alength == Blength
       
-      # a.count <- str_count(q.data$string, "a")
-      # t.count <- str_count(q.data$string, "t")
-      # c.count <- str_count(q.data$string, "c")
-      # g.count <- str_count(q.data$string, "g")
-      diff <- abs(Alength - Blength)
+      A.B <- paste0(Avr,Bvr)
+      temp[x,paste0("VR",(t-1),".A")] <- str_count(A.B, "A")/nchar(A.B)
+      temp[x,paste0("VR",(t-1),".C")] <- str_count(A.B, "C")/nchar(A.B)
+      temp[x,paste0("VR",(t-1),".T")] <- str_count(A.B, "T")/nchar(A.B)
+      temp[x,paste0("VR",(t-1),".G")] <- str_count(A.B, "G")/nchar(A.B)
+      temp[x,paste0("VR",(t-1),".indel")] <- bln
       
       
-      
-      
-      filtered.indels[x,bln] <- Alength == Blength
-      filtered.indels[x,num] <- diff
-      
-    }
+      name.bln <- paste0("VR",as.character(t-1),".indel")
+      name.nt <- paste0("VR",as.character(t-1),".nt")
 
+      diff <- abs(Alength - Blength)
+      filtered.indels[x,name.bln] <- bln
+      filtered.indels[x,name.nt] <- diff
+    }
+  
   }
-  for (j in 1:5){
-    len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] == 3
-    len.diff[[paste0(filename, ".VR",j,".six+")]] <-  filtered.indels[,paste0("VR",j,".nt")] >= 6
+  #load the nt proportions data frame
+  nt.prop[i,1] <- subtype
+  for (g in 1:5){
+    no <- which(temp[,paste0("VR",g,'.indel')])
+    yes <- which(!temp[,paste0("VR",g,'.indel')])
+
+    nt.prop[i,paste0('VR',g,'.A.no')] <- sum(temp[,paste0('VR',g,'.A')][no])/length(no)
+    nt.prop[i,paste0('VR',g,'.G.no')] <- sum(temp[,paste0('VR',g,'.G')][no])/length(no)
+    nt.prop[i,paste0('VR',g,'.T.no')] <- sum(temp[,paste0('VR',g,'.T')][no])/length(no)
+    nt.prop[i,paste0('VR',g,'.C.no')] <- sum(temp[,paste0('VR',g,'.C')][no])/length(no)
+    if (length(yes) == 0){
+      nt.prop[i,paste0('VR',g,'.A.yes')] <- 0
+      nt.prop[i,paste0('VR',g,'.G.yes')] <- 0
+      nt.prop[i,paste0('VR',g,'.T.yes')] <- 0
+      nt.prop[i,paste0('VR',g,'.C.yes')] <- 0
+    }else{
+      nt.prop[i,paste0('VR',g,'.A.yes')] <- sum(temp[,paste0('VR',g,'.A')][yes])/length(yes)
+      nt.prop[i,paste0('VR',g,'.G.yes')] <- sum(temp[,paste0('VR',g,'.G')][yes])/length(yes)
+      nt.prop[i,paste0('VR',g,'.T.yes')] <- sum(temp[,paste0('VR',g,'.T')][yes])/length(yes)
+      nt.prop[i,paste0('VR',g,'.C.yes')] <- sum(temp[,paste0('VR',g,'.C')][yes])/length(yes)
+    }
   }
   
+}
+  #Used to build the len.diff data frame needed for 3/6+ comparison
+  # for (j in 1:5){
+  #   len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] == 3
+  #   len.diff[[paste0(filename, ".VR",j,".six+")]] <-  filtered.indels[,paste0("VR",j,".nt")] >= 6
+  # }
   
+  #Used to isolate only the 0 length cherries
   # for (y in 1:nrow(filtered.indels)){
   #   value <- filtered.indels$total.length[y]
   #   if (value == 0){
@@ -107,26 +135,28 @@ for (i in 1:length(tfolder)){
   # }
   #write.csv(filtered.indels, filename)
 
-}
-indel.sizes <- data.frame(stringsAsFactors = FALSE)
+
+#Used to load the indel.sizes data frame containing 3/6+ indel frequencies
+indel.sizes <- data.frame(subtype=character(),stringsAsFactors = FALSE)
 count <- 1
 for (z in 1:length(len.diff)){
   subtype <- strsplit(names(len.diff)[[z]], "\\.")[[1]][1]
   vregion <- strsplit(names(len.diff)[[z]], "\\.")[[1]][3]
   size <- strsplit(names(len.diff)[[z]], "\\.")[[1]][4]
-  indel.sizes[count,paste0(vregion, "_", size)] <- sum(len.diff[[z]])
-  if ((z - 1) %% 10 == 9){
-    indel.sizes[count,1] <- subtype
-    count <- count + 1
-  }
-}
-names(indel.sizes) <- names(len.diff)
-
-indel.sizes2 <- data.frame(stringsAsFactors = FALSE)
-
-for (p in 1:9){
   
-  for (m in 1:10){
-    indel.sizes2 <- rbind(indel.sizes2, data.frame(indel.sizes()))
+  indel.sizes[z,"subtype"] <- subtype
+  indel.sizes[z,"count"] <- sum(len.diff[[z]])
+  if (size == "three"){
+    indel.sizes[z,"size"] <- 3
+  }else{
+    indel.sizes[z,"size"] <- 6
   }
+  
+  #old version
+  #indel.sizes[count,paste0(vregion, "_", size)] <- sum(len.diff[[z]])
+  # if ((z - 1) %% 10 == 9){
+  #   indel.sizes[count,1] <- subtype
+  #   count <- count + 1
+  # }
 }
+
