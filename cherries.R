@@ -119,7 +119,7 @@ for (i in 1:length(tfolder)){
   }
   #Used to build the len.diff data frame needed for 3/6+ comparison
   for (j in 1:5){
-    len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] == 3
+    len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
     len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
   }
   
@@ -148,9 +148,9 @@ for (z in 1:length(len.diff)){
   indel.sizes[z,"count"] <- sum(len.diff[[z]])
   indel.sizes[z,"vregion"] <- vregion
   if (size == "three"){
-    indel.sizes[z,"three"] <- "3 nt"
+    indel.sizes[z,"three"] <- "<= 3 nt"
   }else{
-    indel.sizes[z,"three"] <- ">3 nt"
+    indel.sizes[z,"three"] <- "> 3 nt"
   }
   
   #old version
@@ -161,6 +161,6 @@ for (z in 1:length(len.diff)){
   # }
 }
 
-df3 <- data.frame(Variable_Region=rep(indel.sizes$vregion, indel.sizes$count), Indel_Sizes=rep(indel.sizes$three,indel.sizes$count))
+df3 <- data.frame(VRegion=rep(indel.sizes$vregion, indel.sizes$count), Indel_Sizes=rep(indel.sizes$three,indel.sizes$count))
 table2 <- table(rep(indel.sizes$subtype, indel.sizes$count), rep(indel.sizes$three, indel.sizes$count))
 mosaic(~Variable_Region+Indel_Sizes,data=df3, shade=T, gp_labels=(gpar(fontsize=11)))
