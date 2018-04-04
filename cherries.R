@@ -5,8 +5,8 @@ tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_1_Trees_cut
 vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions3", full.names=TRUE)
 
 zeros <- data.frame()
-len.diff <- list()
-nt.prop <- data.frame(subtype=character(),stringsAsFactors = F)
+len.diff <- list() #data.frame(subtype=character(),stringsAsFactors = F)
+nt.prop <- data.frame(stringsAsFactors = F)
 
 for (i in 1:length(tfolder)){
   tre <- read.tree(tfolder[i])
@@ -80,10 +80,10 @@ for (i in 1:length(tfolder)){
       bln <- Alength == Blength
       
       A.B <- paste0(Avr,Bvr)
-      temp[x,paste0("VR",(t-1),".A")] <- str_count(A.B, "A")
-      temp[x,paste0("VR",(t-1),".C")] <- str_count(A.B, "C")
-      temp[x,paste0("VR",(t-1),".T")] <- str_count(A.B, "T")
-      temp[x,paste0("VR",(t-1),".G")] <- str_count(A.B, "G")
+      temp[x,paste0("VR",(t-1),".A")] <- str_count(A.B, "A")/nchar(A.B)
+      temp[x,paste0("VR",(t-1),".C")] <- str_count(A.B, "C")/nchar(A.B)
+      temp[x,paste0("VR",(t-1),".T")] <- str_count(A.B, "T")/nchar(A.B)
+      temp[x,paste0("VR",(t-1),".G")] <- str_count(A.B, "G")/nchar(A.B)
       temp[x,paste0("VR",(t-1),".indel")] <- bln
       
       
@@ -96,8 +96,7 @@ for (i in 1:length(tfolder)){
     }
   
   }
-  #load the nt proportions data frame
-  nt.prop[i,1] <- subtype
+  #load the nt proportions data frame from the temp
   for (g in 1:5){
     no <- which(temp[,paste0("VR",g,'.indel')])
     yes <- which(!temp[,paste0("VR",g,'.indel')])
@@ -107,10 +106,10 @@ for (i in 1:length(tfolder)){
     nt.prop[i,paste0('VR',g,'.T.no')] <- sum(temp[,paste0('VR',g,'.T')][no])/length(no)
     nt.prop[i,paste0('VR',g,'.C.no')] <- sum(temp[,paste0('VR',g,'.C')][no])/length(no)
     if (length(yes) == 0){
-      nt.prop[i,paste0('VR',g,'.A.yes')] <- NULL
-      nt.prop[i,paste0('VR',g,'.G.yes')] <- NULL
-      nt.prop[i,paste0('VR',g,'.T.yes')] <- NULL
-      nt.prop[i,paste0('VR',g,'.C.yes')] <- NULL
+      nt.prop[i,paste0('VR',g,'.A.yes')] <- 0
+      nt.prop[i,paste0('VR',g,'.G.yes')] <- 0
+      nt.prop[i,paste0('VR',g,'.T.yes')] <- 0
+      nt.prop[i,paste0('VR',g,'.C.yes')] <- 0
     }else{
       nt.prop[i,paste0('VR',g,'.A.yes')] <- sum(temp[,paste0('VR',g,'.A')][yes])/length(yes)
       nt.prop[i,paste0('VR',g,'.G.yes')] <- sum(temp[,paste0('VR',g,'.G')][yes])/length(yes)
@@ -118,13 +117,14 @@ for (i in 1:length(tfolder)){
       nt.prop[i,paste0('VR',g,'.C.yes')] <- sum(temp[,paste0('VR',g,'.C')][yes])/length(yes)
     }
   }
+  #Used to build the len.diff data frame needed for 3/6+ comparison
+  for (j in 1:5){
+    len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] == 3
+    len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
+  }
   
 }
-  #Used to build the len.diff data frame needed for 3/6+ comparison
-  # for (j in 1:5){
-  #   len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] == 3
-  #   len.diff[[paste0(filename, ".VR",j,".six+")]] <-  filtered.indels[,paste0("VR",j,".nt")] >= 6
-  # }
+  
   
   #Used to isolate only the 0 length cherries
   # for (y in 1:nrow(filtered.indels)){
@@ -137,19 +137,20 @@ for (i in 1:length(tfolder)){
 
 
 #Used to load the indel.sizes data frame containing 3/6+ indel frequencies
-indel.sizes <- data.frame(subtype=character(),stringsAsFactors = FALSE)
+indel.sizes <- data.frame(stringsAsFactors = FALSE)
 count <- 1
 for (z in 1:length(len.diff)){
   subtype <- strsplit(names(len.diff)[[z]], "\\.")[[1]][1]
   vregion <- strsplit(names(len.diff)[[z]], "\\.")[[1]][3]
   size <- strsplit(names(len.diff)[[z]], "\\.")[[1]][4]
   
-  indel.sizes[z,"subtype"] <- subtype
+  indel.sizes[z,"subtype"] <- subtype #vregion
   indel.sizes[z,"count"] <- sum(len.diff[[z]])
+  indel.sizes[z,"vregion"] <- vregion
   if (size == "three"){
-    indel.sizes[z,"size"] <- 3
+    indel.sizes[z,"three"] <- "3 nt"
   }else{
-    indel.sizes[z,"size"] <- 6
+    indel.sizes[z,"three"] <- ">3 nt"
   }
   
   #old version
@@ -160,3 +161,6 @@ for (z in 1:length(len.diff)){
   # }
 }
 
+df3 <- data.frame(Variable_Region=rep(indel.sizes$vregion, indel.sizes$count), Indel_Sizes=rep(indel.sizes$three,indel.sizes$count))
+table2 <- table(rep(indel.sizes$subtype, indel.sizes$count), rep(indel.sizes$three, indel.sizes$count))
+mosaic(~Variable_Region+Indel_Sizes,data=df3, shade=T, gp_labels=(gpar(fontsize=11)))
