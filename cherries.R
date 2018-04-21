@@ -1,7 +1,7 @@
 require(ape)
 require(stringr)
-setwd("~/PycharmProjects/hiv-evolution-master/")
-tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_1_Trees_cut", full.names=TRUE)
+setwd("~/PycharmProjects/hiv-evolution-master/9_3_indels")
+tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_4_Filtered_Run2", full.names=TRUE)
 vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions3", full.names=TRUE)
 
 zeros <- data.frame()
@@ -96,32 +96,39 @@ for (i in 1:length(tfolder)){
     }
   
   }
+  new.df <- filtered.indels[filtered.indels$total.length != 0,]
+  
+  write.csv(new.df, filename)
+  
   #load the nt proportions data frame from the temp
-  for (g in 1:5){
-    no <- which(temp[,paste0("VR",g,'.indel')])
-    yes <- which(!temp[,paste0("VR",g,'.indel')])
-
-    nt.prop[i,paste0('VR',g,'.A.no')] <- sum(temp[,paste0('VR',g,'.A')][no])/length(no)
-    nt.prop[i,paste0('VR',g,'.G.no')] <- sum(temp[,paste0('VR',g,'.G')][no])/length(no)
-    nt.prop[i,paste0('VR',g,'.T.no')] <- sum(temp[,paste0('VR',g,'.T')][no])/length(no)
-    nt.prop[i,paste0('VR',g,'.C.no')] <- sum(temp[,paste0('VR',g,'.C')][no])/length(no)
-    if (length(yes) == 0){
-      nt.prop[i,paste0('VR',g,'.A.yes')] <- 0
-      nt.prop[i,paste0('VR',g,'.G.yes')] <- 0
-      nt.prop[i,paste0('VR',g,'.T.yes')] <- 0
-      nt.prop[i,paste0('VR',g,'.C.yes')] <- 0
-    }else{
-      nt.prop[i,paste0('VR',g,'.A.yes')] <- sum(temp[,paste0('VR',g,'.A')][yes])/length(yes)
-      nt.prop[i,paste0('VR',g,'.G.yes')] <- sum(temp[,paste0('VR',g,'.G')][yes])/length(yes)
-      nt.prop[i,paste0('VR',g,'.T.yes')] <- sum(temp[,paste0('VR',g,'.T')][yes])/length(yes)
-      nt.prop[i,paste0('VR',g,'.C.yes')] <- sum(temp[,paste0('VR',g,'.C')][yes])/length(yes)
-    }
-  }
-  #Used to build the len.diff data frame needed for 3/6+ comparison
-  for (j in 1:5){
-    len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
-    len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
-  }
+  # for (g in 1:5){
+  #   no <- which(temp[,paste0("VR",g,'.indel')])
+  #   yes <- which(!temp[,paste0("VR",g,'.indel')])
+  # 
+  #   nt.prop[i,paste0('VR',g,'.A.no')] <- mean(temp[,paste0('VR',g,'.A')][no])
+  #   nt.prop[i,paste0('VR',g,'.G.no')] <- mean(temp[,paste0('VR',g,'.G')][no])
+  #   nt.prop[i,paste0('VR',g,'.T.no')] <- mean(temp[,paste0('VR',g,'.T')][no])
+  #   nt.prop[i,paste0('VR',g,'.C.no')] <- mean(temp[,paste0('VR',g,'.C')][no])
+  #   if (length(yes) == 0){
+  #     nt.prop[i,paste0('VR',g,'.A.yes')] <- 0
+  #     nt.prop[i,paste0('VR',g,'.G.yes')] <- 0
+  #     nt.prop[i,paste0('VR',g,'.T.yes')] <- 0
+  #     nt.prop[i,paste0('VR',g,'.C.yes')] <- 0
+  #   }else{
+  #     nt.prop[i,paste0('VR',g,'.A.yes')] <- mean(temp[,paste0('VR',g,'.A')][yes])
+  #     nt.prop[i,paste0('VR',g,'.G.yes')] <- mean(temp[,paste0('VR',g,'.G')][yes])
+  #     nt.prop[i,paste0('VR',g,'.T.yes')] <- mean(temp[,paste0('VR',g,'.T')][yes])
+  #     nt.prop[i,paste0('VR',g,'.C.yes')] <- mean(temp[,paste0('VR',g,'.C')][yes])
+  #   }
+  # }
+  # #Used to build the len.diff data frame needed for 3/6+ comparison
+  # for (j in 1:5){
+  #   len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
+  #   len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
+  # }
+  # if (filename == "B.csv"){
+  #   break
+  # }
   
 }
   
@@ -161,6 +168,16 @@ for (z in 1:length(len.diff)){
   # }
 }
 
-df3 <- data.frame(VRegion=rep(indel.sizes$vregion, indel.sizes$count), Indel_Sizes=rep(indel.sizes$three,indel.sizes$count))
+
+
+# for the generation of figures used in poster
+df3 <- data.frame(VRegions=rep(indel.sizes$vregion, indel.sizes$count), Indel_Sizes=rep(indel.sizes$three,indel.sizes$count))
 table2 <- table(rep(indel.sizes$subtype, indel.sizes$count), rep(indel.sizes$three, indel.sizes$count))
 mosaic(~Variable_Region+Indel_Sizes,data=df3, shade=T, gp_labels=(gpar(fontsize=11)))
+
+par(ps = 29, cex.lab = 1.1, cex.axis = 0.5, cex.sub=0.5, las=0, xpd=T, mar=c(5,4, 0.2,2))
+par(ps = 29, cex.lab = 1.1, cex.axis = 0.5, cex.sub=0.5, las=0, xpd=T, mar=c(5,4, 2,2))
+mosaicplot(~VRegions + Indel_Sizes, data=df3, xlab = "Variable Region", ylab = "Indel Sizes",
+           shade=T, main=NULL)
+mosaicplot(~Subtype + Indel_Sizes, data=df3, xlab = "Subtype", ylab = "Indel Sizes",
+           shade=T, main=NULL)
