@@ -1,6 +1,6 @@
 require(ape)
 require(stringr)
-setwd("~/PycharmProjects/hiv-evolution-master/9_3_indels")
+setwd("~/PycharmProjects/hiv-evolution-master/10_Cherries")
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_4_Filtered_Run2", full.names=TRUE)
 vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions3", full.names=TRUE)
 
@@ -56,7 +56,7 @@ for (i in 1:length(tfolder)){
   indels$total.length <- indels$tip1.len + indels$tip2.len
   
   
-  filtered.indels <- indels
+  filtered.indels <- indels[indels$total.length != 0,]
   # for (y in 1:nrow(indels)){
   #   value <- indels$total.length[y]
   #   if (value != 0){
@@ -65,41 +65,43 @@ for (i in 1:length(tfolder)){
   # }
 
   
-  
   temp <- data.frame(stringsAsFactors = F)
+  temp2 <- data.frame(stringsAsFactors = F)
   for (x in 1:nrow(filtered.indels)){
     idxA <- match(filtered.indels$tip1.label[x], csv$accno)
     idxB <- match(filtered.indels$tip2.label[x], csv$accno)
     
-    for (t in 2:ncol(csv)){
-      Avr <- as.character(csv[idxA,t])
-      Bvr <- as.character(csv[idxB,t])
-      
-      Alength <- nchar(Avr)
-      Blength <- nchar(Bvr)
-      bln <- Alength == Blength
-      
-      A.B <- paste0(Avr,Bvr)
-      temp[x,paste0("VR",(t-1),".A")] <- str_count(A.B, "A")/nchar(A.B)
-      temp[x,paste0("VR",(t-1),".C")] <- str_count(A.B, "C")/nchar(A.B)
-      temp[x,paste0("VR",(t-1),".T")] <- str_count(A.B, "T")/nchar(A.B)
-      temp[x,paste0("VR",(t-1),".G")] <- str_count(A.B, "G")/nchar(A.B)
-      temp[x,paste0("VR",(t-1),".indel")] <- bln
-      
-      
-      name.bln <- paste0("VR",as.character(t-1),".indel")
-      name.nt <- paste0("VR",as.character(t-1),".nt")
-
-      diff <- abs(Alength - Blength)
-      filtered.indels[x,name.bln] <- bln
-      filtered.indels[x,name.nt] <- diff
+    if (filtered.indels$total.length[x] != 0){
+      for (t in 2:ncol(csv)){
+        Avr <- as.character(csv[idxA,t])
+        Bvr <- as.character(csv[idxB,t])
+        
+        Alength <- nchar(Avr)
+        Blength <- nchar(Bvr)
+        bln <- Alength == Blength
+        
+        A.B <- paste0(Avr,Bvr)
+        temp[x,paste0("VR",(t-1),".A")] <- str_count(A.B, "A")/nchar(A.B)
+        temp[x,paste0("VR",(t-1),".C")] <- str_count(A.B, "C")/nchar(A.B)
+        temp[x,paste0("VR",(t-1),".T")] <- str_count(A.B, "T")/nchar(A.B)
+        temp[x,paste0("VR",(t-1),".G")] <- str_count(A.B, "G")/nchar(A.B)
+        temp[x,paste0("VR",(t-1),".indel")] <- bln
+        
+        
+        name.bln <- paste0("VR",as.character(t-1),".indel")
+        name.nt <- paste0("VR",as.character(t-1),".nt")
+        
+        diff <- abs(Alength - Blength)
+        filtered.indels[x,name.bln] <- bln
+        filtered.indels[x,name.nt] <- diff
+        
+        temp2 <- rbind(temp2, data.frame(accno1=as.character(csv[idxA,1]), seq1=Avr, accno2=as.character(csv[idxB,1]), seq2=Bvr, Vr=(t-1)))
+      }
     }
-  
   }
-  new.df <- filtered.indels[filtered.indels$total.length != 0,]
   
-  write.csv(new.df, filename)
-  
+  write.csv(temp2, filename)
+
   #load the nt proportions data frame from the temp
   # for (g in 1:5){
   #   no <- which(temp[,paste0("VR",g,'.indel')])
