@@ -32,8 +32,6 @@ def parse_fasta2(handle):
     res[h].append(nt)
     return res
 
-    
-
 #GP120 Reference sequence file
 ref_file = open("hxb2_gp120_sequence.txt", 'r')
 
@@ -49,33 +47,13 @@ v4 = gp120[1152:1254]
 v5 = gp120[1377:1410]
 print(len(v1), len(v2), len(v3), len(v4), len(v5))
 
-
 v_regions = [(390,469), (469,588), (885,993) , (1152,1254), (1377,1410)]
 c_regions = [(0,390),  (588,885) , (993, 1152), (1254, 1377), (1410, 1532)]
 
-'''
-print(v1, len(v1))
-print(v2, len(v2))
-print(v3, len(v3))
-print(v4, len(v4))
-print(v5, len(v5))
-
-
-#Single file testing
-fasta_in = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/2PairwiseAlignments/CD_pairwise.fasta", 'r')
-data = parse_fasta(fasta_in)
-output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/VRegions/V1-sequences.txt",'w')
-'''
-
-
 alignments = glob('/home/jpalme56/PycharmProjects/hiv-evolution-master/2PairwiseAlignments/*.fasta')
-
-
-#headers = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/Excel-Temp/headers.txt",'w')
 
 gap_prefix = re.compile('^[-]+')
 gap_suffix = re.compile('[-]+$')
-
 
 def get_boundaries (str):
     # return a tuple giving indices of subsequence without gap prefix and suffix
@@ -91,15 +69,13 @@ def get_boundaries (str):
     return res
 
 count = 0
-'''
+
 #Read and parse all subtype alignments
 for file in alignments:
 
     with open(file) as handle:
         data = parse_fasta2(handle)
     print(file)
-
-
 
     filename = file.split("/")[6]
     
@@ -141,8 +117,7 @@ for file in alignments:
                 # otherwise alignment has a gap, do not increment reference index
                 index.update({ri: ai})
                 ri += 1
-
-        
+                
         #Output
         for n1, n2 in v_regions:
 
@@ -157,4 +132,4 @@ for file in alignments:
                 outputc.write(q120[index[n1]:index[n2]])
             else:
                 outputc.write(q120[index[n1]:index[n2]] + "\n")
-        '''
+   
