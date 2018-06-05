@@ -1,10 +1,9 @@
 require(ape)
 require(stringr)
-setwd("~/PycharmProjects/hiv-evolution-master/10_Cherries")
+setwd("~/PycharmProjects/hiv-evolution-master/9_2_indels/")
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_4_Filtered_Run2", full.names=TRUE)
-vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions3", full.names=TRUE)
+vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions", full.names=TRUE)
 
-zeros <- data.frame()
 len.diff <- list() #data.frame(subtype=character(),stringsAsFactors = F)
 nt.prop <- data.frame(stringsAsFactors = F)
 
@@ -45,13 +44,13 @@ for (i in 1:length(tfolder)){
     })
   df <- data.frame(node.index=m[1,], edge1=m[2,], edge2=m[3,], tip1=m[4,], tip2=m[5,])
 
-  # to add additional columns, use '$' operator
+
   df$tip1.label <- tre$tip.label[df$tip1]
   df$tip2.label <- tre$tip.label[df$tip2]
   df$tip1.len <- tre$edge.length[df$edge1]
   df$tip2.len <- tre$edge.length[df$edge2]
   
-  
+
   indels <- df[,c(6:9)]
   indels$total.length <- indels$tip1.len + indels$tip2.len
   
@@ -135,16 +134,6 @@ for (i in 1:length(tfolder)){
 }
   
   
-  #Used to isolate only the 0 length cherries
-  # for (y in 1:nrow(filtered.indels)){
-  #   value <- filtered.indels$total.length[y]
-  #   if (value == 0){
-  #     zeros <- rbind(zeros, data.frame(filtered.indels[y,]))
-  #   }
-  # }
-  #write.csv(filtered.indels, filename)
-
-
 #Used to load the indel.sizes data frame containing 3/6+ indel frequencies
 indel.sizes <- data.frame(stringsAsFactors = FALSE)
 count <- 1
