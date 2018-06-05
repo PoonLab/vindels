@@ -99,37 +99,7 @@ for (i in 1:length(tfolder)){
     }
   }
   
-  write.csv(temp2, filename)
-
-  #load the nt proportions data frame from the temp
-  # for (g in 1:5){
-  #   no <- which(temp[,paste0("VR",g,'.indel')])
-  #   yes <- which(!temp[,paste0("VR",g,'.indel')])
-  # 
-  #   nt.prop[i,paste0('VR',g,'.A.no')] <- mean(temp[,paste0('VR',g,'.A')][no])
-  #   nt.prop[i,paste0('VR',g,'.G.no')] <- mean(temp[,paste0('VR',g,'.G')][no])
-  #   nt.prop[i,paste0('VR',g,'.T.no')] <- mean(temp[,paste0('VR',g,'.T')][no])
-  #   nt.prop[i,paste0('VR',g,'.C.no')] <- mean(temp[,paste0('VR',g,'.C')][no])
-  #   if (length(yes) == 0){
-  #     nt.prop[i,paste0('VR',g,'.A.yes')] <- 0
-  #     nt.prop[i,paste0('VR',g,'.G.yes')] <- 0
-  #     nt.prop[i,paste0('VR',g,'.T.yes')] <- 0
-  #     nt.prop[i,paste0('VR',g,'.C.yes')] <- 0
-  #   }else{
-  #     nt.prop[i,paste0('VR',g,'.A.yes')] <- mean(temp[,paste0('VR',g,'.A')][yes])
-  #     nt.prop[i,paste0('VR',g,'.G.yes')] <- mean(temp[,paste0('VR',g,'.G')][yes])
-  #     nt.prop[i,paste0('VR',g,'.T.yes')] <- mean(temp[,paste0('VR',g,'.T')][yes])
-  #     nt.prop[i,paste0('VR',g,'.C.yes')] <- mean(temp[,paste0('VR',g,'.C')][yes])
-  #   }
-  # }
-  # #Used to build the len.diff data frame needed for 3/6+ comparison
-  # for (j in 1:5){
-  #   len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
-  #   len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
-  # }
-  # if (filename == "B.csv"){
-  #   break
-  # }
+  write.csv(filtered.indels, filename)
   
 }
   
@@ -172,3 +142,39 @@ mosaicplot(~VRegions + Indel_Sizes, data=df3, xlab = "Variable Region", ylab = "
            shade=T, main=NULL)
 mosaicplot(~Subtype + Indel_Sizes, data=df3, xlab = "Subtype", ylab = "Indel Sizes",
            shade=T, main=NULL)
+
+
+
+#-------------------------
+#OUTDATED
+
+
+#load the nt proportions data frame from the temp
+# for (g in 1:5){
+#   no <- which(temp[,paste0("VR",g,'.indel')])
+#   yes <- which(!temp[,paste0("VR",g,'.indel')])
+# 
+#   nt.prop[i,paste0('VR',g,'.A.no')] <- mean(temp[,paste0('VR',g,'.A')][no])
+#   nt.prop[i,paste0('VR',g,'.G.no')] <- mean(temp[,paste0('VR',g,'.G')][no])
+#   nt.prop[i,paste0('VR',g,'.T.no')] <- mean(temp[,paste0('VR',g,'.T')][no])
+#   nt.prop[i,paste0('VR',g,'.C.no')] <- mean(temp[,paste0('VR',g,'.C')][no])
+#   if (length(yes) == 0){
+#     nt.prop[i,paste0('VR',g,'.A.yes')] <- 0
+#     nt.prop[i,paste0('VR',g,'.G.yes')] <- 0
+#     nt.prop[i,paste0('VR',g,'.T.yes')] <- 0
+#     nt.prop[i,paste0('VR',g,'.C.yes')] <- 0
+#   }else{
+#     nt.prop[i,paste0('VR',g,'.A.yes')] <- mean(temp[,paste0('VR',g,'.A')][yes])
+#     nt.prop[i,paste0('VR',g,'.G.yes')] <- mean(temp[,paste0('VR',g,'.G')][yes])
+#     nt.prop[i,paste0('VR',g,'.T.yes')] <- mean(temp[,paste0('VR',g,'.T')][yes])
+#     nt.prop[i,paste0('VR',g,'.C.yes')] <- mean(temp[,paste0('VR',g,'.C')][yes])
+#   }
+# }
+# #Used to build the len.diff data frame needed for 3/6+ comparison
+# for (j in 1:5){
+#   len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
+#   len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
+# }
+# if (filename == "B.csv"){
+#   break
+# }
