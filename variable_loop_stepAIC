@@ -1,0 +1,50 @@
+> vrFit.aic <- stepAIC(vrFit, scope=list(upper=vrFit2, lower=~1), direction='both', trace=TRUE)
+Start:  AIC=96289.26
+Freq ~ nucleotide + indel + vregion
+
+                     Df Deviance     AIC
++ indel:vregion       4    37854   38342
++ nucleotide:vregion 12    60221   60725
++ nucleotide:indel    3    95390   95876
+<none>                     95810   96289
+- nucleotide          3   372586  373059
+- vregion             4   379322  379793
+- indel               1  2204135 2204613
+
+Step:  AIC=38341.7
+Freq ~ nucleotide + indel + vregion + indel:vregion
+
+                     Df Deviance    AIC
++ nucleotide:vregion 12     2266   2777
++ nucleotide:indel    3    37435  37928
+<none>                     37854  38342
+- indel:vregion       4    95810  96289
+- nucleotide          3   314630 315112
+
+Step:  AIC=2777.33
+Freq ~ nucleotide + indel + vregion + indel:vregion + nucleotide:vregion
+
+                     Df Deviance   AIC
++ nucleotide:indel    3     1765  2283
+<none>                      2266  2777
+- nucleotide:vregion 12    37854 38342
+- indel:vregion       4    60221 60725
+
+Step:  AIC=2282.61
+Freq ~ nucleotide + indel + vregion + indel:vregion + nucleotide:vregion + 
+    nucleotide:indel
+
+                           Df Deviance   AIC
++ nucleotide:indel:vregion 12        0   542
+<none>                            1765  2283
+- nucleotide:indel          3     2266  2777
+- nucleotide:vregion       12    37435 37928
+- indel:vregion             4    59802 60311
+
+Step:  AIC=541.54
+Freq ~ nucleotide + indel + vregion + indel:vregion + nucleotide:vregion + 
+    nucleotide:indel + nucleotide:indel:vregion
+
+                           Df Deviance     AIC
+<none>                             0.0  541.54
+- nucleotide:indel:vregion 12   1765.1 2282.61
