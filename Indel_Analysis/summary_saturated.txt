@@ -1,0 +1,231 @@
+> summary(ntfit2)
+
+Call:
+glm(formula = Freq ~ nucleotide * indel * vregion * subtype, 
+    family = poisson, data = ntcount2)
+
+Deviance Residuals: 
+  [1]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [35]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+ [69]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+[103]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+[137]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+[171]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+[205]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+[239]  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0
+[273]  0  0  0  0  0  0  0  0
+
+Coefficients:
+                                                 Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                                     7.231e+00  2.690e-02 268.825  < 2e-16 ***
+nucleotideC                                    -4.849e-01  4.357e-02 -11.128  < 2e-16 ***
+nucleotideG                                    -7.824e-01  4.802e-02 -16.293  < 2e-16 ***
+nucleotideT                                    -5.171e-01  4.401e-02 -11.749  < 2e-16 ***
+indeloutside                                    2.538e+00  2.794e-02  90.847  < 2e-16 ***
+vregion2                                       -2.843e-01  4.105e-02  -6.926 4.33e-12 ***
+vregion3                                       -2.214e+00  8.571e-02 -25.832  < 2e-16 ***
+vregion4                                       -2.138e-01  4.024e-02  -5.312 1.08e-07 ***
+vregion5                                       -1.055e+00  5.294e-02 -19.936  < 2e-16 ***
+subtype02_AG                                   -1.013e+00  5.211e-02 -19.433  < 2e-16 ***
+subtypeA1                                      -6.874e-01  4.650e-02 -14.782  < 2e-16 ***
+subtypeB                                        1.504e+00  2.974e-02  50.558  < 2e-16 ***
+subtypeC                                        1.220e+00  3.061e-02  39.858  < 2e-16 ***
+subtypeD                                       -1.288e+00  5.786e-02 -22.267  < 2e-16 ***
+subtypeF1                                      -2.743e+00  1.094e-01 -25.079  < 2e-16 ***
+nucleotideC:indeloutside                       -3.801e-01  4.573e-02  -8.311  < 2e-16 ***
+nucleotideG:indeloutside                       -1.910e-01  5.014e-02  -3.809 0.000140 ***
+nucleotideT:indeloutside                       -1.446e-01  4.588e-02  -3.152 0.001619 ** 
+nucleotideC:vregion2                           -1.381e+00  9.524e-02 -14.496  < 2e-16 ***
+nucleotideG:vregion2                            2.070e-01  7.055e-02   2.935 0.003339 ** 
+nucleotideT:vregion2                           -4.130e-02  6.767e-02  -0.610 0.541679    
+nucleotideC:vregion3                           -2.983e-01  1.517e-01  -1.966 0.049261 *  
+nucleotideG:vregion3                            8.261e-02  1.492e-01   0.554 0.579822    
+nucleotideT:vregion3                           -3.537e-04  1.403e-01  -0.003 0.997988    
+nucleotideC:vregion4                           -4.189e-01  7.076e-02  -5.921 3.21e-09 ***
+nucleotideG:vregion4                            3.131e-01  6.808e-02   4.599 4.24e-06 ***
+nucleotideT:vregion4                           -1.583e-01  6.778e-02  -2.335 0.019538 *  
+nucleotideC:vregion5                           -7.493e-01  1.055e-01  -7.106 1.20e-12 ***
+nucleotideG:vregion5                            1.711e-01  9.064e-02   1.887 0.059151 .  
+nucleotideT:vregion5                           -2.396e-02  8.711e-02  -0.275 0.783256    
+indeloutside:vregion2                           5.904e-01  4.224e-02  13.976  < 2e-16 ***
+indeloutside:vregion3                           2.480e+00  8.630e-02  28.737  < 2e-16 ***
+indeloutside:vregion4                           9.058e-02  4.173e-02   2.171 0.029959 *  
+indeloutside:vregion5                           1.654e-02  5.497e-02   0.301 0.763424    
+nucleotideC:subtype02_AG                        1.689e-01  8.138e-02   2.076 0.037939 *  
+nucleotideG:subtype02_AG                        1.051e-01  9.066e-02   1.159 0.246525    
+nucleotideT:subtype02_AG                        9.457e-02  8.348e-02   1.133 0.257252    
+nucleotideC:subtypeA1                           1.292e-01  7.342e-02   1.760 0.078401 .  
+nucleotideG:subtypeA1                           3.069e-01  7.784e-02   3.943 8.06e-05 ***
+nucleotideT:subtypeA1                           5.998e-02  7.516e-02   0.798 0.424847    
+nucleotideC:subtypeB                           -2.334e-01  4.888e-02  -4.774 1.81e-06 ***
+nucleotideG:subtypeB                            3.244e-01  5.216e-02   6.219 5.00e-10 ***
+nucleotideT:subtypeB                            1.916e-01  4.817e-02   3.978 6.96e-05 ***
+nucleotideC:subtypeC                           -2.160e-01  5.043e-02  -4.283 1.84e-05 ***
+nucleotideG:subtypeC                            1.266e-01  5.414e-02   2.338 0.019399 *  
+nucleotideT:subtypeC                            1.969e-01  4.945e-02   3.982 6.85e-05 ***
+nucleotideC:subtypeD                           -7.343e-02  9.545e-02  -0.769 0.441712    
+nucleotideG:subtypeD                            1.023e-01  1.006e-01   1.017 0.309054    
+nucleotideT:subtypeD                           -1.274e-01  9.778e-02  -1.303 0.192742    
+nucleotideC:subtypeF1                           4.621e-01  1.569e-01   2.945 0.003232 ** 
+nucleotideG:subtypeF1                           7.795e-02  1.904e-01   0.409 0.682312    
+nucleotideT:subtypeF1                          -1.228e-03  1.790e-01  -0.007 0.994526    
+indeloutside:subtype02_AG                      -6.400e-01  5.542e-02 -11.549  < 2e-16 ***
+indeloutside:subtypeA1                         -2.821e-01  4.869e-02  -5.794 6.87e-09 ***
+indeloutside:subtypeB                          -3.832e-03  3.089e-02  -0.124 0.901269    
+indeloutside:subtypeC                          -5.123e-01  3.198e-02 -16.020  < 2e-16 ***
+indeloutside:subtypeD                          -3.285e-01  6.077e-02  -5.405 6.49e-08 ***
+indeloutside:subtypeF1                          1.977e-01  1.129e-01   1.751 0.079947 .  
+vregion2:subtype02_AG                          -3.714e-02  8.015e-02  -0.463 0.643144    
+vregion3:subtype02_AG                          -5.081e-01  1.991e-01  -2.552 0.010714 *  
+vregion4:subtype02_AG                          -1.440e-01  8.038e-02  -1.792 0.073143 .  
+vregion5:subtype02_AG                          -4.270e-01  1.165e-01  -3.666 0.000247 ***
+vregion2:subtypeA1                             -6.724e-02  7.190e-02  -0.935 0.349673    
+vregion3:subtypeA1                             -6.663e-01  1.855e-01  -3.591 0.000329 ***
+vregion4:subtypeA1                             -3.487e-02  7.003e-02  -0.498 0.618560    
+vregion5:subtypeA1                             -4.515e-01  1.036e-01  -4.358 1.31e-05 ***
+vregion2:subtypeB                              -1.747e-01  4.583e-02  -3.811 0.000138 ***
+vregion3:subtypeB                              -9.525e-01  1.064e-01  -8.951  < 2e-16 ***
+vregion4:subtypeB                              -2.151e-01  4.503e-02  -4.777 1.77e-06 ***
+vregion5:subtypeB                              -1.699e-02  5.860e-02  -0.290 0.771801    
+vregion2:subtypeC                              -3.245e-01  4.787e-02  -6.779 1.21e-11 ***
+vregion3:subtypeC                              -7.240e-01  1.077e-01  -6.725 1.76e-11 ***
+vregion4:subtypeC                              -1.130e-01  4.614e-02  -2.448 0.014370 *  
+vregion5:subtypeC                               1.182e-01  5.968e-02   1.981 0.047644 *  
+vregion2:subtypeD                              -5.525e-01  1.018e-01  -5.426 5.77e-08 ***
+vregion3:subtypeD                              -3.966e-01  2.137e-01  -1.855 0.063530 .  
+vregion4:subtypeD                               4.863e-02  8.568e-02   0.568 0.570272    
+vregion5:subtypeD                              -4.215e-01  1.301e-01  -3.240 0.001195 ** 
+vregion2:subtypeF1                              3.673e-04  1.669e-01   0.002 0.998244    
+vregion3:subtypeF1                             -2.658e+01  1.148e+05   0.000 0.999815    
+vregion4:subtypeF1                             -6.113e-01  1.962e-01  -3.116 0.001836 ** 
+vregion5:subtypeF1                              5.180e-01  1.824e-01   2.840 0.004510 ** 
+nucleotideC:indeloutside:vregion2               9.797e-01  9.724e-02  10.075  < 2e-16 ***
+nucleotideG:indeloutside:vregion2               5.944e-02  7.289e-02   0.815 0.414822    
+nucleotideT:indeloutside:vregion2               5.110e-01  6.957e-02   7.345 2.06e-13 ***
+nucleotideC:indeloutside:vregion3               2.492e-01  1.528e-01   1.631 0.102971    
+nucleotideG:indeloutside:vregion3               1.131e-01  1.504e-01   0.752 0.451889    
+nucleotideT:indeloutside:vregion3              -1.191e-01  1.413e-01  -0.843 0.399453    
+nucleotideC:indeloutside:vregion4               6.028e-01  7.343e-02   8.209 2.22e-16 ***
+nucleotideG:indeloutside:vregion4              -1.899e-01  7.113e-02  -2.670 0.007584 ** 
+nucleotideT:indeloutside:vregion4               4.083e-01  7.017e-02   5.819 5.92e-09 ***
+nucleotideC:indeloutside:vregion5               1.074e+00  1.084e-01   9.908  < 2e-16 ***
+nucleotideG:indeloutside:vregion5               2.586e-02  9.454e-02   0.274 0.784451    
+nucleotideT:indeloutside:vregion5               1.682e-01  9.049e-02   1.859 0.062986 .  
+nucleotideC:indeloutside:subtype02_AG          -3.325e-02  8.794e-02  -0.378 0.705340    
+nucleotideG:indeloutside:subtype02_AG          -4.009e-02  9.730e-02  -0.412 0.680338    
+nucleotideT:indeloutside:subtype02_AG          -1.948e-01  8.986e-02  -2.168 0.030140 *  
+nucleotideC:indeloutside:subtypeA1             -2.408e-02  7.782e-02  -0.309 0.756975    
+nucleotideG:indeloutside:subtypeA1             -2.199e-01  8.237e-02  -2.670 0.007590 ** 
+nucleotideT:indeloutside:subtypeA1             -2.052e-01  7.940e-02  -2.584 0.009756 ** 
+nucleotideC:indeloutside:subtypeB              -3.024e-02  5.133e-02  -0.589 0.555751    
+nucleotideG:indeloutside:subtypeB               1.221e-03  5.447e-02   0.022 0.982109    
+nucleotideT:indeloutside:subtypeB              -1.230e-01  5.025e-02  -2.449 0.014339 *  
+nucleotideC:indeloutside:subtypeC              -9.780e-02  5.344e-02  -1.830 0.067210 .  
+nucleotideG:indeloutside:subtypeC              -2.173e-03  5.686e-02  -0.038 0.969515    
+nucleotideT:indeloutside:subtypeC              -1.940e-02  5.183e-02  -0.374 0.708198    
+nucleotideC:indeloutside:subtypeD               1.035e-01  1.013e-01   1.022 0.306786    
+nucleotideG:indeloutside:subtypeD               2.589e-01  1.055e-01   2.453 0.014148 *  
+nucleotideT:indeloutside:subtypeD               8.235e-02  1.030e-01   0.800 0.423855    
+nucleotideC:indeloutside:subtypeF1             -3.297e-02  1.633e-01  -0.202 0.840040    
+nucleotideG:indeloutside:subtypeF1              2.317e-01  1.965e-01   1.179 0.238363    
+nucleotideT:indeloutside:subtypeF1             -7.561e-02  1.856e-01  -0.407 0.683781    
+nucleotideC:vregion2:subtype02_AG               2.654e-01  1.674e-01   1.585 0.112938    
+nucleotideG:vregion2:subtype02_AG              -1.957e-01  1.378e-01  -1.421 0.155429    
+nucleotideT:vregion2:subtype02_AG              -2.685e-01  1.344e-01  -1.997 0.045774 *  
+nucleotideC:vregion3:subtype02_AG              -3.173e-01  3.674e-01  -0.864 0.387766    
+nucleotideG:vregion3:subtype02_AG               3.563e-01  3.114e-01   1.144 0.252446    
+nucleotideT:vregion3:subtype02_AG              -3.656e-01  3.488e-01  -1.048 0.294635    
+nucleotideC:vregion4:subtype02_AG               1.368e-01  1.333e-01   1.027 0.304603    
+nucleotideG:vregion4:subtype02_AG              -9.840e-02  1.339e-01  -0.735 0.462337    
+nucleotideT:vregion4:subtype02_AG               1.227e-01  1.303e-01   0.942 0.346364    
+nucleotideC:vregion5:subtype02_AG              -3.387e-01  2.456e-01  -1.379 0.167942    
+nucleotideG:vregion5:subtype02_AG              -3.179e-01  2.071e-01  -1.535 0.124845    
+nucleotideT:vregion5:subtype02_AG              -3.194e-01  2.006e-01  -1.592 0.111414    
+nucleotideC:vregion2:subtypeA1                  3.562e-01  1.508e-01   2.362 0.018179 *  
+nucleotideG:vregion2:subtypeA1                 -4.145e-01  1.218e-01  -3.405 0.000663 ***
+nucleotideT:vregion2:subtypeA1                 -1.605e-01  1.195e-01  -1.343 0.179264    
+nucleotideC:vregion3:subtypeA1                  3.491e-02  3.159e-01   0.111 0.912001    
+nucleotideG:vregion3:subtypeA1                  3.929e-01  2.780e-01   1.413 0.157622    
+nucleotideT:vregion3:subtypeA1                 -2.802e-02  3.011e-01  -0.093 0.925877    
+nucleotideC:vregion4:subtypeA1                  2.287e-01  1.163e-01   1.966 0.049250 *  
+nucleotideG:vregion4:subtypeA1                 -2.468e-01  1.141e-01  -2.164 0.030500 *  
+nucleotideT:vregion4:subtypeA1                  5.671e-02  1.157e-01   0.490 0.623886    
+nucleotideC:vregion5:subtypeA1                 -4.354e-01  2.267e-01  -1.921 0.054795 .  
+nucleotideG:vregion5:subtypeA1                 -4.559e-01  1.799e-01  -2.534 0.011265 *  
+nucleotideT:vregion5:subtypeA1                 -1.991e-01  1.750e-01  -1.138 0.255040    
+nucleotideC:vregion2:subtypeB                   8.087e-01  1.036e-01   7.803 6.06e-15 ***
+nucleotideG:vregion2:subtypeB                  -6.385e-01  7.916e-02  -8.066 7.28e-16 ***
+nucleotideT:vregion2:subtypeB                  -2.438e-01  7.541e-02  -3.233 0.001224 ** 
+nucleotideC:vregion3:subtypeB                  -9.746e-02  1.974e-01  -0.494 0.621411    
+nucleotideG:vregion3:subtypeB                   3.042e-01  1.749e-01   1.739 0.082000 .  
+nucleotideT:vregion3:subtypeB                  -9.250e-01  1.929e-01  -4.796 1.62e-06 ***
+nucleotideC:vregion4:subtypeB                   2.607e-01  7.961e-02   3.275 0.001057 ** 
+nucleotideG:vregion4:subtypeB                  -2.959e-01  7.537e-02  -3.926 8.63e-05 ***
+nucleotideT:vregion4:subtypeB                   1.212e-01  7.470e-02   1.623 0.104638    
+nucleotideC:vregion5:subtypeB                   5.515e-01  1.151e-01   4.790 1.67e-06 ***
+nucleotideG:vregion5:subtypeB                  -3.908e-01  1.001e-01  -3.903 9.51e-05 ***
+nucleotideT:vregion5:subtypeB                  -5.162e-01  9.777e-02  -5.280 1.29e-07 ***
+nucleotideC:vregion2:subtypeC                   1.291e+00  1.048e-01  12.321  < 2e-16 ***
+nucleotideG:vregion2:subtypeC                   3.691e-03  8.129e-02   0.045 0.963785    
+nucleotideT:vregion2:subtypeC                  -1.003e-01  7.812e-02  -1.283 0.199397    
+nucleotideC:vregion3:subtypeC                   3.060e-01  1.891e-01   1.618 0.105582    
+nucleotideG:vregion3:subtypeC                   3.430e-01  1.789e-01   1.918 0.055163 .  
+nucleotideT:vregion3:subtypeC                  -9.733e-01  1.973e-01  -4.934 8.06e-07 ***
+nucleotideC:vregion4:subtypeC                   4.157e-01  8.091e-02   5.137 2.79e-07 ***
+nucleotideG:vregion4:subtypeC                  -5.690e-01  7.933e-02  -7.173 7.35e-13 ***
+nucleotideT:vregion4:subtypeC                   9.160e-03  7.662e-02   0.120 0.904844    
+nucleotideC:vregion5:subtypeC                   3.228e-01  1.183e-01   2.729 0.006350 ** 
+nucleotideG:vregion5:subtypeC                  -4.670e-01  1.039e-01  -4.494 6.98e-06 ***
+nucleotideT:vregion5:subtypeC                  -9.655e-01  1.033e-01  -9.351  < 2e-16 ***
+nucleotideC:vregion2:subtypeD                   7.451e-01  2.058e-01   3.621 0.000294 ***
+nucleotideG:vregion2:subtypeD                  -1.442e-01  1.734e-01  -0.832 0.405617    
+nucleotideT:vregion2:subtypeD                   1.950e-01  1.678e-01   1.162 0.245378    
+nucleotideC:vregion3:subtypeD                   1.635e-01  3.706e-01   0.441 0.659200    
+nucleotideG:vregion3:subtypeD                   1.557e-01  3.483e-01   0.447 0.654948    
+nucleotideT:vregion3:subtypeD                  -2.895e-01  3.923e-01  -0.738 0.460611    
+nucleotideC:vregion4:subtypeD                  -1.754e-01  1.585e-01  -1.107 0.268353    
+nucleotideG:vregion4:subtypeD                  -4.134e-01  1.493e-01  -2.769 0.005622 ** 
+nucleotideT:vregion4:subtypeD                   2.930e-01  1.431e-01   2.048 0.040595 *  
+nucleotideC:vregion5:subtypeD                  -2.138e-01  2.872e-01  -0.745 0.456516    
+nucleotideG:vregion5:subtypeD                  -2.192e-01  2.266e-01  -0.967 0.333315    
+nucleotideT:vregion5:subtypeD                   1.915e-01  2.127e-01   0.901 0.367811    
+nucleotideC:vregion2:subtypeF1                  3.195e-02  3.249e-01   0.098 0.921671    
+nucleotideG:vregion2:subtypeF1                 -2.415e-01  2.917e-01  -0.828 0.407713    
+nucleotideT:vregion2:subtypeF1                 -1.187e-01  2.811e-01  -0.422 0.672862    
+nucleotideC:vregion3:subtypeF1                  3.210e-01  1.624e+05   0.000 0.999998    
+nucleotideG:vregion3:subtypeF1                  6.218e-01  1.624e+05   0.000 0.999997    
+nucleotideT:vregion3:subtypeF1                  5.187e-01  1.624e+05   0.000 0.999997    
+nucleotideC:vregion4:subtypeF1                 -1.308e-01  3.144e-01  -0.416 0.677268    
+nucleotideG:vregion4:subtypeF1                 -3.819e-01  3.461e-01  -1.103 0.269913    
+nucleotideT:vregion4:subtypeF1                  1.485e-01  3.222e-01   0.461 0.644781    
+nucleotideC:vregion5:subtypeF1                 -4.066e-01  3.400e-01  -1.196 0.231732    
+nucleotideG:vregion5:subtypeF1                 -5.055e-02  3.097e-01  -0.163 0.870324    
+nucleotideT:vregion5:subtypeF1                  1.464e-01  2.924e-01   0.501 0.616561    
+indeloutside:vregion2:subtype02_AG              3.252e-01  8.359e-02   3.890 0.000100 ***
+indeloutside:vregion3:subtype02_AG              7.300e-01  2.006e-01   3.640 0.000273 ***
+indeloutside:vregion4:subtype02_AG              4.854e-01  8.439e-02   5.752 8.80e-09 ***
+indeloutside:vregion5:subtype02_AG              6.974e-01  1.214e-01   5.747 9.08e-09 ***
+indeloutside:vregion2:subtypeA1                 3.664e-01  7.417e-02   4.940 7.81e-07 ***
+indeloutside:vregion3:subtypeA1                 8.272e-01  1.865e-01   4.436 9.16e-06 ***
+indeloutside:vregion4:subtypeA1                 2.635e-01  7.288e-02   3.616 0.000300 ***
+indeloutside:vregion5:subtypeA1                 7.679e-01  1.068e-01   7.187 6.60e-13 ***
+indeloutside:vregion2:subtypeB                  2.643e-01  4.713e-02   5.608 2.05e-08 ***
+indeloutside:vregion3:subtypeB                  1.050e+00  1.070e-01   9.812  < 2e-16 ***
+indeloutside:vregion4:subtypeB                  3.593e-01  4.663e-02   7.704 1.31e-14 ***
+indeloutside:vregion5:subtypeB                  1.338e-01  6.080e-02   2.200 0.027827 *  
+indeloutside:vregion2:subtypeC                  5.885e-01  4.934e-02  11.926  < 2e-16 ***
+indeloutside:vregion3:subtypeC                  9.895e-01  1.083e-01   9.133  < 2e-16 ***
+indeloutside:vregion4:subtypeC                  3.295e-01  4.801e-02   6.863 6.73e-12 ***
+indeloutside:vregion5:subtypeC                  2.758e-01  6.214e-02   4.438 9.06e-06 ***
+ [ reached getOption("max.print") -- omitted 80 rows ]
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for poisson family taken to be 1)
+
+    Null deviance: 5.4245e+06  on 279  degrees of freedom
+Residual deviance: 2.4557e-10  on   0  degrees of freedom
+AIC: 3012.1
+
+Number of Fisher Scoring iterations: 22
+

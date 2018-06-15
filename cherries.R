@@ -1,7 +1,7 @@
 require(ape)
 require(stringr)
 require(ggplot2)
-setwd("~/PycharmProjects/hiv-evolution-master/9_2_indels/")
+setwd("~/PycharmProjects/hiv-evolution-master/10_Cherries/")
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_4_Filtered_Run2", full.names=TRUE)
 vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions", full.names=TRUE)
 
@@ -15,7 +15,7 @@ for (i in 1:length(tfolder)){
   #for output 
   name <- strsplit(tfolder[i], "/")[[1]][7]
   subtype <- strsplit(name, "\\.")[[1]][1]
-  filename <- paste0(subtype, ".csv" )
+  filename <- paste0(subtype, "_.csv" )
   
   
   #naming the csv 
@@ -80,22 +80,24 @@ for (i in 1:length(tfolder)){
         diff <- abs(Alength - Blength)
         filtered.indels[x,name.bln] <- bln
         filtered.indels[x,name.nt] <- diff
+        if (!bln){
+          temp2 <- rbind(temp2, data.frame(accno1=as.character(csv[idxA,1]), seq1=Avr, accno2=as.character(csv[idxB,1]), seq2=Bvr, Vr=(t-1)))
+        }
         
-        temp2 <- rbind(temp2, data.frame(accno1=as.character(csv[idxA,1]), seq1=Avr, accno2=as.character(csv[idxB,1]), seq2=Bvr, Vr=(t-1)))
       }
     }
   }
   
   #temp2 = output for cherry sequences in csv format (accno1,seq1,accno2,seq2,vregion)
-  #write.csv(temp2,filename)
+  write.csv(temp2,filename)
   
   #filtered indels = true/false outcomes along with the indel sizes 
   #write.csv(filtered.indels, filename)
   
-  for (j in 1:5){
-    len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
-    len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
-  }
+  # for (j in 1:5){
+  #   len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
+  #   len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
+  # }
 
 }
   
@@ -117,12 +119,6 @@ for (z in 1:length(len.diff)){
     indel.sizes[z,"three"] <- "> 3 nt"
   }
   
-  #old version
-  #indel.sizes[count,paste0(vregion, "_", size)] <- sum(len.diff[[z]])
-  # if ((z - 1) %% 10 == 9){
-  #   indel.sizes[count,1] <- subtype
-  #   count <- count + 1
-  # }
 }
 
 
