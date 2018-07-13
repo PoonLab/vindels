@@ -1,12 +1,15 @@
 require(ape)
 require(stringr)
 require(ggplot2)
-setwd("~/PycharmProjects/hiv-evolution-master/10_Cherries/")
-tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_4_Filtered_Run2", full.names=TRUE)
-vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions", full.names=TRUE)
+
+tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_Dated_Trees", full.names=TRUE)
+vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_mod2", full.names=TRUE)
 
 len.diff <- list() #data.frame(subtype=character(),stringsAsFactors = F)
-nt.prop <- data.frame(stringsAsFactors = F)
+
+
+# This code reads phylogenetic trees and variable loop sequences in csv format. 
+
 
 for (i in 1:length(tfolder)){
   tre <- read.tree(tfolder[i])
@@ -15,7 +18,7 @@ for (i in 1:length(tfolder)){
   #for output 
   name <- strsplit(tfolder[i], "/")[[1]][7]
   subtype <- strsplit(name, "\\.")[[1]][1]
-  filename <- paste0(subtype, "_.csv" )
+  filename <- paste0(subtype,"+.csv" )
   
   
   #naming the csv 
@@ -63,41 +66,49 @@ for (i in 1:length(tfolder)){
     idxA <- match(filtered.indels$tip1.label[x], csv$accno)
     idxB <- match(filtered.indels$tip2.label[x], csv$accno)
     
-    if (filtered.indels$total.length[x] != 0){
-      for (t in 2:ncol(csv)){
-        Avr <- as.character(csv[idxA,t])
-        Bvr <- as.character(csv[idxB,t])
-        
-        Alength <- nchar(Avr)
-        Blength <- nchar(Bvr)
-        bln <- Alength == Blength
-        
-        A.B <- paste0(Avr,Bvr)
-        
-        name.bln <- paste0("VR",as.character(t-1),".indel")
-        name.nt <- paste0("VR",as.character(t-1),".nt")
-        
-        diff <- abs(Alength - Blength)
-        filtered.indels[x,name.bln] <- bln
-        filtered.indels[x,name.nt] <- diff
-        if (!bln){
-          temp2 <- rbind(temp2, data.frame(accno1=as.character(csv[idxA,1]), seq1=Avr, accno2=as.character(csv[idxB,1]), seq2=Bvr, Vr=(t-1)))
-        }
-        
+    for (t in 2:ncol(csv)){
+      
+      
+      Avr <- as.character(csv[idxA,t])
+      Bvr <- as.character(csv[idxB,t])
+      
+      Alength <- nchar(Avr)
+      Blength <- nchar(Bvr)
+      bln <- Alength == Blength
+      
+      A.B <- paste0(Avr,Bvr)
+      
+      name.bln <- paste0("VR",as.character(t-1),".indel")
+      name.nt <- paste0("VR",as.character(t-1),".nt")
+      
+      diff <- abs(Alength - Blength)
+      filtered.indels[x,name.bln] <- bln
+      filtered.indels[x,name.nt] <- diff
+      if (t == 2){
+        print(Avr)
+        print(Bvr)
+        print(bln)
       }
+      
+      if (!bln){
+        temp2 <- rbind(temp2, data.frame(accno1=as.character(csv[idxA,1]), seq1=Avr, accno2=as.character(csv[idxB,1]), seq2=Bvr, Vr=(t-1)))
+      }
+        
     }
   }
-  
-  #temp2 = output for cherry sequences in csv format (accno1,seq1,accno2,seq2,vregion)
+  setwd("~/PycharmProjects/hiv-evolution-master/10_Cherries/")
+  #temp2 = output for cherry sequences in csv format (accno1,seq1,accno2,seq2,vregion) FOLDER: 10_Cherries
   write.csv(temp2,filename)
   
-  #filtered indels = true/false outcomes along with the indel sizes 
-  #write.csv(filtered.indels, filename)
   
-  # for (j in 1:5){
-  #   len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
-  #   len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
-  # }
+  setwd("~/PycharmProjects/hiv-evolution-master/9_indels/")
+  #filtered indels = true/false outcomes along with the indel sizes  FOLDER: 9_indels
+  write.csv(filtered.indels, filename)
+  
+  for (j in 1:5){
+    len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
+    len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
+  }
 
 }
   
