@@ -9,7 +9,7 @@ len.diff <- list() #data.frame(subtype=character(),stringsAsFactors = F)
 
 
 # This code reads phylogenetic trees and variable loop sequences in csv format. 
-
+branch.lengths <- data.frame()
 
 for (i in 1:length(tfolder)){
   tre <- read.tree(tfolder[i])
@@ -84,11 +84,7 @@ for (i in 1:length(tfolder)){
       diff <- abs(Alength - Blength)
       filtered.indels[x,name.bln] <- bln
       filtered.indels[x,name.nt] <- diff
-      if (t == 2){
-        print(Avr)
-        print(Bvr)
-        print(bln)
-      }
+
       
       if (!bln){
         temp2 <- rbind(temp2, data.frame(accno1=as.character(csv[idxA,1]), seq1=Avr, accno2=as.character(csv[idxB,1]), seq2=Bvr, Vr=(t-1)))
@@ -105,6 +101,7 @@ for (i in 1:length(tfolder)){
   #filtered indels = true/false outcomes along with the indel sizes  FOLDER: 9_indels
   write.csv(filtered.indels, filename)
   
+  branch.lengths <- rbind(branch.lengths, data.frame(subtype=rep(subtype,nrow(filtered.indels)), length=filtered.indels$total.length))
   for (j in 1:5){
     len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
     len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
@@ -117,8 +114,8 @@ for (i in 1:length(tfolder)){
 indel.sizes <- data.frame(stringsAsFactors = FALSE)
 
 for (z in 1:length(len.diff)){
-  subtype <- strsplit(names(len.diff)[[z]], "\\.")[[1]][1]
-  vregion <- strsplit(names(len.diff)[[z]], "\\.")[[1]][3]
+  subtype <- strsplit(names(len.diff)[[z]], "\\+.")[[1]][1]
+  vregion <- strsplit(strsplit(names(len.diff)[[z]], "\\.")[[1]][3],"VR")[[1]][2]
   size <- strsplit(names(len.diff)[[z]], "\\.")[[1]][4]
   
   indel.sizes[z,"subtype"] <- subtype #vregion
@@ -133,24 +130,32 @@ for (z in 1:length(len.diff)){
 }
 
 
-# for the generation of figures used in poster
+# MOSAIC PLOTS - Figure 3
 df3 <- data.frame(VRegions=rep(indel.sizes$vregion, indel.sizes$count), Indel_Sizes=rep(indel.sizes$three,indel.sizes$count))
 df4 <- data.frame(Subtype=rep(indel.sizes$subtype, indel.sizes$count), Indel_Sizes=rep(indel.sizes$three,indel.sizes$count))
 table2 <- table(rep(indel.sizes$subtype, indel.sizes$count), rep(indel.sizes$three, indel.sizes$count))
 
-par(ps = 29, cex.lab = 1.1, cex.axis = 0.5, cex.sub=0.5, las=0, xpd=T, mar=c(5,4, 0.2,2))
-par(ps = 29, cex.lab = 0.85, cex.axis = 0.5, cex.sub=0.1, las=0, xpd=T, mar=c(5,4, 3,2))
-mosaicplot(~VRegions + Indel_Sizes, data=df3, xlab = "Variable Region", ylab = "Indel Sizes",
-           shade=T, main=NULL)
-mosaicplot(~Subtype + Indel_Sizes, data=df4, xlab = "Subtype", ylab = "Indel Sizes",
-           shade=T, main=NULL)
+require(vcd)
+par(ps = 50, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.5, las=0, xpd=T, mar=c(5,4, 2,2), mfrow=c(2,2))
+m <- mosaic(~VRegions + Indel_Sizes, data=df3,
+       shade=T, main=NULL, direction="v",spacing=spacing_equal(sp = unit(0, "lines")),
+       residuals_type=NULL,legend=T)
+
+
+
+          
+par(ps = 27, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.1, las=0, xpd=T, mar=c(5,4, 2,2), xaxt='n')
+mosaic(~Subtype + Indel_Sizes, data=df4, xlab = "Subtype", ylab = "Indel Sizes",
+       shade=T, main=NULL, direction="v",spacing=spacing_equal(sp = unit(0, "lines")),
+       residuals_type=NULL,legend=T)
+
+
+#PHYLOGENETIC PLOT - Figure 1
+tre <- read.tree(tfolder[7])
 
 
 
 #-------------------------
-#OUTDATED
-
-
 #load the nt proportions data frame from the temp
 # for (g in 1:5){
 #   no <- which(temp[,paste0("VR",g,'.indel')])
