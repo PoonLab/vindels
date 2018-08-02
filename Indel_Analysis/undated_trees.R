@@ -2,7 +2,7 @@ require(ape)
 require(stringr)
 require(ggplot2)
 
-tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/7Trees", full.names=TRUE)
+tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/6Trees", full.names=TRUE)
 
 
 
@@ -10,18 +10,18 @@ tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/7Trees", full
 # This code reads phylogenetic trees and variable loop sequences in csv format. 
 branch.lengths <- data.frame()
 
-for (i in 1:length(tfolder)){
+for (i in 1:7){
   tre <- read.tree(tfolder[i])
  
   
   #for output 
   name <- strsplit(tfolder[i], "/")[[1]][7]
-  subtype <- strsplit(name, "MSA2")[[1]][1]
+  subtype <- strsplit(name, "_CR")[[1]][1]
   filename <- paste0(subtype,"+.csv" )
   
-  
+  tre <- multi2di(tre) 
   #naming the csv 
-  names(csv) <- c('accno', 'VR1', 'VR2','VR3', 'VR4', 'VR5')
+  #names(csv) <- c('accno', 'VR1', 'VR2','VR3', 'VR4', 'VR5')
   
   #counting tips
   n <- Ntip(tre)
@@ -62,3 +62,5 @@ for (i in 1:length(tfolder)){
 }
 
 branch.len2 <- split(branch.lengths$length, branch.lengths$subtype)
+par()
+boxplot(branch.len2)

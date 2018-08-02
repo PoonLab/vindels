@@ -3,7 +3,7 @@ require(stringr)
 require(ggplot2)
 
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_Dated_Trees", full.names=TRUE)
-vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_mod2", full.names=TRUE)
+vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_edit", full.names=TRUE)
 
 len.diff <- list() #data.frame(subtype=character(),stringsAsFactors = F)
 
@@ -13,7 +13,7 @@ branch.lengths <- data.frame()
 
 for (i in 1:length(tfolder)){
   tre <- read.tree(tfolder[i])
-  csv <- read.csv(vfolder[i], header=FALSE)
+  csv <- read.csv(vfolder[i], header=FALSE, stringsAsFactors = F)
   
   #for output 
   name <- strsplit(tfolder[i], "/")[[1]][7]
@@ -33,6 +33,7 @@ for (i in 1:length(tfolder)){
   
   #determines which nodes contain cherries (returns vector with their integer positions)
   is.cherry <- sapply(numtips, function(d) d==2)
+  
   
   
   # construct data frame where each row corresponds to a cherry
@@ -61,14 +62,21 @@ for (i in 1:length(tfolder)){
   
   filtered.indels <- indels[indels$total.length != 0,]
   
-  temp2 <- data.frame(stringsAsFactors = F)
+  filtered.indels2 <- data.frame(stringsAsFactors = F)
+  temp3 <- data.frame(stringsAsFactors = F)
+  lens <- c(0,78,120,108,102,33)
+  
+  count = 0
   for (x in 1:nrow(filtered.indels)){
     idxA <- match(filtered.indels$tip1.label[x], csv$accno)
     idxB <- match(filtered.indels$tip2.label[x], csv$accno)
     
+    
+    temp2 <- data.frame(stringsAsFactors = F)
+    
+    #BY VARIABLE LOOPS / COLUMNS 
     for (t in 2:ncol(csv)){
-      
-      
+
       Avr <- as.character(csv[idxA,t])
       Bvr <- as.character(csv[idxB,t])
       
@@ -81,30 +89,53 @@ for (i in 1:length(tfolder)){
       name.bln <- paste0("VR",as.character(t-1),".indel")
       name.nt <- paste0("VR",as.character(t-1),".nt")
       
-      diff <- abs(Alength - Blength)
-      filtered.indels[x,name.bln] <- bln
-      filtered.indels[x,name.nt] <- diff
-
       
-      if (!bln){
+      
+      #FILTER ----------------------------
+      if (Alength < lens[t]/2 || Blength < lens[t]/2 || 
+          (str_count(Avr, "\\?")/Alength) > 0.15 || 
+          (str_count(Bvr, "\\?")/Blength) > 0.15 ||
+          (t !=6 && (substr(paste(trans(as.DNAbin.DNAString(Avr)),collapse=""),1,1) != "C"|| 
+                     substr(paste(trans(as.DNAbin.DNAString(Bvr)),collapse=""),1,1) != "C")))
+      {
+        count = count + 1
+        print(Avr)
+        print(Bvr)
+        print("")
+        filtered.indels[x,name.bln] <- NA
+        filtered.indels[x,name.nt] <- NA
+      }else{
+        diff <- abs(Alength - Blength)
+        filtered.indels[x,name.bln] <- bln
+        filtered.indels[x,name.nt] <- diff
+      }
+      
+      #for generating 10_Cherries, only indel-containing sequences
+      if (!is.na(bln) && !bln){
         temp2 <- rbind(temp2, data.frame(accno1=as.character(csv[idxA,1]), seq1=Avr, accno2=as.character(csv[idxB,1]), seq2=Bvr, Vr=(t-1)))
       }
-        
-    }
-  }
-  setwd("~/PycharmProjects/hiv-evolution-master/10_Cherries/")
-  #temp2 = output for cherry sequences in csv format (accno1,seq1,accno2,seq2,vregion) FOLDER: 10_Cherries
-  write.csv(temp2,filename)
+      
+    } #COLUMNS END
+    temp3 <- rbind(temp3, temp2)
+    filtered.indels2 <- rbind(filtered.indels2, filtered.indels[x,])
+    
+    
+  } #ROWS END 
+  print(count)
+  
+  setwd("~/PycharmProjects/hiv-evolution-master/10_Cherries2/")
+  #temp3 = output for cherry sequences in csv format (accno1,seq1,accno2,seq2,vregion) FOLDER: 10_Cherries
+  write.csv(temp3,filename)
   
   
-  setwd("~/PycharmProjects/hiv-evolution-master/9_indels/")
+  setwd("~/PycharmProjects/hiv-evolution-master/9_2_indels/")
   #filtered indels = true/false outcomes along with the indel sizes  FOLDER: 9_indels
-  write.csv(filtered.indels, filename)
+  write.csv(filtered.indels2, filename)
   
   branch.lengths <- rbind(branch.lengths, data.frame(subtype=rep(subtype,nrow(filtered.indels)), length=filtered.indels$total.length))
   for (j in 1:5){
-    len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[,paste0("VR",j,".nt")] <= 3
-    len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[,paste0("VR",j,".nt")] > 3
+    len.diff[[paste0(filename,".VR",j,".three")]] <- filtered.indels[which(!is.na(filtered.indels[paste0("VR",j,".indel")])),paste0("VR",j,".nt")] <= 3
+    len.diff[[paste0(filename, ".VR",j,".!three")]] <-  filtered.indels[which(!is.na(filtered.indels[paste0("VR",j,".indel")])),paste0("VR",j,".nt")] > 3
   }
 
 }
@@ -137,7 +168,7 @@ table2 <- table(rep(indel.sizes$subtype, indel.sizes$count), rep(indel.sizes$thr
 
 require(vcd)
 par(ps = 50, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.5, las=0, xpd=T, mar=c(5,4, 2,2), mfrow=c(2,2))
-m <- mosaic(~VRegions + Indel_Sizes, data=df3,
+mosaic(~VRegions + Indel_Sizes, data=df3,
        shade=T, main=NULL, direction="v",spacing=spacing_equal(sp = unit(0, "lines")),
        residuals_type=NULL,legend=T)
 
@@ -147,7 +178,7 @@ m <- mosaic(~VRegions + Indel_Sizes, data=df3,
 par(ps = 27, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.1, las=0, xpd=T, mar=c(5,4, 2,2), xaxt='n')
 mosaic(~Subtype + Indel_Sizes, data=df4, xlab = "Subtype", ylab = "Indel Sizes",
        shade=T, main=NULL, direction="v",spacing=spacing_equal(sp = unit(0, "lines")),
-       residuals_type=NULL,legend=T)
+       residuals_type=NULL,legend=T, set_varnames = c(Sex="Gender", Survived="survival"))
 
 
 #PHYLOGENETIC PLOT - Figure 1
