@@ -20,11 +20,15 @@ for (i in 1:length(tfolder)){
   subtype <- strsplit(name, "\\.")[[1]][1]
   test <- strsplit(subtype,"_")[[1]]
   if (length(test) == 2){
+    filename <- paste0(subtype,"+.csv" )
     subtype <- strsplit(subtype,"_")[[1]][2]
-   }else if(subtype == "F1"){
-     subtype <- "F" 
+  }else if(subtype == "F1"){
+    filename <- paste0(subtype,"+.csv" )
+    subtype <- "F" 
+  }else{
+    filename <- paste0(subtype,"+.csv" )
   }
-  filename <- paste0(subtype,"+.csv" )
+  
   
   
   #naming the csv 
