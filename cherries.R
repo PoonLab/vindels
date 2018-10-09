@@ -226,7 +226,7 @@ mosaic(~variable.loop + indel.size, data=df3,
        legend=legend_resbased(fontsize = 16, fontfamily = "",
                        x = unit(0.2, "lines"), y = unit(3,"lines"),
                        height = unit(0.8, "npc"),
-                       width = unit(1, "lines"), range=c(-10,10)),
+                       width = unit(1, "lines"), range=c(-10,10),pvalue=F),
        set_labels=list(Variable.Loop=c("V1","V2","V3","V4","V5")))
 a <- grid.grab()
 
