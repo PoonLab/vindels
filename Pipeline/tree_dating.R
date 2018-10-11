@@ -192,9 +192,9 @@ branch.len2 <- split(branch.lengths$length, branch.lengths$subtype)
 boxplot(branch.len2, xlab="Subtype",cex.lab=1.3,las=1)
 par(las=3)
 mtext(side = 2, text = "Terminal Branch Lengths (Expected Substitutions)", line = 4, cex=1.3)
-
-
 #--------------------------------
+
+
 big.df <- big.df[which(big.df$dates>1960),]
 new.df <- split(big.df[,2:3],big.df[,1])
 
@@ -208,7 +208,7 @@ par(mfrow=c(4,2),las=1)
 names <- c("AE", "AG","A1","B","C","D","F1")
 letters <- c("a","b","c","d","e","f","g")
 lims <- c()
-xconint <- data.frame()
+treedata <- data.frame()
 for (m in 1:7){
   
   par(mar=c(4.5,6,1,1))
@@ -223,14 +223,18 @@ for (m in 1:7){
   lreg <- lm(lengths~dates ,data=new.df[m][[1]])
   
   #compute the 95% conf ints for slope
-  cislope <- c(confint(lreg)[2],confint(lreg)[4])
+  cislope <- c(strsplit(formatC(confint(lreg)[2],format="e",digits=2),"e")[[1]][1],
+               strsplit(formatC(confint(lreg)[4],format="e",digits=2),"e")[[1]][1])
   rsqr <- signif(summary(lreg)$adj.r.squared,2)
-  slope <- signif(lreg$coefficients[2][[1]],2)
+  slope <- strsplit(formatC(lreg$coefficients[2][[1]],format="e",digits=2),"e")[[1]]
   
   xest <- svycontrast(lreg, quote(-`(Intercept)`/dates))
-  xint <- coef(xest)[[1]]
-  se <- SE(xest)[[1]]
-  xconint <- rbind(xconint, data.frame(subtype=names[m],xint=xint,xlow=xint-se, xhigh=xint+se, slope= signif(lreg$coefficients[2][[1]],2), slo=cislope[1], shi=cislope[2],rsqrd=rsqr))
+  xint <- round(coef(xest)[[1]],2)
+  se <- signif(SE(xest)[[1]],2)
+  treedata <- rbind(treedata, data.frame(Clade=names[m],
+                                         Estimate= sprintf("$%s(%s,%s)\times 10^{%s}$",slope[1],cislope[1],cislope[2],slope[2]),
+                                         "$x$-Intercept (Year)"=sprintf("%s(%s,%s)",xint,xint-se,xint+se),
+                                         "$R^2$"=rsqr))
   
   abline(lreg,lwd=1.5)
   #print(summary(lreg))
@@ -246,8 +250,12 @@ for (m in 1:7){
   
   
 }
+
+lxtable <- xtable(treedata)
+
+
 setwd("~/vindels/Indel_Analysis")
-write.csv(xconint,file="tree_data.csv")
+write.csv(treedata,file="tree_data.csv")
 
 # for (m in 1:7){
 #   par(mar=c(4.5,6,1,1))
