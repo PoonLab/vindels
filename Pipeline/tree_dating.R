@@ -1,7 +1,7 @@
 require(ape)
 dfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/Dates",full.names=TRUE)
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/6Trees", full.names=TRUE)
-setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
+
 
 #----FUNCTIONS----
 n.days <- function(year, month) {
@@ -68,6 +68,7 @@ get.range <- function(x) {
 
 branch.lengths <- data.frame()
 big.df <- data.frame(stringsAsFactors = F)
+setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
 for (n in 1:length(tfolder)){
   tre <- read.tree(tfolder[n])
   csv <- read.csv(dfolder[n], header=FALSE,stringsAsFactors = F)
@@ -180,6 +181,7 @@ for (n in 1:length(tfolder)){
   #system(paste0('lsd -i rtt2lsd.nwk -d date_file.txt -o ', filename,' -c'))
   
 }
+setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
 file.remove('date_file.txt')
 file.remove('rtt2lsd.nwk')
 
@@ -219,29 +221,33 @@ for (m in 1:7){
        ylim=c(0,0.30), cex=1,pch=20, 
        xlab="Collection Date",ylab="Root-to-Tip Branch Length", cex.lab=1.1)
   lreg <- lm(lengths~dates ,data=new.df[m][[1]])
+  
+  #compute the 95% conf ints for slope
+  cislope <- c(confint(lreg)[2],confint(lreg)[4])
   rsqr <- signif(summary(lreg)$adj.r.squared,2)
+  slope <- signif(lreg$coefficients[2][[1]],2)
   
   xest <- svycontrast(lreg, quote(-`(Intercept)`/dates))
   xint <- coef(xest)[[1]]
   se <- SE(xest)[[1]]
-  xconint <- rbind(xconint, data.frame(subtype=names[m],xint=xint,lower=xint-se, upper=xint+se, slope= signif(lreg$coefficients[2][[1]],2), rsqrd=rsqr))
+  xconint <- rbind(xconint, data.frame(subtype=names[m],xint=xint,xlow=xint-se, xhigh=xint+se, slope= signif(lreg$coefficients[2][[1]],2), slo=cislope[1], shi=cislope[2],rsqrd=rsqr))
   
   abline(lreg,lwd=1.5)
   #print(summary(lreg))
   text(1979.7,0.285,labels=names[m], cex=1.6)
   eqn <- paste0("y = ", signif(lreg$coefficients[2][[1]],2), "x ", signif(lreg$coefficients[1][[1]],2))
-  text(1998,0.275,labels=eqn, cex=1.1)
+  #text(1998,0.275,labels=eqn, cex=1.1)
   #rsqr <- paste0(txt, get(signif(summary(lreg)$adj.r.squared,2)))
-  text(2012,0.29,labels=expression(paste(R^2,"= ")), cex=1.1)
-  text(2015,0.286,labels=rsqr,cex=1.1)
+  #text(2012,0.29,labels=expression(paste(R^2,"= ")), cex=1.1)
+  #text(2015,0.286,labels=rsqr,cex=1.1)
   par(xpd=NA)
   text(1970,0.31,labels=paste0(letters[m],")"), cex=1.5)
   par(xpd=F)
   
   
 }
-
-write.csv(xconint,file="xconint.csv")
+setwd("~/vindels/Indel_Analysis")
+write.csv(xconint,file="tree_data.csv")
 
 # for (m in 1:7){
 #   par(mar=c(4.5,6,1,1))

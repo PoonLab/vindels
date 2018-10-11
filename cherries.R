@@ -176,8 +176,6 @@ for (z in 1:length(len.diff)){
     subtype <- "AE"
   }else if(subtype == "02_AG"){
     subtype <- "AG"
-  }else if(subtype == "F1"){
-    subtype <- "F"
   }
   
   indel.sizes[z,"subtype"] <- subtype #vregion
@@ -202,7 +200,6 @@ df3$indel.size <- factor(df3$indel.size,levels=c("9+","6","3"))
 df3 <- df3[order(df3$indel.size),]
 
 df4$indel.size <- factor(df4$indel.size,levels=c("9+","6","3"))
-df4$subtype <- factor(df4$subtype, levels=c("AE", "AG", "A1","B","C","D","F"))
 df4 <- df4[order(df4$indel.size),]
 
 require(vcd)
@@ -216,10 +213,9 @@ mosaic(~variable.loop + indel.size, data=df3,
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",
        margins=c(2,2,4,2),
-       panel(F,T,F,F),
        labeling_args = list(tl_labels = c(F,T), 
                             tl_varnames=c(F,T),
-                            gp_labels=gpar(fontsize=19),
+                            gp_labels=gpar(fontsize=20),
                             gp_varnames=gpar(fontsize=24),
                             set_varnames = c(variable.loop="Variable Loop", 
                                              indel.size="Indel Length (nt)"),
@@ -227,8 +223,9 @@ mosaic(~variable.loop + indel.size, data=df3,
        legend=legend_resbased(fontsize = 16, fontfamily = "",
                        x = unit(0.2, "lines"), y = unit(3,"lines"),
                        height = unit(0.8, "npc"),
-                       width = unit(1, "lines"), range=c(-10,10),pvalue=F),
+                       width = unit(1, "lines"), range=c(-10,10)),
        set_labels=list(Variable.Loop=c("V1","V2","V3","V4","V5")))
+a <- grid.grab()
 
 #par(ps = 27, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.1, las=0, xpd=T, mar=c(5,4, 2,2), xaxt='n')
 mosaic(~subtype + indel.size, data=df4,
@@ -238,13 +235,15 @@ mosaic(~subtype + indel.size, data=df4,
        margins=c(1,4,4,4),
        labeling_args = list(tl_labels = c(F,T), 
                             tl_varnames=c(F,T), 
-                            gp_labels=gpar(fontsize=19),
+                            gp_labels=gpar(fontsize=18),
                             gp_varnames=gpar(fontsize=24),
                             set_varnames = c(subtype="Subtype", 
                                              indel.size="Indel Length (nt)"),
                             offset_labels=c(0,0,0,0),rot_labels=c(0,0,35,0), 
                             just_labels=c("center","center","center","center")))
-
+b <- grid.grab()
+grid.newpage()
+grid.arrange(b,a,ncol=2)
 
 #PHYLOGENETIC PLOT - Figure 1
 tre <- read.tree(tfolder[7])
