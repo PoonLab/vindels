@@ -57,6 +57,8 @@ for (i in 1:length(csvfolder)){
   
 }
 
+
+
 #v.order <- c(5,1,2,3,4)
 #big.df <- big.df[order(match(big.df$Vregion,v.order)),]
 
@@ -66,10 +68,23 @@ fit2 <- glm(!outcomes ~ subtype * Vregion + Time, family= "binomial", data=big.d
 
 fit.aic <- stepAIC(fit, scope=list(upper=fit2, lower=~1), direction='both', trace=TRUE)
 summary(fit.aic)
+write(summary(fit.aic),file="results.txt")
 write.csv(max.llh, "indel_rates2.csv")
 write.csv(con.int, "conf_ints2.csv")
 
 # outcomes and times are vectors that have to come from your data frame
+
+# + geom_rect(data=vbox, 
+#             mapping=aes(xmin=vloop-1, xmax=vloop+2.25,ymin=rate, ymax=rate+0.036),
+#             color="black", fill="gray88") + geom_text(data=vloops,aes(x=vloop-0.2),
+#                                                       label=c("V1","V2","V3","V4","V5"),
+#                                                       size=4.5) +geom_text(data=vbox, 
+#                                                                            aes(x=vloop+0.3,y=rate+0.0162),
+#                                                                            label="*",
+#                                                                            size=10) + geom_segment(data=vbox, aes(x=vloop-0.5,xend=vloop-0.5,y=rate+0.020,yend=rate+0.016),
+#                                                                                                    arrow=arrow(length=unit(2,"mm")),
+#                                                                                                    size=0.8)
+
 
 
 require(ggplot2)
@@ -87,9 +102,12 @@ submark[18,3] <- 0.12
 
 rates <- split(max.llh[,2:3], max.llh[,1])
 subline <- data.frame(subtype=c("B"), vloop=c(3),rate=c(0.118))
+vbox <- data.frame(subtype=c("F1"), vloop=c(3),rate=c(0.103))
+vloops <- data.frame(subtype=c(rep("F1",5)), vloop=c(rep(4.5,5)),rate=c(0.100+1:5*0.007))
 vline <- data.frame(subtype=c("01_AE","02_AG","A1","B","C","D","F1"), vloop=rep(3,7),rate=rep(0.028,7))
 
-#plot <- ggplot(data=max.llh)
+
+
 plot <- ggplot(max.llh, aes(x=vloop, 
                             y=rate, 
                             fill=subtype, 
@@ -98,28 +116,33 @@ plot <- ggplot(max.llh, aes(x=vloop,
                                                  position="dodge", 
                                                  show.legend=F) +facet_wrap(~subtype,
                                                                              ncol=7,
-                                                                             nrow=1) + geom_text(data=markers,
-                                                                                                 label="*",
-                                                                                                 size=8) + geom_text(data=submark,
-                                                                                                                     label="*",
-                                                                                                                     size=8) + geom_segment(data=subline, 
-                                                                                                                                            aes(x=vloop-2,xend=vloop+2,y=rate,yend=rate)) + geom_segment(data=vline,
-                                                                                                                                                                                                         aes(x=vloop,xend=vloop,y=rate,yend=rate-0.005),arrow=arrow(length=unit(2,"mm")),size=0.5) +geom_segment(data=subline,
-                                                                                                                                                                                                                                                                                                                aes(x=vloop,xend=vloop,y=rate-0.003,yend=rate-0.01),arrow=arrow(length=unit(3,"mm")),size=0.5)
+                                                                             nrow=1)  + geom_text(data=submark,
+                                                                                                  label="*",
+                                                                                                  size=10) + geom_segment(data=subline, 
+                                                                                                                         aes(x=vloop-2.25,xend=vloop+2.25,y=rate,yend=rate),size=0.8)  + geom_segment(data=subline, aes(x=vloop,xend=vloop,y=rate-0.003,yend=rate-0.01),
+                                                                                                                                                                                                                arrow=arrow(length=unit(3,"mm")),
+                                                                                                                                                                                                                size=0.8)
 plot + labs(x="Variable Loop", 
             y="Indel Rate (Events/Year)")+scale_fill_manual(values=
                                                               colors2)+scale_y_continuous(expand = c(0, 0),
                                                                                          limits = c(0, 0.155))+theme(panel.grid.major.y = element_line(color="black",size=0.3),
                                                                                                                      panel.grid.major.x = element_blank(),
                                                                                                                      panel.grid.minor.y = element_blank(),
-                                                                                                                     plot.margin =margin(t = 10, r = 10, b = 20, l = 20, unit = "pt"),
+                                                                                                                     panel.grid.minor.x = element_blank(),
+                                                                                                                     panel.spacing=unit(1, "mm"),
+                                                                                                                     panel.background=element_rect(fill="gray88",colour="white",size=0),
+                                                                                                                     plot.margin =margin(t = 10, r = 10, b = 20, l = 8, unit = "pt"),
                                                                                                                      axis.line = element_line(colour = "black"), 
-                                                                                                                     axis.title.y=element_text(size=18,margin=margin(t = 0, r = 15, b = 0, l = 0)),
-                                                                                                                     axis.title.x=element_text(size=18,margin=margin(t = 15, r = 0, b = 0, l = 0)),
-                                                                                                                     strip.text.x = element_text(size=12),
-                                                                                                                     axis.text=element_text(size=12))+ geom_errorbar(aes(ymax = con.int$upper, 
-                                                                                                                                         ymin = con.int$lower), 
-                                                                                                                                      width = 0.25) 
+                                                                                                                     axis.title.y=element_text(size=20,margin=margin(t = 0, r = 15, b = 0, l = 0)),
+                                                                                                                     axis.title.x=element_text(size=20,margin=margin(t = 15, r = 0, b = 0, l = 0)),
+                                                                                                                     strip.text.x = element_text(size=16),
+                                                                                                                     axis.text=element_text(size=14),
+                                                                                                                     legend.position="none")+ geom_errorbar(aes(ymax = con.int$upper, ymin = con.int$lower), 
+                                                                                                                                                                     width = 0.25) + geom_segment(data=vline,
+                                                                                                                                                                                                  aes(x=vloop,
+                                                                                                                                                                                                      y=rate-0.001,
+                                                                                                                                                                                                      xend=vloop,
+                                                                                                                                                                                                      yend=rate-0.005),arrow=arrow(length=unit(2,"mm")),size=0.7)+ geom_text(data=vline, label="*", size=8)
 
 segments((n*7)+0.5,8.5,(n*7)+0.5,-1.4,lwd=3)
 #plot +  geom_errorbar(limits, position = position_dodge(0.9),width = 0.25)

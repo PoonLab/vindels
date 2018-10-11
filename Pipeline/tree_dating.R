@@ -100,6 +100,8 @@ for (n in 1:length(tfolder)){
   sample.times <- date.to.decimal(mid.date(temp$min.date, temp$max.date))
   sample.times <- sample.times - 1970
   
+  
+  #ROOTING THE TREE
   rtdtree <- handle.error(tre, sample.times, 5)
   if (is.null(rtdtree)){
     next
@@ -146,6 +148,12 @@ for (n in 1:length(tfolder)){
   sample.times <- sample.times + 1970
   lens <- node.depth.edgelength(rtdtree)[1:Ntip(rtdtree)]
   
+  rtdtree2 <- rtdtree
+  rtdtree2$tip.label <- paste(rtdtree2$tip.label, sample.times, sep="-")
+  setwd("~/PycharmProjects/hiv-evolution-master/7_Tempest")
+  write.tree(rtdtree2, file=paste0(filename,".tree"))
+  setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
+  
   big.df <- rbind(big.df,data.frame(subtype=rep(filename,Ntip(rtdtree)), dates=sample.times, lengths=lens))
   
   # DATING TREES -----------------------------------
@@ -182,14 +190,15 @@ branch.len2 <- split(branch.lengths$length, branch.lengths$subtype)
 boxplot(branch.len2, xlab="Subtype",cex.lab=1.3,las=1)
 par(las=3)
 mtext(side = 2, text = "Terminal Branch Lengths (Expected Substitutions)", line = 4, cex=1.3)
+
+
 #--------------------------------
 big.df <- big.df[which(big.df$dates>1960),]
 new.df <- split(big.df[,2:3],big.df[,1])
 
-
+require(survey)
 require(scales)
 par(mar=c(5,5,4,3))
-
 
 require(RColorBrewer)
 cols <- brewer.pal(7,"Dark2")
@@ -197,21 +206,42 @@ par(mfrow=c(4,2),las=1)
 names <- c("AE", "AG","A1","B","C","D","F1")
 letters <- c("a","b","c","d","e","f","g")
 lims <- c()
+xconint <- data.frame()
 for (m in 1:7){
+  
   par(mar=c(4.5,6,1,1))
-  buffer <- 0.01*(range(new.df[m][[1]][,1])[2] - range(new.df[m][[1]][,1])[1])
-  newx <- min(new.df[m][[1]][,1])-buffer
-  plot(x=jitter(new.df[m][[1]][,1],amount=0.45), y=new.df[m][[1]][,2], col=alpha(cols[m],0.35), xlim=c(1979,2016),
+  xval <- new.df[m][[1]][,1]
+  yval <- new.df[m][[1]][,2]
+  
+  #buffer <- 0.01*(range(xval)[2] - range(new.df[m][[1]][,1])[1])
+  #newx <- min(new.df[m][[1]][,1])-buffer
+  plot(x=jitter(xval,amount=0.45), y=yval, col=alpha(cols[m],0.35), xlim=c(1979,2016),
        ylim=c(0,0.30), cex=1,pch=20, 
        xlab="Collection Date",ylab="Root-to-Tip Branch Length", cex.lab=1.1)
-  abline(lm(new.df[m][[1]][,2]~new.df[m][[1]][,1]),lwd=1.5)
-  text(1979.7,0.285,labels=names[m], cex=1.4)
+  lreg <- lm(lengths~dates ,data=new.df[m][[1]])
+  rsqr <- signif(summary(lreg)$adj.r.squared,2)
+  
+  xest <- svycontrast(lreg, quote(-`(Intercept)`/dates))
+  xint <- coef(xest)[[1]]
+  se <- SE(xest)[[1]]
+  xconint <- rbind(xconint, data.frame(subtype=names[m],xint=xint,lower=xint-se, upper=xint+se, slope= signif(lreg$coefficients[2][[1]],2), rsqrd=rsqr))
+  
+  abline(lreg,lwd=1.5)
+  #print(summary(lreg))
+  text(1979.7,0.285,labels=names[m], cex=1.6)
+  eqn <- paste0("y = ", signif(lreg$coefficients[2][[1]],2), "x ", signif(lreg$coefficients[1][[1]],2))
+  text(1998,0.275,labels=eqn, cex=1.1)
+  #rsqr <- paste0(txt, get(signif(summary(lreg)$adj.r.squared,2)))
+  text(2012,0.29,labels=expression(paste(R^2,"= ")), cex=1.1)
+  text(2015,0.286,labels=rsqr,cex=1.1)
   par(xpd=NA)
   text(1970,0.31,labels=paste0(letters[m],")"), cex=1.5)
   par(xpd=F)
+  
+  
 }
 
-
+write.csv(xconint,file="xconint.csv")
 
 # for (m in 1:7){
 #   par(mar=c(4.5,6,1,1))

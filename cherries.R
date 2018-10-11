@@ -216,6 +216,7 @@ mosaic(~variable.loop + indel.size, data=df3,
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",
        margins=c(2,2,4,2),
+       panel(F,T,F,F),
        labeling_args = list(tl_labels = c(F,T), 
                             tl_varnames=c(F,T),
                             gp_labels=gpar(fontsize=19),
@@ -228,7 +229,6 @@ mosaic(~variable.loop + indel.size, data=df3,
                        height = unit(0.8, "npc"),
                        width = unit(1, "lines"), range=c(-10,10),pvalue=F),
        set_labels=list(Variable.Loop=c("V1","V2","V3","V4","V5")))
-a <- grid.grab()
 
 #par(ps = 27, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.1, las=0, xpd=T, mar=c(5,4, 2,2), xaxt='n')
 mosaic(~subtype + indel.size, data=df4,
@@ -244,9 +244,7 @@ mosaic(~subtype + indel.size, data=df4,
                                              indel.size="Indel Length (nt)"),
                             offset_labels=c(0,0,0,0),rot_labels=c(0,0,35,0), 
                             just_labels=c("center","center","center","center")))
-b <- grid.grab()
-grid.newpage()
-grid.arrange(b,a,ncol=2)
+
 
 #PHYLOGENETIC PLOT - Figure 1
 tre <- read.tree(tfolder[7])
