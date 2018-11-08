@@ -1,5 +1,5 @@
-ifolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/10_8_NGlycs_i", full.names=TRUE)
-tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/10_7_NGlycs_total", full.names=TRUE)
+ifolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/10_10_Indels_i", full.names=TRUE)
+tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/10_9_Indels_total", full.names=TRUE)
 
 totals.df <- data.frame(subtype=character(), stringsAsFactors = F)
 intf.df <- data.frame(subtype=character(), stringsAsFactors = F)
@@ -9,9 +9,9 @@ for (n in 1:length(ifolder)){
   subtypes <- c(subtypes, subtype)
   
   
-  totals <- read.csv(tfolder[n], sep=":", header=F,stringsAsFactors = F)
-  interfered <- read.csv(ifolder[n], sep=":", header=F, stringsAsFactors = F)
-  
+  totals <- read.csv(tfolder[n], sep=":", header=F,  stringsAsFactors = F, colClasses = "character")
+  interfered <- read.csv(ifolder[n], sep=":", header=F, stringsAsFactors = F, colClasses="character")
+  interfered[is.na(interfered)]<-""
   totals$vloop <- sapply(totals$V1, function(x) strsplit(x,"\\.")[[1]][3])
   totals$subtype <- rep(subtype, nrow(totals))
   totals$count <- mapply(function(x, y) { length(strsplit(x, ",")[[1]]) + 
@@ -61,16 +61,16 @@ for (i in subtypes){
 #FIGURE-----
 require(RColorBrewer)
 colors <- brewer.pal(5, 'Set1')
-lim = c(0,0.55)
-par(pty="m",xpd=F,mar=c(6,7,2,2))
-plot(x=ngProps.df$prop, y=disrupt$prop, panel.first = grid(NULL,NULL,lty=1), las=1,pch=(disrupt$vloop+20),bg=rep(colors, 7),cex=2.8, cex.lab=1.3,main=NULL, xlab="",ylab="") 
-legend(0.003,0.285,legend=c('V1  ','V2  ','V3  ','V4  ','V5  '), pch=c(21,22,23,24,25), cex=1.6, pt.bg=colors,x.intersp = 1.5,y.intersp=1.6, pt.cex=2.4)
+lim = c(0,0.75)
+par(pty="s",xpd=F,mar=c(6,7,2,2))
+plot(x=ngProps.df$prop, y=disrupt$prop,  las=1,pch=(disrupt$vloop+20),bg=rep(colors, 7),cex=2.8, cex.lab=1.3,main=NULL, xlab="",ylab="",xlim=lim,ylim=lim) 
+legend(0.003,0.75,legend=c('V1 ','V2 ','V3 ','V4 ','V5'), pch=c(21,22,23,24,25), cex=1.6, pt.bg=colors,x.intersp = 1.5,y.intersp=1.1, pt.cex=2.4)
 #abline(0,1)
-title(ylab="Disrupted PNLGS / Total PNLGS", line=4, cex.lab=1.5)
-title(xlab="PNLGS Amino Acids / Total Amino Acids", line=3, cex.lab=1.5)
-text(0,0.01,label="F1")
-text(0.09,0.125,label="01_AE")
-
+title(ylab="Indels disrupting PNGS / Total Indels", line=4, cex.lab=1.5)
+title(xlab="PNGS Amino Acids / Total Amino Acids", line=3, cex.lab=1.5)
+text(0,0.03,label="F1")
+text(0.09,0.19,label="01_AE")
+abline(0,1,lty=2)
 
 #abline(lm(disrupt$prop ~ ngProps.df$prop))
 

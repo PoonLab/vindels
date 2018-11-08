@@ -2,9 +2,9 @@ import re
 from glob import glob
 from seqUtils import *
 
-folder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/10_5_Translated_Cherries/*.fasta")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/10_5_Translated_Cherries/*.fasta")
 
-output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/ngCounts.csv", 'w')
+output = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/ngCounts.csv", 'w')
 output.write("subtype,V1,V2,V3,V4,V5\n")
 for file in sorted(folder):
 
@@ -29,11 +29,11 @@ for file in sorted(folder):
         ngCount = 4*(len(nGlycs1) + len(nGlycs2))
         print(ngCount)
 
-        '''print(n)
+        print(n)
         print(fasta[n][0])
         print(fasta[n][1])
         print(aaCount)
-        print(ngCount)'''
+        print(ngCount)
 
         aaTotal[vloop] += aaCount
         ngTotal[vloop] += ngCount

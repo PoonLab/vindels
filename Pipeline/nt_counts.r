@@ -17,8 +17,6 @@ for (i in 1:nrow(indel)){
   
   for (x in 1:5){
     
-    
-    
     in.df <- indel[i,c(1+x, 6+x, 11+x, 16+x)]
     out.df <- noindel[i, c(1+x, 6+x, 11+x, 16+x)]
     

@@ -1,6 +1,7 @@
 setwd("~/vindels/Indel_Analysis/")
 require(bbmle)
 require(MASS)
+require(xtable)
 obj.f <- function(rate) -pll(rate, outcomes, times)  # objective function
 
 pll <- function(rate, outcomes, times) {
@@ -67,7 +68,17 @@ fit2 <- glm(!outcomes ~ subtype * Vregion + Time, family= "binomial", data=big.d
 
 
 fit.aic <- stepAIC(fit, scope=list(upper=fit2, lower=~1), direction='both', trace=TRUE)
-summary(fit.aic)
+data.df <- data.frame(summary.glm(fit.aic)$coefficients)
+data.df$Std..Error <- NULL
+data.df$z.value <- NULL
+data.df[which(data.df$Pr...z.. < 0.01 & data.df$Pr...z.. > 0.001),'Signif.'] <- "**"
+data.df[which(data.df$Pr...z.. < 0.001),'Signif.'] <- "***"
+data.df$Estimate <- as.numeric(as.character(format(round(data.df$Estimate, 3), nsmall = 3)))
+data.df$Pr...z.. <- as.numeric(as.character(format(round(data.df$Pr...z.., 3), nsmall = 3)))
+
+
+
+xt <- xtable(data.df, digits=c(0,3,3,0))
 write(summary(fit.aic),file="results.txt")
 write.csv(max.llh, "indel_rates2.csv")
 write.csv(con.int, "conf_ints2.csv")
@@ -102,9 +113,10 @@ submark[18,3] <- 0.12
 
 rates <- split(max.llh[,2:3], max.llh[,1])
 subline <- data.frame(subtype=c("B"), vloop=c(3),rate=c(0.118))
+noest <- data.frame(subtype=c("F1"), vloop=c(3), rate=c(0.02))
 vbox <- data.frame(subtype=c("F1"), vloop=c(3),rate=c(0.103))
 vloops <- data.frame(subtype=c(rep("F1",5)), vloop=c(rep(4.5,5)),rate=c(0.100+1:5*0.007))
-vline <- data.frame(subtype=c("01_AE","02_AG","A1","B","C","D","F1"), vloop=rep(3,7),rate=rep(0.028,7))
+vline <- data.frame(subtype=c("01_AE","02_AG","A1","B","C","D"), vloop=rep(3,6),rate=rep(0.028,6))
 
 
 
@@ -123,7 +135,7 @@ plot <- ggplot(max.llh, aes(x=vloop,
                                                                                                                                                                                                                 arrow=arrow(length=unit(3,"mm")),
                                                                                                                                                                                                                 size=0.8)
 plot + labs(x="Variable Loop", 
-            y="Indel Rate (Events/Year)")+scale_fill_manual(values=
+            y="Indel Rate (Events/Lineage/Year)")+scale_fill_manual(values=
                                                               colors2)+scale_y_continuous(expand = c(0, 0),
                                                                                          limits = c(0, 0.155))+theme(panel.grid.major.y = element_line(color="black",size=0.3),
                                                                                                                      panel.grid.major.x = element_blank(),
@@ -142,7 +154,20 @@ plot + labs(x="Variable Loop",
                                                                                                                                                                                                   aes(x=vloop,
                                                                                                                                                                                                       y=rate-0.001,
                                                                                                                                                                                                       xend=vloop,
-                                                                                                                                                                                                      yend=rate-0.005),arrow=arrow(length=unit(2,"mm")),size=0.7)+ geom_text(data=vline, label="*", size=8)
+                                                                                                                                                                                                      yend=rate-0.005),
+                                                                                                                                                                                                  arrow=arrow(length=unit(2,"mm")),
+                                                                                                                                                                                                  size=0.7)+ geom_text(data=vline,
+                                                                                                                                                                                                                       label="*", 
+                                                                                                                                                                                                                       size=8)  + geom_rect(data=noest,
+                                                                                                                                                                                                                                            aes(xmin=vloop-0.5, 
+                                                                                                                                                                                                                                                xmax= vloop+0.5, 
+                                                                                                                                                                                                                                                ymin=rate-0.02,
+                                                                                                                                                                                                                                                ymax=rate+0.02),
+                                                                                                                                                                                                                                            fill="grey88", 
+                                                                                                                                                                                                                                            color="grey88")+geom_text(aes(y=rate-0.005),data=noest, 
+                                                                                                                                                                                                                                                                     label="no estimate", 
+                                                                                                                                                                                                                                                                     size=7, 
+                                                                                                                                                                                                                                                                     angle=90) 
 
 segments((n*7)+0.5,8.5,(n*7)+0.5,-1.4,lwd=3)
 #plot +  geom_errorbar(limits, position = position_dodge(0.9),width = 0.25)

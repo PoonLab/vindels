@@ -107,8 +107,8 @@ for (i in 1:length(tfolder)){
       if (Alength < lens[t]/2 || Blength < lens[t]/2 || 
           (str_count(Avr, "\\?")/Alength) > 0.15 || 
           (str_count(Bvr, "\\?")/Blength) > 0.15 ||
-          (t !=6 && (substr(paste(trans(as.DNAbin.DNAString(Avr)),collapse=""),1,1) != "C"|| 
-                     substr(paste(trans(as.DNAbin.DNAString(Bvr)),collapse=""),1,1) != "C")))
+          (t !=6 && (as.character(trans(as.DNAbin.DNAString(Avr)))[[1]][1] != "C"|| 
+                     as.character(trans(as.DNAbin.DNAString(Bvr)))[[1]][1] != "C")))
       {
         count = count + 1
         print(Avr)
@@ -176,7 +176,7 @@ for (z in 1:length(len.diff)){
     subtype <- "AE"
   }else if(subtype == "02_AG"){
     subtype <- "AG"
-  }
+  }W
   
   indel.sizes[z,"subtype"] <- subtype #vregion
   indel.sizes[z,"count"] <- sum(len.diff[[z]])
@@ -191,16 +191,27 @@ for (z in 1:length(len.diff)){
   
 }
 
+#MOSAIC PLOT -- chi squared data analysis 
+d <- as.matrix(table(df3))
+c <- chisq.test(d)
+c$observed
+c$expected
+
 
 # MOSAIC PLOTS - Figure 3
 df3 <- data.frame(variable.loop=rep(indel.sizes$vregion, indel.sizes$count), indel.size=rep(indel.sizes$size,indel.sizes$count),stringsAsFactors = F)
 df4 <- data.frame(subtype=rep(indel.sizes$subtype, indel.sizes$count), indel.size=rep(indel.sizes$size,indel.sizes$count),stringsAsFactors = F)
 
+#used to reorder the data frame so that 9+ is first, 6 is second, etc 
 df3$indel.size <- factor(df3$indel.size,levels=c("9+","6","3"))
 df3 <- df3[order(df3$indel.size),]
 
+#used to reorder the data frame so that 9+ is first, 6 is second, etc 
 df4$indel.size <- factor(df4$indel.size,levels=c("9+","6","3"))
 df4 <- df4[order(df4$indel.size),]
+
+#used for determining the proportions in the mosaic plot
+nrow(df3[which(df3$variable.loop=="V2" & df3$indel.size=="3"),])/nrow(df3[which(df3$variable.loop=="V2"),])
 
 require(vcd)
 library(gridGraphics)
@@ -208,7 +219,7 @@ library(gridExtra)
 #par(ps = 50, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.5, las=0, xpd=T, mar=c(5,4, 2,2), mfrow=c(2,2))
 
 
-mosaic(~variable.loop + indel.size, data=df3,
+m <- mosaic(~variable.loop + indel.size, data=df3,
        shade=T, main=NULL, direction="v",
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",

@@ -1,6 +1,7 @@
 require(ape)
-dfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/Dates",full.names=TRUE)
+dfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/Dates/edit",full.names=TRUE)
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/6Trees", full.names=TRUE)
+afolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/5_1_final", full.names=TRUE)
 
 
 #----FUNCTIONS----
@@ -27,7 +28,7 @@ date.to.decimal <- function(dt) {
 }
 
 
-handle.error <- function(tre, vect, x){
+root.to.tip <- function(tre, vect, x){
   rtdtree <- tryCatch(
     {rtdtree <- rtt(tre, vect, ncpu=x)} ,
     error = function(c){
@@ -103,7 +104,7 @@ for (n in 1:length(tfolder)){
   
   
   #ROOTING THE TREE
-  rtdtree <- handle.error(tre, sample.times, 5)
+  rtdtree <- root.to.tip(tre, sample.times, 5)
   if (is.null(rtdtree)){
     next
   }
@@ -111,10 +112,10 @@ for (n in 1:length(tfolder)){
   
   
   #ROOTED (UNDATED) TREE ANALYSIS --------------------------------------------
-  n <- Ntip(tre)
+  ntips <- Ntip(tre)
   
   # count the number of instances that first column (node) corresponds to a second column number which is <= n (meaning it is a tip)
-  numtips <- tabulate(tre$edge[,1][tre$edge[,2] <= n])
+  numtips <- tabulate(tre$edge[,1][tre$edge[,2] <= ntips])
   
   #determines which nodes contain cherries (returns vector with their integer positions)
   is.cherry <- sapply(numtips, function(d) d==2)
@@ -157,28 +158,30 @@ for (n in 1:length(tfolder)){
   
   big.df <- rbind(big.df,data.frame(subtype=rep(filename,Ntip(rtdtree)), dates=sample.times, lengths=lens))
   
-  # DATING TREES -----------------------------------
-  #write.tree(rtdtree, file="rtt2lsd.nwk")
-  
+  # DATING TREES OUTPUT-----------------------------------
+  write.tree(rtdtree, file="rtt2lsd.nwk")
+
   #The following is written in accordance with the LSD format
-  
-  #write(nrow(temp), file='date_file.txt') 
 
-  # for (i in 1:nrow(temp)) {
-  #   if (temp$min.ord[i] == temp$max.ord[i]) {
-  #     write(paste(temp$accno[i], temp$min.ord[i]), file='date_file.txt', append=TRUE)
-  #   } else {
-  #     write(paste(temp$accno[i], paste0("b(", temp$min.ord[i], ",", temp$max.ord[i], ")")), 
-  #           file='date_file.txt', append=TRUE)
-  #   }
-  # }
-  #print(i)
-  
-  #paths <- nodepath(rtdtree)
-  #distances <- c()
-  #for (n in 1:length(paths))  distances <- c(distances, sum(rtdtree$edge.length[paths[[n]]]))
+  write(nrow(temp), file='date_file.txt')
 
-  #system(paste0('lsd -i rtt2lsd.nwk -d date_file.txt -o ', filename,' -c'))
+  for (i in 1:nrow(temp)) {
+    if (temp$min.ord[i] == temp$max.ord[i]) {
+       write(paste(temp$accno[i], temp$min.ord[i]), file='date_file.txt', append=TRUE)
+     } else {
+       write(paste(temp$accno[i], paste0("b(", temp$min.ord[i], ",", temp$max.ord[i], ")")),
+             file='date_file.txt', append=TRUE)
+     }
+   }
+  print(n)
+
+  paths <- nodepath(rtdtree)
+  distances <- c()
+  for (p in 1:length(paths))  distances <- c(distances, sum(rtdtree$edge.length[paths[[p]]]))
+  
+  aLen <- length(read.FASTA(afolder[n])[1][[1]])
+  
+  system(paste0('lsd -i rtt2lsd.nwk -d date_file.txt -o ', filename ,' -c -f 1000 -s ',aLen))
   
 }
 setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
@@ -202,13 +205,14 @@ require(survey)
 require(scales)
 par(mar=c(5,5,4,3))
 
+require(xtable)
 require(RColorBrewer)
 cols <- brewer.pal(7,"Dark2")
 par(mfrow=c(4,2),las=1)
 names <- c("AE", "AG","A1","B","C","D","F1")
 letters <- c("a","b","c","d","e","f","g")
 lims <- c()
-treedata <- data.frame()
+treedata <- data.frame(stringsAsFactors = F)
 for (m in 1:7){
   
   par(mar=c(4.5,6,1,1))
@@ -228,13 +232,20 @@ for (m in 1:7){
   rsqr <- signif(summary(lreg)$adj.r.squared,2)
   slope <- strsplit(formatC(lreg$coefficients[2][[1]],format="e",digits=2),"e")[[1]]
   
+  
+  #calculation of the xintercept
   xest <- svycontrast(lreg, quote(-`(Intercept)`/dates))
-  xint <- round(coef(xest)[[1]],2)
-  se <- signif(SE(xest)[[1]],2)
+  xint <- coef(xest)[[1]]
+  se <- SE(xest)[[1]]
+  
+  xlo <- format(round((xint-se),2),nsmall=2)
+  xup <- format(round((xint+se),2),nsmall=2)
   treedata <- rbind(treedata, data.frame(Clade=names[m],
-                                         Estimate= sprintf("$%s(%s,%s)\times 10^{%s}$",slope[1],cislope[1],cislope[2],slope[2]),
-                                         "$x$-Intercept (Year)"=sprintf("%s(%s,%s)",xint,xint-se,xint+se),
-                                         "$R^2$"=rsqr))
+                                         Estimate= toString(sprintf("%s (%s,%s) %s",slope[1],cislope[1],cislope[2],slope[2])),
+                                         xint=sprintf("%s (%s,%s)",format(round(xint,2),nsmall=2), xlo, xup),
+                                         rsqr=rsqr,stringsAsFactors = F))
+  
+  
   
   abline(lreg,lwd=1.5)
   #print(summary(lreg))
@@ -251,7 +262,10 @@ for (m in 1:7){
   
 }
 
+colnames(treedata) <- c("Clade","Estimate", "$x$-Intercept (Year)", "$R^2$")
+
 lxtable <- xtable(treedata)
+toLatex.xtable(lxtable)
 
 
 setwd("~/vindels/Indel_Analysis")
