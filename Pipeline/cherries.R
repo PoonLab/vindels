@@ -20,11 +20,12 @@ for (i in 1:length(tfolder)){
   subtype <- strsplit(name, "\\.")[[1]][1]
   test <- strsplit(subtype,"_")[[1]]
   if (length(test) == 2){
-    filename <- paste0(subtype,"+.csv" )
+    
     subtype <- strsplit(subtype,"_")[[1]][2]
+    filename <- paste0(subtype,"+.csv" )
   }else if(subtype == "F1"){
     filename <- paste0(subtype,"+.csv" )
-    subtype <- "F" 
+    subtype <- "F1" 
   }else{
     filename <- paste0(subtype,"+.csv" )
   }
@@ -78,6 +79,7 @@ for (i in 1:length(tfolder)){
   lens <- c(0,78,120,108,102,33)
   
   count = 0
+  #COUNT THROUGH EACH CHERRY PAIR LISTED IN FILTERED.INDELS
   for (x in 1:nrow(filtered.indels)){
     idxA <- match(filtered.indels$tip1.label[x], csv$accno)
     idxB <- match(filtered.indels$tip2.label[x], csv$accno)
@@ -86,7 +88,7 @@ for (i in 1:length(tfolder)){
     indel <- data.frame(stringsAsFactors = F)
     nonindel <- data.frame(stringsAsFactors = F)
     
-    #BY VARIABLE LOOPS / COLUMNS 
+    #COMPARE ALL FIVE VARIABLE LOOP SEQUENCES IN THAT CHERRY PAIR (ARRANGED BY COLUMNS) 
     for (t in 2:ncol(csv)){
 
       Avr <- as.character(csv[idxA,t])
@@ -104,6 +106,9 @@ for (i in 1:length(tfolder)){
       
       
       #FILTER ----------------------------
+      # ? greater than 15% 
+      # length is less than 50% of the standard vloop length 
+      # if any sequence belonging to V1 - V4 does not start with a Cysteine codon 
       if (Alength < lens[t]/2 || Blength < lens[t]/2 || 
           (str_count(Avr, "\\?")/Alength) > 0.15 || 
           (str_count(Bvr, "\\?")/Blength) > 0.15 ||
@@ -116,6 +121,8 @@ for (i in 1:length(tfolder)){
         print("")
         filtered.indels[x,name.bln] <- NA
         filtered.indels[x,name.nt] <- NA
+      
+      # fill the data like normal 
       }else{
         diff <- abs(Alength - Blength)
         filtered.indels[x,name.bln] <- bln
@@ -176,7 +183,7 @@ for (z in 1:length(len.diff)){
     subtype <- "AE"
   }else if(subtype == "02_AG"){
     subtype <- "AG"
-  }W
+  }
   
   indel.sizes[z,"subtype"] <- subtype #vregion
   indel.sizes[z,"count"] <- sum(len.diff[[z]])

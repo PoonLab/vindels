@@ -15,7 +15,7 @@ pll <- function(rate, outcomes, times) {
 
 
 csvfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/9_2_indels",full.names=TRUE)
-max.llh <- data.frame(stringsAsFactors = FALSE)
+max.llh <- data.frame(stringsAsFactors = F)
 max.llh2 <- data.frame(subtype=character(),stringsAsFactors = FALSE)
 con.int <- data.frame(stringsAsFactors = FALSE)
 big.df <- data.frame(stringsAsFactors = FALSE)
@@ -25,6 +25,12 @@ for (i in 1:length(csvfolder)){
   csv <- read.csv(csvfolder[i])
   
   filename <- strsplit(strsplit(csvfolder[i], "/")[[1]][7], "\\+.")[[1]][1]
+  
+  # if (filename == "AE"){
+  #   filename <- "01_AE"
+  # }else if (filename =="AG"){
+  #   filename <- "02_AG"
+  # }
   max.llh2 [i,1] <- filename
 
   print(filename)
@@ -79,7 +85,6 @@ data.df$Pr...z.. <- as.numeric(as.character(format(round(data.df$Pr...z.., 3), n
 
 
 xt <- xtable(data.df, digits=c(0,3,3,0))
-write(summary(fit.aic),file="results.txt")
 write.csv(max.llh, "indel_rates2.csv")
 write.csv(con.int, "conf_ints2.csv")
 
@@ -95,14 +100,18 @@ write.csv(con.int, "conf_ints2.csv")
 #                                                                            size=10) + geom_segment(data=vbox, aes(x=vloop-0.5,xend=vloop-0.5,y=rate+0.020,yend=rate+0.016),
 #                                                                                                    arrow=arrow(length=unit(2,"mm")),
 #                                                                                                    size=0.8)
+max.llh$subtype <- factor(max.llh$subtype, levels=c("AE", "AG", "A1", "B", "C", "D", "F1"))
+max.llh <- max.llh[order(max.llh$subtype),]
 
-
+max.llh2$subtype <- factor(max.llh2$subtype, levels=c("AE", "AG", "A1", "B", "C", "D", "F1"))
+max.llh2 <- max.llh2[order(max.llh2$subtype),]
 
 require(ggplot2)
 #indel rate plot 
 require(RColorBrewer)
 colors <- brewer.pal(7, 'Set2')
 colors2 <- brewer.pal(7, 'Dark2')
+con.int$subtype <- factor(con.int$subtype, levels=c("AE", "AG", "A1", "B", "C", "D", "F1"))
 con.int <- con.int[order(con.int$subtype),]
 
 # MARKERS
@@ -112,11 +121,11 @@ submark[18,3] <- 0.12
 
 
 rates <- split(max.llh[,2:3], max.llh[,1])
-subline <- data.frame(subtype=c("B"), vloop=c(3),rate=c(0.118))
+subline <- data.frame(subtype=c("B", "C"), vloop=c(3, 3),rate=c(0.118, 0.118))
 noest <- data.frame(subtype=c("F1"), vloop=c(3), rate=c(0.02))
 vbox <- data.frame(subtype=c("F1"), vloop=c(3),rate=c(0.103))
 vloops <- data.frame(subtype=c(rep("F1",5)), vloop=c(rep(4.5,5)),rate=c(0.100+1:5*0.007))
-vline <- data.frame(subtype=c("01_AE","02_AG","A1","B","C","D"), vloop=rep(3,6),rate=rep(0.028,6))
+vline <- data.frame(subtype=c("AE","AG","A1","B","C","D"), vloop=rep(3,6),rate=rep(0.028,6))
 
 
 
@@ -128,8 +137,8 @@ plot <- ggplot(max.llh, aes(x=vloop,
                                                  position="dodge", 
                                                  show.legend=F) +facet_wrap(~subtype,
                                                                              ncol=7,
-                                                                             nrow=1)  + geom_text(data=submark,
-                                                                                                  label="*",
+                                                                             nrow=1)  + geom_text(data=subline,
+                                                                                                  aes(x=vloop, y=rate+0.002, label="*"),
                                                                                                   size=10) + geom_segment(data=subline, 
                                                                                                                          aes(x=vloop-2.25,xend=vloop+2.25,y=rate,yend=rate),size=0.8)  + geom_segment(data=subline, aes(x=vloop,xend=vloop,y=rate-0.003,yend=rate-0.01),
                                                                                                                                                                                                                 arrow=arrow(length=unit(3,"mm")),
