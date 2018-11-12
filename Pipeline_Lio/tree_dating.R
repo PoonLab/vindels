@@ -1,3 +1,5 @@
+#DATING TREES USING ASSOCIATED TIP DATES
+
 require(ape)
 dfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/Dates/edit",full.names=TRUE)
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/6Trees", full.names=TRUE)
@@ -79,7 +81,6 @@ for (n in 1:length(tfolder)){
   print(filename)
   
   # ROOTING THE TREES WITH RTT ----------------------------------
-  
   tre <- multi2di(tre) 
   
   #rearranges the temp file to be in the same order as the tree
@@ -181,7 +182,7 @@ for (n in 1:length(tfolder)){
   
   aLen <- length(read.FASTA(afolder[n])[1][[1]])
   
-  system(paste0('lsd -i rtt2lsd.nwk -d date_file.txt -o ', filename ,' -c -f 1000 -s ',aLen))
+  system(paste0('lsd -i rtt2lsd.nwk -d date_file.txt -o ', filename ,' -c -f 100 -s ',aLen))
   
 }
 setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
@@ -213,6 +214,7 @@ names <- c("AE", "AG","A1","B","C","D","F1")
 letters <- c("a","b","c","d","e","f","g")
 lims <- c()
 treedata <- data.frame(stringsAsFactors = F)
+
 for (m in 1:7){
   
   par(mar=c(4.5,6,1,1))
