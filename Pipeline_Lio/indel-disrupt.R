@@ -58,17 +58,23 @@ for (i in subtypes){
   }
 }
 
+
+ngProps.df <- ngProps.df[-33,]
+disrupt <- disrupt[-33,]
+
+
 #FIGURE-----
 require(RColorBrewer)
-colors <- brewer.pal(5, 'Set1')
+colors <- rep(brewer.pal(5, 'Set1'),7)
+
 lim = c(0,0.75)
 par(pty="s",xpd=F,mar=c(6,7,2,2))
-plot(x=ngProps.df$prop, y=disrupt$prop,  las=1,pch=(disrupt$vloop+20),bg=rep(colors, 7),cex=2.8, cex.lab=1.3,main=NULL, xlab="",ylab="",xlim=lim,ylim=lim) 
-legend(0.003,0.75,legend=c('V1 ','V2 ','V3 ','V4 ','V5'), pch=c(21,22,23,24,25), cex=1.6, pt.bg=colors,x.intersp = 1.5,y.intersp=1.1, pt.cex=2.4)
+plot(x=ngProps.df$prop, y=disrupt$prop,  las=1,pch=(disrupt$vloop+20),bg=colors,cex=2.8, cex.lab=1.3,main=NULL, xlab="",ylab="",xlim=lim,ylim=lim) 
+legend(0.60,0.25,legend=c('V1 ','V2 ','V3 ','V4 ','V5'), pch=c(21,22,23,24,25), cex=1.6, pt.bg=colors,x.intersp = 1.5,y.intersp=1.1, pt.cex=2.4)
 #abline(0,1)
 title(ylab="Indels disrupting PNGS / Total Indels", line=4, cex.lab=1.5)
 title(xlab="PNGS Amino Acids / Total Amino Acids", line=3, cex.lab=1.5)
-text(0,0.03,label="F1")
+#text(0,0.03,label="F1")
 text(0.09,0.19,label="01_AE")
 abline(0,1,lty=2)
 

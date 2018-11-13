@@ -110,8 +110,6 @@ for (n in 1:length(tfolder)){
     next
   }
   
-  
-  
   #ROOTED (UNDATED) TREE ANALYSIS --------------------------------------------
   ntips <- Ntip(tre)
   
@@ -120,7 +118,6 @@ for (n in 1:length(tfolder)){
   
   #determines which nodes contain cherries (returns vector with their integer positions)
   is.cherry <- sapply(numtips, function(d) d==2)
-  
   
   # construct data frame where each row corresponds to a cherry
   m <- sapply(which(is.cherry), function(a) { #will input the numbers of nodes containing 2 tips?
