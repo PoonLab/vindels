@@ -10,7 +10,6 @@ vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequen
 
 len.diff <- list() #data.frame(subtype=character(),stringsAsFactors = F)
 
-
 # This code reads phylogenetic trees and variable loop sequences in csv format. 
 branch.lengths <- data.frame()
 
@@ -19,11 +18,10 @@ for (i in 1:length(tfolder)){
   csv <- read.csv(vfolder[i], header=FALSE, stringsAsFactors = F)
   
   #for output 
-  name <- strsplit(tfolder[i], "/")[[1]][7]
+  name <- strsplit(tfolder[i], "/")[[1]][8]
   subtype <- strsplit(name, "\\.")[[1]][1]
   test <- strsplit(subtype,"_")[[1]]
   if (length(test) == 2){
-    
     subtype <- strsplit(subtype,"_")[[1]][2]
     filename <- paste0(subtype,"+.csv" )
   }else if(subtype == "F1"){
@@ -186,6 +184,8 @@ for (z in 1:length(len.diff)){
     subtype <- "AE"
   }else if(subtype == "02_AG"){
     subtype <- "AG"
+  }else if (subtype == "F1"){
+    subtype <- "F"
   }
   
   indel.sizes[z,"subtype"] <- subtype #vregion
@@ -201,16 +201,12 @@ for (z in 1:length(len.diff)){
   
 }
 
-#MOSAIC PLOT -- chi squared data analysis 
-d <- as.matrix(table(df3))
-c <- chisq.test(d)
-c$observed
-c$expected
-
 
 # MOSAIC PLOTS - Figure 3
 df3 <- data.frame(variable.loop=rep(indel.sizes$vregion, indel.sizes$count), indel.size=rep(indel.sizes$size,indel.sizes$count),stringsAsFactors = F)
-df4 <- data.frame(subtype=rep(indel.sizes$subtype, indel.sizes$count), indel.size=rep(indel.sizes$size,indel.sizes$count),stringsAsFactors = F)
+df4 <- data.frame(subtype=rep(indel.sizes$subtype, indel.sizes$count), indel.size=rep(indel.sizes$size,indel.sizes$count))
+
+
 
 #used to reorder the data frame so that 9+ is first, 6 is second, etc 
 df3$indel.size <- factor(df3$indel.size,levels=c("9+","6","3"))
@@ -218,14 +214,22 @@ df3 <- df3[order(df3$indel.size),]
 
 #used to reorder the data frame so that 9+ is first, 6 is second, etc 
 df4$indel.size <- factor(df4$indel.size,levels=c("9+","6","3"))
+df4$subtype <- factor(df4$subtype, levels=c("AE", "AG", "A1", "B", "C", "D", "F"))
 df4 <- df4[order(df4$indel.size),]
+df4 <- df4[order(df4$subtype),]
+
+#MOSAIC PLOT -- chi squared data analysis 
+d <- as.matrix(table(df3))
+c <- chisq.test(d)
+c$observed
+c$expected
 
 #used for determining the proportions in the mosaic plot
 nrow(df3[which(df3$variable.loop=="V2" & df3$indel.size=="3"),])/nrow(df3[which(df3$variable.loop=="V2"),])
 
 require(vcd)
 library(gridGraphics)
-library(gridExtra)
+
 #par(ps = 50, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.5, las=0, xpd=T, mar=c(5,4, 2,2), mfrow=c(2,2))
 
 
@@ -246,7 +250,6 @@ m <- mosaic(~variable.loop + indel.size, data=df3,
                        height = unit(0.8, "npc"),
                        width = unit(1, "lines"), range=c(-10,10)),
        set_labels=list(Variable.Loop=c("V1","V2","V3","V4","V5")))
-a <- grid.grab()
 
 #par(ps = 27, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.1, las=0, xpd=T, mar=c(5,4, 2,2), xaxt='n')
 mosaic(~subtype + indel.size, data=df4,
@@ -260,11 +263,9 @@ mosaic(~subtype + indel.size, data=df4,
                             gp_varnames=gpar(fontsize=24),
                             set_varnames = c(subtype="Subtype", 
                                              indel.size="Indel Length (nt)"),
-                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,90,0), 
+                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,35,0), 
                             just_labels=c("center","center","center","center")))
-b <- grid.grab()
-grid.newpage()
-grid.arrange(b,a,ncol=2)
+
 
 #PHYLOGENETIC PLOT - Figure 1
 tre <- read.tree(tfolder[7])

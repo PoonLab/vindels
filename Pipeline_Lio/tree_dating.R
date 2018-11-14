@@ -171,7 +171,6 @@ for (n in 1:length(tfolder)){
              file='date_file.txt', append=TRUE)
      }
    }
-  print(n)
 
   paths <- nodepath(rtdtree)
   distances <- c()
@@ -179,7 +178,7 @@ for (n in 1:length(tfolder)){
   
   aLen <- length(read.FASTA(afolder[n])[1][[1]])
   
-  system(paste0('lsd -i rtt2lsd.nwk -d date_file.txt -o ', filename ,' -c -f 100 -s ',aLen))
+  system(paste0('lsd -i rtt2lsd.nwk -d date_file.txt -o ', filename ,' -c -f 10 -s ',aLen))
   
 }
 setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")

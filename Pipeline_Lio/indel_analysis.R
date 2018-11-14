@@ -77,8 +77,8 @@ fit.aic <- stepAIC(fit, scope=list(upper=fit2, lower=~1), direction='both', trac
 data.df <- data.frame(summary.glm(fit.aic)$coefficients)
 data.df$Std..Error <- NULL
 data.df$z.value <- NULL
-data.df[which(data.df$Pr...z.. < 0.01 & data.df$Pr...z.. > 0.001),'Signif.'] <- "**"
-data.df[which(data.df$Pr...z.. < 0.001),'Signif.'] <- "***"
+data.df[which(data.df$Pr...z.. < 0.01 & data.df$Pr...z.. > 0.00143),'Signif.'] <- "**"
+data.df[which(data.df$Pr...z.. < 0.00143),'Signif.'] <- "***"
 data.df$Estimate <- as.numeric(as.character(format(round(data.df$Estimate, 3), nsmall = 3)))
 data.df$Pr...z.. <- as.numeric(as.character(format(round(data.df$Pr...z.., 3), nsmall = 3)))
 

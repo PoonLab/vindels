@@ -57,9 +57,10 @@ for (n in ntides){
 }
 
 
-#DATA ANALYSIS ------------------------------------------
+#DATA ANALYSIS PART 1 ------------------------------------
 #for pooling the subtypes together to test if the vregions are significantly different   
 #nucleotide counts are summed across all the subtypes
+require(MASS)
 vr.df <- cbind(big.df[1:40, 'freq'],big.df[41:80, 'freq'],big.df[81:120, 'freq'],big.df[121:160, 'freq'],big.df[161:200, 'freq'],big.df[201:240, 'freq'],big.df[241:280, 'freq'] )
 vr.df <- data.frame(vr.df)
 vr.df$sum <- rowSums(vr.df)
@@ -70,11 +71,10 @@ vrFit <- glm(Freq ~ nucleotide + indel + vregion, data = vrcount2, family=poisso
 
 vrFit2 <- glm(Freq ~ nucleotide * indel * vregion, data = vrcount2, family=poisson)
 #step AIC function -- vregions 
-
-
 vrFit.aic <- stepAIC(vrFit, scope=list(upper=vrFit2, lower=~1), direction='both', trace=TRUE)
 
 
+#DATA ANALYSIS PART 2 -------------------------------------
 #for pooling the vregions together to test if the subtypes are significantly different
 st.df <- data.frame()
 for (i in 1:7){
@@ -91,35 +91,17 @@ stcount2 <- as.data.frame(as.table(stcount))
 stFit <- glm(Freq ~ nucleotide + indel + subtype, data = stcount2, family=poisson)
 
 stFit2 <- glm(Freq ~ nucleotide * indel * subtype, data = stcount2, family=poisson)
-
 stFit.aic <- stepAIC(stFit, scope=list(upper=stFit2, lower=~1), direction='both', trace=TRUE)
 
 #4 way table
-
 ntcount <- array(data=big.df$freq, dim=c(4,2,5,7), dimnames=list("nucleotide"=c(ntides), "indel"= c('inside','outside'), "vregion"=c(1,2,3,4,5), "subtype" =c("01_AE","02_AG", "A1","B","C","D","F1")))
 
 ntcount2 <- as.data.frame(as.table(ntcount))
 ntfit <- glm(Freq ~ nucleotide + indel + vregion + subtype, data=ntcount2, family=poisson)
 ntfit2 <- glm(Freq ~ nucleotide * indel * vregion * subtype, data=ntcount2, family=poisson)
 
-require(MASS)
-
 ntfit.aic <- stepAIC(ntfit, scope=list(upper=ntfit2, lower=~1, direction='both', trace=TRUE))
 
-
-
-
-
-# #nt plot generation ---------------------------
-# nt <- big.df[which(big.df$indel == 'inside'),6]
-# inside <- as.double(big.df[which(big.df$indel == 'inside'), 'prop'])
-# outside <- as.double(big.df[which(big.df$indel == 'outside'), 'prop'])
-# vregion <- big.df[which(big.df$indel == 'inside'), 8]
-# subtype <- big.df[which(big.df$indel == 'inside'), 7]
-# freq <- big.df[which(big.df$indel == 'inside'), 10]
-# #colors <- c(rep(34,20), rep(47,20), rep(143,20), rep(636,20), rep(473,20), rep(491,20), rep(53,20))
-# data <- data.frame(outside=outside, inside=inside, nt=nt, vregion=vregion, subtype=subtype, colors=colors,freq=freq)
-#   
 
 #SCALE SIZES -----------------------------------------
 sizes.df <- data.frame()
@@ -146,15 +128,6 @@ for (n in 1:nrow(data.df)){
   sizes.v <- c(sizes.v,sizes)
 }
 
-# for (x in 1:length(pvalues)){
-#   if (pvalues[x] > 1.0){
-#     pvalues[x] <- pvalues[x] -1 
-#     
-#     pvalues[x] <- pvalues[x]/10
-#     
-#     pvalues[x] <- pvalues[x] + 1
-#   }
-# }
 
 
 colors <- brewer.pal(5, 'Set1')
@@ -177,30 +150,7 @@ for (nt in ntides){
 }
 
 
-  # data.df.out <- data.frame(nt=outside[1:5,6], vregion=outside[1:5,8], target=outside[1:5,9])
-  # for (n in 1:5){
-  #   data.df.out[n,'freq'] <- sum(outside[which(outside$vregion==n),'freq'])
-  #   data.df.out[n,'total'] <- sum(outside[which(outside$vregion==n),'total'])
-  #   data.df.out[n, 'prop'] <- data.df.out[n,'freq'] / data.df.out[n,'total']
-  # }
-  # 
-  # outside2 <- rbind(outside2, data.df.out)
-  # 
-  # data.df.in <- data.frame(nt=inside[1:5,6], vregion=inside[1:5,8], target=inside[1:5,9])
-  # for (n in 1:5){
-  #   data.df.in[n,'freq'] <- sum(inside[which(inside$vregion==n),'freq'])
-  #   data.df.in[n,'total'] <- sum(inside[which(inside$vregion==n),'total'])
-  #   data.df.in[n, 'prop'] <- data.df.in[n,'freq'] / data.df.in[n,'total']
-  # }
-  # 
-  # inside2 <- rbind(inside2, data.df.in)
-  
-
-
-
 #A
-setwd("~/PycharmProjects/hiv-evolution-master/")
-
 cex=2
 par(pty="s", mfrow=c(2,2), xpd=NA, mar=c(3,8,4,1),las=0)
 
@@ -240,8 +190,7 @@ par(xpd=NA)
 text(0.053,0.42,labels="c)", cex=1.5)
 text(0.127,0.387,labels="G", cex=1.5)
 par(xpd=F)
-legend(0.34,0.25,legend=c('V1  ','V2  ','V3  ','V4  ','V5  '), pch=c(21,22,23,24,25),cex=1.2, pt.bg=colors,x.intersp = 1.8,y.intersp=1.6, pt.cex=2.2)
-
+legend(0.33,0.26,legend=c('V1  ','V2  ','V3  ','V4  ','V5  '), pch=c(21,22,23,24,25),cex=1.2, pt.bg=colors,x.intersp = 1.4,y.intersp=1.2, pt.cex=2.2)
 
 #T
 lim=c(0.11,0.33)
@@ -256,6 +205,4 @@ text(0.058,0.345,labels="d)", cex=1.5)
 text(0.115,0.32,labels="T", cex=1.5)
 par(xpd=F)
 
-dev.copy2pdf(file="ntplot.pdf")
-dev.off()
 

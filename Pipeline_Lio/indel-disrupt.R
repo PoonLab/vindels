@@ -66,7 +66,7 @@ disrupt <- disrupt[-33,]
 #FIGURE-----
 require(RColorBrewer)
 colors <- rep(brewer.pal(5, 'Set1'),7)
-
+colors <- colors[-33]
 lim = c(0,0.75)
 par(pty="s",xpd=F,mar=c(6,7,2,2))
 plot(x=ngProps.df$prop, y=disrupt$prop,  las=1,pch=(disrupt$vloop+20),bg=colors,cex=2.8, cex.lab=1.3,main=NULL, xlab="",ylab="",xlim=lim,ylim=lim) 
