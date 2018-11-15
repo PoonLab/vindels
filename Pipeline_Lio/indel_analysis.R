@@ -121,11 +121,15 @@ submark[18,3] <- 0.12
 
 
 rates <- split(max.llh[,2:3], max.llh[,1])
-subline <- data.frame(subtype=c("B", "C"), vloop=c(3, 3),rate=c(0.118, 0.118))
+subline <- data.frame(subtype=c("B"), vloop=c(3),rate=c(0.118))
 noest <- data.frame(subtype=c("F1"), vloop=c(3), rate=c(0.02))
 vbox <- data.frame(subtype=c("F1"), vloop=c(3),rate=c(0.103))
 vloops <- data.frame(subtype=c(rep("F1",5)), vloop=c(rep(4.5,5)),rate=c(0.100+1:5*0.007))
-vline <- data.frame(subtype=c("AE","AG","A1","B","C","D"), vloop=rep(3,6),rate=rep(0.028,6))
+vline <- data.frame(subtype=c(rep(c("AE","AG","A1","B","C","D","F1"),2)), vloop=c(rep(3,7), rep(5,7)),rate=rep(0.012,7))
+vline <- vline[-7,]
+vline[6,3] <- 0.021
+vline[2,3] <- 0.016
+vline[3,3] <- 0.016
 
 
 
@@ -143,7 +147,7 @@ plot <- ggplot(max.llh, aes(x=vloop,
                                                                                                                          aes(x=vloop-2.25,xend=vloop+2.25,y=rate,yend=rate),size=0.8)  + geom_segment(data=subline, aes(x=vloop,xend=vloop,y=rate-0.003,yend=rate-0.01),
                                                                                                                                                                                                                 arrow=arrow(length=unit(3,"mm")),
                                                                                                                                                                                                                 size=0.8)
-plot + labs(x="Variable Loop", 
+plot <- plot + labs(x="Variable Loop", 
             y="Indel Rate (Events/Lineage/Year)")+scale_fill_manual(values=
                                                               colors2)+scale_y_continuous(expand = c(0, 0),
                                                                                          limits = c(0, 0.155))+theme(panel.grid.major.y = element_line(color="black",size=0.3),
@@ -167,17 +171,17 @@ plot + labs(x="Variable Loop",
                                                                                                                                                                                                   arrow=arrow(length=unit(2,"mm")),
                                                                                                                                                                                                   size=0.7)+ geom_text(data=vline,
                                                                                                                                                                                                                        label="*", 
-                                                                                                                                                                                                                       size=8)  + geom_rect(data=noest,
-                                                                                                                                                                                                                                            aes(xmin=vloop-0.5, 
-                                                                                                                                                                                                                                                xmax= vloop+0.5, 
-                                                                                                                                                                                                                                                ymin=rate-0.02,
-                                                                                                                                                                                                                                                ymax=rate+0.02),
-                                                                                                                                                                                                                                            fill="grey88", 
-                                                                                                                                                                                                                                            color="grey88")+geom_text(aes(y=rate-0.005),data=noest, 
-                                                                                                                                                                                                                                                                     label="no estimate", 
-                                                                                                                                                                                                                                                                     size=7, 
-                                                                                                                                                                                                                                                                     angle=90) 
+                                                                                                                                                                                                                       size=8)  + geom_text(aes(y=rate-0.005),
+                                                                                                                                                                                                                                            data=noest, 
+                                                                                                                                                                                                                                            label="no estimate", 
+                                                                                                                                                                                                                                            size=6, 
+                                                                                                                                                                                                                                            angle=90)
 
+plot
+
+figure <- ggplot_build(plot)
+figure$layout$clip[figure$layout$name=="panel"] <- "off"
+figure2 <- figure 
 segments((n*7)+0.5,8.5,(n*7)+0.5,-1.4,lwd=3)
 #plot +  geom_errorbar(limits, position = position_dodge(0.9),width = 0.25)
 
