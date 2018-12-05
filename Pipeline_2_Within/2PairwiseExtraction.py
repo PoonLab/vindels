@@ -40,6 +40,11 @@ for file in folder:
 
     data = parse_fasta(input)
 
+    filename = file.split("/")[-1]
+
+    output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3_1_pairwise/"+filename, 'w')
+
+    unequal = []
     for header in data:
 
         nt_pair = Aligner()
@@ -54,14 +59,42 @@ for file in folder:
 
         ntqry = result[1][left:right].replace("-","")
 
-        #aaqry = translate_nuc(ntqry,0)
+        aaqry = translate_nuc(ntqry,0)
 
 
-        result2 = nt_pair.align(ntref, ntqry)
+        aa_pair = Aligner()
+        aa_pair.set_model('EmpHIV25')
+        aa_pair.gap_extend_penalty = 10
+        aa_pair.gap_open_penalty = 30
+        aa_pair.is_global = True
 
-        ri = 0
+        result2 = aa_pair.align(aaref,aaqry)
 
-        for char in result2[0]
+        newRef = list(ntref)
+        newQry = list(ntqry)
+
+        # reads through the amino acid alignment and adds codon gaps to the proper locations
+        for i in range(len(result2[0])):
+            if result2[0][i] == '-':
+                newRef[i * 3:i * 3] = ['-', '-', '-']
+
+            if result2[1][i] == '-':
+                newQry[i * 3:i * 3] = ['-', '-', '-']
+
+        if len(newRef) != len(newQry):
+            unequal.append(header)
+            print(header)
+
+            continue
+
+        finalRef = "".join(newRef)
+        finalQry = "".join(newQry)
+
+        output.write(">" + header + '\n')
+        output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
+
+
+    print(unequal)
 
 
 
