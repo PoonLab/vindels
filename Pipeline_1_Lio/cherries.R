@@ -101,8 +101,9 @@ for (i in 1:length(tfolder)){
       
       A.B <- paste0(Avr,Bvr)
       
-      name.bln <- paste0("VR",as.character(t-1),".indel")
-      name.nt <- paste0("VR",as.character(t-1),".nt")
+      #NAMES : bln, len, VR length
+      names <- c(paste0("VR",as.character(t-1),".indel"), paste0("VR",as.character(t-1),".nt"), paste0("VR",as.character(t-1),".len"))
+      
       
       
       
@@ -120,14 +121,16 @@ for (i in 1:length(tfolder)){
         print(Avr)
         print(Bvr)
         print("")
-        filtered.indels[x,name.bln] <- NA
-        filtered.indels[x,name.nt] <- NA
+        filtered.indels[x,names[1]] <- NA
+        filtered.indels[x,names[2]] <- NA
+        filtered.indels[x,names[3]] <- (Alength + Blength)/2
       
       # fill the data like normal 
       }else{
         diff <- abs(Alength - Blength)
-        filtered.indels[x,name.bln] <- bln
-        filtered.indels[x,name.nt] <- diff
+        filtered.indels[x,names[1]] <- bln
+        filtered.indels[x,names[2]] <- diff
+        filtered.indels[x,names[3]] <- (Alength + Blength)/2
       }
       
       #for generating 10_Cherries, only indel-containing sequences

@@ -59,14 +59,14 @@ for (i in subtypes){
 }
 
 
-ngProps.df <- ngProps.df[-33,]
-disrupt <- disrupt[-33,]
+#ngProps.df <- ngProps.df[-33,]
+#disrupt <- disrupt[-33,]
 
 
 #FIGURE-----
 require(RColorBrewer)
 colors <- rep(brewer.pal(5, 'Set1'),7)
-colors <- colors[-33]
+#colors <- colors[-33]
 lim = c(0,0.75)
 par(pty="s",xpd=F,mar=c(6,7,2,2))
 plot(x=ngProps.df$prop, y=disrupt$prop,  las=1,pch=(disrupt$vloop+20),bg=colors,cex=2.8, cex.lab=1.3,main=NULL, xlab="",ylab="",xlim=lim,ylim=lim) 
@@ -74,7 +74,7 @@ legend(0.60,0.25,legend=c('V1 ','V2 ','V3 ','V4 ','V5'), pch=c(21,22,23,24,25), 
 #abline(0,1)
 title(ylab="Indels disrupting PNGS / Total Indels", line=4, cex.lab=1.5)
 title(xlab="PNGS Amino Acids / Total Amino Acids", line=3, cex.lab=1.5)
-#text(0,0.03,label="F1")
+text(0,0.04,label="F1")
 text(0.09,0.19,label="01_AE")
 abline(0,1,lty=2)
 
@@ -109,22 +109,34 @@ v3.prop <- v3.df/rowSums(v3.df)
 v4.prop <- v4.df/rowSums(v4.df)
 v5.prop <- v5.df/rowSums(v5.df)
 
+
+clades <- c("AE","AG","A1","B","C","D","F1")
+sizes <- c(nrow(ngTotal[which(ngTotal$subtype=="01_AE" & ngTotal$vloop==1),]),
+           nrow(ngTotal[which(ngTotal$subtype=="02_AG" & ngTotal$vloop==1),]),
+           nrow(ngTotal[which(ngTotal$subtype=="A1" & ngTotal$vloop==1),]),
+           nrow(ngTotal[which(ngTotal$subtype=="B" & ngTotal$vloop==1),]),
+           nrow(ngTotal[which(ngTotal$subtype=="C" & ngTotal$vloop==1),]),
+           nrow(ngTotal[which(ngTotal$subtype=="D" & ngTotal$vloop==1),]),
+           nrow(ngTotal[which(ngTotal$subtype=="F1" & ngTotal$vloop==1),]))
+
+
 #NGS Plot #2
-par(mar=c(6,4,2,2), pty="m")
-plot(1:8,c(0,2,4,5,7,8,8,9),cex=0, ylim=c(-0.5,8.5),xlim=c(1,35), xaxt='n',yaxt='n', 
+par(mar=c(8,4,2,2), pty="m")
+plot(1:8,c(0,2,4,5,7,8,8,8),cex=0, ylim=c(-0.5,8.5),xlim=c(1,35), xaxt='n',yaxt='n', 
      main=NULL,xlab="", ylab="", cex.lab=1.7,cex.main=2, bty='n')
-title(xlab="V-Loop / Subtype", line=4, cex.lab=1.5)
+title(xlab="V-Loop / Clade", line=4, cex.lab=1.5)
 title(ylab="Number of N-linked Glycosylation Sites", line=1.7, cex.lab=1.5)
 
 par(las=1)
-axis(1,at=c(1:35),lab=rep(c("AE","AG","A1","B","C","D","F1"),5), line=-1.8, tick=F,cex.axis=0.7)
-axis(1,at=c(4,11,18,25,32), lab=c("V1","V2","V3","V4","V5"),line=1,tick=F,cex.axis=1.2)
+axis(1,at=c(1:35),lab=rep(clades,5), line=-1.8, tick=F,cex.axis=0.7)
+axis(1,at=c(4,11,18,25,32), lab=c("V1","V2","V3","V4","V5"),line=0,tick=F,cex.axis=1.2)
 par(las=2)
-axis(2, at=0:7,pos=0.5,cex.axis=1.2)
+axis(2, at=0:8,pos=0.5,cex.axis=1.2)
 par(xpd=NA)
 
-#first vertical segment
+#x axis vertical line 
 segments(0.5,8.5,0.5,-1.4,lwd=2.5)
+
 
 #bright color scheme
 #colors <- c(1,0,0,0,0.5,1,0,1,0,1,0,0.8,1,0.5,0)
@@ -146,6 +158,8 @@ for (n in 1:5){
   #vertical line segments
   segments((n*7)+0.5,8.5,(n*7)+0.5,-1.4,lwd=3)
   
+  
+  #iterate through all possible positions in the 7x9 grid, check for the proportion and draw the color density with it
   for (x in 1:7){
     for (y in 1:9){
       if (!is.null(prop[x,y])){
@@ -158,15 +172,16 @@ for (n in 1:5){
       rect(((n-1)*7)+x-0.5, y-1.5,((n-1)*7)+x+0.5,y-0.5, col=alpha(colors[n],alv),lwd=0.8)
       
       #for low density boxes      
-      if(!is.null(prop[x,y]) && isTRUE(bool[x,y]) && temp[x,y] > 1){
+      if(!is.null(prop[x,y]) && isTRUE(bool[x,y]) && temp[x,y] > 0){
         text(((n-1)*7)+x,y-1,labels=temp[x,y],col=colors[n], cex=0.8) #colors[n] #rgb(r,g,b)
       }
       
     }
   }
 }
-higher <- data.frame(x=c(1,11,18,19,23,24,25),y=c(3,2,1,1,3,3,3))
 
+#significance
+higher <- data.frame(x=c(1,11,18,19,23,24,25),y=c(3,2,1,1,3,3,3))
 for (i in 1:7){
   text(higher[i,1],(higher[i,2]-0.2),labels="*",cex=1.7)
   arrows(higher[i,1],higher[i,2],higher[i,1],(higher[i,2]+0.25), length=0.07, lwd=1.5)
@@ -175,6 +190,21 @@ lower <- data.frame(x=c(33,28),y=c(1,3))
 for (i in 1:2){
   text(lower[i,1],(lower[i,2]+0.2),labels="*",cex=1.7)
   arrows(lower[i,1],lower[i,2],lower[i,1],(lower[i,2]-0.25), length=0.07, lwd=1.5)
+}
+
+#color legend bottom left hand corner
+rect(0.5,-2.8,1.5,-1.8, col=alpha(colors[1],0.25),lwd=0.8)
+rect(2.5,-2.8,3.5,-1.8, col=alpha(colors[1],0.5),lwd=0.8)
+rect(4.5,-2.8,5.5,-1.8, col=alpha(colors[1],0.75),lwd=0.8)
+rect(6.5,-2.8,7.5,-1.8, col=alpha(colors[1],1),lwd=0.8)
+text(1,-3, labels="25%")
+text(3,-3, labels="50%")
+text(5,-3, labels="75%")
+text(7,-3, labels="100%")
+text(30, -1.9, labels="Available Sequences")
+for (x in 1:7){
+  text(23+(x*1.8),-2.3, labels=clades[x])
+  text(23+(x*1.8),-2.8, labels=sizes[x])
 }
 
 

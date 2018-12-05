@@ -190,7 +190,7 @@ par(xpd=NA)
 text(0.053,0.42,labels="c)", cex=1.5)
 text(0.127,0.387,labels="G", cex=1.5)
 par(xpd=F)
-legend(0.33,0.26,legend=c('V1  ','V2  ','V3  ','V4  ','V5  '), pch=c(21,22,23,24,25),cex=1.2, pt.bg=colors,x.intersp = 1.4,y.intersp=1.2, pt.cex=2.2)
+legend(0.33,0.26,legend=c('V1 ','V2 ','V3 ','V4 ','V5 '), pch=c(21,22,23,24,25),cex=1.4, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.2)
 
 #T
 lim=c(0.11,0.33)

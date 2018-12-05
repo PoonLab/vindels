@@ -1,6 +1,6 @@
 from seqUtils import *
 
-fasta_file = open("hiv-db.fasta", 'r')
+fasta_file = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/hiv-db.fasta", 'r')
 
 
 data = parse_fasta(fasta_file)  #Returns headers and sequences as key/value pairs
@@ -48,7 +48,7 @@ for i in subtypes:
 
     filtered += 1
 
-    output_file = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/1SubtypeSequences/" + i + "+.fasta", 'w')
+    output_file = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/1SubtypeSequences/" + i + "++.fasta", 'w')
     for x in subtypes[i]:
         count += 1
 

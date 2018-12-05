@@ -2,8 +2,96 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1c935150-3286-42c4-bef9-fb4adc6682d6" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/indel-disrupt.R" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_Lio/indel-disrupt.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/indel_analysis.R" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_Lio/indel_analysis.R" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vindels.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vindels.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Figures/indel-disrupt.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/Figures/indel-disrupt.pdf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Figures/indel-rates.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/Figures/indel-rates.pdf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Indel_Analysis/.RData" beforeDir="false" afterPath="$PROJECT_DIR$/Indel_Analysis/.RData" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Indel_Analysis/.Rhistory" beforeDir="false" afterPath="$PROJECT_DIR$/Indel_Analysis/.Rhistory" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Indel_Analysis/conf_ints2.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Indel_Analysis/conf_ints2.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Indel_Analysis/indel_rates2.csv" beforeDir="false" afterPath="$PROJECT_DIR$/Indel_Analysis/indel_rates2.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/10_0_Editing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/10_10_IndelDisrupt.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/10_1_PairwiseCherries_Nt.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/10_2_IndelExtractionNt.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/10_5_Translate_Fasta.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/10_6_PairwiseCherries_Prot.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/10_7_IndelExtractionProt.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/10_9a_nGlycSites.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/10_9b_nGlycTotal.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/1SubtypeSorting.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/2pairwise.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/2pairwise_codon.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/3RegionSlicing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/3RegionSlicing_wtest.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/3_5_V5mod.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/4ConservedSort.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/4_1_MSAedit.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/5_1RemoveGaps.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/6_0Accno.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/6_1GenbankRetrieval.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/6_2DateDictionary.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/6_3DateSorting.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/6_4DateProcessing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/N-glycs.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/cherries.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/indel-disrupt.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/indel_analysis.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/nt_counts.r" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Lio/tree_dating.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/10_0_Editing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/10_1_PairwiseCherries_Nt.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/10_2_IndelExtractionNt.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/10_2_old.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/10_3_NucleotideProps.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/10_5_Translate_Fasta.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/10_6_PairwiseCherries_Prot.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/10_7_IndelExtractionProt.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/10_9a_nGlycSites.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/10_9b_nGlycTotal.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/1SubtypeSorting.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/2pairwise.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/2pairwise_rev.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/3RegionSlicing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/3RegionSlicing_wtest.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/3_5_V5mod.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/4ConservedSort.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/4_1_MSAedit.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/5_1RemoveGaps.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/5_xAccHeaders.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/5_xCutExcess.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/6_0Accno.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/6_1GenbankRetrieval.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/6_2DateDictionary.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/6_3DateSorting.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/6_4DateProcessing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/N-glycs.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/all_dates2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/date-ranges.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/dates_output.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/dates_processing.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/dates_processing2.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/estimate_mu.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/gb.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/get_dates.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/get_range.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/handle_error.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/handle_warning.r" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/mid_date.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/ndays.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/Old_Dating_Files/tree_dating.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/cherries.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/gbdata1.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/gbdata2.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/genbank_dates.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/indel-disrupt.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/indel.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/indel_analysis.R" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/noindel.csv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/nt_counts.r" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_Nagisa/tree_dating.R" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -11,49 +99,83 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FUSProjectUsageTrigger">
-    <session id="-21122256">
-      <usages-collector id="statistics.lifecycle.project">
-        <counts>
-          <entry key="project.closed" value="18" />
-          <entry key="project.open.time.0" value="1" />
-          <entry key="project.open.time.2" value="2" />
-          <entry key="project.open.time.3" value="11" />
-          <entry key="project.open.time.4" value="3" />
-          <entry key="project.opened" value="18" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.open">
-        <counts>
-          <entry key="csv" value="4" />
-          <entry key="fastaz" value="1" />
-          <entry key="py" value="34" />
-          <entry key="txt" value="3" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.open">
-        <counts>
-          <entry key="PLAIN_TEXT" value="8" />
-          <entry key="Python" value="34" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.extensions.edit">
-        <counts>
-          <entry key="dummy" value="1" />
-          <entry key="fastaz" value="2" />
-          <entry key="py" value="3642" />
-        </counts>
-      </usages-collector>
-      <usages-collector id="statistics.file.types.edit">
-        <counts>
-          <entry key="PLAIN_TEXT" value="3" />
-          <entry key="Python" value="3642" />
-        </counts>
-      </usages-collector>
-    </session>
-  </component>
   <component name="FileEditorManager">
-    <leaf />
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="357">
+              <caret line="23" selection-start-line="23" selection-end-line="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1071">
+              <caret line="63" column="30" lean-forward="true" selection-start-line="63" selection-start-column="30" selection-end-line="63" selection-end-column="30" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/2pairwise_codon.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-568">
+              <caret line="16" selection-start-line="16" selection-end-line="30" selection-end-column="14" />
+              <folding>
+                <element signature="e#0#22#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="748">
+              <caret line="56" column="33" selection-start-line="56" selection-start-column="33" selection-end-line="56" selection-end-column="33" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/4_1_MSAedit.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <element signature="e#0#22#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3_5_V5mod.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state>
+              <folding>
+                <element signature="e#0#22#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
@@ -78,6 +200,9 @@
       <find>_gotoh</find>
       <find>translate</find>
       <find>jpalme56</find>
+      <find>DQ168577.JN248580.1</find>
+      <find>DQ168577.JN248580.5</find>
+      <find>AY371132.GU201495.1</find>
     </findStrings>
     <replaceStrings>
       <replace>jpalmer</replace>
@@ -90,21 +215,26 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/Pipeline/10_9a_nGlycSites.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_10_Indel-Ngly.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_6_Pairwise_Prot/02_AG++.fastaz" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_7_IndelExtractionProt.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_10_IndelDisrupt.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/6_3DateSorting.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_0_Editing.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/gotoh2.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_1_PairwiseCherries_Nt.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_2_IndelExtractionNt.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_3_NucleotideProps.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_5_Translate_Fasta.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_6_PairwiseCherries_Prot.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/seqUtils.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_9a_nGlycSites.py" />
-        <option value="$USER_HOME$/PycharmProjects/hiv-evolution-master/10_9b_nGlycTotal.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_10_Indel-Ngly.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_6_Pairwise_Prot/02_AG++.fastaz" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_7_IndelExtractionProt.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_10_IndelDisrupt.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/6_3DateSorting.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_0_Editing.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/gotoh2.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_1_PairwiseCherries_Nt.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_2_IndelExtractionNt.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_3_NucleotideProps.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_5_Translate_Fasta.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_6_PairwiseCherries_Prot.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/seqUtils.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_9a_nGlycSites.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_9b_nGlycTotal.py" />
+        <option value="$PROJECT_DIR$/Pipeline_Lio/1SubtypeSorting.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" />
+        <option value="$PROJECT_DIR$/Pipeline_1_Lio/2pairwise_codon.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py" />
+        <option value="$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing.py" />
       </list>
     </option>
   </component>
@@ -115,22 +245,35 @@
     <option name="height" value="1059" />
   </component>
   <component name="ProjectView">
-    <navigator proportions="" version="1">
+    <navigator currentView="Scope" currentSubView="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope" proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
+      <pane id="ProjectPane" />
+      <pane id="Scope">
+        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
           <expand>
             <path>
-              <item name="vindels" type="b2602c69:ProjectViewProjectNode" />
-              <item name="vindels" type="462c0819:PsiDirectoryNode" />
+              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
             </path>
             <path>
-              <item name="vindels" type="b2602c69:ProjectViewProjectNode" />
-              <item name="vindels" type="462c0819:PsiDirectoryNode" />
-              <item name="Pipeline_Lio" type="462c0819:PsiDirectoryNode" />
+              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="Pipeline_1_Lio" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="Pipeline_2_Within" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+            <path>
+              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="~/PycharmProjects/hiv-evolution-master" type="442cc68d:ScopeViewTreeModel$RootNode" />
+            </path>
+            <path>
+              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="~/PycharmProjects/hiv-withinhost" type="442cc68d:ScopeViewTreeModel$RootNode" />
             </path>
           </expand>
           <select />
@@ -139,12 +282,12 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="last_opened_file_path" value="$USER_HOME$/PycharmProjects/hiv-evolution-master" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../PycharmProjects/hiv-withinhost" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PythonContentEntriesConfigurable" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="$USER_HOME$/PycharmProjects/hiv-evolution-master" />
+      <recent name="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -159,7 +302,28 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.10_10_IndelDisrupt">
+  <component name="RunManager" selected="Python.2PairwiseExtraction">
+    <configuration name="10_10_IndelDisrupt (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="vindels" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Pipeline_Lio" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_Lio/10_10_IndelDisrupt.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="10_10_IndelDisrupt" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="hiv-evolution-master" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -181,19 +345,19 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="10_5_Translate_Fasta" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="hiv-evolution-master" />
+    <configuration name="1SequenceProcessing" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="vindels" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Pipeline_2_Within" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_5_Translate_Fasta.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -202,19 +366,19 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="10_7_IndelExtractionProt" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="hiv-evolution-master" />
+    <configuration name="1SubtypeSorting" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="vindels" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Pipeline_Lio" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_7_IndelExtractionProt.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_Lio/1SubtypeSorting.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -223,40 +387,19 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="10_9a_nGlycSites" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="hiv-evolution-master" />
+    <configuration name="2PairwiseExtraction" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="vindels" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Pipeline_2_Within" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_9a_nGlycSites.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="10_9b_nGlycTotal" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="hiv-evolution-master" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_9b_nGlycTotal.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -266,19 +409,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.10_5_Translate_Fasta" />
-      <item itemvalue="Python.10_7_IndelExtractionProt" />
-      <item itemvalue="Python.10_9a_nGlycSites" />
-      <item itemvalue="Python.10_9b_nGlycTotal" />
       <item itemvalue="Python.10_10_IndelDisrupt" />
+      <item itemvalue="Python.10_10_IndelDisrupt (1)" />
+      <item itemvalue="Python.1SubtypeSorting" />
+      <item itemvalue="Python.1SequenceProcessing" />
+      <item itemvalue="Python.2PairwiseExtraction" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.2PairwiseExtraction" />
+        <item itemvalue="Python.1SequenceProcessing" />
+        <item itemvalue="Python.1SubtypeSorting" />
+        <item itemvalue="Python.10_10_IndelDisrupt (1)" />
         <item itemvalue="Python.10_10_IndelDisrupt" />
-        <item itemvalue="Python.10_9b_nGlycTotal" />
-        <item itemvalue="Python.10_9a_nGlycSites" />
-        <item itemvalue="Python.10_7_IndelExtractionProt" />
-        <item itemvalue="Python.10_5_Translate_Fasta" />
       </list>
     </recent_temporary>
   </component>
@@ -298,12 +441,12 @@
   <component name="ToolWindowManager">
     <frame x="67" y="25" width="2493" height="1415" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17368206" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18635063" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3299611" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3299611" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32970452" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -319,39 +462,36 @@
       <window_info anchor="right" id="R Packages" order="4" />
     </layout>
   </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
-  </component>
   <component name="editorHistoryManager">
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_10_Indel-Ngly.py" />
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/3RegionSlicing.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_10_Indel-Ngly.py" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/3RegionSlicing.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1418" />
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/4_1_MSAedit.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/4_1_MSAedit.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/5_xAccHeaders.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/5_xAccHeaders.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/5_xCutExcess.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/5_xCutExcess.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline/3_5_V5mod.py" />
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/ngTotal.csv">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/ngTotal.csv">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_6_Pairwise_Prot/02_AG++.fastaz" />
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/Dates/02_AG.csv">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_6_Pairwise_Prot/02_AG++.fastaz" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/Dates/02_AG.csv">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-268" />
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/Dates/B2.csv" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/Dates/B2.csv" />
     <entry file="file://$PROJECT_DIR$/Pipeline/10_9a_nGlycSites.py" />
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/gotoh2.py" />
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/6_3DateSorting.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/gotoh2.py" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/6_3DateSorting.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2176">
           <caret line="131" column="31" selection-start-line="131" selection-start-column="31" selection-end-line="131" selection-end-column="31" />
@@ -359,101 +499,184 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline/10_9b_nGlycTotal.py" />
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_0_Editing.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_0_Editing.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret line="1" column="21" selection-start-line="1" selection-start-column="21" selection-end-line="1" selection-end-column="21" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/genbank_dates.txt">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/genbank_dates.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret column="8" selection-start-column="8" selection-end-column="8" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/dictionary.txt">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/dictionary.txt">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/6_4DateProcessing.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/6_4DateProcessing.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/5_1RemoveGaps.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/5_1RemoveGaps.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="238">
           <caret line="16" column="4" selection-start-line="16" selection-start-column="4" selection-end-line="16" selection-end-column="4" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_2_old.py" />
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_x_NucleotideProps.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_2_old.py" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_x_NucleotideProps.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="428">
           <caret line="33" column="56" selection-start-line="33" selection-start-column="56" selection-end-line="33" selection-end-column="56" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/seqUtils.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/seqUtils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="344">
           <caret line="187" column="26" selection-start-line="187" selection-start-column="26" selection-end-line="187" selection-end-column="26" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_5_Translate_Fasta.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_5_Translate_Fasta.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="425">
           <caret line="25" column="41" selection-start-line="25" selection-start-column="41" selection-end-line="25" selection-end-column="41" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_2_IndelExtractionNt.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_2_IndelExtractionNt.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1734">
           <caret line="102" column="51" selection-start-line="102" selection-start-column="51" selection-end-line="102" selection-end-column="51" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_10_IndelDisrupt.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_10_IndelDisrupt.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
           <caret line="2" column="35" selection-start-line="2" selection-start-column="35" selection-end-line="2" selection-end-column="35" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_9b_nGlycTotal.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_9b_nGlycTotal.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="6" column="73" selection-start-line="6" selection-start-column="73" selection-end-line="6" selection-end-column="73" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_9a_nGlycSites.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_9a_nGlycSites.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="44">
           <caret line="6" column="29" selection-start-line="6" selection-start-column="29" selection-end-line="6" selection-end-column="29" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_7_IndelExtractionProt.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_7_IndelExtractionProt.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-3230">
           <caret line="5" selection-start-line="5" selection-end-line="5" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_6_PairwiseCherries_Prot.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_6_PairwiseCherries_Prot.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="221">
           <caret line="13" selection-start-line="13" selection-end-line="13" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/PycharmProjects/hiv-evolution-master/10_1_PairwiseCherries_Nt.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_1_PairwiseCherries_Nt.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="476">
           <caret line="28" column="38" selection-start-line="28" selection-start-column="38" selection-end-line="28" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_Lio/10_9a_nGlycSites.py" />
+    <entry file="file://$PROJECT_DIR$/Pipeline_Lio/10_9b_nGlycTotal.py" />
+    <entry file="file://$PROJECT_DIR$/Pipeline_Lio/10_7_IndelExtractionProt.py" />
+    <entry file="file://$PROJECT_DIR$/Pipeline_Lio/10_10_IndelDisrupt.py" />
+    <entry file="file://$PROJECT_DIR$/Pipeline_Lio/1SubtypeSorting.py" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-insertions/hiv-db.fasta" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/hiv-db.fasta">
+      <provider selected="true" editor-type-id="LargeFileEditor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="23" selection-start-line="23" selection-end-line="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/2pairwise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" column="9" lean-forward="true" selection-start-line="3" selection-start-column="9" selection-end-line="3" selection-end-column="9" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/4_1_MSAedit.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3_5_V5mod.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1071">
+          <caret line="63" column="30" lean-forward="true" selection-start-line="63" selection-start-column="30" selection-end-line="63" selection-end-column="30" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing_wtest.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-653">
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/2pairwise_codon.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-568">
+          <caret line="16" selection-start-line="16" selection-end-line="30" selection-end-column="14" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="748">
+          <caret line="56" column="33" selection-start-line="56" selection-start-column="33" selection-end-line="56" selection-end-column="33" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

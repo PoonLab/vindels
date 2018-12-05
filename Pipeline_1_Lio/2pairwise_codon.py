@@ -1,6 +1,7 @@
 from seqUtils import *
 from gotoh2 import *
 from glob import glob
+import os
 
 #nucleotide version of the reference sequence
 gp120 = open("hxb2_gp120_sequence.txt", 'r')

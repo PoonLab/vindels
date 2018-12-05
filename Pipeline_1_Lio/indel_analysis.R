@@ -1,4 +1,3 @@
-setwd("~/vindels/Indel_Analysis/")
 require(bbmle)
 require(MASS)
 require(xtable)
@@ -14,18 +13,21 @@ pll <- function(rate, outcomes, times) {
 }
 
 
-csvfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/9_2_indels",full.names=TRUE)
+#csvfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/9_2_indels",full.names=TRUE)
+csvfolder <- Sys.glob("~/PycharmProjects/hiv-evolution-master/9_2_indels/*.csv")
 max.llh <- data.frame(stringsAsFactors = F)
 max.llh2 <- data.frame(subtype=character(),stringsAsFactors = FALSE)
 con.int <- data.frame(stringsAsFactors = FALSE)
 big.df <- data.frame(stringsAsFactors = FALSE)
-rates <- c()
+vlen.tot <- data.frame()
+ml.output <- list()
+clades <- c()
 
 for (i in 1:length(csvfolder)){
   csv <- read.csv(csvfolder[i])
   
   filename <- strsplit(strsplit(csvfolder[i], "/")[[1]][7], "\\+.")[[1]][1]
-  
+  clades[i] <- filename
   # if (filename == "AE"){
   #   filename <- "01_AE"
   # }else if (filename =="AG"){
@@ -35,76 +37,77 @@ for (i in 1:length(csvfolder)){
 
   print(filename)
   
-  
-  times.df <- c()
-  outcomes.df <- data.frame()
+  data.df <- data.frame()
   for (z in 1:5){
-    times <- csv$total.length[which(!is.na(csv[paste0("VR",z,".indel")]))]
-    times.df <- c(times.df, times)
+    times <- csv[which(!is.na(csv[paste0("VR",z,".indel")])),6]  #retrieves total.length
     outcomes <- csv[which(!is.na(csv[paste0("VR",z,".indel")])),paste0("VR",z,".indel")]
-    outcomes.df <- rbind(outcomes.df, data.frame(out=outcomes, vregion=z))
+    vlen <- csv[which(!is.na(csv[paste0("VR",z,".indel")])), paste0("VR",z,".len")]
+    
+    data.df <- rbind(data.df, data.frame(out=outcomes, times=times, vregion=z, vlen=vlen))
+    
+    vlen.tot <- rbind(vlen.tot, data.frame(clade=filename, vloop=z, vlength=mean(vlen)))
     
     obj.f <- function(rate) -pll(rate, outcomes, times)  # objective function
     mle.result <- bbmle::mle2(obj.f, start=list(rate=1), method = "Brent", lower=1e-12, upper = 1)
     
-    max.llh <- rbind(max.llh, data.frame(subtype=filename, vloop=z, rate=coef(mle.result)[[1]])) 
-    max.llh2 [i,z+1] <- coef(mle.result)[[1]]
-    rates <- c(rates,coef(mle.result)[[1]]) # this is the rate
-    #res$value #this is the likelihood
-    if(!all(outcomes)){
+    rate <- coef(mle.result)[[1]]
+    
+    max.llh <- rbind(max.llh, data.frame(subtype=filename, vloop=z, rate=rate, rate2=rate/mean(vlen), adj.rate=1000*(rate/mean(vlen)))) 
+    max.llh2[i,z+1] <- rate/mean(vlen)
+    
+    if(!all(outcomes) & !all(!outcomes)){
       int <- confint(mle.result, level = 0.95)
-      con.int <- rbind(con.int,data.frame(subtype=filename,vloop=z,lower=int[[1]],upper=int[[2]]))
+      con.int <- rbind(con.int,data.frame(subtype=filename,vloop=z,lower=1000*(int[[1]]/mean(vlen)),upper=1000*(int[[2]]/mean(vlen))))
       
     }else{
       con.int <- rbind(con.int,data.frame(subtype=filename,vloop=z,lower=0,upper=0))
     }
+    
   }
   
-  big.df <- rbind(big.df, data.frame(subtype=rep(filename, length(times.df)), Time=times.df, outcomes=outcomes.df$out, Vregion=as.factor(outcomes.df$vregion)))
+  big.df <- rbind(big.df, data.frame(subtype=rep(filename, nrow(data.df)), Time=data.df$times, outcomes=data.df$out, Vregion=as.factor(data.df$vregion), Vlength=data.df$vlen))
   
 }
 
 
-
-#v.order <- c(5,1,2,3,4)
-#big.df <- big.df[order(match(big.df$Vregion,v.order)),]
-
-fit <- glm(!outcomes ~ subtype + Vregion + Time, family= "binomial", data=big.df)
-fit2 <- glm(!outcomes ~ subtype * Vregion + Time, family= "binomial", data=big.df)
+max.llh$subtype <- factor(max.llh$subtype, levels=c("AE", "AG", "A1", "B", "C", "D", "F1"))
+max.llh <- max.llh[order(max.llh$subtype),]
 
 
+
+max.llh2$subtype <- factor(max.llh2$subtype, levels=c("AE", "AG", "A1", "B", "C", "D", "F1"))
+max.llh2 <- max.llh2[order(max.llh2$subtype),]
+
+big.df$subtype <- factor(big.df$subtype, levels=c("AE", "AG", "A1", "B", "C", "D", "F1"))
+big.df <- big.df[order(big.df$subtype),]
+
+avg <- c()
+for (y in 1:5){
+  avg[y] <- median(max.llh[which(max.llh$vloop==y),5])
+}
+
+
+big.df$time.len <- big.df$Time * big.df$Vlength
+
+fit <- glm(!outcomes ~ subtype + Vregion + time.len, family= "binomial", data=big.df)
+fit2 <- glm(!outcomes ~ subtype * Vregion + time.len, family= "binomial", data=big.df)
 fit.aic <- stepAIC(fit, scope=list(upper=fit2, lower=~1), direction='both', trace=TRUE)
+
+
 data.df <- data.frame(summary.glm(fit.aic)$coefficients)
 data.df$Std..Error <- NULL
 data.df$z.value <- NULL
-data.df[which(data.df$Pr...z.. < 0.01 & data.df$Pr...z.. > 0.00143),'Signif.'] <- "**"
+data.df[which(data.df$Pr...z.. < 0.01 & data.df$Pr...z.. > 0.00143),'Signif.'] <- "*"
 data.df[which(data.df$Pr...z.. < 0.00143),'Signif.'] <- "***"
 data.df$Estimate <- as.numeric(as.character(format(round(data.df$Estimate, 3), nsmall = 3)))
 data.df$Pr...z.. <- as.numeric(as.character(format(round(data.df$Pr...z.., 3), nsmall = 3)))
-
-
 
 xt <- xtable(data.df, digits=c(0,3,3,0))
 write.csv(max.llh, "indel_rates2.csv")
 write.csv(con.int, "conf_ints2.csv")
 
-# outcomes and times are vectors that have to come from your data frame
 
-# + geom_rect(data=vbox, 
-#             mapping=aes(xmin=vloop-1, xmax=vloop+2.25,ymin=rate, ymax=rate+0.036),
-#             color="black", fill="gray88") + geom_text(data=vloops,aes(x=vloop-0.2),
-#                                                       label=c("V1","V2","V3","V4","V5"),
-#                                                       size=4.5) +geom_text(data=vbox, 
-#                                                                            aes(x=vloop+0.3,y=rate+0.0162),
-#                                                                            label="*",
-#                                                                            size=10) + geom_segment(data=vbox, aes(x=vloop-0.5,xend=vloop-0.5,y=rate+0.020,yend=rate+0.016),
-#                                                                                                    arrow=arrow(length=unit(2,"mm")),
-#                                                                                                    size=0.8)
-max.llh$subtype <- factor(max.llh$subtype, levels=c("AE", "AG", "A1", "B", "C", "D", "F1"))
-max.llh <- max.llh[order(max.llh$subtype),]
 
-max.llh2$subtype <- factor(max.llh2$subtype, levels=c("AE", "AG", "A1", "B", "C", "D", "F1"))
-max.llh2 <- max.llh2[order(max.llh2$subtype),]
 
 require(ggplot2)
 #indel rate plot 
@@ -116,25 +119,17 @@ con.int <- con.int[order(con.int$subtype),]
 
 # MARKERS
 
-submark <- data.frame(subtype=max.llh$subtype,vloop=max.llh$vloop,rate=rep(NaN,35))
-submark[18,3] <- 0.12
+subline <- data.frame(subtype=c("B"), vloop=c(3),adj.rate=c(1.3))
+noest <- data.frame(subtype=c("F1"), vloop=c(3), adj.rate=c(0.2))
+vline <- data.frame(subtype=c("AE","AG","A1","B","C","D","F1"), vloop=rep(3,7),adj.rate=rep(0.4,7))
+vline <- rbind(vline, data.frame(subtype=c("B", "C"), vloop=c(2,2), adj.rate=c(0.4,0.4)))
 
-
-rates <- split(max.llh[,2:3], max.llh[,1])
-subline <- data.frame(subtype=c("B"), vloop=c(3),rate=c(0.118))
-noest <- data.frame(subtype=c("F1"), vloop=c(3), rate=c(0.02))
-vbox <- data.frame(subtype=c("F1"), vloop=c(3),rate=c(0.103))
-vloops <- data.frame(subtype=c(rep("F1",5)), vloop=c(rep(4.5,5)),rate=c(0.100+1:5*0.007))
-vline <- data.frame(subtype=c(rep(c("AE","AG","A1","B","C","D","F1"),2)), vloop=c(rep(3,7), rep(5,7)),rate=rep(0.012,7))
-vline <- vline[-7,]
-vline[6,3] <- 0.021
-vline[2,3] <- 0.016
-vline[3,3] <- 0.016
+# vline[3,3] <- 0.016
 
 
 
 plot <- ggplot(max.llh, aes(x=vloop, 
-                            y=rate, 
+                            y=adj.rate, 
                             fill=subtype, 
                             width=1)) + geom_bar(colour="black",
                                                  stat="identity", 
@@ -142,15 +137,14 @@ plot <- ggplot(max.llh, aes(x=vloop,
                                                  show.legend=F) +facet_wrap(~subtype,
                                                                              ncol=7,
                                                                              nrow=1)  + geom_text(data=subline,
-                                                                                                  aes(x=vloop, y=rate+0.002, label="*"),
-                                                                                                  size=10) + geom_segment(data=subline, 
-                                                                                                                         aes(x=vloop-2.25,xend=vloop+2.25,y=rate,yend=rate),size=0.8)  + geom_segment(data=subline, aes(x=vloop,xend=vloop,y=rate-0.003,yend=rate-0.01),
-                                                                                                                                                                                                                arrow=arrow(length=unit(3,"mm")),
+                                                                                                  aes(x=vloop, y=adj.rate-0.05, label="†"),
+                                                                                                  size=8) + geom_segment(data=subline, 
+                                                                                                                         aes(x=vloop-2.25,xend=vloop+2.25,y=adj.rate,yend=adj.rate),size=0.8)  + geom_segment(data=subline, aes(x=vloop,xend=vloop,y=adj.rate-0.08,yend=adj.rate-0.11),
+                                                                                                                                                                                                                arrow=arrow(length=unit(4,"mm")),
                                                                                                                                                                                                                 size=0.8)
 plot <- plot + labs(x="Variable Loop", 
-            y="Indel Rate (Events/Lineage/Year)")+scale_fill_manual(values=
-                                                              colors2)+scale_y_continuous(expand = c(0, 0),
-                                                                                         limits = c(0, 0.155))+theme(panel.grid.major.y = element_line(color="black",size=0.3),
+            y=expression(paste("Indel Rate (Events/Nt/Year x ", 10^-3, ")", sep = "")))+scale_fill_manual(values=colors2)+scale_y_continuous(expand = c(0, 0),
+                                                                                                       limits = c(0, 2))+theme(panel.grid.major.y = element_line(color="black",size=0.3),
                                                                                                                      panel.grid.major.x = element_blank(),
                                                                                                                      panel.grid.minor.y = element_blank(),
                                                                                                                      panel.grid.minor.x = element_blank(),
@@ -165,18 +159,17 @@ plot <- plot + labs(x="Variable Loop",
                                                                                                                      legend.position="none")+ geom_errorbar(aes(ymax = con.int$upper, ymin = con.int$lower), 
                                                                                                                                                                      width = 0.25) + geom_segment(data=vline,
                                                                                                                                                                                                   aes(x=vloop,
-                                                                                                                                                                                                      y=rate-0.001,
+                                                                                                                                                                                                      y=adj.rate-0.01,
                                                                                                                                                                                                       xend=vloop,
-                                                                                                                                                                                                      yend=rate-0.005),
-                                                                                                                                                                                                  arrow=arrow(length=unit(2,"mm")),
+                                                                                                                                                                                                      yend=adj.rate-0.04),
+                                                                                                                                                                                                  arrow=arrow(length=unit(3,"mm")),
                                                                                                                                                                                                   size=0.7)+ geom_text(data=vline,
-                                                                                                                                                                                                                       label="*", 
-                                                                                                                                                                                                                       size=8)  + geom_text(aes(y=rate-0.005),
+                                                                                                                                                                                                                       aes(x=vloop, y=adj.rate+0.02, label=c("†","†","†","†","‡","†","‡","†","†")), 
+                                                                                                                                                                                                                       size=8)  + geom_text(aes(y=adj.rate-0.02),
                                                                                                                                                                                                                                             data=noest, 
                                                                                                                                                                                                                                             label="no estimate", 
                                                                                                                                                                                                                                             size=6, 
                                                                                                                                                                                                                                             angle=90)
-
 plot
 
 figure <- ggplot_build(plot)
