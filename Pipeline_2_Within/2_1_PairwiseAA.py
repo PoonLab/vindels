@@ -32,7 +32,7 @@ aaref = translate_nuc(ntref, 0)
 
 print(ntref)
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/2FilteredSeqs/*.fasta")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/*.fasta")
 
 for file in folder:
 
@@ -42,7 +42,7 @@ for file in folder:
 
     filename = file.split("/")[-1]
 
-    output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3_1_pairwise/"+filename, 'w')
+    output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/2_2_pairwiseAA/"+filename, 'w')
 
     unequal = []
     for header in data:
@@ -70,31 +70,35 @@ for file in folder:
 
         result2 = aa_pair.align(aaref,aaqry)
 
-        newRef = list(ntref)
-        newQry = list(ntqry)
+        newref = list(ntref)
+        newqry = list(ntqry)
 
         # reads through the amino acid alignment and adds codon gaps to the proper locations
         for i in range(len(result2[0])):
             if result2[0][i] == '-':
-                newRef[i * 3:i * 3] = ['-', '-', '-']
+                newref[i * 3:i * 3] = ['-', '-', '-']
 
             if result2[1][i] == '-':
-                newQry[i * 3:i * 3] = ['-', '-', '-']
+                newqry[i * 3:i * 3] = ['-', '-', '-']
 
-        if len(newRef) != len(newQry):
+        finalRef = "".join(newref)
+        finalQry = "".join(newqry)
+
+        if len(newref) != len(newqry):
             unequal.append(header)
             print(header)
-
+            print(aaref)
+            print(aaqry)
             continue
 
-        finalRef = "".join(newRef)
-        finalQry = "".join(newQry)
+
 
         output.write(">" + header + '\n')
         output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
 
 
     print(unequal)
+
 
 
 

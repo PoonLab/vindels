@@ -74,6 +74,24 @@ def parse_fasta2(handle):
     res[head].append(nt)
     return res
 
+def get_boundaries (str):
+
+    gap_prefix = re.compile('^[-]+')
+    gap_suffix = re.compile('[-]+$')
+    # return a tuple giving indices of subsequence without gap prefix and suffix
+    res = [0,len(str)]
+    left = gap_prefix.findall(str)
+    right = gap_suffix.findall(str)
+    if left:
+        res[0] = len(left[0])
+
+    if right:
+        res[1] = len(str) - len(right[0])
+
+    return res
+
+
+
 def iter_fasta (handle):
     """
     Parse open file as FASTA.  Returns a generator

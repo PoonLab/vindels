@@ -19,7 +19,7 @@ for i in ref_file:
 c_regions = [(0,390),  (588,885) , (993, 1152), (1254, 1377), (1410, 1532)]
 #v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1377, 1410)]
 #modified
-v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1368, 1419)]
+v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1377, 1410)]
 alignments = glob('/home/jpalmer/PycharmProjects/hiv-evolution-master/2_1_AAPairwise/*++.fasta')
 
 gap_prefix = re.compile('^[-]+')

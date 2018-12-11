@@ -2,7 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1c935150-3286-42c4-bef9-fb4adc6682d6" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Pipeline_2_Within/2xPairwise.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Figures/indel-rates.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/Figures/indel-rates.pdf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_1_Lio/1SubtypeSorting.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_1_Lio/1SubtypeSorting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_1_Lio/N-glycs.R" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_1_Lio/N-glycs.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_1_Lio/indel_analysis.R" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_1_Lio/indel_analysis.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/seqUtils.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/seqUtils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -15,8 +25,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="20" column="29" selection-start-line="20" selection-start-column="29" selection-end-line="20" selection-end-column="29" />
+            <state relative-caret-position="527">
+              <caret line="31" column="28" selection-start-line="31" selection-start-column="28" selection-end-line="31" selection-end-column="28" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -24,11 +34,32 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2xPairwise.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="623">
-              <caret line="96" column="18" selection-start-line="96" selection-start-column="18" selection-end-line="96" selection-end-column="18" />
+            <state>
+              <caret column="9" selection-start-column="9" selection-end-column="9" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/2pairwise.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="374">
+              <caret line="22" column="26" selection-start-line="22" selection-start-column="26" selection-end-line="22" selection-end-column="26" />
+              <folding>
+                <element signature="e#0#22#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="51">
+              <caret line="3" column="22" lean-forward="true" selection-start-line="3" selection-start-column="22" selection-end-line="3" selection-end-column="22" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -37,22 +68,32 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3_1_pairwise/7.fasta">
+        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/10_1_PairwiseCherries_Nt.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1309">
-              <caret line="4" column="42" selection-start-line="4" selection-start-column="42" selection-end-line="4" selection-end-column="42" />
+            <state>
+              <folding>
+                <element signature="e#0#17#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/2pairwise_codon.py">
+        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/10_2_IndelExtractionNt.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1642">
-              <caret line="119" column="74" selection-start-line="118" selection-start-column="8" selection-end-line="119" selection-end-column="74" />
+            <state relative-caret-position="-663">
               <folding>
-                <element signature="e#0#22#0" expanded="true" />
+                <element signature="e#0#21#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/1SubtypeSorting.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="816">
+              <caret line="60" selection-start-line="60" selection-end-line="60" />
             </state>
           </provider>
         </entry>
@@ -60,32 +101,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="748">
-              <caret line="56" column="33" selection-start-line="56" selection-start-column="33" selection-end-line="56" selection-end-column="33" />
+            <state relative-caret-position="459">
+              <caret line="107" column="42" selection-start-line="107" selection-start-column="12" selection-end-line="107" selection-end-column="42" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/4_1_MSAedit.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#0#22#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3_5_V5mod.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#0#22#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -126,9 +145,15 @@
       <find>DQ168577.JN248580.5</find>
       <find>AY371132.GU201495.1</find>
       <find>jpalme56</find>
+      <find>newQry</find>
+      <find>subtypes</find>
     </findStrings>
     <replaceStrings>
       <replace>jpalmer</replace>
+      <replace>newqry</replace>
+      <replace>dict1</replace>
+      <replace>prelim</replace>
+      <replace>predict</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -154,10 +179,16 @@
         <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_9a_nGlycSites.py" />
         <option value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_9b_nGlycTotal.py" />
         <option value="$PROJECT_DIR$/Pipeline_Lio/1SubtypeSorting.py" />
-        <option value="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" />
         <option value="$PROJECT_DIR$/Pipeline_1_Lio/2pairwise_codon.py" />
-        <option value="$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing.py" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py" />
+        <option value="$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/seqUtils.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/2Pairwise.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/2_1_Extraction.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py" />
+        <option value="$PROJECT_DIR$/Pipeline_1_Lio/1SubtypeSorting.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py" />
       </list>
     </option>
   </component>
@@ -182,22 +213,12 @@
             </path>
             <path>
               <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="Pipeline_1_Lio" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-            <path>
-              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="Pipeline_2_Within" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-            <path>
-              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
               <item name="~/PycharmProjects/hiv-withinhost" type="442cc68d:ScopeViewTreeModel$RootNode" />
             </path>
             <path>
               <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
               <item name="~/PycharmProjects/hiv-withinhost" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="3_1_pairwise" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+              <item name="3RegionSequences" type="9f88c78c:ScopeViewTreeModel$FileNode" />
             </path>
           </expand>
           <select />
@@ -211,6 +232,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Pipeline_2_Within" />
       <recent name="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master" />
     </key>
   </component>
@@ -226,49 +248,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.2PairwiseExtraction">
-    <configuration name="10_10_IndelDisrupt (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="vindels" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Pipeline_Lio" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_Lio/10_10_IndelDisrupt.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="10_10_IndelDisrupt" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="hiv-evolution-master" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_10_IndelDisrupt.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python.3Extraction">
     <configuration name="1SequenceProcessing" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="vindels" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -282,6 +262,27 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="1SubtypeSorting (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="vindels" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Pipeline_1_Lio" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_1_Lio/1SubtypeSorting.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -323,7 +324,28 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_2_Within/2xPairwise.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="3Extraction" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="vindels" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Pipeline_2_Within" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -333,19 +355,19 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.10_10_IndelDisrupt" />
-      <item itemvalue="Python.10_10_IndelDisrupt (1)" />
       <item itemvalue="Python.1SubtypeSorting" />
       <item itemvalue="Python.1SequenceProcessing" />
       <item itemvalue="Python.2PairwiseExtraction" />
+      <item itemvalue="Python.3Extraction" />
+      <item itemvalue="Python.1SubtypeSorting (1)" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.2PairwiseExtraction" />
+        <item itemvalue="Python.3Extraction" />
         <item itemvalue="Python.1SequenceProcessing" />
+        <item itemvalue="Python.1SubtypeSorting (1)" />
+        <item itemvalue="Python.2PairwiseExtraction" />
         <item itemvalue="Python.1SubtypeSorting" />
-        <item itemvalue="Python.10_10_IndelDisrupt (1)" />
-        <item itemvalue="Python.10_10_IndelDisrupt" />
       </list>
     </recent_temporary>
   </component>
@@ -365,11 +387,11 @@
   <component name="ToolWindowManager">
     <frame x="67" y="25" width="2493" height="1415" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18635063" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18798529" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.3299611" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32970452" />
       <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.32970452" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
@@ -387,25 +409,6 @@
     </layout>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_10_Indel-Ngly.py" />
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/3RegionSlicing.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1418" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/4_1_MSAedit.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/5_xAccHeaders.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/5_xCutExcess.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline/3_5_V5mod.py" />
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/ngTotal.csv">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_6_Pairwise_Prot/02_AG++.fastaz" />
     <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/Dates/02_AG.csv">
       <provider selected="true" editor-type-id="text-editor">
@@ -530,16 +533,6 @@
     <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/hiv-db.fasta">
       <provider selected="true" editor-type-id="LargeFileEditor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/2pairwise.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="3" column="9" lean-forward="true" selection-start-line="3" selection-start-column="9" selection-end-line="3" selection-end-column="9" />
-          <folding>
-            <element signature="e#0#22#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/4_1_MSAedit.py">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -558,29 +551,104 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing_wtest.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3_1_pairwise/7.fasta" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3_1_pairwise/2.fasta" />
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/2pairwise_codon.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-653">
+        <state relative-caret-position="605">
+          <caret line="67" column="24" lean-forward="true" selection-start-line="67" selection-start-column="24" selection-end-line="67" selection-end-column="24" />
           <folding>
-            <element signature="e#0#9#0" expanded="true" />
+            <element signature="e#0#22#0" expanded="true" />
           </folding>
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/seqUtils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="10" selection-start-column="10" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/1.fasta">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/1SubtypeSorting.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="816">
+          <caret line="60" selection-start-line="60" selection-end-line="60" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="680">
+          <caret line="59" column="49" selection-start-line="59" selection-start-column="49" selection-end-line="59" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/10_1_PairwiseCherries_Nt.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#0#17#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/10_2_IndelExtractionNt.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-663">
+          <folding>
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3xRegionSlicing_wtest.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2xPairwise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="9" selection-start-column="9" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Nagisa/5_xCutExcess.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="714">
+          <caret line="44" column="100" selection-start-line="44" selection-start-column="100" selection-end-line="44" selection-end-column="100" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/conserved/21/30651.fasta">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/variable/1.csv">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="748">
-          <caret line="56" column="33" selection-start-line="56" selection-start-column="33" selection-end-line="56" selection-end-column="33" />
+        <state relative-caret-position="459">
+          <caret line="107" column="42" selection-start-line="107" selection-start-column="12" selection-end-line="107" selection-end-column="42" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/2pairwise_codon.py">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/variable/2.csv">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1642">
-          <caret line="119" column="74" selection-start-line="118" selection-start-column="8" selection-end-line="119" selection-end-column="74" />
+        <state relative-caret-position="340">
+          <caret line="20" column="305" selection-start-line="20" selection-start-column="200" selection-end-line="20" selection-end-column="305" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/2pairwise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="374">
+          <caret line="22" column="26" selection-start-line="22" selection-start-column="26" selection-end-line="22" selection-end-column="26" />
           <folding>
             <element signature="e#0#22#0" expanded="true" />
           </folding>
@@ -589,25 +657,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="20" column="29" selection-start-line="20" selection-start-column="29" selection-end-line="20" selection-end-column="29" />
+        <state relative-caret-position="527">
+          <caret line="31" column="28" selection-start-line="31" selection-start-column="28" selection-end-line="31" selection-end-column="28" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3_1_pairwise/7.fasta">
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1309">
-          <caret line="4" column="42" selection-start-line="4" selection-start-column="42" selection-end-line="4" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2PairwiseExtraction.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="623">
-          <caret line="96" column="18" selection-start-line="96" selection-start-column="18" selection-end-line="96" selection-end-column="18" />
+        <state relative-caret-position="51">
+          <caret line="3" column="22" lean-forward="true" selection-start-line="3" selection-start-column="22" selection-end-line="3" selection-end-column="22" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>

@@ -79,16 +79,32 @@ text(0.09,0.125,label="01_AE")
 #HEAT MAP FIGURE 
 #contains the total counts of NG sites in all sequences 
 # format ---- 
-ngTotal <- read.csv("~/PycharmProjects/hiv-evolution-master/ngTotal.csv", stringsAsFactors = F)
+ngTotal <- read.csv("~/PycharmProjects/hiv-evolution-master/ngTotal.txt", stringsAsFactors = F)
 ngTotal$accno <- NULL
 v1 <- ngTotal[which(ngTotal$vloop==1),c(1,3)]
 v2 <- ngTotal[which(ngTotal$vloop==2),c(1,3)]
 v3 <- ngTotal[which(ngTotal$vloop==3),c(1,3)]
 v4 <- ngTotal[which(ngTotal$vloop==4),c(1,3)]
 v5 <- ngTotal[which(ngTotal$vloop==5),c(1,3)]
+list.df <- list()
+for (n in 1:5){
+  df <- as.data.frame.matrix(ngTotal[which(ngTotal$vloop==n),c(1,3)])
+  list.df[[n]] <- df
+  
+}
 
+summary(glm(count ~ subtype, data = list.df[[3]], family=poisson))
 #stats analysis between subtypes
-summary(glm(count ~ subtype, data = v5, family=poisson))
+coef <- list()
+con.list <- list()
+for (j in 1:5){
+  fit <- glm(count ~ subtype, data = list.df[[j]], family=poisson)
+  xp <- exp(fit$coefficients)
+  con <- exp(confint(fit))
+  coef[[j]] <- xp 
+  con.list[[j]] <- con
+}
+
 
 v1.df <- as.data.frame.matrix(table(v1))
 v2.df <- as.data.frame.matrix(table(v2))
