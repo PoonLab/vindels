@@ -4,8 +4,8 @@ from seqUtils import *
 
 
 
-folder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/5MSAlignments/*.msa")
-
+folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/5MSAlignments/*.msa")
+count = 0
 
 for file in folder:
 
@@ -35,8 +35,8 @@ for file in folder:
     fasta = open(file, "r")
 
     data = parse_fasta(fasta)
-    
-    output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/5_1_final/"+ name +".fasta",'w')
+    count += len(data)
+    output = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/5_1_final/"+ name +"_.fasta",'w')
 
     #dictionary format
     
@@ -58,3 +58,4 @@ for file in folder:
 
     fasta.close()
     output.close()
+print(count)

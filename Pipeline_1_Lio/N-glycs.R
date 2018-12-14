@@ -102,7 +102,14 @@ for (j in 1:5){
   xp <- exp(fit$coefficients)
   con <- exp(confint(fit))
   coef[[j]] <- xp 
-  con.list[[j]] <- con
+  con.list[[j]] <- as.data.frame(con)
+}
+
+for (k in 1:5){
+  con.list[[k]]$coef <- coef[[k]]
+  con.list[[k]]$count <- con.list[[k]]$coef * coef[[k]][1]
+  con.list[[k]]$lower <- con.list[[k]]$`2.5 %` * con.list[[k]]$coef[1]
+  con.list[[k]]$upper <- con.list[[k]]$`97.5 %` * con.list[[k]]$coef[1]
 }
 
 
