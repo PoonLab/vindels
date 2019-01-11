@@ -2,11 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1c935150-3286-42c4-bef9-fb4adc6682d6" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Pipeline_2_Within/0_1_mkdir.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Pipeline_1_Lio/5_1RemoveGaps.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_1_Lio/5_1RemoveGaps.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Pipeline_1_Lio/N-glycs.R" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_1_Lio/N-glycs.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/0_1_mkdir.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/0_1_mkdir.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -20,8 +18,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
-              <caret line="16" column="15" selection-start-line="16" selection-start-column="15" selection-end-line="16" selection-end-column="15" />
+            <state relative-caret-position="374">
+              <caret line="24" selection-start-line="24" selection-end-line="24" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -30,40 +28,29 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/1FilteredSeqs/1.fasta">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="85">
-              <caret line="5" column="2562" selection-start-line="5" selection-end-line="5" selection-end-column="2562" />
-            </state>
-          </provider>
+        <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/full_length/12255.fasta">
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/test.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="561">
-              <caret line="33" selection-start-line="33" selection-end-line="33" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2xPairwise.py">
+        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/test">
           <provider selected="true" editor-type-id="text-editor">
             <state>
-              <caret column="9" selection-start-column="9" selection-end-column="9" />
+              <caret column="43" selection-start-column="43" selection-end-column="43" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py">
+        <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/10.fasta">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-890">
-              <caret line="11" selection-start-line="11" selection-end-line="11" />
+            <state relative-caret-position="112">
+              <caret line="86" lean-forward="true" selection-start-line="86" selection-end-line="86" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -72,31 +59,23 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
+        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="215">
-              <caret line="64" column="50" lean-forward="true" selection-start-line="64" selection-start-column="50" selection-end-line="64" selection-end-column="50" />
+            <state relative-caret-position="289">
+              <caret line="16" column="24" selection-start-line="16" selection-start-column="24" selection-end-line="16" selection-end-column="24" />
+              <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
               <folding>
-                <element signature="e#0#9#0" expanded="true" />
+                <element signature="e#1#22#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/conserved/1/30622.fasta">
+        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="136">
-              <caret line="8" column="36" selection-start-line="8" selection-start-column="36" selection-end-line="8" selection-end-column="36" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/0_1_mkdir.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="170">
-              <caret line="10" column="58" selection-start-line="10" selection-start-column="58" selection-end-line="10" selection-end-column="58" />
+            <state relative-caret-position="459">
+              <caret line="31" selection-start-line="31" selection-end-line="31" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
               </folding>
@@ -115,14 +94,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>JQ403041.AY331296.1</find>
-      <find>KT124796.JQ403056.1</find>
-      <find>KY324331.HQ595801.4</find>
-      <find>KJ669860.KJ669864.1</find>
-      <find>EF593191.EF593271.1</find>
-      <find>AY444801.HM215318.1</find>
-      <find>AF110969.KF770430.2</find>
-      <find>AY253307.KC862912.4</find>
       <find>JF910254.JF320028.2</find>
       <find>AY901975.DQ396374.1</find>
       <find>GU329257.KC154013.1</find>
@@ -145,6 +116,14 @@
       <find>y</find>
       <find>patdict1</find>
       <find>patdict</find>
+      <find>vpatdict</find>
+      <find>A6.RU.2011.113017.MH604208.-.-.45.-.5</find>
+      <find>times</find>
+      <find>&gt;</find>
+      <find>patcount</find>
+      <find>cpatdict</find>
+      <find>full2</find>
+      <find>,</find>
     </findStrings>
     <replaceStrings>
       <replace>jpalmer</replace>
@@ -156,6 +135,8 @@
       <replace>header</replace>
       <replace>patdict1</replace>
       <replace>cpatdict</replace>
+      <replace>vdict1</replace>
+      <replace>fields</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -187,21 +168,26 @@
         <option value="$PROJECT_DIR$/Pipeline_2_Within/seqUtils.py" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/2Pairwise.py" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/2_1_Extraction.py" />
-        <option value="$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py" />
         <option value="$PROJECT_DIR$/Pipeline_1_Lio/1SubtypeSorting.py" />
         <option value="$PROJECT_DIR$/Pipeline_1_Lio/5_1RemoveGaps.py" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/0_1_Directories.py" />
         <option value="$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/1FilteredSeqs/1.fasta" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/test.py" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/3Filtering.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/6_1Accno.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/0_1_mkdir.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/test" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py" />
+        <option value="$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="87" />
-    <option name="y" value="311" />
-    <option name="width" value="2473" />
+    <option name="x" value="-21" />
+    <option name="y" value="353" />
+    <option name="width" value="2483" />
     <option name="height" value="1059" />
   </component>
   <component name="ProjectLevelVcsManager">
@@ -253,7 +239,7 @@
     </option>
   </component>
   <component name="RunManager" selected="Python.3Extraction">
-    <configuration name="0_1_Directories" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="0_1_mkdir" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="vindels" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -337,7 +323,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="6_1Accno" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="vindels" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -349,7 +335,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_2_Within/test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Pipeline_2_Within/6_1Accno.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -360,18 +346,18 @@
     </configuration>
     <list>
       <item itemvalue="Python.1SequenceProcessing" />
-      <item itemvalue="Python.0_1_Directories" />
-      <item itemvalue="Python.test" />
       <item itemvalue="Python.2_1_PairwiseAA" />
       <item itemvalue="Python.3Extraction" />
+      <item itemvalue="Python.6_1Accno" />
+      <item itemvalue="Python.0_1_mkdir" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.3Extraction" />
-        <item itemvalue="Python.1SequenceProcessing" />
-        <item itemvalue="Python.test" />
+        <item itemvalue="Python.0_1_mkdir" />
+        <item itemvalue="Python.6_1Accno" />
         <item itemvalue="Python.2_1_PairwiseAA" />
-        <item itemvalue="Python.0_1_Directories" />
+        <item itemvalue="Python.1SequenceProcessing" />
       </list>
     </recent_temporary>
   </component>
@@ -392,6 +378,27 @@
     <frame x="67" y="25" width="2493" height="1415" extended-state="6" />
     <editor active="true" />
     <layout>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.20106253" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Favorites" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32970452" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32970452" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39968896" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.32970452" />
+      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="bottom" id="Python Console" order="10" weight="0.32970452" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="R Graphics" order="3" />
+      <window_info anchor="right" id="R Packages" order="4" />
+    </layout>
+    <layout-to-restore>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18798529" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -411,65 +418,9 @@
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="R Graphics" order="3" />
       <window_info anchor="right" id="R Packages" order="4" />
-    </layout>
+    </layout-to-restore>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/genbank_dates.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="8" selection-start-column="8" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/dictionary.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/6_4DateProcessing.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/5_1RemoveGaps.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="16" column="4" selection-start-line="16" selection-start-column="4" selection-end-line="16" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_2_old.py" />
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_x_NucleotideProps.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="428">
-          <caret line="33" column="56" selection-start-line="33" selection-start-column="56" selection-end-line="33" selection-end-column="56" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/seqUtils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="344">
-          <caret line="187" column="26" selection-start-line="187" selection-start-column="26" selection-end-line="187" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_5_Translate_Fasta.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="25" column="41" selection-start-line="25" selection-start-column="41" selection-end-line="25" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_2_IndelExtractionNt.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1734">
-          <caret line="102" column="51" selection-start-line="102" selection-start-column="51" selection-end-line="102" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_10_IndelDisrupt.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="2" column="35" selection-start-line="2" selection-start-column="35" selection-end-line="2" selection-end-column="35" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/10_9b_nGlycTotal.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
@@ -551,9 +502,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/1.fasta">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/1SubtypeSorting.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="816">
@@ -589,12 +537,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/conserved/21/30651.fasta">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/variable/1.csv">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/conserved/21/30651.fasta" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/variable/1.csv" />
     <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/3RegionSlicing.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="459">
@@ -605,13 +549,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/variable/2.csv">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="20" column="305" selection-start-line="20" selection-start-column="200" selection-end-line="20" selection-end-column="305" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/variable/2.csv" />
     <entry file="file://$PROJECT_DIR$/Pipeline_1_Lio/5_1RemoveGaps.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="708">
@@ -632,34 +570,81 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/1FilteredSeqs/2.fasta">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/4MSA/1/30622_msa.txt" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/26.fasta">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/conserved/1/30622.fasta" />
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Filtering.py" />
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/1FilteredSeqs/1.fasta">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="28" selection-start-line="4" selection-start-column="28" selection-end-line="4" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2xPairwise.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="9" selection-start-column="9" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-evolution-master/6_0Accno.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret selection-end-line="25" selection-end-column="15" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/0_1_mkdir.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="170">
-          <caret line="10" column="58" selection-start-line="10" selection-start-column="58" selection-end-line="10" selection-end-column="58" />
+        <state relative-caret-position="204">
+          <caret line="15" column="28" selection-start-line="15" selection-start-column="28" selection-end-line="15" selection-end-column="28" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/1FilteredSeqs/2.fasta">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/4MSA/1/30622_msa.txt">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/full_length/9017.fasta">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="17" column="60" selection-start-line="17" selection-start-column="60" selection-end-line="17" selection-end-column="60" />
+        <state relative-caret-position="-221">
+          <caret line="29" column="74" selection-start-line="29" selection-start-column="74" selection-end-line="29" selection-end-column="74" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/1FilteredSeqs/1.fasta">
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/6_1Accno.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" column="2562" selection-start-line="5" selection-end-line="5" selection-end-column="2562" />
+        <state relative-caret-position="153">
+          <caret line="9" column="28" selection-start-line="9" selection-start-column="28" selection-end-line="9" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/26.fasta">
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/full_length/30650.fasta">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5032">
+          <caret line="416" column="1" selection-start-line="416" selection-end-line="416" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/1.fasta">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="561">
+          <caret line="33" column="6" selection-start-line="33" selection-start-column="6" selection-end-line="33" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/6.fasta">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/test.py">
@@ -672,34 +657,33 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2xPairwise.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="9" selection-start-column="9" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/conserved/1/30622.fasta">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="136">
-          <caret line="8" column="36" selection-start-line="8" selection-start-column="36" selection-end-line="8" selection-end-column="36" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="16" column="15" selection-start-line="16" selection-start-column="15" selection-end-line="16" selection-end-column="15" />
+        <state relative-caret-position="374">
+          <caret line="24" selection-start-line="24" selection-end-line="24" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/full_length/12255.fasta">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/test">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="43" selection-start-column="43" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/10.fasta">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-890">
-          <caret line="11" selection-start-line="11" selection-end-line="11" />
+        <state relative-caret-position="459">
+          <caret line="31" selection-start-line="31" selection-end-line="31" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
           </folding>
@@ -708,10 +692,21 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="215">
-          <caret line="64" column="50" lean-forward="true" selection-start-line="64" selection-start-column="50" selection-end-line="64" selection-end-column="50" />
+        <state relative-caret-position="112">
+          <caret line="86" lean-forward="true" selection-start-line="86" selection-end-line="86" />
           <folding>
             <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="289">
+          <caret line="16" column="24" selection-start-line="16" selection-start-column="24" selection-end-line="16" selection-end-column="24" />
+          <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
+          <folding>
+            <element signature="e#1#22#0" expanded="true" />
           </folding>
         </state>
       </provider>

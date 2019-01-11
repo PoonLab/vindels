@@ -34,6 +34,8 @@ print(ntref)
 
 folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/*.fasta")
 
+pairwise = {}
+
 for file in folder:
 
     input = open(file, "r")
@@ -46,6 +48,9 @@ for file in folder:
 
     unequal = []
     for header in data:
+
+        accno = header.split(".")[4]
+        patid = header.split(".")[3]
 
         nt_pair = Aligner()
         nt_pair.set_model('HYPHY_NUC')
@@ -91,13 +96,13 @@ for file in folder:
             print(aaqry)
             continue
 
-
-
         output.write(">" + header + '\n')
         output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
 
 
-    print(unequal)
+
+
+
 
 
 
