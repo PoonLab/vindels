@@ -1,0 +1,13 @@
+@comment{x-kbibtex-personnameformatting=<%l><, %f>}
+
+@article{wood2009hiv,
+	author = "Wood, Natasha and Bhattacharya, Tanmoy and Keele, Brandon F and Giorgi, Elena and Liu, Michael and Gaschen, Brian and Daniels, Marcus and Ferrari, Guido and Haynes, Barton F and McMichael, Andrew and others",
+	journal = "PLoS pathogens",
+	number = "5",
+	pages = "e1000414",
+	publisher = "Public Library of Science",
+	title = "{HIV evolution in early infection: selection pressures, patterns of insertion and deletion, and the impact of APOBEC}",
+	volume = "5",
+	year = "2009"
+}
+
