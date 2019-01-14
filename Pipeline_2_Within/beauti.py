@@ -35,9 +35,12 @@ def parse(template_file, fasta_file, stem, outfile, time_unit='days', nreps=1):
 
     # reset TAXA and ALIGNMENT blocks
     t_taxa = template.findall('taxa')[0]
-    t_taxa._children = []
+    # t_taxa._children = []  # deprecated since Python 2.7
+    t_taxa.clear()
+    
     t_aln = template.find('alignment')
-    t_aln._children = []
+    # t_aln._children = []
+    t_aln.clear()
 
     all_dates = []
 
