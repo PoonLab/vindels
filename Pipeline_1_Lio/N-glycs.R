@@ -68,8 +68,8 @@ legend(0.003,0.285,legend=c('V1  ','V2  ','V3  ','V4  ','V5  '), pch=c(21,22,23,
 #abline(0,1)
 title(ylab="Disrupted PNLGS / Total PNLGS", line=4, cex.lab=1.5)
 title(xlab="PNLGS Amino Acids / Total Amino Acids", line=3, cex.lab=1.5)
-text(0,0.01,label="F1")
-text(0.09,0.125,label="01_AE")
+text(0,0.01,label="F1",cex=1.5)
+text(0.09,0.125,label="01_AE",cex=1.5)
 
 
 #abline(lm(disrupt$prop ~ ngProps.df$prop))
@@ -79,7 +79,7 @@ text(0.09,0.125,label="01_AE")
 #HEAT MAP FIGURE 
 #contains the total counts of NG sites in all sequences 
 # format ---- 
-ngTotal <- read.csv("~/PycharmProjects/hiv-evolution-master/ngTotal.txt", stringsAsFactors = F)
+ngTotal <- read.csv("~/PycharmProjects/hiv-evolution-master/ngTotal.txt", stringsAsFactors = T)
 ngTotal$accno <- NULL
 v1 <- ngTotal[which(ngTotal$vloop==1),c(1,3)]
 v2 <- ngTotal[which(ngTotal$vloop==2),c(1,3)]
@@ -94,6 +94,17 @@ for (n in 1:5){
 }
 
 summary(glm(count ~ subtype, data = list.df[[3]], family=poisson))
+
+
+ngTotal['vloop'] <- sapply(ngTotal['vloop'], as.character)
+
+vl <- glm(count ~ subtype + vloop, data=ngTotal, family=poisson)
+novl <- glm(count ~ subtype, data=ngTotal, family=poisson)
+anova(vl, novl, test='LRT')
+
+sub <- glm(count ~ subtype + vloop, data=ngTotal, family=poisson)
+nosub <- glm(count ~ vloop, data=ngTotal, family=poisson)
+
 #stats analysis between subtypes
 coef <- list()
 con.list <- list()

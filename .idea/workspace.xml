@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="1c935150-3286-42c4-bef9-fb4adc6682d6" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_1_Lio/N-glycs.R" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_1_Lio/N-glycs.R" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_1_Lio/indel-disrupt.R" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_1_Lio/indel-disrupt.R" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/beauti.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/beauti.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -13,44 +17,9 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/1SequenceProcessing.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="24" selection-start-line="24" selection-end-line="24" />
-              <folding>
-                <element signature="e#0#21#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/full_length/12255.fasta">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-5741">
-              <caret line="8" column="17" selection-start-line="8" selection-start-column="17" selection-end-line="8" selection-end-column="17" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/test">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret column="43" selection-start-column="43" selection-end-column="43" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/10.fasta">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-669">
+            <state relative-caret-position="1394">
               <caret line="86" selection-start-line="86" selection-end-line="86" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -62,8 +31,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="357">
-              <caret line="21" column="69" lean-forward="true" selection-start-line="21" selection-start-column="69" selection-end-line="21" selection-end-column="69" />
+            <state relative-caret-position="374">
+              <caret line="22" column="13" selection-start-line="22" selection-start-column="13" selection-end-line="22" selection-end-column="13" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -72,22 +41,22 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/4MSA/12255.fasta">
+        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/beauti.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="34">
-              <caret line="2" selection-start-line="2" selection-end-line="2" />
+            <state relative-caret-position="612">
+              <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
+              <folding>
+                <element signature="e#0#53#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/beauti.py">
+        <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/4MSA/12255.fasta">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="436">
-              <caret line="128" column="80" selection-start-line="128" selection-start-column="80" selection-end-line="128" selection-end-column="80" />
-              <folding>
-                <element signature="e#0#53#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="442">
+              <caret line="26" column="57" selection-start-line="26" selection-start-column="57" selection-end-line="26" selection-end-column="57" />
             </state>
           </provider>
         </entry>
@@ -201,17 +170,17 @@
         <option value="$PROJECT_DIR$/Pipeline_2_Within/0_1_mkdir.py" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/test" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py" />
+        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/4MSA/12255.fasta" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/beauti.py" />
         <option value="$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py" />
-        <option value="$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/4MSA/12255.fasta" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-21" />
-    <option name="y" value="353" />
-    <option name="width" value="2483" />
-    <option name="height" value="1059" />
+  <component name="ProjectFrameBounds" extendedState="4">
+    <option name="x" value="1313" />
+    <option name="y" value="25" />
+    <option name="width" value="1247" />
+    <option name="height" value="1413" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="1" id="Add" />
@@ -221,7 +190,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
       <pane id="Scope">
         <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
           <expand>
@@ -252,6 +220,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="ProjectPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -319,7 +288,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="4_Beauti" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="4_Beauti" type="PythonConfigurationType" factoryName="Python">
       <module name="vindels" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -383,15 +352,14 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.4_Beauti" />
+      <item itemvalue="Python.beauti" />
       <item itemvalue="Python.3Extraction" />
       <item itemvalue="Python.6_1Accno" />
       <item itemvalue="Python.0_1_mkdir" />
-      <item itemvalue="Python.beauti" />
-      <item itemvalue="Python.4_Beauti" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.4_Beauti" />
         <item itemvalue="Python.beauti" />
         <item itemvalue="Python.3Extraction" />
         <item itemvalue="Python.0_1_mkdir" />
@@ -413,15 +381,15 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="67" y="25" width="2493" height="1415" extended-state="6" />
+    <frame x="1313" y="25" width="1247" height="1413" extended-state="4" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20269719" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10491257" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32970452" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.32970452" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.22741432" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39968896" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -691,6 +659,46 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/10.fasta">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/template.xml">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/full_length/12255.fasta">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-5741">
+          <caret line="8" column="17" selection-start-line="8" selection-start-column="17" selection-end-line="8" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1394">
+          <caret line="86" selection-start-line="86" selection-end-line="86" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/beauti.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="612">
+          <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/4MSA/12255.fasta">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="442">
+          <caret line="26" column="57" selection-start-line="26" selection-start-column="57" selection-end-line="26" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/2_1_PairwiseAA.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="459">
@@ -701,50 +709,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/2_2_pairwiseAA/10.fasta">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/template.xml">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-669">
-          <caret line="86" selection-start-line="86" selection-end-line="86" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/3RegionSequences/full_length/12255.fasta">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5741">
-          <caret line="8" column="17" selection-start-line="8" selection-start-column="17" selection-end-line="8" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/beauti.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="436">
-          <caret line="128" column="80" selection-start-line="128" selection-start-column="80" selection-end-line="128" selection-end-column="80" />
-          <folding>
-            <element signature="e#0#53#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/4MSA/12255.fasta">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="21" column="69" lean-forward="true" selection-start-line="21" selection-start-column="69" selection-end-line="21" selection-end-column="69" />
+        <state relative-caret-position="374">
+          <caret line="22" column="13" selection-start-line="22" selection-start-column="13" selection-end-line="22" selection-end-column="13" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>

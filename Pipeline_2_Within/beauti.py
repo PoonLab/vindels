@@ -31,17 +31,30 @@ def parse(template_file, fasta_file, stem, outfile, time_unit='days', nreps=1):
     handle.close()
     
     template = Tree()
+
     t_root = template.parse(template_file)
 
     # reset TAXA and ALIGNMENT blocks
     t_taxa = template.findall('taxa')[0]
+    id_tx = t_taxa.get("id")
     # t_taxa._children = []  # deprecated since Python 2.7
     t_taxa.clear()
-    
+
+    t_taxa.set('id',id_tx)
+
     t_aln = template.find('alignment')
+    alntype = t_aln.get("dataType")
+    id_aln = t_aln.get("id")
     # t_aln._children = []
     t_aln.clear()
 
+    t_aln.set('dataType', alntype)
+    t_aln.set('id',id_aln)
+
+
+
+
+    #t_aln = alntype
     all_dates = []
 
     # update blocks

@@ -4,8 +4,6 @@ import os
 import re
 
 p = re.compile('.+_([0-9]+)\..+')
-infile = open("template.xml")
-
 
 template_file = 'template.xml'
 
@@ -13,11 +11,13 @@ template_file = 'template.xml'
 files = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/*.fasta')
 
 for f in files:
-    name = os.path.basename(f)
-    path = os.path.dirname(f)
-    #os.mkdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/'+name.split(".fasta")[0]+'/')
-    stem = re.sub('\.fasta', '.xml', name)
-    print(stem)
+    if "101827" in f:
+        name = str(os.path.basename(f)).split(".fasta")[0]
+        newpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/'
 
-    ofn = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/'+stem
-    parse(template_file, f, stem, ofn, 'days', '1')
+        #os.mkdir(newpath+name+'/')
+        stem = newpath+name+"/"
+
+        ofn = stem + name + ".xml"
+        parse(template_file, f, stem, ofn, 'days', 1)
+        break
