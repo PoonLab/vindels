@@ -1,0 +1,12 @@
+> relaxed <- read.table("~/PycharmProjects/hiv-withinhost/5BEAST/101827_relaxed/101827.log", sep="\t", header=T)
+> strict <- read.table("~/PycharmProjects/hiv-withinhost/5BEAST/101827_strict/101827.log", sep="\t", header=T)
+> shm <- 1/mean(1/strict$likelihood)
+> rhm <- 1/mean(1/relaxed$likelihood)
+> shm
+[1] -6432.62
+> rhm
+[1] -6417.411
+> log(rhm-shm)
+[1] 2.721868
+> log(abs(shm-rhm))
+[1] 2.721868
