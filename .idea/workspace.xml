@@ -3,10 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1c935150-3286-42c4-bef9-fb4adc6682d6" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Pipeline_1_Lio/N-glycs.R" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_1_Lio/N-glycs.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Pipeline_1_Lio/indel-disrupt.R" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_1_Lio/indel-disrupt.R" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/beauti.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/beauti.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -19,7 +16,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1394">
+            <state relative-caret-position="1198">
               <caret line="86" selection-start-line="86" selection-end-line="86" />
               <folding>
                 <element signature="e#0#9#0" expanded="true" />
@@ -31,8 +28,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="22" column="13" selection-start-line="22" selection-start-column="13" selection-end-line="22" selection-end-column="13" />
+            <state relative-caret-position="221">
+              <caret line="13" column="4" lean-forward="true" selection-start-line="13" selection-start-column="4" selection-end-line="13" selection-end-column="4" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -190,37 +187,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope">
-        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
-          <expand>
-            <path>
-              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-            </path>
-            <path>
-              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="Pipeline_2_Within" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-            <path>
-              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="~/PycharmProjects/hiv-withinhost" type="442cc68d:ScopeViewTreeModel$RootNode" />
-            </path>
-            <path>
-              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="~/PycharmProjects/hiv-withinhost" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="4MSA" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-            <path>
-              <item name="vindels" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="~/PycharmProjects/hiv-withinhost" type="442cc68d:ScopeViewTreeModel$RootNode" />
-              <item name="5BEAST" type="9f88c78c:ScopeViewTreeModel$FileNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
       <pane id="ProjectPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -353,10 +321,10 @@
     </configuration>
     <list>
       <item itemvalue="Python.4_Beauti" />
-      <item itemvalue="Python.beauti" />
+      <item itemvalue="Python.0_1_mkdir" />
       <item itemvalue="Python.3Extraction" />
       <item itemvalue="Python.6_1Accno" />
-      <item itemvalue="Python.0_1_mkdir" />
+      <item itemvalue="Python.beauti" />
     </list>
     <recent_temporary>
       <list>
@@ -384,7 +352,7 @@
     <frame x="1313" y="25" width="1247" height="1413" extended-state="4" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10491257" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10824313" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -672,26 +640,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1394">
-          <caret line="86" selection-start-line="86" selection-end-line="86" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/beauti.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="612">
-          <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
-          <folding>
-            <element signature="e#0#53#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/../PycharmProjects/hiv-withinhost/4MSA/12255.fasta">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="442">
@@ -709,10 +657,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/3Extraction.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1198">
+          <caret line="86" selection-start-line="86" selection-end-line="86" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/beauti.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="612">
+          <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
+          <folding>
+            <element signature="e#0#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="22" column="13" selection-start-line="22" selection-start-column="13" selection-end-line="22" selection-end-column="13" />
+        <state relative-caret-position="221">
+          <caret line="13" column="4" lean-forward="true" selection-start-line="13" selection-start-column="4" selection-end-line="13" selection-end-column="4" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>
