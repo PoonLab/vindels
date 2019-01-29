@@ -13,11 +13,17 @@ files = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/*.fasta')
 for f in files:
 
     name = str(os.path.basename(f)).split(".fasta")[0]
+    #print(name)
     newpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/'
 
     #os.mkdir(newpath+name+'/')
-    stem = newpath+name+"/"
+    #stem = newpath+name+"/"
 
-    ofn = stem + name + ".xml"
+
+    ofn = newpath + name + '/' + name + ".xml"
+
+    #override stem to test output location
+    stem = '/home/jpalmer/6BEASTout/' + name + "/"
+    print(stem)
+    print(ofn)
     parse(template_file, f, stem, ofn, 'days', 1)
-
