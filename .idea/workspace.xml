@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="1c935150-3286-42c4-bef9-fb4adc6682d6" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Documents/OGS_application_draft.odt" beforeDir="false" afterPath="$PROJECT_DIR$/Documents/OGS_application_draft.odt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py" beforeDir="false" afterPath="$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -28,8 +29,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="493">
-              <caret line="29" selection-start-line="29" selection-end-line="29" />
+            <state relative-caret-position="357">
+              <caret line="21" selection-start-line="21" selection-end-line="21" />
               <folding>
                 <element signature="e#0#21#0" expanded="true" />
               </folding>
@@ -40,7 +41,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/beauti.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
+            <state relative-caret-position="452">
               <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
               <folding>
                 <element signature="e#0#53#0" expanded="true" />
@@ -81,8 +82,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>JF910254.JF320028.2</find>
-      <find>AY901975.DQ396374.1</find>
       <find>GU329257.KC154013.1</find>
       <find>JQ403058.JF689877.1</find>
       <find>DQ383751.HQ216577.4</find>
@@ -111,6 +110,8 @@
       <find>cpatdict</find>
       <find>full2</find>
       <find>,</find>
+      <find>newpath</find>
+      <find>ofn</find>
     </findStrings>
     <replaceStrings>
       <replace>jpalmer</replace>
@@ -124,6 +125,8 @@
       <replace>cpatdict</replace>
       <replace>vdict1</replace>
       <replace>fields</replace>
+      <replace>xmlpath</replace>
+      <replace>out</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -173,9 +176,9 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="4">
-    <option name="x" value="1313" />
-    <option name="y" value="25" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="950" />
+    <option name="y" value="27" />
     <option name="width" value="1247" />
     <option name="height" value="1413" />
   </component>
@@ -187,8 +190,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
       <pane id="Scope" />
+      <pane id="ProjectPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -349,15 +352,15 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1313" y="25" width="1247" height="1413" extended-state="4" />
+    <frame x="67" y="25" width="2493" height="1415" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.10990841" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.056395587" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32970452" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.22741432" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.22706065" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39968896" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -669,7 +672,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/beauti.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
+        <state relative-caret-position="452">
           <caret line="42" column="26" selection-start-line="42" selection-start-column="26" selection-end-line="42" selection-end-column="26" />
           <folding>
             <element signature="e#0#53#0" expanded="true" />
@@ -679,8 +682,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Pipeline_2_Within/4_Beauti.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="493">
-          <caret line="29" selection-start-line="29" selection-end-line="29" />
+        <state relative-caret-position="357">
+          <caret line="21" selection-start-line="21" selection-end-line="21" />
           <folding>
             <element signature="e#0#21#0" expanded="true" />
           </folding>

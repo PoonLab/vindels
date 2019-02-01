@@ -14,16 +14,14 @@ for f in files:
 
     name = str(os.path.basename(f)).split(".fasta")[0]
     #print(name)
-    newpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/'
+    xmlpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/'
+    out = xmlpath + name + ".xml"
+    #os.mkdir(xmlpath+name+'/')
+    #stem = xmlpath+name+"/"
 
-    #os.mkdir(newpath+name+'/')
-    #stem = newpath+name+"/"
-
-
-    ofn = newpath + name + '/' + name + ".xml"
 
     #override stem to test output location
-    stem = '/home/jpalmer/6BEASTout/' + name + "/"
+    stem = '/home/jpalmer/6BEASTout/'
     print(stem)
-    print(ofn)
-    parse(template_file, f, stem, ofn, 'days', 1)
+    print(out)
+    parse(template_file, f, stem, out, 'days', 1)
