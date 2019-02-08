@@ -3,6 +3,8 @@ from glob import glob
 import os
 from seqUtils import *
 
+
+
 folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/*.fastamsa")
 
 for file in folder:

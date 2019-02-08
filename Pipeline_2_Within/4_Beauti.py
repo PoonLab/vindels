@@ -18,10 +18,11 @@ for f in files:
     out = xmlpath + name + ".xml"
     #os.mkdir(xmlpath+name+'/')
     #stem = xmlpath+name+"/"
-
+    print(name)
 
     #override stem to test output location
-    stem = '/home/jpalmer/6BEASTout/'
+    stem = '/home/jpalmer/6BEASTout/' + name
     print(stem)
     print(out)
     parse(template_file, f, stem, out, 'days', 1)
+
