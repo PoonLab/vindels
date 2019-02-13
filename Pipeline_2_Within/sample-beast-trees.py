@@ -6,14 +6,14 @@ import random
 import os 
 
 
-def sample_beast(file, numsample=10):
+def sample_beast(infile, numsample=10, ):
     tcount = 0
     states = []
     
 
-    path = os.path.dirname(file) + "/"
-    name = os.path.basename(file).split(".")[0]
-    input = open(file,'rU')
+    path = os.path.dirname(infile) + "/"
+    name = os.path.basename(infile).split(".")[0]
+    input = open(infile,'rU')
 
     for line in input:
         data = line.split()
@@ -30,7 +30,7 @@ def sample_beast(file, numsample=10):
         rsample.append(str(random.randint(start,total)*int(states[1])))
 
 
-    input2 = open(file,'rU')
+    input2 = open(infile,'rU')
 
     seqDict = {}
     
@@ -49,7 +49,6 @@ def sample_beast(file, numsample=10):
 
             #fixed all comments from the tree lines 
             fixed = re.sub("\[&rate[^\]]*\]", "", rawtree)
-            x = fixed.decode('utf-8')
 
             handle = cStringIO.StringIO(fixed)
             print(type(handle))
@@ -60,27 +59,27 @@ def sample_beast(file, numsample=10):
             for tip in tree.get_terminals():
                 newname = seqDict[tip.name]
                 
-            #Phylo.write(tree, path+name+"_"+state+".tree.sample", 'newick')
+            Phylo.write(tree, path+name+"_"+state+".tree.sample", 'newick')
             print(tree)
     print(seqDict)
 
 
 #folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*.trees")
-#for file in folder:
+#for infile in folder:
 folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*time.trees")
 
-for file in folder:
-    sample_beast(file,10)
+for infile in folder:
+    sample_beast(infile,5)
     break
 
 
 
 '''states =[]
-for line in infile:
+for line in ininfile:
     data = line.split()
     if len(data) == 6:
             states.append(int(data[1].lstrip("STATE_")))
-infile.close()
+ininfile.close()
 
 total = len(states) - 1
 start = int(total*0.1) + 1
@@ -113,10 +112,10 @@ tree = Phylo.read(handle, 'newick')
 for tip in tree.get_terminals():
     tip.name = dictionary[tip.name]
 
-Phylo.write(tree, file="")'''
+Phylo.write(tree, infile="")'''
 
 
-# open file stream to BEAST tree log
+# open infile stream to BEAST tree log
 
 # iterate through stream on a by-line basis - pass through TWICE
 
