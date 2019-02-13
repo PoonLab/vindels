@@ -98,69 +98,117 @@ for file in folder:
 
 patcount = 0
 for pat in full.keys():
-    info = [[], [], [], [],[]]
+    dates = [[], [], [], [],[]]
     for header in full[pat].keys():
         fields = header.split(".")
-        info[0].append(fields[5])
-        info[1].append(fields[6])
-        info[2].append(fields[7])
-        info[3].append(fields[8])
-        info[4].append(fields[9])
+
+        #these are the four date fields to check 
+        dates[0].append(fields[5])
+        dates[1].append(fields[6])
+        dates[2].append(fields[7])
+        dates[3].append(fields[8])
+        #this one is just a count of how many timepoints
+        dates[4].append(fields[9])
     
     #ensure that the patient has 5 time points or more 
-    if int(info[4][0]) < 5:
+    if int(dates[4][0]) < 5:
         print(pat + " has too few timepoints")
         continue
 
 
-    bool = []
+    unique = []
     for x in range(4):
-        bool.append(len(set(info[x])) > 1)
-    if not any(bool):
+        tset = set(dates[x])
+        unique.append(len(tset))
+
+           
+        
+    #skip the patient if they contain no unique timepoints 
+    if not any(i > 1 for i in unique):
         print(pat + " has no unique timepoints")
         continue
     
-    #find the first location where bool = TRUE (idx), AKA first field containing unique timepoint values
+    #find the field with the most unique timepoints 
+    #completes the idx variable, with the best timepoint 
     idx = -1
-    for n, x in enumerate(bool):
-        if x:
+    for n, x in enumerate(unique):
+        if x > 1 and x > idx:
             idx = n
-            break
 
-    # arbitrarily choose the first populated time field
+    #used to detect and fix negative date values
+    hasNeg = False
+    lowest = 0
+    for n, j in enumerate(dates[idx]):
+        
+        if j == "2222":
+            dates[idx][n] = None
+            j = "-"
+        if j != "-":
+            dates[idx][n] = int(j)
+            negative = re.search('-\d*',j)
+            if negative is not None:
+                hasNeg = True
+                if int(j) < lowest:
+                    lowest = int(j)
+
+    if hasNeg: 
+        print("HELLO THERE")
+        print(pat)
+        print(len(dates[idx]))
+        for n, k in enumerate(dates[idx]):
+            try:
+                k = int(k)
+            except:
+                continue
+            
+            dates[idx][n] = k - lowest
+         
+    
+    #skips the entire patient if no valuable dates are found
+    if all(i in ("-", "2222", None) for i in dates[idx]):
+        continue
 
     outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta","w")
     outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv", "w")
     outputv.write("header,V1,V2,V3,V4,V5\n")
 
     patcount += 1
-    for header in full[pat].keys():
+    for n, header in enumerate(full[pat].keys()):
         fields = header.split(".")
-        #print(fields)
-        if "-" in fields[idx+5]:
+        
+        #skips the sequences that do not contain a proper date 
+        if dates[idx][n] in ("-", "2222", None):
             continue
 
-        # fields[0:5] . selected time scale . number of time points . which time scale was chosen
-        hedit = ".".join(fields[0:5]) + "." + fields[9] + "." + str(idx) + "_" + fields[idx+5]
-        #print(fields[9])
+        # fields[0:5] . number of time points . selected time scale . which time scale was chosen
+        hedit = ".".join(fields[0:5]) + "." + fields[9] + "." + str(idx) + "_" + str(dates[idx][n])
         outputfull.write(">" + hedit + "\n" + full[pat][header] + "\n")
         outputv.write(hedit + "," + vpatdict[pat][header] + "\n")
 print(patcount)
 
+
 '''
-for pat in full.keys():
-        outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta", "w")
-        outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv", "w")
-        outputv.write("header,V1,V2,V3,V4,V5\n")
-        for header in full[pat].keys():
-            outputfull.write(">" + header + "\n" + full[pat][header] + "\n")
-            outputv.write(header + "," + vpatdict[pat][header]+"\n")'''
+for x in tset:
+    if (x != "-") and ("-" in x):
 
 
 
+genr = (x for x in tset if (x != "-") and ("-" in x))
 
-
-
+#finds the LOWEST negative number
+lowest = 0
+for i in genr:
+    print(i)
+    if int(i) < lowest:
+        lowest = i
+print(dates[x])
+print(genr)
+print(lowest)
+for j in dates[x]:
+    dates[x] = int(dates[x]) - lowest
+print("REWRITTEN DATES")
+print(dates[x])
+'''
 
 
 

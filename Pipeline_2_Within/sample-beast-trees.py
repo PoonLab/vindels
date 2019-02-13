@@ -33,6 +33,7 @@ def sample_beast(file, numsample=10):
     input2 = open(file,'rU')
 
     seqDict = {}
+    
 
     for line in input2:
         search = re.search("\d*[^\S\t\n\r]'.*'", line)
@@ -57,9 +58,11 @@ def sample_beast(file, numsample=10):
             #convert all the tip names using the seqDict dictionary
 
             for tip in tree.get_terminals():
-                tip.name = seqDict[tip.name].split(".")[4]
-            Phylo.write(tree, path+name+"_"+state+".tree.sample", 'newick')
-            
+                newname = seqDict[tip.name]
+                
+            #Phylo.write(tree, path+name+"_"+state+".tree.sample", 'newick')
+            print(tree)
+    print(seqDict)
 
 
 #folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*.trees")
