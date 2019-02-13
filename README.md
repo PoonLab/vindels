@@ -1,12 +1,14 @@
 # vindels
-Developing an empirical model of sequence insertion and deletion in virus genomes
+Project aimed at determining the rates of insertions and deletions in the five variable regions (V1-V5) of the HIV-1 gp120 surface envelope glycoprotein 
 
-1) collected gp120 sequence data from patient samples on LANL (97,000 sequences)
-2) Filtered sequences by >1400 nt; subtype present ; date present (8957 sequences) [subtype_output.py]
-3) Performed pairwise alignments on the gp120 reference sequence (HXB2) using MAFFT [pairwise.py]
-4) Cut and output the pairwise-aligned Variable and Conserved Regions by reading in frame [V_region_slicing2.py]
-5) Concatenated and output the conserved regions by subtype [V_region_slicing3.py]
-6) Multiple sequence alignment in MAFFT by subtype [MSA.py]
-7) Converted .fasta file to .phy file [fasta2phylip.py]
-8) Created phylo trees in PhyML 
-      
+Overview:
+1) parsed over 26,000 HIV-1 gp120 sequences from the Los Alamos National Laboratory (LANL) HIV Database and sorted them into their respective group M subtypes and circulating recombinant forms (CRFs)
+2) filtered sequences to ensure sufficient coverage of gp120 (>1,400 nt) and availability of collection dates
+3) performed a pairwise alignments between each sequence and the HXB2 reference genome to locate and extract the five variable and five conserved regions of gp120
+4) performed multiple sequence alignments (MSAs) among concatenated conserved regions within each group M clade 
+5) reconstructed phylogenetic trees from these MSAs, and rescaled the trees in time using sequence collection dates
+6) extracted cherries of the phylogenetic trees and checked for length differences in their variable regions to detect indels
+7) applied a binomial-Poisson model to these data to determine indel rates for each variable loop within each group M clade
+
+
+
