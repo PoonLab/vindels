@@ -3,15 +3,27 @@ from gotoh2 import *
 from glob import glob
 import os
 
+# USAGE : python [input folder directory] [output directory]
+# This script assumes that each sequence contains a header which is formatted in the follow way
+# [subtype].[country].[sampling year].[name] ...etc.   according to the standard LANL file output
+
+if len(sys.argv) < 3:
+    print 'python [input dir] [output dir]'
+    print "This file will perform pairwise alignments between each sequence found in the input dir\
+        and HXB2 and output the result to a new dir"
+    exit()
+
+
 #nucleotide version of the reference sequence
 gp120 = open("hxb2_gp120_sequence.txt", 'r')
 
-refseq = ''
+#load the gp120 reference 
+ntRef = ''
 for line in gp120:
-    refseq += line.strip("\n")
+    ntRef += line.strip("\n")
 
 #amino acid version of the reference sequence
-aaRef = translate_nuc(refseq,0)
+aaRef = translate_nuc(ntRef,0)
 
 #used for cutting off flanking regions
 def get_boundaries(str):
@@ -30,30 +42,28 @@ def get_boundaries(str):
 
     return res
 
-for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/1SubtypeSequences"):
-    fasta_in = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/1SubtypeSequences/" + filename, 'r')
+folder = glob(sys.argv[1] + "/*.fasta")
 
-    #used to retrieve subtype name from my file name e.g. 01_AE.fasta >> 01_AE
-    subtype = filename.split(".")[0]
+for infile in folder:
+    openfile = open(infile, 'r')
+    filename = os.path.basename(infile)
+    data = parse_fasta(openfile)
 
-    data = parse_fasta(fasta_in)
-
-    output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/2_2_Test/" + subtype + "++.fasta", 'w')
+    output = open(sys.argv[2] + "/" + filename, 'w')
 
     stops = []
     unequal = []
 
-
     for header in data:
 
-        #nt alignment to remove any unwanted gene regions
+        #nt alignment soley to remove any unwanted gene regions
         nt_pair = Aligner()
         nt_pair.set_model('HYPHY_NUC')
         nt_pair.is_global = False
         nt_pair.gap_open_penalty = 30
         nt_pair.gap_extend_penalty = 10
 
-        result = nt_pair.align(refseq,data[header])
+        result = nt_pair.align(ntRef,data[header])
 
         #finds the boundaries of the gene of interest
         left, right = get_boundaries(result[0])
@@ -70,7 +80,6 @@ for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/
             #print(header)
             continue
 
-
         #amino acid alignment
         aa_pair = Aligner()
         aa_pair.set_model('EmpHIV25')
@@ -80,16 +89,17 @@ for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/
 
         result2 = aa_pair.align(aaRef,aaQry)
 
-        # prints the amino acid alignment
+        # testing the amino acid alignment
         print(header)
+        print(ntRef)
+        print(ntQry)
         print(result2[0])
         print(result2[1])
         print("\n")
 
-        # convert the nucleotide sequences to lists so they can be edited (strings cant be mutated)
-        newRef = list(refseq)
+        # convert the nucleotide sequences to lists so they can be edited 
+        newRef = list(ntRef)
         newQry = list(ntQry)
-
 
         #reads through the amino acid alignment and adds codon gaps to the proper locations
         for i in range(len(result2[0])):
@@ -99,11 +109,11 @@ for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/
             if result2[1][i] == '-':
                 newQry[i*3:i*3] = ['-', '-', '-']
 
-
+        # unequal lengths of final alignment typically indicated a faulty sequence
         if len(newRef) != len(newQry):
             unequal.append(header)
-            print(ntQry)
-            print(refseq)
+            #print(ntQry)
+            #print(ntRef)
 
             continue
 
@@ -115,7 +125,6 @@ for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/
         print(finalQry)
         print("\n")
 
-        #output
         output.write(">" + header + '\n')
         output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
 

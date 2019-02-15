@@ -1,5 +1,17 @@
 from seqUtils import *
 import sys
+# USAGE : python [input file name] [output directory]
+# This script assumes that each sequence contains a header which is formatted in the follow way
+# [subtype].[country].[sampling year].[name] ...etc.   according to the standard LANL file output
+
+if len(sys.argv) < 3:
+    print 'python [input fasta file] [output directory]'
+    print "This file will a) filter out sequences that do not contain a collection year and sample\
+    date and are less than 1400 nt, and b) sort them based on subtype"
+    
+
+
+
 fasta_file = open(sys.argv[1], 'r')
 
 
@@ -14,7 +26,7 @@ seqcount = 0
 for i in data:
     header = i.split(".")
     seqcount += 1
-    if header[0] != "-" and header[2] != "-" and len(data[i][x]) > 1400:
+    if header[0] != "-" and header[2] != "-" and len(data[i]) > 1400:
         if header[0] not in subdict.keys():
             subdict[header[0]] = {}
             subdict[header[0]][i] = data[i]
@@ -24,42 +36,26 @@ for i in data:
 print(seqcount)
 
 subcount = 0
-for i in subdict.keys():
-    subcount += 1
-    for x in subdict[i].keys():
-        header = x.split(".")
 
-        if header[0] != "-" and header[2] != "-" and len(subdict[i][x]) > 1400:   #Removing sequences without a date sequences & less than 1400 nt
-            if i not in filtered.keys():
-                filtered[i] = {x:subdict[i][x]}
-            else:
-                filtered[i][x] = subdict[i][x]
+#output each subtype into a different file
+for subtype in subdict:
+    subcount+=1
+    if len(subdict[subtype]) == 0:
+        print(subtype + " is empty")
+        continue
 
-print(subcount)
-
-'''
-#Testing for sequence lengths
-for i in subtypes:
-    for x in subtypes[i].keys():
-        print(len(subtypes[i][x]))
-'''
-#filtered = 0
-
-#For output
-for i in filtered:
-
-    output_file = open(sys.argv[1] + "/" + i + ".fasta", 'w')
-    for x in filtered[i]:
+    output_file = open(sys.argv[2] +"/" +subtype + ".fasta", 'w')
+    for seq in subdict[subtype]:
         count += 1
 
-        output_file.write(">"+ x)
+        output_file.write(">"+ seq)
         output_file.write("\n")
-        output_file.write(filtered[i][x])
+        output_file.write(subdict[subtype][seq])
         output_file.write("\n")
         
     output_file.close()
 
-print(filtered)
+print(subcount)
 print(count)
 
 

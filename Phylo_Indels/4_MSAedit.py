@@ -6,7 +6,7 @@ from glob import glob
 #delete the sequences in the given lists, and re-print the Conserved Region .fasta file
 
 
-cfolder = glob('/home/jpalme56/PycharmProjects/hiv-evolution-master/4_2_Conserved/*.fasta')
+cfolder = glob('/home/jpalme56/PycharmProjects/hiv-evolution-master/4Conserved/*.fasta')
 vfolder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_mod2/*.csv")
 blacklist =  {"01_AE":['KP411841'],
               "02_AG":['KP411843'],

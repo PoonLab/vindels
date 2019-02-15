@@ -4,23 +4,21 @@ import re
 import sys
 from seqUtils import *
 
-
 #GP120 Reference sequence file
-ref_file = open("hxb2_gp120_sequence.txt", 'r')
+rfile = open("./Phylo_Indels/hxb2_gp120_sequence.txt", 'r')
 
 gp120 = ''
-for i in ref_file:
+for i in rfile:
     gp120 += i.strip('\n').upper()
 
-#Variable regions
-#print(len(v1), len(v2), len(v3), len(v4), len(v5))
-
-
+#Conserved regions
 c_regions = [(0,390),  (588,885) , (993, 1152), (1254, 1377), (1410, 1532)]
+
+#normal v regions
 #v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1377, 1410)]
-#modified
-v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1377, 1410)]
-alignments = glob('/home/jpalmer/PycharmProjects/hiv-evolution-master/2_1_AAPairwise/*++.fasta')
+#v regions with modified V5
+v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1368, 1419)]
+alignments = glob('/home/jpalmer/PycharmProjects/hiv-evolution-master/2_1_AAPairwise/*.fasta')
 
 gap_prefix = re.compile('^[-]+')
 gap_suffix = re.compile('[-]+$')
@@ -38,88 +36,57 @@ def get_boundaries (str):
 
     return res
 
-
-
-#Read and parse all subtype alignments
-for file in alignments:
+for infile in alignments:
     count = 0
-    print(file)
+    print(infile)
 
-    with open(file) as handle:
+    with open(infile) as handle:
         data = parse_fasta2(handle)
 
-
-    filename = file.split("/")[-1].split("++")[0]
-
+    subtype = os.path.basename(infile).split(".")[0]
+    print(subtype)
     incorrect =[]
 
-    outputv = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_mod/"+ filename + "_VR.csv", "w")
-    outputc = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/4_2_Conserved/" + filename + "_CR.fasta", "w")
+    outputv = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions-pre/"+ subtype + ".csv", "w")
+    outputc = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/4Conserved/" + subtype + ".fasta", "w")
 
     for header, seq in data.items():
         #Extract the reference and query sequences
-
-
         ref, query = seq
 
+        #Extract the accession number (last in the header)
         accno = header[-8:]
-
         if "." in accno:
             accno = accno.split(".")[1]
 
-
-
-        #Determines the start and end positions of the reference sequence in the alignment
-        #REMOVED : was moved to the pairwise alignment step earlier #2
-        #left, right = get_boundaries(ref)
-
-        #Work only with relevant sections
-        r120 = ref   # cut down to gp120
-        q120 = query
-        #print(header)
-
-
-        # generate map from alignment to reference coordinates
-        ri = 0  # reference index
-
-        #{nucleotide #: actual position}
-        index = {}
-
-        #Scan the reference for the variable region location
-        for ai, x in enumerate(r120):
-            # ai = alignment index, literal position
-
+        ri = 0  
+        index = {} # generate an alignment index
+        for ai, x in enumerate(ref):
             if x != '-':
-                # otherwise alignment has a gap, do not increment reference index
                 index.update({ri: ai})
                 ri += 1
 
         #Output
-
-        #FILTERING STEP
-        #remove any sequences that contain a problematic variable region (more than 70% gaps)
-
+        #_____________________________________________________
 
         outputv.write(accno + ",")
         outputc.write(">" + header + "\n")
 
-
         for n1, n2 in v_regions:
-            seq= q120[index[n1]:index[n2]]
+            seq= query[index[n1]:index[n2]]
             gapcount = float(seq.count("-")) / len(seq)
             qcount = float(seq.count("?")) / len(seq)
-
-
             if n1 != 1368:
                 outputv.write(seq.replace("-","") + ",")  # commas separators to make csv files
             else:
                 outputv.write(seq.replace("-","") + "\n")
 
         for n1, n2 in c_regions:
-            seq = q120[index[n1]:index[n2]]
+            seq = query[index[n1]:index[n2]]
             if n1 != 1410:
                 outputc.write(seq.replace("-",""))    # no separators so that the conserved regions are concatenated together
             else:
                 outputc.write(seq.replace("-","") + "\n")
+        
     print(count)
     print(len(incorrect))

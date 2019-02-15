@@ -1,28 +1,32 @@
 from seqUtils import *
 import subprocess
-# TODO: use tempfile module
 from glob import glob
 from gotoh2 import *
 
-refseq = """MRVKEKYQHLWRWGWRWGTMLLGMLMICSATEKLWVTVYYGVPVWKEATTTLFCASDAKAYDTEVHNVWATHACVPTDPN
-PQEVVLVNVTENFNMWKNDMVEQMHEDIISLWDQSLKPCVKLTPLCVSLKCTDLKNDTNTNSSSGRMIMEKGEIKNCSFN
-ISTSIRGKVQKEYAFFYKLDIIPIDNDTTSYKLTSCNTSVITQACPKVSFEPIPIHYCAPAGFAILKCNNKTFNGTGPCT
-NVSTVQCTHGIRPVVSTQLLLNGSLAEEEVVIRSVNFTDNAKTIIVQLNTSVEINCTRPNNNTRKRIRIQRGPGRAFVTI
-GKIGNMRQAHCNISRAKWNNTLKQIASKLREQFGNNKTIIFKQSSGGDPEIVTHSFNCGGEFFYCNSTQLFNSTWFNSTW
-STEGSNNTEGSDTITLPCRIKQIINMWQKVGKAMYAPPISGQIRCSSNITGLLLTRDGGNSNNESEIFRPGGGDMRDNWR
-SELYKYKVVKIEPLGVAPTKAKRRVVQREKR""".replace("\n",'')
 
-refv5 = refseq[456:473]
+#nucleotide version of the reference sequence
+gp120 = open("./Phylo_Indels/hxb2_gp120_sequence.txt", 'r')
 
-folder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_mod/*.csv")
+#load the gp120 reference 
+ntRef = ''
+for line in gp120:
+    ntRef += line.strip("\n")
 
-for file in folder:
-    print(file)
-    csv = open(file,'r')
+#amino acid version of the reference sequence
+aaRef = translate_nuc(ntRef,0)
+refv5 = aaRef[456:473]
+print(aaRef)
+print(refv5)
 
-    name = file.split("/")[-1]
+folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions-pre/*.csv")
 
-    output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_modTEST/"+name, 'w')
+for infile in folder:
+    print(infile)
+    csv = open(infile,'r')
+
+    name = infile.split("/")[-1] + "_"
+
+    output = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions-final/"+name, 'w')
 
     for line in csv:
         line = line.split(",")
@@ -37,14 +41,10 @@ for file in folder:
             pairwise.gap_open_penalty = 40
             pairwise.is_global = True
 
-
-
             result = pairwise.align(refv5, aav5)
 
             print(line[0])
-            #print(v5)
             print(aav5)
-
             print(result[0])
             print(result[1])
 
@@ -65,10 +65,12 @@ for file in folder:
                     ri += 1
             #print(result[1][index[2] + 1:index[14]].replace("-", ''))
 
-            final = newv5[(index[2]+1)*3:((index[14])*3)].replace("-",'')   #translate the position, add 1 to make it 1-indexed so that you can multiply by 3, multiply by 3, apply to a 0-index slice, result is the first nt of v5
+            final = newv5[(index[2]+1)*3:((index[14])*3)].replace("-",'')   
+            # translate the position, 
+            # add 1 to make it 1-indexed so that you can multiply by 3, multiply by 3, apply to a 0-index slice, 
+            # result is the first nt of v5
 
             print(final)
-
             print('')
 
             output.write(",".join(line[0:5]) + ","+ final + "\n")
