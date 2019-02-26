@@ -1,6 +1,6 @@
 from seqUtils import *
 from glob import glob
-folder = glob ("/home/jpalmer/PycharmProjects/hiv-evolution-master/1SubtypeSequences/*.fasta")
+folder = glob ("/home/jpalmer/PycharmProjects/hiv-evolution-master/1_SubtypeSequences/*.fasta")
 
 count = 0 
 for infile in folder:

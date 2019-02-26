@@ -17,7 +17,7 @@ for line in gp120:
 c_regions = [(0,390),  (588,885) , (993, 1152), (1254, 1377), (1410, 1532)]
 v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1377, 1410)]
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/2_2_pairwiseAA/*.fasta")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/2PairwiseAA/*.fasta")
 
 overall = {}
 vpatdict = {}
@@ -168,8 +168,8 @@ for pat in full.keys():
     if all(i in ("-", "2222", None) for i in dates[idx]):
         continue
 
-    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta","w")
-    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv", "w")
+    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3_RegionSequences/full_length/" + pat + ".fasta","w")
+    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3_RegionSequences/variable/" + pat + ".csv", "w")
     outputv.write("header,V1,V2,V3,V4,V5\n")
 
     patcount += 1
@@ -186,29 +186,6 @@ for pat in full.keys():
         outputv.write(hedit + "," + vpatdict[pat][header] + "\n")
 print(patcount)
 
-
-'''
-for x in tset:
-    if (x != "-") and ("-" in x):
-
-
-
-genr = (x for x in tset if (x != "-") and ("-" in x))
-
-#finds the LOWEST negative number
-lowest = 0
-for i in genr:
-    print(i)
-    if int(i) < lowest:
-        lowest = i
-print(dates[x])
-print(genr)
-print(lowest)
-for j in dates[x]:
-    dates[x] = int(dates[x]) - lowest
-print("REWRITTEN DATES")
-print(dates[x])
-'''
 
 
 

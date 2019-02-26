@@ -5,7 +5,7 @@ require(stringr)
 require(ggplot2)
 
 tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/8_Dated_Trees/trees", full.names=TRUE)
-vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_edit", full.names=TRUE)
+vfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-final", full.names=TRUE)
 
 
 len.diff <- list() #data.frame(subtype=character(),stringsAsFactors = F)

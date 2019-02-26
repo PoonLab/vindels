@@ -7,7 +7,7 @@ from glob import glob
 
 
 cfolder = glob('/home/jpalme56/PycharmProjects/hiv-evolution-master/4_2_Conserved/*.fasta')
-vfolder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_mod2/*.csv")
+vfolder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-final/*.csv")
 blacklist =  {"01_AE":['KP411841'],
               "02_AG":['KP411843'],
               "C": ['KU319547','KP411838','MF373131','KU319550','KU319539','MF373138'],
@@ -38,7 +38,7 @@ for file in vfolder:
     input = open(file,"r")
 
     subtype = file.split("/")[-1].split("_VR")[0]
-    output_file = open('/home/jpalme56/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_edit/' + subtype + "_VR.csv", 'w')
+    output_file = open('/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-final/' + subtype + "_VR.csv", 'w')
 
     print(file)
     if subtype in blacklist:

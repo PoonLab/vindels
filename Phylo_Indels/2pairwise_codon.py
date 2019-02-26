@@ -13,7 +13,6 @@ if len(sys.argv) < 3:
         and HXB2 and output the result to a new dir"
     exit()
 
-
 #nucleotide version of the reference sequence
 gp120 = open("hxb2_gp120_sequence.txt", 'r')
 

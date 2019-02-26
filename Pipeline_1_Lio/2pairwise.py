@@ -24,9 +24,9 @@ def pairwise(ref, query):
     return p
 
 
-for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/1SubtypeSequences"):
+for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/1_SubtypeSequences"):
 
-    fasta_in = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/1SubtypeSequences/"+filename, 'r')
+    fasta_in = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/1_SubtypeSequences/"+filename, 'r')
 
 
     #fasta_in = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/test.fasta", 'r')

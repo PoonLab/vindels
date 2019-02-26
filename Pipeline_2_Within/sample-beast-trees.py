@@ -6,12 +6,16 @@ import random
 import os 
 
 
-def sample_beast(infile, numsample=10, ):
+def sample_beast(infile, outdir, numsample=10 ):
     tcount = 0
     states = []
     
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
 
-    path = os.path.dirname(infile) + "/"
+    if outdir[-1] != "/":
+        outdir += "/"
+
     name = os.path.basename(infile).split(".")[0]
     input = open(infile,'rU')
 
@@ -59,7 +63,7 @@ def sample_beast(infile, numsample=10, ):
             for tip in tree.get_terminals():
                 newname = seqDict[tip.name]
                 
-            Phylo.write(tree, path+name+"_"+state+".tree.sample", 'newick')
+            Phylo.write(tree, outdir+name+"_"+state+".tree.sample", 'newick')
             print(tree)
     print(seqDict)
 
@@ -69,7 +73,7 @@ def sample_beast(infile, numsample=10, ):
 folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*time.trees")
 
 for infile in folder:
-    sample_beast(infile,5)
+    sample_beast(infile,"/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees", 10)
     break
 
 

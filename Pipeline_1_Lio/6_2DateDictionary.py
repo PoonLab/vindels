@@ -9,7 +9,7 @@ output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/dictionary.tx
 
 
 
-for file in glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/5MSAlignments/*.msa"):
+for file in glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/5MSAs/*.msa"):
 
 
     fasta = open(file, "r")

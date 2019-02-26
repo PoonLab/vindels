@@ -7,7 +7,7 @@ from glob import glob
 
 # these files contain the raw data from GenBank
 
-folder = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/*.fasta')
+folder = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/3_RegionSequences/full_length/*.fasta')
 
 
 #prints the date to this

@@ -14,7 +14,7 @@ SELYKYKVVKIEPLGVAPTKAKRRVVQREKR""".replace("\n",'')
 
 refv5 = refseq[456:473]
 
-folder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_mod/*.csv")
+folder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions_mod/*.csv")
 
 for file in folder:
     print(file)
@@ -22,7 +22,7 @@ for file in folder:
 
     name = file.split("/")[-1]
 
-    output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_modTEST/"+name, 'w')
+    output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions_modTEST/"+name, 'w')
 
     for line in csv:
         line = line.split(",")

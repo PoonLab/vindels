@@ -36,15 +36,15 @@ folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/*.fast
 
 pairwise = {}
 
-for file in folder:
+for infile in folder:
 
-    input = open(file, "r")
+    input = open(infile, "r")
 
     data = parse_fasta(input)
 
-    filename = file.split("/")[-1]
+    filename = infile.split("/")[-1]
 
-    output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/2_2_pairwiseAA/"+filename, 'w')
+    output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/2PairwiseAA/"+filename, 'w')
 
     unequal = []
     for header in data:

@@ -30,8 +30,8 @@ def get_boundaries(str):
 
     return res
 
-for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/1SubtypeSequences"):
-    fasta_in = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/1SubtypeSequences/" + filename, 'r')
+for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/1_SubtypeSequences"):
+    fasta_in = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/1_SubtypeSequences/" + filename, 'r')
 
     #used to retrieve subtype name from my file name e.g. 01_AE.fasta >> 01_AE
     subtype = filename.split(".")[0]

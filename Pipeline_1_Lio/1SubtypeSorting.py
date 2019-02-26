@@ -48,7 +48,7 @@ for i in subtypes:
 #For output
 for i in filtered:
 
-    output_file = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/1SubtypeSequences/" + i + "++.fasta", 'w')
+    output_file = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/1_SubtypeSequences/" + i + "++.fasta", 'w')
     for x in filtered[i]:
         count += 1
 

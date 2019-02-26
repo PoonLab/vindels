@@ -1,23 +1,21 @@
 from seqUtils import *
 from glob import glob
 
-
+# MANUAL EDITING
 #listed sequences hinder the accurate formation of alignments
-#delete the sequences in the given lists, and re-print the Conserved Region .fasta file
+#delete the specific sequences provided in the given lists to improve overall alignment quality
 
-
-cfolder = glob('/home/jpalme56/PycharmProjects/hiv-evolution-master/4Conserved/*.fasta')
-vfolder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_mod2/*.csv")
+cfolder = glob('/home/jpalme56/PycharmProjects/hiv-evolution-master/4_Conserved/*.fasta')
+vfolder = glob("/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-final/*.csv")
 blacklist =  {"01_AE":['KP411841'],
               "02_AG":['KP411843'],
               "C": ['KU319547','KP411838','MF373131','KU319550','KU319539','MF373138'],
               "B":['KP411824','KP411825','JQ403020','KT427845','DQ339453','KT427832']}
 
-for file in cfolder:
-    fasta = open(file,"r")
-
-
-    subtype = file.split("/")[-1].split("_CR")[0]
+for infile in cfolder:
+    fasta = open(infile,"r")
+    
+    subtype = infile.split("/")[-1].split("_CR")[0]
     data = parse_fasta(fasta)
     if subtype in blacklist:
 
@@ -34,13 +32,13 @@ for file in cfolder:
     output_file.close()
 
 
-for file in vfolder:
-    input = open(file,"r")
+for infile in vfolder:
+    input = open(infile,"r")
 
-    subtype = file.split("/")[-1].split("_VR")[0]
-    output_file = open('/home/jpalme56/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_edit/' + subtype + "_VR.csv", 'w')
+    subtype = infile.split("/")[-1].split("_VR")[0]
+    output_file = open('/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-final/' + subtype + "_VR.csv", 'w')
 
-    print(file)
+    print(infile)
     if subtype in blacklist:
         for line in input:
             accno = line.split(",")[0]

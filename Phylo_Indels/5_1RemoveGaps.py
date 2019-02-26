@@ -4,7 +4,7 @@ from seqUtils import *
 
 
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/5MSAlignments/*.msa")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/5MSAs/*.msa")
 count = 0
 
 for file in folder:

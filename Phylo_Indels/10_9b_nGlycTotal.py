@@ -2,7 +2,7 @@ import re
 from glob import glob
 from seqUtils import *
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_edit/*.csv")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-final/*.csv")
 
 output = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/ngTotal.csv", 'w')
 output.write("subtype,vloop,count,accno\n")

@@ -9,9 +9,6 @@ if len(sys.argv) < 3:
     print "This file will a) filter out sequences that do not contain a collection year and sample\
     date and are less than 1400 nt, and b) sort them based on subtype"
     
-
-
-
 fasta_file = open(sys.argv[1], 'r')
 
 

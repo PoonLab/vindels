@@ -128,8 +128,8 @@ for file in alignments:
 
     filename = file.split("/")[6]
     
-    outputv = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions/"+ filename.split("pairwise")[0] + "2.csv", "w")
-    outputc = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/4ConservedRegions/" + filename.split("pairwise")[0] + "CRegions2.fasta", "w")
+    outputv = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions/"+ filename.split("pairwise")[0] + "2.csv", "w")
+    outputc = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/4_ConservedRegions/" + filename.split("pairwise")[0] + "CRegions2.fasta", "w")
 
     for header, seq in data.items():
         #Extract the reference and query sequences

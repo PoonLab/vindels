@@ -18,7 +18,9 @@ c_regions = [(0,390),  (588,885) , (993, 1152), (1254, 1377), (1410, 1532)]
 #v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1377, 1410)]
 #v regions with modified V5
 v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1368, 1419)]
-alignments = glob('/home/jpalmer/PycharmProjects/hiv-evolution-master/2_1_AAPairwise/*.fasta')
+
+#input folder of pairwise alignments from 2_pairwise_codon.py 
+alignments = glob('/home/jpalmer/PycharmProjects/hiv-evolution-master/2_AAPairwise/*.fasta')
 
 gap_prefix = re.compile('^[-]+')
 gap_suffix = re.compile('[-]+$')
@@ -47,8 +49,8 @@ for infile in alignments:
     print(subtype)
     incorrect =[]
 
-    outputv = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions-pre/"+ subtype + ".csv", "w")
-    outputc = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/4Conserved/" + subtype + ".fasta", "w")
+    outputv = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-pre/"+ subtype + ".csv", "w")
+    outputc = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/4_Conserved/" + subtype + ".fasta", "w")
 
     for header, seq in data.items():
         #Extract the reference and query sequences

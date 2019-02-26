@@ -20,7 +20,7 @@ c_regions = [(0,390),  (588,885) , (993, 1152), (1254, 1377), (1410, 1532)]
 #v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1377, 1410)]
 #modified
 v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1377, 1410)]
-alignments = glob('/home/jpalmer/PycharmProjects/hiv-evolution-master/2_1_AAPairwise/*++.fasta')
+alignments = glob('/home/jpalmer/PycharmProjects/hiv-evolution-master/2_AAPairwise/*++.fasta')
 
 gap_prefix = re.compile('^[-]+')
 gap_suffix = re.compile('[-]+$')
@@ -53,7 +53,7 @@ for file in alignments:
 
     incorrect =[]
 
-    outputv = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions_mod/"+ filename + "_VR.csv", "w")
+    outputv = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions_mod/"+ filename + "_VR.csv", "w")
     outputc = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/4_2_Conserved/" + filename + "_CR.fasta", "w")
 
     for header, seq in data.items():

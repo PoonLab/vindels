@@ -1,5 +1,5 @@
 logfiles <- Sys.glob("~/PycharmProjects/hiv-withinhost/6BEASTout/*.log")
-setwd("~/PycharmProjects/hiv-withinhost/6BEASTout/")
+setwd("~/PycharmProjects/hiv-withinhost/6BEASTout/thinned_logs/")
 
 
 for (file in logfiles){
@@ -9,6 +9,6 @@ for (file in logfiles){
   
   log2 <- log[seq(1, nrow(log), length.out=1001), ]
   
-  write.table(log2, file=paste0(name,'.thinned'), sep='\t', quote=F, row.names=F)
+  write.table(log2, file=paste0(name,'-thin.log'), sep='\t', quote=F, row.names=F)
   
 }

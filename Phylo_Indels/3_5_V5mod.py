@@ -18,7 +18,7 @@ refv5 = aaRef[456:473]
 print(aaRef)
 print(refv5)
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions-pre/*.csv")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-pre/*.csv")
 
 for infile in folder:
     print(infile)
@@ -26,7 +26,7 @@ for infile in folder:
 
     name = infile.split("/")[-1] + "_"
 
-    output = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3RegionSequences/VRegions-final/"+name, 'w')
+    output = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/3_RegionSequences/VRegions-V5mod/"+name, 'w')
 
     for line in csv:
         line = line.split(",")

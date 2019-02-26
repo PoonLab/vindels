@@ -41,7 +41,7 @@ for filename in os.listdir("/home/jpalme56/PycharmProjects/hiv-evolution-master/
     data = parse_fasta(fasta_in)
 
 
-    output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/2_1_AAPairwise/" + subtype + "++.fasta", 'w')
+    output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/2_AAPairwise/" + subtype + "++.fasta", 'w')
 
 
 
