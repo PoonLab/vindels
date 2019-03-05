@@ -27,7 +27,7 @@ for file in cfolder:
                     print(i)
                     del data[i]
 
-    output_file = open('/home/jpalme56/PycharmProjects/hiv-evolution-master/4_2_Edit/' + subtype + "_CR.fasta", 'w')
+    output_file = open('/home/jpalme56/PycharmProjects/hiv-evolution-master/4_1_Edited/' + subtype + "_CR.fasta", 'w')
     for n in data.keys():
         output_file.write(">"+ n +"\n"+ data[n]+"\n")
 

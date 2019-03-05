@@ -1,15 +1,19 @@
 from seqUtils import *
 from glob import glob
-folder = glob ("/home/jpalmer/PycharmProjects/hiv-evolution-master/1_SubtypeSequences/*.fasta")
+import os 
+folder = glob ("/home/jpalmer/PycharmProjects/hiv-evolution-master/4_1_Edited/*.fasta")
 
 count = 0 
 for infile in folder:
+    filename = os.path.basename(infile)
+    outfile = open("/home/jpalmer/dart/data/unaligned/"+filename, 'w')
+
     with open(infile) as handle:
         fasta = parse_fasta(handle)
     
 
-    for seq in fasta:
-        count += 1
+    for header in fasta:
+        sliced = header.split(".")[-1]
+        outfile.write('>'+sliced+'\n'+fasta[header]+'\n')
 
-print(count)
 
