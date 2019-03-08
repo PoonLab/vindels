@@ -40,7 +40,7 @@ for (i in 1:length(tfolder)){
   n <- Ntip(tre)
   
   # number of tips per internal node
-  # count the number of instances that first column (node) corresponds to a second column number which is <= n (meaning it is a tip)
+  # count the number of instances that first column (node) corresponds to a tip number in the second column which is <= n (meaning it is a tip)
   numtips <- tabulate(tre$edge[,1][tre$edge[,2] <= n])
   
   #determines which nodes contain cherries (returns vector with their integer positions)

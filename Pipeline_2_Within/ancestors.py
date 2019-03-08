@@ -9,14 +9,13 @@ def opposite(num):
     else:
         return 0
 
-def extractAncestors(inputFile):
-
-    with open(inputFile) as handle:
-        data = parse_fasta(handle)
-    
-    cherry = re.compile("\([^()]*:[^()]*,[^()]*\)")
-    
+def getNodes(anFile):
     nodes = {}
+    
+    with open(anFile) as handle:
+        data = parse_fasta(handle)
+
+    cherry = re.compile("\([^()]*:[^()]*,[^()]*\)")
     
     for header in data.keys():
         #print(header)
@@ -27,15 +26,19 @@ def extractAncestors(inputFile):
             s1 = s1.split(":")[0]
             s2 = s2.split(":")[0]
             label =  s1 + "." + s2
-            
+
             nodes[label] = [data[s1],data[s2],data[header]]
+    return nodes
+
+def extractAncestors(anFile):
     
+    nodes = getNodes(anFile)
 
     iDict = {}
     dDict = {}
     for header in nodes.keys():
         #print(header)
-        head1, head2 = header.split('.')
+        accnos = header.split('.')
         for i in range(2):
             iTemp = ''
             dTemp = ''
@@ -93,18 +96,21 @@ def extractAncestors(inputFile):
                         if dTemp:
                             deletions.append(tuple((dTemp, n-1)))
                             dTemp = ''
-            print(insertions)
-            print(deletions)
-            iDict[] = insertions
-            iDict[
-
+            #print(insertions)
+            #print(deletions)
+            iDict[accnos[i]] = insertions
+            dDict[accnos[i]] = deletions
+    print("iDict")
+    print(iDict)
+    print("dDict")
+    print(dDict)
         
 
 def main():
-    files = glob('/home/jpalmer/historian/bin/*.fasta')
-
-    for f in files:
-        extractAncestors(f)
+    folder = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/4_1Accno/*.fasta')
+    
+    for infile in folder:
+        extractAncestors(infile)
 
 if __name__ == '__main__': 
     main()

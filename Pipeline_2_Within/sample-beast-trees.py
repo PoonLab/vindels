@@ -40,18 +40,23 @@ def sample_beast(infile, outdir, numsample=10 ):
     
 
     for line in input2:
+
+        #locates the translate table 
         search = re.search("\d*[^\S\t\n\r]'.*'", line)
         data = line.split()
 
+        # this will load the translate dictionary (when search has been found)
         if search != None:
             fields = line.strip("\t\n,").split()
-            fields[1] = fields[1].strip("'")
+            fields[1] = fields[1].strip("'").split(".")[4]
             seqDict[fields[0]] = fields[1]
+        
+        # this find and process each tree state in the rsample
         elif len(data) == 6 and data[1].lstrip("STATE_") in rsample:
             state = data[1].lstrip("STATE_")
             rawtree = data[-1]
 
-            #fixed all comments from the tree lines 
+            #locates and fixes all the rate comments found within each tree state 
             fixed = re.sub("\[&rate[^\]]*\]", "", rawtree)
 
             handle = cStringIO.StringIO(fixed)
@@ -61,7 +66,7 @@ def sample_beast(infile, outdir, numsample=10 ):
             #convert all the tip names using the seqDict dictionary
 
             for tip in tree.get_terminals():
-                newname = seqDict[tip.name]
+                tip.name = seqDict[tip.name]
                 
             Phylo.write(tree, outdir+name+"_"+state+".tree.sample", 'newick')
             print(tree)

@@ -121,11 +121,11 @@ for pat in full.keys():
         tset = set(dates[x])
         unique.append(len(tset))
 
-           
+    # unique = list of 4 elements, the number of unique dates in each field           
         
     #skip the patient if they contain no unique timepoints 
     if not any(i > 1 for i in unique):
-        print(pat + " has no unique timepoints")
+        print(pat + " has no unique timepoints in ALL date fields")
         continue
     
     #find the field with the most unique timepoints 
@@ -135,14 +135,18 @@ for pat in full.keys():
         if x > 1 and x > idx:
             idx = n
 
-    #used to detect and fix negative date values
+    #used to detect and fix negative date values in the chosen date list (dates[idx])
     hasNeg = False
     lowest = 0
     for n, j in enumerate(dates[idx]):
         
+        #simple filter to first get rid of any 2222 values 
         if j == "2222":
             dates[idx][n] = None
             j = "-"
+
+        #this will check every non '-' value to see if its negative
+        #if its negative, record it in hasNeg and find the lowest negative value 
         if j != "-":
             dates[idx][n] = int(j)
             negative = re.search('-\d*',j)
@@ -151,6 +155,7 @@ for pat in full.keys():
                 if int(j) < lowest:
                     lowest = int(j)
 
+    # for the date lists containing negative values, recenter all valid dates to 0  
     if hasNeg: 
         print("HELLO THERE")
         print(pat)
@@ -166,6 +171,7 @@ for pat in full.keys():
     
     #skips the entire patient if no valuable dates are found
     if all(i in ("-", "2222", None) for i in dates[idx]):
+        print(pat + " had no valuable date information")
         continue
 
     outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3_RegionSequences/full_length/" + pat + ".fasta","w")
