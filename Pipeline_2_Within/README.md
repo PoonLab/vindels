@@ -9,3 +9,6 @@ Objectives:
 4) Generate phylogenetic trees using Bayesian Inference (implemented using BEAST software package)
 5) Apply an ancestral reconstruction method to extract insertion and deletion sequences from data 
 6) Estimate the rates, lengths, and compositions of indels in each gp120 variable region using past pipeline
+
+
+
