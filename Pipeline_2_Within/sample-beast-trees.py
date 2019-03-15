@@ -75,10 +75,10 @@ def sample_beast(infile, outdir, numsample=10 ):
 
 #folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*.trees")
 #for infile in folder:
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*time.trees")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/30631-a.time.trees")
 
 for infile in folder:
-    sample_beast(infile,"/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees", 10)
+    sample_beast(infile,"/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees", 1)
     break
 
 
