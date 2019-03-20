@@ -47,11 +47,14 @@ def sample_beast(infile, outdir, numsample=10 ):
 
         # this will load the translate dictionary (when search has been found)
         if search != None:
-            fields = line.strip("\t\n,").split()
-            fields[1] = fields[1].strip("'").split(".")[4]
-            seqDict[fields[0]] = fields[1]
+            line = line.strip("\t\n,").split()
+            header = line[1].strip("'").split(".")
+            date = line[1].strip("'").split("_")[1]
+            print(line[0])
+            print(date)
+            seqDict[line[0]] = header[4] + "-" + date
         
-        # this find and process each tree state in the rsample
+        # this finds and processes each tree state in the rsample
         elif len(data) == 6 and data[1].lstrip("STATE_") in rsample:
             state = data[1].lstrip("STATE_")
             rawtree = data[-1]

@@ -26,5 +26,7 @@ This is an ongoing record of notes about the project. Notably, this will cover t
 3) sequence filtering
 
     * length > 1400 nt 
-    * at least one 
+    * at least one of the four day fields (6-9) has been populated
+    * subtype and collection year
+    
 

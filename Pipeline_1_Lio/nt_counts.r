@@ -53,7 +53,7 @@ ntides <- strsplit('ACGT',"")[[1]]
 
 for (n in ntides){
   big.df[which(big.df$nt == n),'freq'] <- big.df[which(big.df$nt == n) , n] 
-  big.df[which(big.df$nt == n),'prop'] = big.df[which(big.df$nt == n), 'freq'] / big.df[which(big.df$nt == n), 'total'] 
+  big.df[which(big.df$nt == n),'prop'] <- big.df[which(big.df$nt == n), 'freq'] / big.df[which(big.df$nt == n), 'total'] 
 }
 
 
@@ -205,4 +205,37 @@ text(0.058,0.345,labels="d)", cex=1.5)
 text(0.115,0.32,labels="T", cex=1.5)
 par(xpd=F)
 
+#Just G and T 
+#----------------------------------------
+#G
+sizes2 <- sizes.v*1.4
+
+cex=2
+par(pty="s", mfrow=c(1,2), xpd=NA, mar=c(5,4,4,2),las=0,xpd=F)
+lim=c(0.12,0.40)
+par(mar=c(5,8,3,5))
+plot(list.df[[3]][,1:2], cex=sizes2, pch=(list.df[[3]]$vregion+20), bg=rep(colors, 7),xlim=lim,ylim=lim,
+     cex.lab=1, cex.axis=1.45,cex.main=1.5, ylab='', xlab='')
+abline(0,1)
+title(ylab="Proportion Within Indels", line=3.8, cex.lab=1.7)
+title(xlab="Proportion Outside Indels", line=3.5, cex.lab=1.7)
+ 
+par(xpd=NA)
+text(0.053,0.42,labels="a)", cex=1.8)
+text(0.127,0.387,labels="G", cex=2.2)
+par(xpd=F)
+legend(0.33,0.26,legend=c('V1 ','V2 ','V3 ','V4 ','V5 '), pch=c(21,22,23,24,25),cex=1.6, pt.bg=colors,x.intersp = 1.0,y.intersp=1.1, pt.cex=3.0)
+
+#T
+lim=c(0.11,0.33)
+par(mar=c(5,5,3,8))
+plot(list.df[[4]][,1:2], cex=sizes2, pch=(list.df[[4]]$vregion+20), bg=rep(colors, 7),xlim=lim,ylim=lim,
+     cex.lab=1.2, cex.axis=1.45,cex.main=1.5, ylab='', xlab='')
+abline(0,1)
+title(ylab="Proportion Within Indels", line=3.8,cex.lab=1.7)
+title(xlab="Proportion Outside Indels", line=3.5,cex.lab=1.7)
+par(xpd=NA)
+text(0.058,0.345,labels="b)", cex=1.8)
+text(0.115,0.32,labels="T", cex=2.2)
+par(xpd=F)
 

@@ -5,8 +5,8 @@ from seqUtils import *
 
 
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/*.fasta")
-outdir = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length_accno/'
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/*.fasta")
+outdir = '/home/jpalmer/PycharmProjects/hiv-withinhost/4_1Accno/'
 for infile in folder:
     with open(infile) as handle:
         data = parse_fasta(handle)
@@ -15,6 +15,7 @@ for infile in folder:
     outfile = open(outdir+filename,'w')
     for header in data.keys():
         accno = header.split(".")[4]  # isolate just the accession number in the fifth position 
+        date = header.strip("\n").split("_")[1]
 
-        outfile.write( '>' + accno +'\n'+ data[header] +'\n')
+        outfile.write( '>' + accno+"-"+date+'\n'+ data[header] +'\n')
     

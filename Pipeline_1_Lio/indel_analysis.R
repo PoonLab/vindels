@@ -117,6 +117,8 @@ colors2 <- brewer.pal(7, 'Dark2')
 con.int$subtype <- factor(con.int$subtype, levels=c("AE", "AG", "A1", "B", "C", "D", "F1"))
 con.int <- con.int[order(con.int$subtype),]
 
+max.llh$subtype <- factor(max.llh$subtype, levels= c("AE", "AG", "A1", "B", "C", "D", "F1"))
+
 # MARKERS
 
 subline <- data.frame(subtype=c("B"), vloop=c(3),adj.rate=c(1.3))
@@ -128,7 +130,7 @@ vline <- rbind(vline, data.frame(subtype=c("B", "C"), vloop=c(2,2), adj.rate=c(0
 
 
 
-plot <- ggplot(max.llh, aes(x=vloop, 
+plot <- ggplot(max.llh, aes(x=vloop,    #*************************************************************************************************************************
                             y=adj.rate, 
                             fill=subtype, 
                             width=1)) + geom_bar(colour="black",
@@ -148,29 +150,29 @@ plot <- plot + labs(x="Variable Loop",
                                                                                                                      panel.grid.major.x = element_blank(),
                                                                                                                      panel.grid.minor.y = element_blank(),
                                                                                                                      panel.grid.minor.x = element_blank(),
-                                                                                                                     panel.spacing=unit(1, "mm"),
+                                                                                                                     panel.spacing=unit(5, "mm"),
                                                                                                                      panel.background=element_rect(fill="gray88",colour="white",size=0),
-                                                                                                                     plot.margin =margin(t = 10, r = 10, b = 20, l = 8, unit = "pt"),
+                                                                                                                     plot.margin=margin(t = 10, r = 18, b = 18, l = 20, unit = "pt"),
                                                                                                                      axis.line = element_line(colour = "black"), 
-                                                                                                                     axis.title.y=element_text(size=20,margin=margin(t = 0, r = 15, b = 0, l = 0)),
-                                                                                                                     axis.title.x=element_text(size=20,margin=margin(t = 15, r = 0, b = 0, l = 0)),
-                                                                                                                     strip.text.x = element_text(size=16),
-                                                                                                                     axis.text=element_text(size=14),
+                                                                                                                     axis.title.y=element_text(size=24,margin=margin(t = 0, r = 22, b = 0, l = 0), colour="black"),
+                                                                                                                     axis.title.x=element_text(size=24,margin=margin(t = 22, r = 0, b = 0, l = 0), colour="black"),
+                                                                                                                     strip.text.x = element_text(size=18),
+                                                                                                                     axis.text=element_text(size=18,colour="black"),
                                                                                                                      legend.position="none")+ geom_errorbar(aes(ymax = con.int$upper, ymin = con.int$lower), 
                                                                                                                                                                      width = 0.25) + geom_segment(data=vline,
                                                                                                                                                                                                   aes(x=vloop,
                                                                                                                                                                                                       y=adj.rate-0.01,
                                                                                                                                                                                                       xend=vloop,
-                                                                                                                                                                                                      yend=adj.rate-0.04),
+                                                                                                                                                                                                      yend=adj.rate-0.06),
                                                                                                                                                                                                   arrow=arrow(length=unit(3,"mm")),
-                                                                                                                                                                                                  size=0.7)+ geom_text(data=vline,
+                                                                                                                                                                                                  size=0.9)+ geom_text(data=vline,
                                                                                                                                                                                                                        aes(x=vloop, y=adj.rate+0.02, label=c("†","†","†","†","‡","†","‡","†","†")), 
-                                                                                                                                                                                                                       size=8)  + geom_text(aes(y=adj.rate-0.02),
+                                                                                                                                                                                                                       size=10)  + geom_text(aes(y=adj.rate-0.02),
                                                                                                                                                                                                                                             data=noest, 
-                                                                                                                                                                                                                                            label="no estimate", 
+                                                                                                                                                                                                                                            label="N/A", 
                                                                                                                                                                                                                                             size=6, 
                                                                                                                                                                                                                                             angle=90)
-plot
+plot  #**********************************************************************************************************************************************************************************************************************
 
 figure <- ggplot_build(plot)
 figure$layout$clip[figure$layout$name=="panel"] <- "off"
