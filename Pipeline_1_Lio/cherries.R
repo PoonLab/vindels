@@ -231,7 +231,6 @@ c$expected
 nrow(df3[which(df3$variable.loop=="V2" & df3$indel.size=="3"),])/nrow(df3[which(df3$variable.loop=="V2"),])
 
 require(vcd)
-library(gridGraphics)
 
 #par(ps = 50, cex.lab = 0.7, cex.axis = 0.5, cex.sub=0.5, las=0, xpd=T, mar=c(5,4, 2,2), mfrow=c(2,2))
 
@@ -240,16 +239,16 @@ m <- mosaic(~variable.loop + indel.size, data=df3,
        shade=T, main=NULL, direction="v",
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",
-       margins=c(2,2,4,2),
+       margins=c(2,2,6,2),
        labeling_args = list(tl_labels = c(F,T), 
                             tl_varnames=c(F,T),
-                            gp_labels=gpar(fontsize=20),
-                            gp_varnames=gpar(fontsize=24),
+                            gp_labels=gpar(fontsize=24),
+                            gp_varnames=gpar(fontsize=28),
                             set_varnames = c(variable.loop="Variable Loop", 
                                              indel.size="Indel Length (nt)"),
                             offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
-       legend=legend_resbased(fontsize = 16, fontfamily = "",
-                       x = unit(0.2, "lines"), y = unit(3,"lines"),
+       legend=legend_resbased(fontsize = 20, fontfamily = "",
+                       x = unit(0.5, "lines"), y = unit(2,"lines"),
                        height = unit(0.8, "npc"),
                        width = unit(1, "lines"), range=c(-10,10)),
        set_labels=list(Variable.Loop=c("V1","V2","V3","V4","V5")))
@@ -259,14 +258,14 @@ mosaic(~subtype + indel.size, data=df4,
        shade=T, main=NULL, direction="v",
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",legend=F, 
-       margins=c(1,4,4,4),
+       margins=c(3,2,6,2),
        labeling_args = list(tl_labels = c(F,T), 
                             tl_varnames=c(F,T), 
-                            gp_labels=gpar(fontsize=20),
-                            gp_varnames=gpar(fontsize=24),
+                            gp_labels=gpar(fontsize=23),
+                            gp_varnames=gpar(fontsize=28),
                             set_varnames = c(subtype="Subtype", 
                                              indel.size="Indel Length (nt)"),
-                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,35,0), 
+                            offset_labels=c(0,0,-0.2,-0.1),rot_labels=c(0,0,35,0), 
                             just_labels=c("center","center","center","center")))
 
 

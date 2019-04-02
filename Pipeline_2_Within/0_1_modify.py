@@ -17,5 +17,5 @@ for infile in folder:
         accno = header.split(".")[4]  # isolate just the accession number in the fifth position 
         date = header.strip("\n").split("_")[1]
 
-        outfile.write( '>' + accno+"-"+date+'\n'+ data[header] +'\n')
+        outfile.write( '>' + accno+"_"+date+'\n'+ data[header] +'\n')
     

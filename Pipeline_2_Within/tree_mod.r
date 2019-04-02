@@ -3,14 +3,31 @@
  
 
 require(ape)
-intree <- read.tree("~/PycharmProjects/hiv-withinhost/7SampleTrees/30631-a.tree.sample")
-
+tree.folder <- Sys.glob("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/*.tree.sample")
+for (treefile in tree.folder){
+  path <- strsplit(treefile,"prelim")[[1]][1]
+  intree <- read.tree(treefile)
+  filename <- basename(treefile)
+  
+  logname <- paste0(strsplit(filename, "_")[[1]][1], ".log")
+  
+  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout/",logname), sep="\t", skip=3)
+  
+  loglen <- nrow(logfile) -1
+  interval <- c(loglen*0.1+1,loglen+1)
+  rescale.factor <- median(logfile$ucld.mean[interval[1]:interval[2]])
+  intree$edge.length <- (intree$edge.length * rescale.factor)
+  print(intree)
+  write.tree(intree,paste0(path,"rescaled/",filename))
+}
 #modify all tree edge lengths using the value from the log file 
-intree$edge.length <- (intree$edge.length * 2.9042e-5)
+
 
 #output 
 write.tree(intree,"30631-a.tree")
 
+
+# ----------------------
 #bifurcating only
 intree <- multi2di(intree)
 
@@ -34,7 +51,7 @@ for (node in is.cherry){
 	tips <- intree$edge[idx.cherry,2]
 	lengths <- intree$edge.length[idx.cherry]
 	#print(tips)
-	node.name <- paste0("(",intree$tip.label[tips[1]] , ":",lengths[1],",", intree$tip.label[tips[2]],lengths[2], ")")
+	node.name <- paste0("(",intree$tip.label[tips[1]] , ":",lengths[1],",", intree$tip.label[tips[2]],":",lengths[2], ")")
 	print(node.name)  
 	#c.nodes <- rbind(c.nodes, data.frame(name=node, ,]
   

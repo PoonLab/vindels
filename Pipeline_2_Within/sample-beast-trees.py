@@ -52,11 +52,13 @@ def sample_beast(infile, outdir, numsample=10 ):
             date = line[1].strip("'").split("_")[1]
             print(line[0])
             print(date)
-            seqDict[line[0]] = header[4] + "-" + date
+            seqDict[line[0]] = header[4] + "_" + date
         
         # this finds and processes each tree state in the rsample
         elif len(data) == 6 and data[1].lstrip("STATE_") in rsample:
             state = data[1].lstrip("STATE_")
+            if len(state) >1:
+                state = state[:-5]
             rawtree = data[-1]
 
             #locates and fixes all the rate comments found within each tree state 
@@ -78,11 +80,11 @@ def sample_beast(infile, outdir, numsample=10 ):
 
 #folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*.trees")
 #for infile in folder:
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/30631-a.time.trees")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*.time.trees")
 
 for infile in folder:
-    sample_beast(infile,"/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees", 1)
-    break
+    sample_beast(infile,"/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/", 1)
+
 
 
 
