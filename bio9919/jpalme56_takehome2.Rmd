@@ -1,0 +1,122 @@
+---
+title: "Take-home assignment 2"
+author: 'John Palmer'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE, global.par=TRUE)
+```
+
+### Set-up
+
+This chunk contains some code needed to re-format the data frame for this exercise:
+```{r}
+# This code is here to pre-load the rice microbiome data
+# !!! YOU WILL NEED TO MODIFY THESE FILE PATHS !!!
+rice <- read.csv('~/BIO9919/arbuckle1.csv')
+otu <- read.csv('~/BIO9919/soilOTUs.csv')
+
+# these lines map some columns from `otu` to `rice`
+index <- match(rice$variable, otu$OTU)
+rice$Phylum <- otu$Phylum[index]
+
+# create a list keyed by Phylum and Compartment
+temp <- split(rice$RA, f=list(rice$Phylum, rice$Compartment))
+means <- sapply(temp, mean)
+dim(means) <- c(12,3)  # fold into a matrix
+
+# divide each column by its total
+freqs <- sweep(means, 2, apply(means, 2, sum), '/')
+```
+
+
+### Questions
+
+#### Relative abundance
+
+1. For this first part, we're going to examine the relative abundance variable (`RA`).  This quantity is proportional to the ratio of `Depth` (the number of short reads for that sample) and `value` (the number of those reads that mapped to a particular OTU).  Generate a visual confirmation of this with a scatterplot that displays this ratio on the x-axis, and `RA` on the y-axis:
+
+```{r}
+# make a plot!
+plot(rice$value/rice$Depth, rice$RA, ylab="Relative Abundance",xlab="Ratio (value/depth)")
+```
+
+2. To get a better understanding of `RA`, let's generate a histogram.  Make one below:
+
+```{r}
+# Make a histogram!
+hist(rice$RA)
+```
+
+3. This is a really skewed distribution!  We'd like to use a log-transform, but first we should determine how many of the values in the vector `RA` are equal to zero.  Use the `table` command and a logical test to determine this number:
+
+```{r}
+# how many zeroes?
+zeros <- rice$RA == 0
+table(zeros)
+```
+
+4. Bearing this in mind, go ahead and make a histogram with the $\log_{10}$-transformed `RA` vector.  Add a "rug" and a density curve to this histogram, remove the title, make the x-axis label more informative, and make use of colour to distinguish the density from the histogram:
+
+```{r}
+# Response here
+logRA <- log10(rice$RA)
+plot(density(logRA), ylim=c(0,0.6), col=rgb(0,0,0.9), main="", xlab="Log10 Relative Abundance")
+hist(logRA, add=T, freq=F)
+rug(logRA)
+```
+
+
+#### Rice microbiome
+
+For this next set of questions, we're going to recreate a figure from a [PNAS paper](https://www.pnas.org/content/112/8/E911) associated with this data set. 
+In the "Set-Up" section above, I've created a matrix for you (`freqs`) that contains the relative frequency of different bacterial phyla in the different root compartments (in increasing distance away from the centre of the root: endosphere, rhizoplane, rhiszosphere).
+
+5. Create a plain stacked barplot of phyla frequencies against compartments using the matrix `freqs`:
+
+```{r}
+# Response here!
+barplot(freqs)
+```
+
+6. Next, let's label these stacks.  Each stack represents a `Compartment` - by default, R will arrange these in left to right in the order of the factor levels.  You can retrieve the levels of a factor vector as a character vector with the function `levels`.  Get this vector and pass it to your `barplot` function for the optional argument `names.arg`:
+
+```{r}
+# Response here!
+
+barplot(freqs, names.arg=levels(rice$Compartment))
+```
+
+7. Let's add some colour.  Use `RColorBrewer` to generate a palette and apply it to your barplot with the keyward argument `col` (note there are 12 phyla):
+
+```{r}
+# Response here!
+require(RColorBrewer)
+pal <- brewer.pal(n=12, name="Set3")
+barplot(freqs, names.arg=levels(rice$Compartment), col=pal)
+```
+
+8. Make a legend for your barplot and display it along the top.  Remember to use `levels` to extract a character vector for `Phylum`.  Since this legend is going to be too large for the plot region, you're going to have to tinker with the plot settings with `par`.  Here are some tips:
+
+* `par(xpd=NA)` allows you to plot objects outside the normal region (*i.e.*, in the margins)
+* `par(margin=c(5,5,1,5))` creates extra space on the right side (fourth value).
+* `legend(..., cex=0.5)` is a useful way to make the entire legend smaller.
+* `legend(..., fill=<vector>)` can be used to draw filled boxes with different colours contained in `<vector>`.
+
+Make use of the `help` command and the course readings!
+
+```{r}
+# Response here!
+require(RColorBrewer)
+pal <- brewer.pal(n=12, name="Set3")
+phyla <- levels(rice$Phylum)
+par(mar=c(5,5,1,7))
+par(xpd=NA)
+barplot(freqs, names.arg=levels(rice$Compartment), col=pal)
+legend(3.7,0.9,legend=phyla, fill=pal,cex=0.8)
+```
+
+Save your plot as a PDF file and attach it to your assignment!
+You will be judged on the quality of your barplot.

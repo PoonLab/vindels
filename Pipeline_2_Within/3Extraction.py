@@ -54,6 +54,8 @@ for file in folder:
         vseq=[]
         for n1, n2 in v_regions:
             vseq.append(query[index[n1]:index[n2]].replace("-",""))
+            vseq.append(str(len(query[:index[n1]].replace("-",""))))
+            vseq.append(str(len(query[:index[n2]].replace("-",""))))
         vseq = ",".join(vseq)
 
         '''cseq = ""
@@ -114,41 +116,39 @@ for pat in full.keys():
     if int(dates[4][0]) < 5:
         print(pat + " has too few timepoints")
         continue
-
-
+    
+    # unique = list of 4 elements, the number of unique dates in each field    
     unique = []
     for x in range(4):
-        tset = set(dates[x])
-        unique.append(len(tset))
+        dateset = set(dates[x])
+        unique.append(len(dateset))
 
-    # unique = list of 4 elements, the number of unique dates in each field           
-        
     #skip the patient if they contain no unique timepoints 
     if not any(i > 1 for i in unique):
         print(pat + " has no unique timepoints in ALL date fields")
         continue
     
     #find the field with the most unique timepoints 
-    #completes the idx variable, with the best timepoint 
-    idx = -1
+    #completes the bestIdx variable, with the best timepoint 
+    bestIdx = -1
     for n, x in enumerate(unique):
-        if x > 1 and x > idx:
-            idx = n
+        if x > 1 and x > bestIdx:
+            bestIdx = n
 
-    #used to detect and fix negative date values in the chosen date list (dates[idx])
+    #used to detect and fix negative date values in the chosen date list (dates[bestIdx])
     hasNeg = False
     lowest = 0
-    for n, j in enumerate(dates[idx]):
+    for n, j in enumerate(dates[bestIdx]):
         
         #simple filter to first get rid of any 2222 values 
         if j == "2222":
-            dates[idx][n] = None
+            dates[bestIdx][n] = None
             j = "-"
 
         #this will check every non '-' value to see if its negative
         #if its negative, record it in hasNeg and find the lowest negative value 
         if j != "-":
-            dates[idx][n] = int(j)
+            dates[bestIdx][n] = int(j)
             negative = re.search('-\d*',j)
             if negative is not None:
                 hasNeg = True
@@ -159,37 +159,37 @@ for pat in full.keys():
     if hasNeg: 
         print("HELLO THERE")
         print(pat)
-        print(len(dates[idx]))
-        for n, k in enumerate(dates[idx]):
+        print(len(dates[bestIdx]))
+        for n, k in enumerate(dates[bestIdx]):
             try:
                 k = int(k)
             except:
                 continue
             
-            dates[idx][n] = k - lowest
+            dates[bestIdx][n] = k - lowest
          
     
     #skips the entire patient if no valuable dates are found
-    if all(i in ("-", "2222", None) for i in dates[idx]):
+    if all(i in ("-", "2222", None) for i in dates[bestIdx]):
         print(pat + " had no valuable date information")
         continue
 
-    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3_RegionSequences/full_length/" + pat + ".fasta","w")
-    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3_RegionSequences/variable/" + pat + ".csv", "w")
-    outputv.write("header,V1,V2,V3,V4,V5\n")
+    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta","w")
+    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv", "w")
+    outputv.write("header,V1,start,stop,V2,start,stop,V3,start,stop,V4,start,stop,V5,start,stop\n")
 
     patcount += 1
     for n, header in enumerate(full[pat].keys()):
         fields = header.split(".")
         
         #skips the sequences that do not contain a proper date 
-        if dates[idx][n] in ("-", "2222", None):
+        if dates[bestIdx][n] in ("-", "2222", None):
             continue
 
         # fields[0:5] . number of time points . selected time scale . which time scale was chosen
-        hedit = ".".join(fields[0:5]) + "." + fields[9] + "." + str(idx) + "_" + str(dates[idx][n])
-        outputfull.write(">" + hedit + "\n" + full[pat][header] + "\n")
-        outputv.write(hedit + "," + vpatdict[pat][header] + "\n")
+        hedit = ".".join(fields[0:5]) + "." + fields[9] + "." + str(bestIdx) + "_" + str(dates[bestIdx][n])
+        outputfull.write(">" + fields[4] +"_" + str(dates[bestIdx][n]) + "\n" + full[pat][header] + "\n")
+        outputv.write(fields[4] + "_" + str(dates[bestIdx][n]) + "," + vpatdict[pat][header] + "\n")
 print(patcount)
 
 

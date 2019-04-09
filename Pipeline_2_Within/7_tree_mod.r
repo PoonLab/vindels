@@ -3,7 +3,7 @@
  
 
 require(ape)
-tree.folder <- Sys.glob("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/*.tree.sample")
+tree.folder <- Sys.glob("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim2/*.tree.sample")
 for (treefile in tree.folder){
   path <- strsplit(treefile,"prelim")[[1]][1]
   intree <- read.tree(treefile)
@@ -11,14 +11,14 @@ for (treefile in tree.folder){
   
   logname <- paste0(strsplit(filename, "_")[[1]][1], ".log")
   
-  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout/",logname), sep="\t", skip=3)
+  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout2/",logname), sep="\t", skip=3)
   
   loglen <- nrow(logfile) -1
   interval <- c(loglen*0.1+1,loglen+1)
   rescale.factor <- median(logfile$ucld.mean[interval[1]:interval[2]])
   intree$edge.length <- (intree$edge.length * rescale.factor)
   print(intree)
-  write.tree(intree,paste0(path,"rescaled/",filename))
+  write.tree(intree,paste0(path,"rescaled2/",filename))
 }
 #modify all tree edge lengths using the value from the log file 
 
