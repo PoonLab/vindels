@@ -5,5 +5,5 @@ for filename in /home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/rescal
     name="$(cut -d'_' -f1 <<<"$(basename $filename)")"
     guide="$(cut -d'-' -f1 <<<"$name").fasta"
     outfile=$name"_recon.fasta"
-    ~/historian/bin/historian r -vvv -guide $msadir$guide -tree $filename -output fasta > $outdir$outfile
+    ~/historian/bin/historian r -vvv -guide $msadir$guide -tree $filename -ancseq -output fasta > $outdir$outfile
 done

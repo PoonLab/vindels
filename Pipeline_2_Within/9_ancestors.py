@@ -10,27 +10,37 @@ def opposite(num):
     else:
         return 0
 
-def getNodes(anFile):
+def getAncestors(anFile):
     nodes = {}
     
     with open(anFile) as handle:
         data = parse_fasta(handle)
 
-    cherry = re.compile("\([^()]*:[^()]*,[^()]*\)")
+    #cherry = re.compile("\([^()]*:[^()]*,[^()]*\)")
+    pos1 = re.compile("^>\([^(:,)]*:[^(:,)]*,")
+    pos2 = re.compile(",[^(:,)]*:[^(:,)]*\)$")
     
-    for header in data.keys():
-        #print(header)
-        check = cherry.match(header)
+    for entry in data.keys():
+        #print(entry)
+        #check = cherry.match(entry)
+        check1 = pos1.search(entry)
+        check2 = pos2.search(entry)
 
-        if check != None:
-            s1, s2  = header.strip("()").split(",")
-            s1 = s1.split(":")[0]
-            s2 = s2.split(":")[0]
-            label =  s1 + "." + s2
+        if check1 != None:
+            header = entry.split(",")[0].strip(">(,").split(":")[0]
 
-            nodes[label] = [data[s1],data[s2],data[header]]
+            # reformat: 
+            # nodes[accession number] = [sequence,ancestral sequence]
+            nodes[header] = [data[header], data[entry].upper()]
+        if check2 != None:
+            header = entry.split(",")[-1].strip(",)").split(":")[0]
+            nodes[header] = [data[header], data[entry].upper()]
+
+
     return nodes
 
+# Depends on vrSwitch
+# vSeqFile format: header, V1, start, stop, V2, start, stop, V3, start, stop, V4, start, stop, V5, start, stop 
 def getVRegions(vSeqFile):
 
     with open(vSeqFile) as handle:
@@ -42,16 +52,20 @@ def getVRegions(vSeqFile):
     positions = {}
     for line in data:
         fields = line.strip("\n").split(",")
+
+        # vregions[accession number] = list(V1seq, V2seq, V3seq, V4seq, V5seq)
         vregions.update({fields[0]:[]})
         positions.update({fields[0]:[]})
         for vr in range(5):
             vregions[fields[0]].append(fields[(vr*3)+1])
             positions[fields[0]].append([fields[(vr*3)+2], fields[(vr*3)+3]])
 
+    # Two dictionaries 
+    # vregions[accession number] = list(V1seq, V2seq, V3seq, V4seq, V5seq)
+    # positions[accesion number] = list([start, stop],[start, stop],[start,stop],[start,stop],[start,stop])
     return vregions, positions
         
 def vrSwitch(position, boundaries):
-
     for i in range(5):
         start, stop = boundaries[i]
         start = int(start)
@@ -61,109 +75,112 @@ def vrSwitch(position, boundaries):
     return -1
     
             
-            
-
+# Dependencies: 1) getAncestors   2) vrSwitch   3) getVRegions  
 def extractIndels(anFile, vSeqFile):
     count = 0
 
-    # {"accno1.accno2":[seq1,seq2,anseq]}
-    nodes = getNodes(anFile)
+    # {"accno":[seq1,anseq]}
+    nodes = getAncestors(anFile)
+
+    #
     vregions, positions = getVRegions(vSeqFile)
     iDict = {}
     dDict = {}
-    for header in nodes.keys():
-        accnos = header.split('.')
-        iDict[header] = []
-        dDict[header] = []
+    for accno in nodes.keys():
 
-        #repeat once for each sequence in the cherry 
-        for i in range(2):
+        iTemp = ''
+        dTemp = ''
+
+        #for collecting insertion and deletion sequences in each variable region 
+        insertions = [[],[],[],[],[]]
+        deletions = [[],[],[],[],[]]
+
+        #for compiling the variable regions to ensure they are properly examined
+        vseqs = ['','','','','']
+        
+        # ai will count the number of nucleotides, skipping gaps 
+        ai = 0
+        
+        # iterate through every character in the aligned sequence 
+        for n, schar in enumerate(nodes[accno][0]):
+            achar = nodes[accno][1][n]
+
+            #retrieves a numeric value (0,1,2,3,4) to indicate which variable region the nucleotide is in, and -1 if outside of a vloop
+            vregion = vrSwitch(ai, positions[accno]) 
             
-            iTemp = ''
-            dTemp = ''
-            insertions = [[],[],[],[],[]]
-            deletions = [[],[],[],[],[]]
-            vseqs = ['','','','','']
-            ai = 0
-            for n, Achar in enumerate(nodes[header][2]):
-                Schar = nodes[header][i][n]
-                Ochar = nodes[header][opposite(i)][n]
+            #this counts up the number of nucleotides found in the SOI (seq of interest)
+            if schar != '-':
+                ai += 1
 
-                #retrieves a numeric value (0,1,2,3,4) to indicate which variable region the nucleotide is in, and -1 if outside of a vloop
-                vregion = vrSwitch(ai, positions[accnos[i]])
+            #following code only runs if inside a variable loop
+            if vregion != -1:
                 
-                #this counts up the number of nucleotides found in the SOI (seq of interest)
-                if Schar != '-':
-                    ai += 1
-
-                #following code only run if inside a variable loop
-                if vregion != -1:
-                    
-                    #sanity check to ensure the code is covering the 
-                    vseqs[vregion] += Schar
-                    #1 : ancestral gap, sequence gap  = nothing 
-                    #2 : ancestral gap, sequence char = insertion 
-                    #3 : ancestral char, sequence gap  = deletion 
-                    #4 : ancestral char, sequence char  = nothing 
-                    if Achar == "-":
-                        #insertion in seq 1 
-                        if Schar != '-':
-                            iTemp += Schar
-                            #print(Achar + "" + Schar+"" + Ochar)
-                        #clear the dTemp 
-                            if dTemp:
-                                deletions[vregion].append(dTemp+"-"+str(n-1))
-                                dTemp = ''
-                    
-                        #nothing -- both gaps 
-                        else:
-                            #clear iTemp and dTemp
-                            if iTemp:
-                                insertions[vregion].append(iTemp+"-"+str(n-1))
-                                iTemp = ''
-                            if dTemp:
-                                deletions[vregion].append(dTemp+"-"+str(n-1))
-                                dTemp = ''
-                            
-                    elif Achar == "*":
-                        #deletion in seq 1
-                        if Schar == "-":
-                            dTemp += Ochar
-                            #print(Achar + "" + Schar+"" + Ochar)
-                            #clear iTemp
-                            if iTemp:
-                                insertions[vregion].append(iTemp+"-"+str(n-1))
-                                iTemp = ''
-                            
-                        #nothing -- both have character
-                        else:
-                            #clear iTemp and dTemp
-                            if iTemp:
-                                insertions[vregion].append(iTemp+"-"+str(n-1))
-                                iTemp = ''
-                            if dTemp:
-                                deletions[vregion].append(dTemp+"-"+str(n-1))
-                                dTemp = ''
-            iDict[header].append(insertions)
-            dDict[header].append(deletions)
-            '''
-            #SANITY CHECK 
-            #ensures that the iterated sequences are the proper variable loops and that they are identical to the one found in the csv file 
-            for n, vr in enumerate(vseqs):
-                extracted = vr.replace("-","")
+                #sanity check to ensure the code is covering the variable regions 
+                vseqs[vregion] += schar
+                #1 : ancestral gap, sequence gap  = nothing 
+                #2 : ancestral gap, sequence char = insertion 
+                #3 : ancestral char, sequence gap  = deletion 
+                #4 : ancestral char, sequence char  = nothing 
                 
-                csvSeq = vregions[accnos[i]][n] 
+                if achar == "-":
+                    #insertion in seq 1 
+                    if schar != '-':
+                        iTemp += schar
+                        
+                    #clear the dTemp 
+                        if dTemp:
+                            deletions[vregion].append(dTemp+"-"+str(n-1))
+                            dTemp = ''
                 
-                start, stop = positions[accnos[i]][n]
-                start = int(start)
-                stop = int(stop)
-                sliced = nodes[header][i].replace("-","")[start:stop]
-                if extracted == sliced and extracted == csvSeq and sliced == csvSeq:
-                    print(accnos[i])
-                    print(sliced)
-                    print(extracted)
-                    print(csvSeq)
-                    count +=1'''
+                    #nothing -- both gaps 
+                    else:
+                        #clear iTemp and dTemp
+                        if iTemp:
+                            insertions[vregion].append(iTemp+"-"+str(n-1))
+                            iTemp = ''
+                        if dTemp:
+                            deletions[vregion].append(dTemp+"-"+str(n-1))
+                            dTemp = ''
+                        
+                elif achar != "-":
+                    #deletion in seq 1
+                    if schar == "-":
+                        dTemp += achar
+        
+                        #clear iTemp
+                        if iTemp:
+                            insertions[vregion].append(iTemp+"-"+str(n-1))
+                            iTemp = ''
+                        
+                    #nothing -- both have character
+                    else:
+                        #clear iTemp and dTemp
+                        if iTemp:
+                            insertions[vregion].append(iTemp+"-"+str(n-1))
+                            iTemp = ''
+                        if dTemp:
+                            deletions[vregion].append(dTemp+"-"+str(n-1))
+                            dTemp = ''
+        iDict[accno] = insertions
+        dDict[accno] = deletions
+        '''
+        #SANITY CHECK 
+        #ensures that the iterated sequences are the proper variable loops and that they are identical to the one found in the csv file 
+        for n, vr in enumerate(vseqs):
+            extracted = vr.replace("-","")
+            
+            csvSeq = vregions[accnos[i]][n] 
+            
+            start, stop = positions[accnos[i]][n]
+            start = int(start)
+            stop = int(stop)
+            sliced = nodes[header][i].replace("-","")[start:stop]
+            if extracted == sliced and extracted == csvSeq and sliced == csvSeq:
+                print(accnos[i])
+                print(sliced)
+                print(extracted)
+                print(csvSeq)
+                count +=1'''
 
     return iDict, dDict
 
@@ -171,7 +188,13 @@ def main():
     hFolder = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/*.fasta')
     vPath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
     
-    for infile in hFolder:
+
+    #testfile = open("/home/jpalmer/101827-RECON-TEST.fasta")
+    ancestors = extractIndels("/home/jpalmer/101827-RECON-TEST.fasta","/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/101827.csv" )
+    print(ancestors[0])
+    print(ancestors[1])
+
+    '''for infile in hFolder:
         filename = os.path.basename(infile)
         #create names for both the csv file and the output recon file 
         csvfile = filename.split('-')[0] + ".csv"
@@ -200,7 +223,7 @@ def main():
                     delList = ",".join(dl)
                     if delList == "":
                         delList = ""
-                    del_out.write("\t".join([accno,date,delList,str(j+1)])+"\n")
+                    del_out.write("\t".join([accno,date,delList,str(j+1)])+"\n")'''
 
 
 
