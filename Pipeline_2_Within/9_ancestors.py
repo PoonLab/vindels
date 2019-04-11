@@ -4,14 +4,8 @@ import os
 import csv
 from seqUtils import * 
 
-def opposite(num):
-    if num == 0:
-        return 1
-    else:
-        return 0
-
 def getAncestors(anFile):
-    nodes = {}
+    terminals = {}
     
     with open(anFile) as handle:
         data = parse_fasta(handle)
@@ -28,16 +22,14 @@ def getAncestors(anFile):
 
         if check1 != None:
             header = entry.split(",")[0].strip(">(,").split(":")[0]
-
-            # reformat: 
-            # nodes[accession number] = [sequence,ancestral sequence]
-            nodes[header] = [data[header], data[entry].upper()]
+            terminals[header] = [data[header], data[entry].upper()]
         if check2 != None:
             header = entry.split(",")[-1].strip(",)").split(":")[0]
-            nodes[header] = [data[header], data[entry].upper()]
+            terminals[header] = [data[header], data[entry].upper()]
 
-
-    return nodes
+    # RETURNS:
+    # terminals[accession number] = [sequence, ancestral sequence]
+    return terminals
 
 # Depends on vrSwitch
 # vSeqFile format: header, V1, start, stop, V2, start, stop, V3, start, stop, V4, start, stop, V5, start, stop 
@@ -60,7 +52,7 @@ def getVRegions(vSeqFile):
             vregions[fields[0]].append(fields[(vr*3)+1])
             positions[fields[0]].append([fields[(vr*3)+2], fields[(vr*3)+3]])
 
-    # Two dictionaries 
+    # RETURNS
     # vregions[accession number] = list(V1seq, V2seq, V3seq, V4seq, V5seq)
     # positions[accesion number] = list([start, stop],[start, stop],[start,stop],[start,stop],[start,stop])
     return vregions, positions
@@ -80,13 +72,14 @@ def extractIndels(anFile, vSeqFile):
     count = 0
 
     # {"accno":[seq1,anseq]}
-    nodes = getAncestors(anFile)
+    terminals = getAncestors(anFile)
 
     #
     vregions, positions = getVRegions(vSeqFile)
     iDict = {}
     dDict = {}
-    for accno in nodes.keys():
+    vLen = {}
+    for accno in terminals.keys():
 
         iTemp = ''
         dTemp = ''
@@ -101,9 +94,11 @@ def extractIndels(anFile, vSeqFile):
         # ai will count the number of nucleotides, skipping gaps 
         ai = 0
         
-        # iterate through every character in the aligned sequence 
-        for n, schar in enumerate(nodes[accno][0]):
-            achar = nodes[accno][1][n]
+        # iterate through every character in the main sequence 
+        for n, schar in enumerate(terminals[accno][0]):
+
+            # also retrieve the chars in the ancestral sequence 
+            achar = terminals[accno][1][n]
 
             #retrieves a numeric value (0,1,2,3,4) to indicate which variable region the nucleotide is in, and -1 if outside of a vloop
             vregion = vrSwitch(ai, positions[accno]) 
@@ -117,6 +112,7 @@ def extractIndels(anFile, vSeqFile):
                 
                 #sanity check to ensure the code is covering the variable regions 
                 vseqs[vregion] += schar
+
                 #1 : ancestral gap, sequence gap  = nothing 
                 #2 : ancestral gap, sequence char = insertion 
                 #3 : ancestral char, sequence gap  = deletion 
@@ -163,6 +159,8 @@ def extractIndels(anFile, vSeqFile):
                             dTemp = ''
         iDict[accno] = insertions
         dDict[accno] = deletions
+        vLen[accno] = [len(vloop) for vloop in vseqs]
+        print(vLen)
         '''
         #SANITY CHECK 
         #ensures that the iterated sequences are the proper variable loops and that they are identical to the one found in the csv file 
@@ -174,7 +172,7 @@ def extractIndels(anFile, vSeqFile):
             start, stop = positions[accnos[i]][n]
             start = int(start)
             stop = int(stop)
-            sliced = nodes[header][i].replace("-","")[start:stop]
+            sliced = terminals[header][i].replace("-","")[start:stop]
             if extracted == sliced and extracted == csvSeq and sliced == csvSeq:
                 print(accnos[i])
                 print(sliced)
@@ -182,48 +180,40 @@ def extractIndels(anFile, vSeqFile):
                 print(csvSeq)
                 count +=1'''
 
-    return iDict, dDict
+    return iDict, dDict, vLen
 
 def main():
     hFolder = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/*.fasta')
     vPath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
-    
 
-    #testfile = open("/home/jpalmer/101827-RECON-TEST.fasta")
-    ancestors = extractIndels("/home/jpalmer/101827-RECON-TEST.fasta","/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/101827.csv" )
-    print(ancestors[0])
-    print(ancestors[1])
-
-    '''for infile in hFolder:
+    for infile in hFolder:
         filename = os.path.basename(infile)
+
         #create names for both the csv file and the output recon file 
-        csvfile = filename.split('-')[0] + ".csv"
-        reconfile = filename.split("_")[0] + ".csv"
+        csvfile = filename.split('-')[0] + ".csv"     #101827.csv
+        reconfile = filename.split("_")[0] + ".csv"   #101827-a.csv
         ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/insertions/"+reconfile,'w')
         del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/deletions/"+reconfile,'w')
-        iDict, dDict = extractIndels(infile, vPath+csvfile)
+        iDict, dDict, vLen = extractIndels(infile, vPath+csvfile)
 
-        ins_out.write("Accno\tDate\tIns\tVloop\n")
-        del_out.write("Accno\tDate\tDel\tVloop\n")
+        ins_out.write("Accno\tIns\tVloop\tVlen\n")
+        del_out.write("Accno\tDel\tVloop\tVlen\n")
 
-        for key in iDict:
-            header = key.split(".")
-            
-            for n in range(2):
-                accno, date = header[n].split("_")
-                
-                insertions = iDict[key][n]
-                deletions = dDict[key][n]
-                for j, ins in enumerate(insertions):
-                    insList = ",".join(ins)
-                    if insList == "":
-                        insList = ""
-                    ins_out.write("\t".join([accno,date,insList,str(j+1)])+"\n")
-                for k, dl in enumerate(deletions):
-                    delList = ",".join(dl)
-                    if delList == "":
-                        delList = ""
-                    del_out.write("\t".join([accno,date,delList,str(j+1)])+"\n")'''
+        for accno in iDict:      
+                 
+            insertions = iDict[accno]
+            deletions = dDict[accno]
+            vlengths = vLen[accno]   # will be a list containing the lengths of each variable loop 
+            for j, ins in enumerate(insertions):
+                insList = ",".join(ins)
+                if insList == "":
+                    insList = ""
+                ins_out.write("\t".join([accno,insList,str(j+1),vlength[j]])+"\n")
+            for k, dl in enumerate(deletions):
+                delList = ",".join(dl)
+                if delList == "":
+                    delList = ""
+                del_out.write("\t".join([accno,delList,str(j+1), vlength[j]])+"\n")
 
 
 
