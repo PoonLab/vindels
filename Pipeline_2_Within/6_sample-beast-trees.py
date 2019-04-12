@@ -73,17 +73,17 @@ def sample_beast(infile, outdir, numsample=10 ):
             for tip in tree.get_terminals():
                 tip.name = seqDict[tip.name]
                 
-            Phylo.write(tree, outdir+name+"_"+state+".tree.sample", 'newick')
+            Phylo.write(tree, outdir+name+".tree.sample", 'newick')
             print(tree)
     print(seqDict)
 
 
 #folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*.trees")
 #for infile in folder:
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout2/*.time.trees")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*.time.trees")
 
 for infile in folder:
-    sample_beast(infile,"/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim2/", 1)
+    sample_beast(infile,"/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/", 1)
 
 
 
