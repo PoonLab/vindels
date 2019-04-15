@@ -1,0 +1,151 @@
+[jpalmer@BEVi ~]$ mpirun -machinefile mfile python mpibeast.py ~/5BEAST/
+2019-04-05 16:27:31.973402 Process 3 of 24 starting task 3 of 50
+2019-04-05 16:27:31.973727 Process 4 of 24 starting task 4 of 50
+2019-04-05 16:27:31.974489 Process 5 of 24 starting task 5 of 50
+2019-04-05 16:27:31.974328 Process 6 of 24 starting task 6 of 50
+2019-04-05 16:27:31.973403 Process 7 of 24 starting task 7 of 50
+2019-04-05 16:27:31.974611 Process 8 of 24 starting task 8 of 50
+2019-04-05 16:27:31.974047 Process 9 of 24 starting task 9 of 50
+2019-04-05 16:27:31.974326 Process 10 of 24 starting task 10 of 50
+2019-04-05 16:27:31.973802 Process 11 of 24 starting task 11 of 50
+2019-04-05 16:27:31.973798 Process 12 of 24 starting task 12 of 50
+2019-04-05 16:27:31.974635 Process 13 of 24 starting task 13 of 50
+2019-04-05 16:27:31.973872 Process 14 of 24 starting task 14 of 50
+2019-04-05 16:27:31.974251 Process 15 of 24 starting task 15 of 50
+2019-04-05 16:27:31.974612 Process 16 of 24 starting task 16 of 50
+2019-04-05 16:27:31.975221 Process 17 of 24 starting task 17 of 50
+2019-04-05 16:27:31.973512 Process 18 of 24 starting task 18 of 50
+2019-04-05 16:27:31.974771 Process 19 of 24 starting task 19 of 50
+2019-04-05 16:27:31.974146 Process 20 of 24 starting task 20 of 50
+2019-04-05 16:27:31.974581 Process 21 of 24 starting task 21 of 50
+2019-04-05 16:27:31.974231 Process 22 of 24 starting task 22 of 50
+2019-04-05 16:27:31.974309 Process 23 of 24 starting task 23 of 50
+2019-04-05 16:27:31.974221 Process 0 of 24 starting task 0 of 50
+2019-04-05 16:27:31.975053 Process 1 of 24 starting task 1 of 50
+2019-04-05 16:27:31.974126 Process 2 of 24 starting task 2 of 50
+2019-04-05 23:42:24.207424 Process 21 of 24 completed task 21 of 50:
+
+2019-04-05 23:42:24.207529 Process 21 of 24 starting task 45 of 50
+2019-04-06 00:02:06.439450 Process 20 of 24 completed task 20 of 50:
+
+2019-04-06 00:02:06.439588 Process 20 of 24 starting task 44 of 50
+2019-04-06 00:47:49.924281 Process 11 of 24 completed task 11 of 50:
+
+2019-04-06 00:47:49.924430 Process 11 of 24 starting task 35 of 50
+2019-04-06 00:52:48.623999 Process 10 of 24 completed task 10 of 50:
+
+2019-04-06 00:52:48.624220 Process 10 of 24 starting task 34 of 50
+2019-04-06 04:20:45.162579 Process 2 of 24 completed task 2 of 50:
+
+2019-04-06 04:20:45.162753 Process 2 of 24 starting task 26 of 50
+2019-04-06 04:58:32.300202 Process 3 of 24 completed task 3 of 50:
+
+2019-04-06 04:58:32.300359 Process 3 of 24 starting task 27 of 50
+2019-04-06 05:18:10.872198 Process 15 of 24 completed task 15 of 50:
+
+2019-04-06 05:18:10.872330 Process 15 of 24 starting task 39 of 50
+2019-04-06 05:20:53.760552 Process 14 of 24 completed task 14 of 50:
+
+2019-04-06 05:20:53.760660 Process 14 of 24 starting task 38 of 50
+2019-04-06 05:32:00.967010 Process 18 of 24 completed task 18 of 50:
+
+2019-04-06 05:32:00.967238 Process 18 of 24 starting task 42 of 50
+2019-04-06 06:20:15.604543 Process 22 of 24 completed task 22 of 50:
+
+2019-04-06 06:20:15.604673 Process 22 of 24 starting task 46 of 50
+2019-04-06 06:31:26.968625 Process 12 of 24 completed task 12 of 50:
+
+2019-04-06 06:31:26.968737 Process 12 of 24 starting task 36 of 50
+2019-04-06 06:39:21.712199 Process 19 of 24 completed task 19 of 50:
+
+2019-04-06 06:39:21.712351 Process 19 of 24 starting task 43 of 50
+2019-04-06 06:48:43.697319 Process 23 of 24 completed task 23 of 50:
+
+2019-04-06 06:48:43.697478 Process 23 of 24 starting task 47 of 50
+2019-04-06 06:48:44.817023 Process 13 of 24 completed task 13 of 50:
+
+2019-04-06 06:48:44.817171 Process 13 of 24 starting task 37 of 50
+2019-04-06 08:03:56.865680 Process 5 of 24 completed task 5 of 50:
+
+2019-04-06 08:03:56.865792 Process 5 of 24 starting task 29 of 50
+2019-04-06 08:07:49.151590 Process 4 of 24 completed task 4 of 50:
+
+2019-04-06 08:07:49.151727 Process 4 of 24 starting task 28 of 50
+2019-04-06 08:39:59.943521 Process 16 of 24 completed task 16 of 50:
+
+2019-04-06 08:39:59.943641 Process 16 of 24 starting task 40 of 50
+2019-04-06 08:47:15.358813 Process 17 of 24 completed task 17 of 50:
+
+2019-04-06 08:47:15.358994 Process 17 of 24 starting task 41 of 50
+2019-04-06 12:44:47.278483 Process 15 of 24 completed task 39 of 50:
+
+2019-04-06 12:55:30.041401 Process 14 of 24 completed task 38 of 50:
+
+2019-04-06 12:56:35.306294 Process 11 of 24 completed task 35 of 50:
+
+2019-04-06 13:08:51.891930 Process 10 of 24 completed task 34 of 50:
+
+2019-04-06 14:43:37.134376 Process 22 of 24 completed task 46 of 50:
+
+2019-04-06 15:05:42.603404 Process 23 of 24 completed task 47 of 50:
+
+2019-04-06 15:18:28.752216 Process 17 of 24 completed task 41 of 50:
+
+2019-04-06 15:19:06.897047 Process 16 of 24 completed task 40 of 50:
+
+2019-04-06 18:23:24.367695 Process 4 of 24 completed task 28 of 50:
+
+2019-04-06 18:24:34.217815 Process 5 of 24 completed task 29 of 50:
+
+2019-04-06 18:32:15.269076 Process 21 of 24 completed task 45 of 50:
+
+2019-04-06 18:53:24.039589 Process 20 of 24 completed task 44 of 50:
+
+2019-04-06 23:18:12.256550 Process 3 of 24 completed task 27 of 50:
+
+2019-04-06 23:45:54.508085 Process 2 of 24 completed task 26 of 50:
+
+2019-04-07 07:14:15.227394 Process 12 of 24 completed task 36 of 50:
+
+2019-04-07 07:35:40.078986 Process 13 of 24 completed task 37 of 50:
+
+2019-04-07 11:09:53.415913 Process 18 of 24 completed task 42 of 50:
+
+2019-04-07 12:39:19.826952 Process 19 of 24 completed task 43 of 50:
+
+2019-04-07 18:28:32.793400 Process 7 of 24 completed task 7 of 50:
+
+2019-04-07 18:28:32.793485 Process 7 of 24 starting task 31 of 50
+2019-04-08 00:10:31.318482 Process 7 of 24 completed task 31 of 50:
+
+2019-04-08 03:50:16.272815 Process 6 of 24 completed task 6 of 50:
+
+2019-04-08 03:50:16.272896 Process 6 of 24 starting task 30 of 50
+2019-04-08 09:17:21.771680 Process 6 of 24 completed task 30 of 50:
+
+2019-04-12 15:09:17.134246 Process 9 of 24 completed task 9 of 50:
+
+2019-04-12 15:09:17.134330 Process 9 of 24 starting task 33 of 50
+2019-04-12 15:42:29.450145 Process 8 of 24 completed task 8 of 50:
+
+2019-04-12 15:42:29.450222 Process 8 of 24 starting task 32 of 50
+2019-04-12 21:18:42.334471 Process 9 of 24 completed task 33 of 50:
+
+2019-04-12 21:50:03.472793 Process 8 of 24 completed task 32 of 50:
+
+2019-04-13 19:36:39.419068 Process 0 of 24 completed task 0 of 50:
+
+2019-04-13 19:36:39.419140 Process 0 of 24 starting task 24 of 50
+2019-04-13 19:52:37.671849 Process 1 of 24 completed task 1 of 50:
+
+2019-04-13 19:52:37.671924 Process 1 of 24 starting task 25 of 50
+2019-04-14 01:43:38.914587 Process 0 of 24 completed task 24 of 50:
+
+2019-04-14 01:43:38.914644 Process 0 of 24 starting task 48 of 50
+2019-04-14 01:59:25.824164 Process 1 of 24 completed task 25 of 50:
+
+2019-04-14 01:59:25.824238 Process 1 of 24 starting task 49 of 50
+2019-04-14 06:37:10.686576 Process 0 of 24 completed task 48 of 50:
+
+2019-04-14 06:55:27.533941 Process 1 of 24 completed task 49 of 50:
+

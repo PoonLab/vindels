@@ -51,7 +51,8 @@ output <- sapply(csvfile$Ins, extractInfo)
 folder <- Sys.glob("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/insertions/*.csv")
 treedir <- "/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/"
 data.df <- data.frame()
-total.df <- list()
+vr.df <- list()
+total.df <- data.frame()
 count <- 0
 for (file in folder){
   print(file)
@@ -78,10 +79,12 @@ for (file in folder){
   csvfile$Ins <- NULL
   
   colnames(csvfile) <- c("Accno", "Vloop", "Count","Date", "Seq", "Pos")
-  vrdf <- split(csvfile, csvfile$Vloop)
+  total.df <- rbind(total.df, csvfile)
+  temp.df <- split(csvfile, csvfile$Vloop)
+  
   
   for (i in 1:5){
-    total.df[i][[1]] <- rbind(total.df[i][[1]], vrdf[i][[1]])
+    vr.df[i][[1]] <- rbind(vr.df[i][[1]], temp.df[i][[1]])
   }
 }
 
@@ -89,13 +92,16 @@ for (file in folder){
 rates <- c()
 vlengths <- c(84,156,105,90,33)
 for (vloop in 1:5){
-  #obj.f <- function(rate) -poisll(rate, total.df[[vloop]]$Count, total.df[[vloop]]$Date)
-  fit <- glm(total.df[[vloop]]$Count ~ total.df[[vloop]]$Date, family="poisson") 
+  current <- vr.df[[vloop]]
+  finalized <- current[current$Date < 10,]
+  print(nrow(current) - nrow(finalized))
+  #obj.f <- function(rate) -poisll(rate, vr.df[[vloop]]$Count, vr.df[[vloop]]$Date)
+  fit <- glm(finalized$Count ~ finalized$Date, family="poisson") 
   rates <- c(rates, coef(fit)[2][[1]]*365/vlengths[vloop])
 }
 
 # Get raw insertion counts 
-sum(total.df[[1]]$Count)
-sum(total.df[[2]]$Count)
+sum(vr.df[[1]]$Count)
+sum(vr.df[[2]]$Count)
 
 
