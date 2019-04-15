@@ -42,8 +42,8 @@ cutHeader <- function(header){
 
 
 #TESTING ----------------------
-csvfile <- read.csv(file, sep="\t", stringsAsFactors = F)
-output <- sapply(csvfile$Ins, extractInfo)
+#csvfile <- read.csv(file, sep="\t", stringsAsFactors = F)
+#output <- sapply(csvfile$Ins, extractInfo)
 
 
 
@@ -87,18 +87,36 @@ for (file in folder){
     vr.df[i][[1]] <- rbind(vr.df[i][[1]], temp.df[i][[1]])
   }
 }
-
+require(BSDA)
 # RATE ANALYSIS -------------
 rates <- c()
+fits <- c()
 vlengths <- c(84,156,105,90,33)
-for (vloop in 1:5){
-  current <- vr.df[[vloop]]
-  finalized <- current[current$Date < 10,]
-  print(nrow(current) - nrow(finalized))
-  #obj.f <- function(rate) -poisll(rate, vr.df[[vloop]]$Count, vr.df[[vloop]]$Date)
-  fit <- glm(finalized$Count ~ finalized$Date, family="poisson") 
-  rates <- c(rates, coef(fit)[2][[1]]*365/vlengths[vloop])
-}
+#for (vloop in 1:5){
+
+vloop <- 1
+current <- vr.df[[vloop]]
+finalized <- current[current$Date < 15,]
+#print(nrow(current) - nrow(finalized))
+#obj.f <- function(rate) -poisll(rate, vr.df[[vloop]]$Count, vr.df[[vloop]]$Date)
+fit <- glm(finalized$Count ~ finalized$Date, family="poisson")
+rate <- coef(fit)[2][[1]]*365/vlengths[vloop]
+rates <- c(rates, rate)
+
+
+
+#----- 
+vloop <- 1
+current <- vr.df[[vloop]]
+finalized <- current[current$Date < 325,]
+#print(nrow(current) - nrow(finalized))
+#obj.f <- function(rate) -poisll(rate, vr.df[[vloop]]$Count, vr.df[[vloop]]$Date)
+fit <- glm(finalized$Count ~ finalized$Date, family="poisson")
+rate <- coef(fit)[2][[1]]*365/vlengths[vloop]
+rates <- c(rates, rate)
+summary(fit)
+1 - (fit$deviance/fit$null.deviance)
+EDA(residuals(fit))
 
 # Get raw insertion counts 
 sum(vr.df[[1]]$Count)
