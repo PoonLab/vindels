@@ -90,33 +90,32 @@ for (file in folder){
 require(BSDA)
 # RATE ANALYSIS -------------
 rates <- c()
-fits <- c()
 vlengths <- c(84,156,105,90,33)
-#for (vloop in 1:5){
+all.df <- data.frame()
+for (vloop in 1:5){
+  current <- vr.df[[vloop]]
+  finalized <- current[current$Date < 325,]
+  #print(nrow(current) - nrow(finalized))
+  
+  
+  fit <- glm(finalized$Count ~ finalized$Date, family="poisson")
+  rate <- coef(fit)[2][[1]]*365/vlengths[vloop]
+  rates <- c(rates, rate)
+  print(summary(fit))
+  print(1 - (fit$deviance/fit$null.deviance))
+  all.df <- rbind(all.df, finalized)
+  #EDA(residuals(fit))
+  
+  #to.remove <- c(order(residuals(fit), decreasing = T)[1:52])
+  #finalized2 <- finalized[-to.remove,]
+  #fit2 <- glm(finalized2$Count ~ finalized2$Date, family="poisson")
+  #EDA(residuals(fit2))
+  
+  
+}
 
-vloop <- 1
-current <- vr.df[[vloop]]
-finalized <- current[current$Date < 15,]
-#print(nrow(current) - nrow(finalized))
-#obj.f <- function(rate) -poisll(rate, vr.df[[vloop]]$Count, vr.df[[vloop]]$Date)
-fit <- glm(finalized$Count ~ finalized$Date, family="poisson")
-rate <- coef(fit)[2][[1]]*365/vlengths[vloop]
-rates <- c(rates, rate)
 
-
-
-#----- 
-vloop <- 1
-current <- vr.df[[vloop]]
-finalized <- current[current$Date < 325,]
-#print(nrow(current) - nrow(finalized))
-#obj.f <- function(rate) -poisll(rate, vr.df[[vloop]]$Count, vr.df[[vloop]]$Date)
-fit <- glm(finalized$Count ~ finalized$Date, family="poisson")
-rate <- coef(fit)[2][[1]]*365/vlengths[vloop]
-rates <- c(rates, rate)
-summary(fit)
-1 - (fit$deviance/fit$null.deviance)
-EDA(residuals(fit))
+ggplot(all.df, aes(x=Date, y=Count, group=Count)) + geom_density_ridges(colour="white", fill="blue", scale=1, bandwidth=5)
 
 # Get raw insertion counts 
 sum(vr.df[[1]]$Count)
