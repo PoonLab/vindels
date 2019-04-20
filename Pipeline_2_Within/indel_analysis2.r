@@ -42,8 +42,8 @@ cutHeader <- function(header){
 
 
 #TESTING ----------------------
-csvfile <- read.csv(file, sep="\t", stringsAsFactors = F)
-output <- sapply(csvfile$Ins, extractInfo)
+#csvfile <- read.csv(file, sep="\t", stringsAsFactors = F)
+#output <- sapply(csvfile$Ins, extractInfo)
 
 
 
@@ -51,7 +51,8 @@ output <- sapply(csvfile$Ins, extractInfo)
 folder <- Sys.glob("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/insertions/*.csv")
 treedir <- "/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/"
 data.df <- data.frame()
-total.df <- list()
+vr.df <- list()
+total.df <- data.frame()
 count <- 0
 for (file in folder){
   print(file)
@@ -78,24 +79,46 @@ for (file in folder){
   csvfile$Ins <- NULL
   
   colnames(csvfile) <- c("Accno", "Vloop", "Count","Date", "Seq", "Pos")
-  vrdf <- split(csvfile, csvfile$Vloop)
+  total.df <- rbind(total.df, csvfile)
+  temp.df <- split(csvfile, csvfile$Vloop)
+  
   
   for (i in 1:5){
-    total.df[i][[1]] <- rbind(total.df[i][[1]], vrdf[i][[1]])
+    vr.df[i][[1]] <- rbind(vr.df[i][[1]], temp.df[i][[1]])
   }
 }
-
+require(BSDA)
 # RATE ANALYSIS -------------
 rates <- c()
 vlengths <- c(84,156,105,90,33)
+all.df <- data.frame()
 for (vloop in 1:5){
-  #obj.f <- function(rate) -poisll(rate, total.df[[vloop]]$Count, total.df[[vloop]]$Date)
-  fit <- glm(total.df[[vloop]]$Count ~ total.df[[vloop]]$Date, family="poisson") 
-  rates <- c(rates, coef(fit)[2][[1]]*365/vlengths[vloop])
+  current <- vr.df[[vloop]]
+  finalized <- current[current$Date < 325,]
+  #print(nrow(current) - nrow(finalized))
+  
+  
+  fit <- glm(finalized$Count ~ finalized$Date, family="poisson")
+  rate <- coef(fit)[2][[1]]*365/vlengths[vloop]
+  rates <- c(rates, rate)
+  print(summary(fit))
+  print(1 - (fit$deviance/fit$null.deviance))
+  all.df <- rbind(all.df, finalized)
+  #EDA(residuals(fit))
+  
+  #to.remove <- c(order(residuals(fit), decreasing = T)[1:52])
+  #finalized2 <- finalized[-to.remove,]
+  #fit2 <- glm(finalized2$Count ~ finalized2$Date, family="poisson")
+  #EDA(residuals(fit2))
+  
+  
 }
 
+
+ggplot(all.df, aes(x=Date, y=Count, group=Count)) + geom_density_ridges(colour="white", fill="blue", scale=1, bandwidth=5)
+
 # Get raw insertion counts 
-sum(total.df[[1]]$Count)
-sum(total.df[[2]]$Count)
+sum(vr.df[[1]]$Count)
+sum(vr.df[[2]]$Count)
 
 
