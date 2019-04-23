@@ -94,24 +94,21 @@ vlengths <- c(84,156,105,90,33)
 all.df <- data.frame()
 for (vloop in 1:5){
   current <- vr.df[[vloop]]
-  finalized <- current[current$Date < 325,]
+  # finalized <- current[current$Date < 325 & current$Count < 2,]
   #print(nrow(current) - nrow(finalized))
   
-  
-  fit <- glm(finalized$Count ~ finalized$Date, family="poisson")
-  rate <- coef(fit)[2][[1]]*365/vlengths[vloop]
+  fit <- glm(finalized$Count ~ 1, offset=log(finalized$Date), family="poisson")
+  rate <- exp(coef(fit)[[1]])*365/vlengths[vloop]
   rates <- c(rates, rate)
   print(summary(fit))
-  print(1 - (fit$deviance/fit$null.deviance))
-  all.df <- rbind(all.df, finalized)
+  #print(1 - (fit$deviance/fit$null.deviance))
+  #all.df <- rbind(all.df, finalized)
   #EDA(residuals(fit))
   
   #to.remove <- c(order(residuals(fit), decreasing = T)[1:52])
   #finalized2 <- finalized[-to.remove,]
   #fit2 <- glm(finalized2$Count ~ finalized2$Date, family="poisson")
   #EDA(residuals(fit2))
-  
-  
 }
 
 

@@ -37,11 +37,27 @@ Methodology:
         * subtype and collection year present
 
 
-2) Perform pairwise alignment of each patient sequence with HXB2 (reference) to remove any irrelevant nucleotides outside gp120 
+2) Perform pairwise alignment of each patient sequence with HXB2 (reference) (3Extraction.py) 
+    
+    1. to remove any flanking nucleotides outside of the gp120 gene   
 
-3) Use full length gp120 sequences to create  a MSA between all sequences within each host 
-4) Generate phylogenetic trees using Bayesian Inference (implemented using BEAST software package)
-5) Apply an ancestral reconstruction method to extract insertion and deletion sequences from data 
+    2. to extract the Variable Loops 1-5 for later analysis
+
+
+3) Apply MAFFT software to all full length gp120 sequences within each patient to create within-host MSAs (4MSA_withinhost.sh)
+
+4) Generate time-scaled phylogenetic trees using Bayesian Inference (implemented using BEAST) (5_Beauti.py, 6)
+
+    1. Substitution model: TN93
+    2. Site heterogeneity model: Gamma
+    3. Clock model: Uncorrelated relaxed clock
+    4. Coalescent model: Bayesian Skyline
+    5. MCMC: 10e8 iterations
+
+5) Use ancestral reconstruction software (Historian) to extract insertion and deletions from all tips (6_sample-beast-trees.py, 7_tree_mod.r, 8_historian.sh, 9_ancestors.py)
+
+
+
 6) Estimate the rates, lengths, and compositions of indels in each gp120 variable region using past pipeline
 
 
