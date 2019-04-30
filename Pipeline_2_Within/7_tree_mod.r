@@ -23,12 +23,7 @@ for (treefile in tree.folder){
 #modify all tree edge lengths using the value from the log file 
 
 
-# RESCALE THE GUIDE TREE FOR BEAST ANALYSIS
 
-require(ape)  # if ape is not installed, run `install.packages("ape")`
-tr <- read.tree('~/PycharmProjects/hiv-withinhost/7SampleTrees/raxml/VN_Data_edited.tree')  # you may need to specify a different path
-tr$edge.length <- rep(1, times=length(tr$edge.length))
-write.tree(tr, "~/PycharmProjects/hiv-withinhost/7SampleTrees/raxml/VN_Data_rescaled.tree")
 
 
 

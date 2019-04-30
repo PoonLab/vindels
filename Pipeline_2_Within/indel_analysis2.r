@@ -94,7 +94,7 @@ vlengths <- c(84,156,105,90,33)
 all.df <- data.frame()
 for (vloop in 1:5){
   current <- vr.df[[vloop]]
-  # finalized <- current[current$Date < 325 & current$Count < 2,]
+  finalized <- current[current$Date < 325 & current$Count < 2,]
   #print(nrow(current) - nrow(finalized))
   
   fit <- glm(finalized$Count ~ 1, offset=log(finalized$Date), family="poisson")
@@ -116,6 +116,6 @@ ggplot(all.df, aes(x=Date, y=Count, group=Count)) + geom_density_ridges(colour="
 
 # Get raw insertion counts 
 sum(vr.df[[1]]$Count)
-sum(vr.df[[2]]$Count)
+sum(vr.df[[5]]$Count)
 
 

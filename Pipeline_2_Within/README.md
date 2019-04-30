@@ -7,7 +7,7 @@ Pipeline of Python, Bash, and R scripts used to perform a within-host phylogenet
 
 
 Methodology:
-1) Downloaded gp120 sequence data from LANL from within-host HIV-1 sequence data (1SequenceProcessing.py)
+1) Downloaded gp120 sequence data from LANL from within-host HIV-1 sequence data (1_SequenceProcessing.py)
 
     1. Parameters for LANL search (29 sets and 11350 sequences)
 

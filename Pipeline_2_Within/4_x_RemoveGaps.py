@@ -26,7 +26,7 @@ for infile in folder:
         data = parse_fasta(fasta)
     
     count += len(data)
-    output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/4_1MSAedited/"+ filename,'w')
+    output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/"+ filename,'w')
 
     #dictionary format
     for header in data.keys():

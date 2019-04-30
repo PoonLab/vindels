@@ -5,8 +5,8 @@ from seqUtils import *
 
 
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/4_1MSAedited/*.fasta")
-outdir = '/home/jpalmer/PycharmProjects/hiv-withinhost/4_2Accno/'
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/*.fasta")
+outdir = '/home/jpalmer/PycharmProjects/hiv-withinhost/4_1Accno/'
 for infile in folder:
     with open(infile) as handle:
        data = parse_fasta(handle)

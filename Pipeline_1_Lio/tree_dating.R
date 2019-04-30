@@ -150,8 +150,8 @@ for (n in 1:length(tfolder)){
   
   rtdtree2 <- rtdtree
   rtdtree2$tip.label <- paste(rtdtree2$tip.label, sample.times, sep="-")
-  setwd("~/PycharmProjects/hiv-evolution-master/7_Tempest")
-  write.tree(rtdtree2, file=paste0(filename,".tree"))
+  #setwd("~/PycharmProjects/hiv-evolution-master/7_Tempest")
+  #write.tree(rtdtree2, file=paste0(filename,".tree"))
   setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
   
   big.df <- rbind(big.df,data.frame(subtype=rep(filename,Ntip(rtdtree)), dates=sample.times, lengths=lens))

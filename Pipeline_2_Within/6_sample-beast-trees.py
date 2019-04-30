@@ -52,6 +52,8 @@ def sample_beast(infile, outdir, numsample=10 ):
             date = line[1].strip("'").split("_")[1]
             print(line[0])
             print(date)
+            
+            #NEW SEQUENCE HEADER FORMAT
             seqDict[line[0]] = header[4] + "_" + date
         
         # this finds and processes each tree state in the rsample
