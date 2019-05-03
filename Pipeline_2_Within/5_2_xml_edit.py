@@ -15,18 +15,23 @@ for infile in xmlFolder:
     treefile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/guide_trees/"+treename, "r")
 
     tree = treefile.readline()
-
     root = xml.getroot()
 
-    for child in root:
-        if child.tag == "coalescentSimulator":
-            child.clear()
-            child.tag = "newick"
-            child.attrib = {'id':'startingTree'}
+    for parent in root.iter():
+        if parent.tag == "operators":
+            for toRemove in ["subtreeSlide", "narrowExchange", "wideExchange", "wilsonBalding"]:
+                element = parent.find(toRemove)
+                if element != None:
+                    print(element.tag)
+                    parent.remove(element)
 
-            print(child.tag, child.attrib)
-            child.text = "\n"+tree
-
+        if parent.tag == "coalescentSimulator":
+            parent.clear()
+            parent.tag = "newick"
+            parent.attrib = {'id':'startingTree'}
+            parent.text = "\n"+tree
+    
     xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/"+xmlname)
+    
 
 
