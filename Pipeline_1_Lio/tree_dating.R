@@ -70,6 +70,7 @@ get.range <- function(x) {
 }
 
 branch.lengths <- data.frame()
+genetic.dists <- data.frame()
 big.df <- data.frame(stringsAsFactors = F)
 setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
 for (n in 1:length(tfolder)){
@@ -92,9 +93,6 @@ for (n in 1:length(tfolder)){
   temp <- NULL
   for (x in 1:nrow(csv)){
     dtx <- get.range(csv$date[x])
-    
-    #middate <- as.Date(mid.date(dtx[1],dtx[2]))
-    #decdate <- date.to.decimal(middate)
     temp <- rbind(temp, data.frame(accno=csv$accno[x],
                                    acc.date=csv$date[x], min.date=dtx[1], max.date=dtx[2],
                                    min.ord=date.to.decimal(dtx[1]), max.ord=date.to.decimal(dtx[2])))
@@ -110,17 +108,18 @@ for (n in 1:length(tfolder)){
     next
   }
   
-  #ROOTED (UNDATED) TREE ANALYSIS --------------------------------------------
+  #ROOTED (UNDATED) TREE ANALYSIS 
+  # --------------------------------------------
   ntips <- Ntip(tre)
   
   # count the number of instances that first column (node) corresponds to a second column number which is <= n (meaning it is a tip)
-  numtips <- tabulate(tre$edge[,1][tre$edge[,2] <= ntips])
+  numtips <- tabulate(tre$edge[,1][which(tre$edge[,2] <= ntips)])
   
   #determines which nodes contain cherries (returns vector with their integer positions)
-  is.cherry <- sapply(numtips, function(d) d==2)
+  is.cherry <- which(numtips == 2)
   
   # construct data frame where each row corresponds to a cherry
-  m <- sapply(which(is.cherry), function(a) { #will input the numbers of nodes containing 2 tips?
+  m <- sapply(is.cherry, function(a) { #will input the numbers of nodes containing 2 tips?
     edge.idx <- tre$edge[,1]==a  # FINDS THE EDGES (row #) corresponding with the parent node ; ap: select rows in edge matrix with parent node index
     
     c(a,   # index of the parent node
@@ -143,20 +142,24 @@ for (n in 1:length(tfolder)){
   #TERMINAL BRANCH LENGTHS PLOT 
   branch.lengths <- rbind(branch.lengths, data.frame(subtype=rep(filename,nrow(indels)), length=indels$total.length))
   
+  #CHERRY GENETIC DISTANCES PLOT
+  genetic.dists <- rbind(genetic.dists, data.frame(subtype=rep(filename,2*(nrow(df))),GD=c(df$tip1.len, df$tip2.len)))
   
   #ROOT TO TIP DISTANCE PLOT
   sample.times <- sample.times + 1970
   lens <- node.depth.edgelength(rtdtree)[1:Ntip(rtdtree)]
   
-  rtdtree2 <- rtdtree
-  rtdtree2$tip.label <- paste(rtdtree2$tip.label, sample.times, sep="-")
+  
+  # STUFF USED FOR TEMPEST
+  #rtdtree2 <- rtdtree
+  #rtdtree2$tip.label <- paste(rtdtree2$tip.label, sample.times, sep="-")
   #setwd("~/PycharmProjects/hiv-evolution-master/7_Tempest")
   #write.tree(rtdtree2, file=paste0(filename,".tree"))
-  setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
   
   big.df <- rbind(big.df,data.frame(subtype=rep(filename,Ntip(rtdtree)), dates=sample.times, lengths=lens))
   
-  # DATING TREES OUTPUT-----------------------------------
+  # DATING TREES USING LSD 
+  # -----------------------------------
   write.tree(rtdtree, file="rtt2lsd.nwk")
 
   #The following is written in accordance with the LSD format
@@ -192,7 +195,25 @@ branch.len2 <- split(branch.lengths$length, branch.lengths$subtype)
 boxplot(branch.len2, xlab="Subtype",cex.lab=1.3,las=1)
 par(las=3)
 mtext(side = 2, text = "Terminal Branch Lengths (Expected Substitutions)", line = 4, cex=1.3)
-#--------------------------------
+
+
+
+# GENETIC DISTANCES PLOT --------------
+plot(genetic.dists$subtype, genetic.dists$GD, xlab="Group M Clade", ylab="Genetic Distance (Cherries)", cex.axis=1.2, cex.lab=1.5)
+new.df <- split(genetic.dists, genetic.dists$subtype)
+means <- sapply(new.df, function (x) mean(x$GD) )
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 big.df <- big.df[which(big.df$dates>1960),]

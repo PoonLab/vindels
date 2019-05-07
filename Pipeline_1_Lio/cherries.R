@@ -263,7 +263,7 @@ mosaic(~subtype + indel.size, data=df4,
                             tl_varnames=c(F,T), 
                             gp_labels=gpar(fontsize=23),
                             gp_varnames=gpar(fontsize=28),
-                            set_varnames = c(subtype="Subtype", 
+                            set_varnames = c(subtype="Clade", 
                                              indel.size="Indel Length (nt)"),
                             offset_labels=c(0,0,-0.2,-0.1),rot_labels=c(0,0,35,0), 
                             just_labels=c("center","center","center","center")))
