@@ -198,31 +198,46 @@ mtext(side = 2, text = "Terminal Branch Lengths (Expected Substitutions)", line 
 
 
 
-# GENETIC DISTANCES PLOT --------------
-par(mar=c(5,5,1,1))
-plot(genetic.dists$subtype, genetic.dists$GD, xlab="Group M Clade", ylab="Genetic Distance (Cherries)", cex.axis=1.2, cex.lab=1.5)
+# GENETIC DISTANCES PLOTS --------------
 
-
-gd.df <- genetic.dists[which(genetic.dists$GD <= 0.05),]
-
-par(mar=c(5,5,1,1))
-plot(gd.df$subtype, gd.df$GD, xlab="Group M Clade", ylab="Genetic Distance (Cherries)", cex.axis=1.2, cex.lab=1.5)
-
-
+# qcquire the order of means 
 new.df <- split(genetic.dists, genetic.dists$subtype)
 means <- sapply(new.df, function (x) mean(x$GD) )
+means <- means[order(means)]
+ordered <- names(means)
 
 
+gd.order <- genetic.dists
+# this applies the properly ordered factor to the subtype column 
+gd.order$subtype <- factor(gd.order$subtype, levels=ordered)
+# this sorts the entire data frame by the properly ordered 'levels' in the subtype column
+gd.order <- gd.order[order(gd.order$subtype),]
 
 
+# A) Standard plot 
+par(mar=c(5,5,1,1))
+plot(gd.order$subtype, gd.order$GD, xlab="Group M Clade", ylab="Genetic Distance (Cherries)", cex.axis=1.2, cex.lab=1.5)
+
+# perform a wilcoxon test on this 
 
 
+# B) Only GDs under 0.05 
+gd.05 <- genetic.dists[which(genetic.dists$GD <= 0.05),]
+par(mar=c(5,5,1,1))
+plot(gd.05$subtype, gd.05$GD, xlab="Group M Clade", ylab="Genetic Distance (Cherries)", cex.axis=1.2, cex.lab=1.5)
 
 
-
-
-
-
+# C) Staggered density plot of the seven subtypes  
+require(ggplot2)
+require(ggridges)
+gd.15 <- genetic.dists[which(genetic.dists$GD <= 0.15),]
+ggplot(gd.15, aes(x=GD, y=subtype, group=subtype)) + 
+  geom_density_ridges(colour="white", fill="blue3", scale=1, bandwidth=0.002) + 
+  labs(x="Genetic Distance", y="Subtype") + 
+  theme(axis.title.x=element_text(size=15,margin=margin(t = 15, r = 0, b = 0, l = 0)),
+        axis.title.y=element_text(size=15,margin=margin(t = 15, r = 0, b = 0, l = 0)),
+        #strip.text.x = element_text(size=16),
+        axis.text=element_text(size=13))
 
 
 big.df <- big.df[which(big.df$dates>1960),]
