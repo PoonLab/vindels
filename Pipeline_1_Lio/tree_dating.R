@@ -181,7 +181,7 @@ for (n in 1:length(tfolder)){
   
   aLen <- length(read.FASTA(afolder[n])[1][[1]])
   
-  system(paste0('lsd -i rtt2lsd.nwk -d date_file.txt -o ', filename ,' -c -f 1000 -s ',aLen))
+  #system(paste0('lsd -i rtt2lsd.nwk -d date_file.txt -o ', filename ,' -c -f 1000 -s ',aLen))
   
 }
 setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
@@ -199,7 +199,16 @@ mtext(side = 2, text = "Terminal Branch Lengths (Expected Substitutions)", line 
 
 
 # GENETIC DISTANCES PLOT --------------
+par(mar=c(5,5,1,1))
 plot(genetic.dists$subtype, genetic.dists$GD, xlab="Group M Clade", ylab="Genetic Distance (Cherries)", cex.axis=1.2, cex.lab=1.5)
+
+
+gd.df <- genetic.dists[which(genetic.dists$GD <= 0.05),]
+
+par(mar=c(5,5,1,1))
+plot(gd.df$subtype, gd.df$GD, xlab="Group M Clade", ylab="Genetic Distance (Cherries)", cex.axis=1.2, cex.lab=1.5)
+
+
 new.df <- split(genetic.dists, genetic.dists$subtype)
 means <- sapply(new.df, function (x) mean(x$GD) )
 
