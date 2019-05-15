@@ -31,10 +31,21 @@ for (idx in 1:6){
   }
 }
 
+
+
 # A.2) Log plot 
 gd.order2 <- gd.order[gd.order$GD != 0,]
 gd.order2$logged <- log(gd.order2$GD)
 gd.order2 <- gd.order2[gd.order2$logged>-10,]
+
+# create the order of medians
+new.df <- split(gd.order2, gd.order2$subtype)
+means <- sapply(new.df, function (x) median(x$logged) )
+means <- means[order(means)]
+ordered <- names(means)
+
+gd.order2$subtype <- factor(gd.order2$subtype, levels=ordered)
+gd.order2 <- gd.order2[order(gd.order2$subtype),]
 
 par(mar=c(5,5,1,1))
 plot(gd.order2$subtype, gd.order2$logged, xlab="Group M Clade", ylab="log(Genetic Distance)", cex.axis=1.2, cex.lab=1.5)
@@ -46,7 +57,7 @@ for (idx in 1:6){
   test <- wilcox.test(new.order[[idx]]$GD, new.order[[idx+1]]$GD)
   if (test$p.value < 0.05){
     arrows(idx+0.1, -8, idx+0.9, -8, length=0, lwd=3)
-    text(idx+0.5, -9, labels="*", cex=1.5)
+    text(idx+0.5, -7.7, labels="*", cex=1.5)
   }
 }
 
