@@ -184,19 +184,19 @@ for (n in 1:length(tfolder)){
   #system(paste0('lsd -i rtt2lsd.nwk -d date_file.txt -o ', filename ,' -c -f 1000 -s ',aLen))
   
 }
-setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
+#setwd("~/PycharmProjects/hiv-evolution-master/8_Dated_Trees")
 file.remove('date_file.txt')
 file.remove('rtt2lsd.nwk')
 
 
 # BRANCH LENGTHS PLOT --------------------------------
-par(mar=c(6,7,2,2))
-branch.len2 <- split(branch.lengths$length, branch.lengths$subtype)
-boxplot(branch.len2, xlab="Subtype",cex.lab=1.3,las=1)
-par(las=3)
-mtext(side = 2, text = "Terminal Branch Lengths (Expected Substitutions)", line = 4, cex=1.3)
+#par(mar=c(6,7,2,2))
+#branch.len2 <- split(branch.lengths$length, branch.lengths$subtype)
+#boxplot(branch.len2, xlab="Subtype",cex.lab=1.3,las=1)
+#par(las=3)
+#mtext(side = 2, text = "Terminal Branch Lengths (Expected Substitutions)", line = 4, cex=1.3)
 
-
+write.csv(genetic.dists, "~/genetic-dists.csv")
 
 # GENETIC DISTANCES PLOTS --------------
 
@@ -305,14 +305,14 @@ for (m in 1:7){
   
 }
 
-colnames(treedata) <- c("Clade","Estimate", "$x$-Intercept (Year)", "$R^2$")
+#colnames(treedata) <- c("Clade","Estimate", "$x$-Intercept (Year)", "$R^2$")
 
-lxtable <- xtable(treedata)
-toLatex.xtable(lxtable)
+#lxtable <- xtable(treedata)
+#toLatex.xtable(lxtable)
 
 
-setwd("~/vindels/Indel_Analysis")
-write.csv(treedata,file="tree_data.csv")
+#setwd("~/vindels/Indel_Analysis")
+#write.csv(treedata,file="tree_data.csv")
 
 # for (m in 1:7){
 #   par(mar=c(4.5,6,1,1))
@@ -332,17 +332,17 @@ write.csv(treedata,file="tree_data.csv")
 
 
 
-plot(x=jitter(dfAE$dates,amount=0.3), y=dfAE$lengths, col=alpha(cols[1],0.7), xlim=c(1982,2016),ylim=c(0.05,0.25), cex=0.8,pch=20,
-     xlab="Collection Date",ylab="Root-to-Tip Branch Length\n", main="Tree Branch Lengths vs. Collection Dates -- AE", cex.lab=1.4,cex.main=1.6)
-abline(lm(dfAE[,2]~dfAE[,1]),lwd=1.5)
+#plot(x=jitter(dfAE$dates,amount=0.3), y=dfAE$lengths, col=alpha(cols[1],0.7), xlim=c(1982,2016),ylim=c(0.05,0.25), cex=0.8,pch=20,
+#     xlab="Collection Date",ylab="Root-to-Tip Branch Length\n", main="Tree Branch Lengths vs. Collection Dates -- AE", cex.lab=1.4,cex.main=1.6)
+#abline(lm(dfAE[,2]~dfAE[,1]),lwd=1.5)
 
 
-par(mar=c(6,6,4,4))
-plot(x=jitter(dfB$dates,amount=0.5), y=dfB$lengths, col=alpha(as.character(dfB$color),0.5), cex=0.8,pch=20,
-     xlab="Collection Date",ylab="Root-to-Tip Branch Length", main="Tree Branch Lengths vs. Collection Dates -- Subtype B",cex.lab=1.3,cex.main=1.6)
-abline(lm(dfB[,2]~dfB[,1]))
+#par(mar=c(6,6,4,4))
+#plot(x=jitter(dfB$dates,amount=0.5), y=dfB$lengths, col=alpha(as.character(dfB$color),0.5), cex=0.8,pch=20,
+#     xlab="Collection Date",ylab="Root-to-Tip Branch Length", main="Tree Branch Lengths vs. Collection Dates -- Subtype B",cex.lab=1.3,cex.main=1.6)
+#abline(lm(dfB[,2]~dfB[,1]))
 
-par(mar=c(6,6,4,4))
-plot(x=jitter(dfC$dates,amount=0.5), y=dfC$lengths, col=alpha(cols[1],0.5),cex=1,pch=20, 
-     xlab="Collection Date",ylab="Root-to-Tip Branch Length", main="Tree Branch Lengths vs. Collection Dates -- Subtype C",cex.lab=1.3,cex.main=1.6)
-abline(lm(dfC[,2]~dfC[,1]))
+#par(mar=c(6,6,4,4))
+#plot(x=jitter(dfC$dates,amount=0.5), y=dfC$lengths, col=alpha(cols[1],0.5),cex=1,pch=20, 
+#     xlab="Collection Date",ylab="Root-to-Tip Branch Length", main="Tree Branch Lengths vs. Collection Dates -- Subtype C",cex.lab=1.3,cex.main=1.6)
+#abline(lm(dfC[,2]~dfC[,1]))

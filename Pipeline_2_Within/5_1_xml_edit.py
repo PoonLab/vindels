@@ -18,13 +18,22 @@ for infile in xmlFolder:
     root = xml.getroot()
 
     for parent in root.iter():
+
+        # removes all operators responsible for modifying the tree 
         if parent.tag == "operators":
             for toRemove in ["subtreeSlide", "narrowExchange", "wideExchange", "wilsonBalding"]:
                 element = parent.find(toRemove)
                 if element != None:
-                    print(element.tag)
+                    #print(element.tag)
                     parent.remove(element)
 
+        # changes the population size to 5 
+        if parent.tag == "populationSizes":
+            if parent != None:
+                element = parent.find("parameter")
+                element.attrib = {"dimension":"5", "id":"skyline.popSize" ,"lower":"0.0" ,"value":"1.0"}
+
+        # removes the simulator element and replaces it with the starting tree
         if parent.tag == "coalescentSimulator":
             parent.clear()
             parent.tag = "newick"
