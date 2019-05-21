@@ -172,7 +172,7 @@ We collected HIV-1 sequences covering gp120 from the Los Alamos National Laborat
 To estimate the rates of indel evolution for different HIV-1 subtypes and circulating recombinant forms (CRFs) in this data set, we reconstructed phylogenies for each of the seven group M clades using maximum likelihood, and then rooted and rescaled each tree based on the sample collection dates under a molecular clock model.
 Initially we employed a strict clock model in root-to-tip regressions (Figure \ref{branch-lengths}) to assess whether the data sets contained sufficient signal to estimate rates of evolution (Table \ref{tab:xint}).
 Specifically, we confirmed that the lower bounds of the 95\% confidence intervals of rate estimates exceeded zero for all clades, which implied a gradual and measurable accumulation of mutations over the sampling time frame.
-Further, we assessed the model fit with the coefficient of determination ($R^2$), which was greatest for AE and F1, and lowest for subtype C (Table \ref{tab:xint}).
+Further, we assessed the model fit with the coefficient of determination ($R^2$), which was greatest for 01\_AE and F1, and lowest for subtype C (Table \ref{tab:xint}).
 Next, we employed a more robust least-squares dating method \citep{To:2015} to rescale the trees in time.  
 Table \ref{tab:xint} summarizes the substantial differences between the strict clock and least-squares estimates of the times to the most recent common ancestor (tMRCA) for each clade.
 
@@ -186,8 +186,8 @@ Table \ref{tab:xint} summarizes the substantial differences between the strict c
      \cline{1-4}\cline{6-7}\\
  	 Clade & Rate $\times 10^{-3}$ & tMRCA & $R^2$ & &Rate $\times 10^{-3}$ & tMRCA\\ 
  	 \cline{1-4}\cline{6-7}
-	 AE & $2.49~ (2.31, 2.67)$ & 1971.4 & 0.51 && 1.87 (1.85, 2.10) & 1968.6 (1965.5, 1974.6)\\ 
- 	 AG & $2.21~ (1.75, 2.67)$ & 1957.4 & 0.35 & &2.27 (2.10, 2.68) & 1961.9 (1957.5, 1969.0)\\ 
+	 01\_AE & $2.49~ (2.31, 2.67)$ & 1971.4 & 0.51 && 1.87 (1.85, 2.10) & 1968.6 (1965.5, 1974.6)\\ 
+ 	 02\_AG & $2.21~ (1.75, 2.67)$ & 1957.4 & 0.35 & &2.27 (2.10, 2.68) & 1961.9 (1957.5, 1969.0)\\ 
 	A1 & $2.69~ (2.17, 3.21)$ & 1932.0 & 0.26 && 2.45 (2.32, 2.66) & 1966.3 (1964.0, 1969.5)\\ 
   	B & $2.43~ (2.32, 2.54)$ & 1941.2 & 0.34 & &1.47 (1.46, 1.57) & 1951.7 (1951.2, 1954.8)\\ 
   	C & $1.99~ (1.75, 2.23)$ & 1926.9 & 0.13 & &1.80 (1.78, 1.96) & 1939.8 (1937.5, 1946.7) \\ 
@@ -223,7 +223,7 @@ We extracted pairs of 'cherries' --- pairs of sequences directly descended from 
 Next, we used these cherries to estimate the mean indel rates for each variable loop using a binomial-Poisson model, where the probability of detecting an indel event in a cherry increased exponentially with the divergence time.
 The indel rate estimates across the five variable loops and seven HIV-1 clades in this study ranged between $3.0 \times10^{-5}$ to $1.5\times10^{-3}$ indels/nt/year (Figure \ref{indel-rates}). 
 We could not obtain an indel rate estimate for V3 in F1 due to low sample size for this sub-subtype, such that no cherries had discordant sequence lengths in V3.
-Similarly, we observed wide confidence intervals for the rate estimates for indels within V1 in AG and F1, and for V5 in F1.  
+Similarly, we observed wide confidence intervals for the rate estimates for indels within V1 in 02\_AG and F1, and for V5 in F1.  
 %error bars
 The frequency of indels was significantly lower in subtype B than the reference clade, 01\_AE (binomial GLM, $p<2\times 10^{-16}$; Supplementary Table \ref{tab:glm}).
 In addition, indels were significantly less frequent in V3 irrespective of clade relative to V1.
@@ -239,7 +239,7 @@ Estimated interaction effects in the model also indicated that indels were signi
     Each group of five colored bars describes the indel rates of V1-V5 for one of the seven examined clades. 
     Maximum likelihood estimation was applied to cherry indel outcomes using a binomial-Poisson model to determine the above indel rates. 
     Error bars represent the 95\% confidence intervals within which indel rates were estimated. 
-    Arrows labeled with a * symbol indicate the presence and direction of significant differences among the mean indel rates of group M clades, relative to the CRF AE reference. 
+    Arrows labeled with a * symbol indicate the presence and direction of significant differences among the mean indel rates of group M clades, relative to the CRF 01\_AE reference. 
     Arrows labeled by a \protect\singledag{2.9mm}{2.8mm} symbol denote significant differences among the variable loops irrespective of clade, relative to V1.  
     Arrows labeled by a \protect\doubledag{2.9mm}{2.8mm} symbol denote individual interactions between variable loop and clade which are significantly different than their predicted value.
     No meaningful rate estimate was provided for V3 of clade F1 because no indels were detected in this data set.   
@@ -299,10 +299,10 @@ The mean counts in loops V1 to V5 were 2.4, 2.1, 0.9, 4.1 and 1.3 PNGSs, respect
 We found significant differences in PNGS counts among variable loops (likelihood ratio test, $p=2.8^{-13}$ ) and among clades ($p <10^{-15}$).
 %\todo{John}{Please add P-value from LRT test of GLM with and without V-loop term where indicated.}
 % anova(fit1, fit2, test='LRT')
-For variable loop V1, AE contained significantly more PNGS (mean 2.93 PNGS) than the other clades; the next highest count was obtained for subtype C (2.43 [95\% C.I.~2.31, 2.57]).
-Subtypes B and C had significantly higher numbers of PNGS within V3 on average (0.96 [0.87, 1.05] and 0.95 [0.96, 1.05], respectively) than the reference clade AE (mean 0.81).
+For variable loop V1, 01\_AE contained significantly more PNGS (mean 2.93 PNGS) than the other clades; the next highest count was obtained for subtype C (2.43 [95\% C.I.~2.31, 2.57]).
+Subtypes B and C had significantly higher numbers of PNGS within V3 on average (0.96 [0.87, 1.05] and 0.95 [0.96, 1.05], respectively) than the reference clade 01\_AE (mean 0.81).
 We observed substantial variation in the numbers of PNGS among clades in variable loop V4.
-For instance, clades AG, A1 and B had significantly higher numbers, and subtype F1 significantly lower, than the reference clade AE (mean 3.72).
+For instance, clades 02\_AG, A1 and B had significantly higher numbers, and subtype F1 significantly lower, than the reference clade 01\_AE (mean 3.72).
 Finally, we mapped indels to PNGS in the variable loop sequences to determine how frequently indels were associated with the addition or removal of a PNGS (`disruption', Figure \ref{indel-disrupt}). 
 V1, V2, and V4 contained the highest proportions of indel-induced PNGS disruption among the five variable loops.
 Again, we observed that estimates for different clades visibly clustered by variable loop.
@@ -333,7 +333,6 @@ Surprisingly, one of the only estimates of HIV-1 indel rates we have found dated
 In contrast, our comparative study measures indel rates among different hosts, and as a result will inevitably underestimate these rates due to purifying selection on indels.
 %\todo{Art}{Added the following section in at the request of reviewers. (Considering the limitation that sequences may have indels removed from them) }
 A further consideration is indels may have been removed by investigators as sequencing errors, prior to their deposition into the LANL HIV-1 database, which would cause us to underestimate indel rates. 
-% this is really unlikely
 It is not feasible to quantify this potential bias; however, the extensive length variation in the variable regions of gp120 are well known and it is reasonable to expect investigators to accept indels in these regions that do not induce a frameshift.
 %This limitation should not have a substantial impact on our study as this tends to only affect indels that are out of frame. 
 %Given the hypermutation in gp120, it is common to leave all other cases of indels untouched, even those which induce a loss of function.  
@@ -363,7 +362,7 @@ Furthermore, \citet{Wertheim:2011} postulated that estimates of tMRCA among stud
 Our estimates of region- and subtype-specific indel rates ranged from $3.0\times 10^{-5}$ to $1.5\times 10^{-3}$ indels/nt/year (Figure \ref{indel-rates}). 
 As expected, our average estimate ($5\times 10^{-4}$ indels/nt/year) was considerably lower than the rate inferred from Mansky and Temin's \textit{in vitro} experiments (about $1.5\times 10^{-3}$ indels/nt/year) \citep{Mansky:1995} , where we used parameter estimates from \citet{Perelson:1999} to convert the observed numbers of indel counts to a rate.
 Since our study compares HIV-1 sequences isolated from different hosts, the indels have been filtered by purifying selection so that only a subset become fixed within the respective hosts.
-We found that indel rates in subtype B gp120 were significantly lower than the reference clade AE, and generally lower than the other clades in our study.
+We found that indel rates in subtype B gp120 were significantly lower than the reference clade 01\_AE, and generally lower than the other clades in our study.
 We postulate that this variation of indel rates among subtypes might be associated with differences in the predominant modes of transmission.
 For instance, more frequent exposure to the vaginal mucosal layer, \textit{e.g.}, heterosexual transmission, in non-B subtypes may episodically select for reduced levels of glycosylation in the HIV-1 envelope to avoid capture by lectins, such as langerin found on vaginal Langerhans cells \citep{joseph2015bottlenecks, lederman2006microbicides, Hladik:2009}.
 %We postulate that this selective pressure may not be present to the same extent in the rectal mucosa, \textit{e.g} transmission via males who have sex with males, which is commonly exposed 
