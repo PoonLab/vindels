@@ -1,0 +1,735 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.18 (TeX Live 2017/Debian) (preloaded format=latex 2019.5.2)  15 MAY 2019 12:58
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**main.tex
+(./main.tex
+LaTeX2e <2017-04-15>
+Babel <3.18> and hyphenation patterns for 5 language(s) loaded.
+(/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(/usr/share/texlive/texmf-dist/tex/latex/base/size12.clo
+File: size12.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count79
+\c@section=\count80
+\c@subsection=\count81
+\c@subsubsection=\count82
+\c@paragraph=\count83
+\c@subparagraph=\count84
+\c@figure=\count85
+\c@table=\count86
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/share/texlive/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2010/09/12 v5.6 Page Geometry
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2017/03/15 v3.2 Provides the ifpdf switch
+)
+(/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifvtex.sty
+Package: ifvtex 2016/05/16 v1.6 Detect VTeX and its facilities (HO)
+Package ifvtex Info: VTeX not detected.
+)
+(/usr/share/texlive/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+)
+\Gm@cnth=\count87
+\Gm@cntv=\count88
+\c@Gm@tempcnt=\count89
+\Gm@bindingoffset=\dimen103
+\Gm@wd@mp=\dimen104
+\Gm@odd@mp=\dimen105
+\Gm@even@mp=\dimen106
+\Gm@layoutwidth=\dimen107
+\Gm@layoutheight=\dimen108
+\Gm@layouthoffset=\dimen109
+\Gm@layoutvoffset=\dimen110
+\Gm@dimlist=\toks15
+)
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/mathptmx.sty
+Package: mathptmx 2005/04/12 PSNFSS-v9.2a Times w/ Math, improved (SPQR, WaS) 
+LaTeX Font Info:    Redeclaring symbol font `operators' on input line 28.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
+(Font)                  OT1/cmr/m/n --> OT1/ztmcm/m/n on input line 28.
+LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/ztmcm/m/n on input line 28.
+LaTeX Font Info:    Redeclaring symbol font `letters' on input line 29.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `normal'
+(Font)                  OML/cmm/m/it --> OML/ztmcm/m/it on input line 29.
+LaTeX Font Info:    Overwriting symbol font `letters' in version `bold'
+(Font)                  OML/cmm/b/it --> OML/ztmcm/m/it on input line 29.
+LaTeX Font Info:    Redeclaring symbol font `symbols' on input line 30.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `normal'
+(Font)                  OMS/cmsy/m/n --> OMS/ztmcm/m/n on input line 30.
+LaTeX Font Info:    Overwriting symbol font `symbols' in version `bold'
+(Font)                  OMS/cmsy/b/n --> OMS/ztmcm/m/n on input line 30.
+LaTeX Font Info:    Redeclaring symbol font `largesymbols' on input line 31.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `normal'
+(Font)                  OMX/cmex/m/n --> OMX/ztmcm/m/n on input line 31.
+LaTeX Font Info:    Overwriting symbol font `largesymbols' in version `bold'
+(Font)                  OMX/cmex/m/n --> OMX/ztmcm/m/n on input line 31.
+\symbold=\mathgroup4
+\symitalic=\mathgroup5
+LaTeX Font Info:    Redeclaring math alphabet \mathbf on input line 34.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
+(Font)                  OT1/cmr/bx/n --> OT1/ptm/bx/n on input line 34.
+LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `bold'
+(Font)                  OT1/cmr/bx/n --> OT1/ptm/bx/n on input line 34.
+LaTeX Font Info:    Redeclaring math alphabet \mathit on input line 35.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
+(Font)                  OT1/cmr/m/it --> OT1/ptm/m/it on input line 35.
+LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
+(Font)                  OT1/cmr/bx/it --> OT1/ptm/m/it on input line 35.
+LaTeX Info: Redefining \hbar on input line 50.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/setspace/setspace.sty
+Package: setspace 2011/12/19 v6.7a set line spacing
+)
+(/usr/share/texlive/texmf-dist/tex/latex/lineno/lineno.sty
+Package: lineno 2005/11/02 line numbers on paragraphs v4.41
+\linenopenalty=\count90
+\output=\toks16
+\linenoprevgraf=\count91
+\linenumbersep=\dimen111
+\linenumberwidth=\dimen112
+\c@linenumber=\count92
+\c@pagewiselinenumber=\count93
+\c@LN@truepage=\count94
+\c@internallinenumber=\count95
+\c@internallinenumbers=\count96
+\quotelinenumbersep=\dimen113
+\bframerule=\dimen114
+\bframesep=\dimen115
+\bframebox=\box26
+LaTeX Info: Redefining \\ on input line 3056.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/capt-of/capt-of.sty
+Package: capt-of 2009/12/29 v0.2 standard captions outside of floats
+)
+(/usr/share/texlive/texmf-dist/tex/latex/caption/subcaption.sty
+Package: subcaption 2016/05/22 v1.1-161 Sub-captions (AR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2016/02/21 v3.3-144 Customizing captions (AR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2016/05/22 v1.7-166 caption3 kernel (AR)
+Package caption3 Info: TeX engine: e-TeX on input line 67.
+\captionmargin=\dimen116
+\captionmargin@=\dimen117
+\captionwidth=\dimen118
+\caption@tempdima=\dimen119
+\caption@indent=\dimen120
+\caption@parindent=\dimen121
+\caption@hangindent=\dimen122
+)
+\c@ContinuedFloat=\count97
+)
+\c@subfigure=\count98
+\c@subtable=\count99
+)
+(/usr/share/texlive/texmf-dist/tex/latex/enumitem/enumitem.sty
+Package: enumitem 2011/09/28 v3.5.2 Customized lists
+\labelindent=\skip43
+\enit@outerparindent=\dimen123
+\enit@toks=\toks17
+\enit@inbox=\box27
+\enitdp@description=\count100
+)
+(/usr/share/texlive/texmf-dist/tex/generic/ulem/ulem.sty
+\UL@box=\box28
+\UL@hyphenbox=\box29
+\UL@skip=\skip44
+\UL@hook=\toks18
+\UL@height=\dimen124
+\UL@pe=\count101
+\UL@pixel=\dimen125
+\ULC@box=\box30
+Package: ulem 2012/05/18
+\ULdepth=\dimen126
+)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/verbatim.sty
+Package: verbatim 2014/10/28 v1.5q LaTeX2e package for verbatim enhancements
+\every@verbatim=\toks19
+\verbatim@line=\toks20
+\verbatim@in@stream=\read1
+)
+(/usr/share/texlive/texmf-dist/tex/latex/titlesec/titlesec.sty
+Package: titlesec 2016/03/21 v2.10.2 Sectioning titles
+\ttl@box=\box31
+\beforetitleunit=\skip45
+\aftertitleunit=\skip46
+\ttl@plus=\dimen127
+\ttl@minus=\dimen128
+\ttl@toksa=\toks21
+\titlewidth=\dimen129
+\titlewidthlast=\dimen130
+\titlewidthfirst=\dimen131
+)
+(/usr/share/texlive/texmf-dist/tex/latex/natbib/natbib.sty
+Package: natbib 2010/09/13 8.31b (PWD, AO)
+\bibhang=\skip47
+\bibsep=\skip48
+LaTeX Info: Redefining \cite on input line 694.
+\c@NAT@ctr=\count102
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2017/06/01 v1.1a Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2017/06/25 v1.2c Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: dvips.def on input line 99.
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-def/dvips.def
+File: dvips.def 2017/06/20 v3.1d Graphics/color driver for dvips
+))
+\Gin@req@height=\dimen132
+\Gin@req@width=\dimen133
+)
+(/usr/share/texlive/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip10
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/color.sty
+Package: color 2016/07/10 v1.1e Standard LaTeX Color (DPC)
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package color Info: Driver file: dvips.def on input line 147.
+
+(/usr/share/texlive/texmf-dist/tex/latex/graphics/dvipsnam.def
+File: dvipsnam.def 2016/06/17 v3.0m Driver-dependent file (DPC,SPQR)
+))
+(/usr/share/texlive/texmf-dist/tex/latex/soul/soul.sty
+Package: soul 2003/11/17 v2.4 letterspacing/underlining (mf)
+\SOUL@word=\toks22
+\SOUL@lasttoken=\toks23
+\SOUL@cmds=\toks24
+\SOUL@buffer=\toks25
+\SOUL@token=\toks26
+\SOUL@spaceskip=\skip49
+\SOUL@ttwidth=\dimen134
+\SOUL@uldp=\dimen135
+\SOUL@ulht=\dimen136
+)
+(/usr/share/texlive/texmf-dist/tex/latex/booktabs/booktabs.sty
+Package: booktabs 2016/04/27 v1.618033 publication quality tables
+\heavyrulewidth=\dimen137
+\lightrulewidth=\dimen138
+\cmidrulewidth=\dimen139
+\belowrulesep=\dimen140
+\belowbottomsep=\dimen141
+\aboverulesep=\dimen142
+\abovetopsep=\dimen143
+\cmidrulesep=\dimen144
+\cmidrulekern=\dimen145
+\defaultaddspace=\dimen146
+\@cmidla=\count103
+\@cmidlb=\count104
+\@aboverulesep=\dimen147
+\@belowrulesep=\dimen148
+\@thisruleclass=\count105
+\@lastruleclass=\count106
+\@thisrulewidth=\dimen149
+)
+(/usr/share/texlive/texmf-dist/tex/latex/tools/xr.sty
+Package: xr 1994/05/28 v5.02 eXternal References (DPC)
+)
+
+Package xr Warning: 
+No file supplement.aux
+LABELS NOT IMPORTED.
+ on input line 68.
+
+(supplement.tex)
+(supplement.aux)
+No file supplement.aux.
+No file main.aux.
+\openout1 = `main.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 71.
+LaTeX Font Info:    ... okay on input line 71.
+LaTeX Font Info:    Try loading font information for OT1+ptm on input line 71.
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ptm.fd
+File: ot1ptm.fd 2001/06/04 font definitions for OT1/ptm.
+)
+*geometry* driver: auto-detecting
+*geometry* detected driver: dvips
+*geometry* verbose mode - [ preamble ] result:
+* driver: dvips
+* paper: <default>
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(72.26999pt, 469.75502pt, 72.26999pt)
+* v-part:(T,H,B)=(72.26999pt, 650.43001pt, 72.26999pt)
+* \paperwidth=614.295pt
+* \paperheight=794.96999pt
+* \textwidth=469.75502pt
+* \textheight=650.43001pt
+* \oddsidemargin=0.0pt
+* \evensidemargin=0.0pt
+* \topmargin=-37.0pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=12.0pt
+* \footskip=30.0pt
+* \marginparwidth=44.0pt
+* \marginparsep=10.0pt
+* \columnsep=10.0pt
+* \skip\footins=10.8pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+\big@size=\dimen150
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: End \AtBeginDocument code.
+LaTeX Font Info:    Try loading font information for OT1+ztmcm on input line 78
+.
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/ot1ztmcm.fd
+File: ot1ztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OT1/ztmcm.
+)
+LaTeX Font Info:    Try loading font information for OML+ztmcm on input line 78
+.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/omlztmcm.fd
+File: omlztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OML/ztmcm.
+)
+LaTeX Font Info:    Try loading font information for OMS+ztmcm on input line 78
+.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/omsztmcm.fd
+File: omsztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMS/ztmcm.
+)
+LaTeX Font Info:    Try loading font information for OMX+ztmcm on input line 78
+.
+
+(/usr/share/texlive/texmf-dist/tex/latex/psnfss/omxztmcm.fd
+File: omxztmcm.fd 2000/01/03 Fontinst v1.801 font definitions for OMX/ztmcm.
+)
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <12> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 78.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <9> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 78.
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <7> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 78.
+ [1
+
+]
+LaTeX Font Info:    Font shape `OT1/ptm/bx/n' in size <14.4> not available
+(Font)              Font shape `OT1/ptm/b/n' tried instead on input line 107.
+
+
+Package lineno Warning: Linenumber reference failed, 
+(lineno)                rerun to get it right.
+
+[2]
+
+Package natbib Warning: Citation `WHO:2018' on page 3 undefined on input line 1
+31.
+
+
+Package natbib Warning: Citation `korber2001evolutionary' on page 3 undefined o
+n input line 131.
+
+
+Package natbib Warning: Citation `Tebit:2011' on page 3 undefined on input line
+ 131.
+
+
+Package natbib Warning: Citation `Kiwanuka:2008' on page 3 undefined on input l
+ine 133.
+
+
+Package natbib Warning: Citation `Vasan:2006' on page 3 undefined on input line
+ 133.
+
+
+Package natbib Warning: Citation `Wainberg:2004' on page 3 undefined on input l
+ine 133.
+
+
+Package natbib Warning: Citation `Arien:2007' on page 3 undefined on input line
+ 133.
+
+
+Package natbib Warning: Citation `tran2012structural' on page 3 undefined on in
+put line 135.
+
+
+Package natbib Warning: Citation `kwong1998structure' on page 3 undefined on in
+put line 136.
+
+
+Package natbib Warning: Citation `zhang2004tracking' on page 3 undefined on inp
+ut line 137.
+
+
+Package natbib Warning: Citation `Li:1988' on page 3 undefined on input line 13
+9.
+
+
+Package natbib Warning: Citation `wood2009hiv' on page 3 undefined on input lin
+e 140.
+
+
+Package natbib Warning: Citation `Abram:2010' on page 3 undefined on input line
+ 142.
+
+
+Package natbib Warning: Citation `Keulen:1996' on page 3 undefined on input lin
+e 143.
+
+
+Package natbib Warning: Citation `Nielsen:1998' on page 3 undefined on input li
+ne 143.
+
+
+Package natbib Warning: Citation `Rakik:1999' on page 3 undefined on input line
+ 144.
+
+
+Package natbib Warning: Citation `Aralaguppe:2017' on page 3 undefined on input
+ line 144.
+
+
+Package natbib Warning: Citation `Alexander:2002' on page 3 undefined on input 
+line 144.
+
+
+Package natbib Warning: Citation `wood2009hiv' on page 3 undefined on input lin
+e 146.
+
+
+Package natbib Warning: Citation `Derdeyn:2004' on page 3 undefined on input li
+ne 146.
+
+
+Package natbib Warning: Citation `Tsuchiya:2013' on page 3 undefined on input l
+ine 146.
+
+[3
+
+]
+
+LaTeX Warning: Reference `branch-lengths' on page 4 undefined on input line 160
+.
+
+
+LaTeX Warning: Reference `tab:xint' on page 4 undefined on input line 160.
+
+
+LaTeX Warning: Reference `tab:xint' on page 4 undefined on input line 162.
+
+
+Package natbib Warning: Citation `To:2015' on page 4 undefined on input line 16
+3.
+
+
+LaTeX Warning: Reference `tab:xint' on page 4 undefined on input line 164.
+
+
+! LaTeX Error: File `branch-lengths' not found.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.196 ...mm, width=0.97\textwidth]{branch-lengths}
+                                                  
+I could not locate the file with any of these extensions:
+.eps,.ps,.eps.gz,.ps.gz,.eps.Z,.mps
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+LaTeX Warning: Reference `indel-rates' on page 4 undefined on input line 211.
+
+
+LaTeX Warning: Reference `tab:glm' on page 4 undefined on input line 215.
+
+[4] [5]
+
+! LaTeX Error: File `indel-rates' not found.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.223 ...raphics[width=.85\textwidth]{indel-rates}
+                                                  
+I could not locate the file with any of these extensions:
+.eps,.ps,.eps.gz,.ps.gz,.eps.Z,.mps
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+LaTeX Warning: Reference `mosaic' on page 6 undefined on input line 242.
+
+
+! LaTeX Error: Cannot determine size of graphic in mosaic-combined.pdf (no Boun
+dingBox).
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.249 ...2mm 5mm 0 5mm},clip]{mosaic-combined.pdf}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+File: mosaic-combined.pdf Graphic file (type eps)
+<mosaic-combined.pdf>
+
+LaTeX Warning: Reference `nt-plot' on page 6 undefined on input line 265.
+
+[6]
+
+! LaTeX Error: File `nt-plot' not found.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.273 ...th,trim={2.85cm 0 2.9cm 0},clip]{nt-plot}
+                                                  
+I could not locate the file with any of these extensions:
+.eps,.ps,.eps.gz,.ps.gz,.eps.Z,.mps
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+LaTeX Warning: Reference `pngs-totals' on page 7 undefined on input line 286.
+
+
+LaTeX Warning: Reference `indel-disrupt' on page 7 undefined on input line 295.
+
+
+
+! LaTeX Error: File `indel-disrupt' not found.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.303 ...5mm 10mm 15mm 10mm}, clip]{indel-disrupt}
+                                                  
+I could not locate the file with any of these extensions:
+.eps,.ps,.eps.gz,.ps.gz,.eps.Z,.mps
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+
+Package natbib Warning: Citation `Mansky:1995' on page 7 undefined on input lin
+e 321.
+
+
+Package natbib Warning: Citation `wood2009hiv' on page 7 undefined on input lin
+e 327.
+
+[7]
+
+Package natbib Warning: Citation `olabode2018evidence' on page 8 undefined on i
+nput line 331.
+
+
+Package natbib Warning: Citation `Wertheim:2011' on page 8 undefined on input l
+ine 335.
+
+
+LaTeX Warning: Reference `branch-lengths' on page 8 undefined on input line 335
+.
+
+
+Package natbib Warning: Citation `Hemelaar:2012' on page 8 undefined on input l
+ine 336.
+
+
+Package natbib Warning: Citation `Wertheim:2011' on page 8 undefined on input l
+ine 336.
+
+
+Package natbib Warning: Citation `tongo2018unravelling' on page 8 undefined on 
+input line 337.
+
+
+Package natbib Warning: Citation `Wertheim:2011' on page 8 undefined on input l
+ine 340.
+
+[8]
+
+LaTeX Warning: Reference `indel-rates' on page 9 undefined on input line 343.
+
+
+Package natbib Warning: Citation `Mansky:1995' on page 9 undefined on input lin
+e 344.
+
+
+Package natbib Warning: Citation `Perelson:1999' on page 9 undefined on input l
+ine 344.
+
+
+Package natbib Warning: Citation `joseph2015bottlenecks' on page 9 undefined on
+ input line 348.
+
+
+LaTeX Warning: Reference `indel-rates' on page 9 undefined on input line 349.
+
+
+Package natbib Warning: Citation `Liang:1999' on page 9 undefined on input line
+ 350.
+
+
+Package natbib Warning: Citation `Jiang:2010' on page 9 undefined on input line
+ 350.
+
+
+Package natbib Warning: Citation `poon2007evolutionary' on page 9 undefined on 
+input line 352.
+
+
+Package natbib Warning: Citation `Tsuchiya:2013' on page 9 undefined on input l
+ine 353.
+
+
+Package natbib Warning: Citation `Derdeyn:2004' on page 9 undefined on input li
+ne 362.
+
+
+Package natbib Warning: Citation `Derdeyn:2004' on page 9 undefined on input li
+ne 363.
+
+
+Package natbib Warning: Citation `Chohan:2005' on page 9 undefined on input lin
+e 364.
+
+
+Package natbib Warning: Citation `Curlin:2010' on page 9 undefined on input lin
+e 366.
+
+
+Package natbib Warning: Citation `Sagar:2006' on page 9 undefined on input line
+ 366.
+
+[9]
+
+Package natbib Warning: Citation `Lidd2004apobec' on page 10 undefined on input
+ line 372.
+
+
+LaTeX Warning: Reference `nt-plot' on page 10 undefined on input line 374.
+
+
+Package natbib Warning: Citation `Zhu:2000' on page 10 undefined on input line 
+382.
+
+
+LaTeX Warning: Reference `pngs-totals' on page 10 undefined on input line 383.
+
+
+LaTeX Warning: Reference `indel-disrupt' on page 10 undefined on input line 384
+.
+
+
+Package natbib Warning: Citation `Sagar:2006' on page 10 undefined on input lin
+e 386.
+
+
+Package natbib Warning: Citation `Derdeyn:2004' on page 10 undefined on input l
+ine 386.
+
+
+Package natbib Warning: Citation `Sagar:2006' on page 10 undefined on input lin
+e 390.
+
+[10]
+
+Package natbib Warning: Citation `altschul1986optimal' on page 11 undefined on 
+input line 404.
+
+
+Package natbib Warning: Citation `nickle2007hiv' on page 11 undefined on input 
+line 407.
+
+[11]
+
+Package natbib Warning: Citation `Katoh:2013' on page 12 undefined on input lin
+e 422.
+
+
+Package natbib Warning: Citation `Price:2010' on page 12 undefined on input lin
+e 424.
+
+
+Package natbib Warning: Citation `Paradis:2004' on page 12 undefined on input l
+ine 430.
+
+
+Package natbib Warning: Citation `drummond2003inference' on page 12 undefined o
+n input line 431.
+
+
+Package natbib Warning: Citation `To:2015' on page 12 undefined on input line 4
+33.
+
+[12] [13]
+Overfull \hbox (2.24783pt too wide) in paragraph at lines 480--481
+\OT1/ptm/m/n/12 Sequence data and scripts used for this study are avail-able at
+ $https : / / github . com / PoonLab / indelrates$. 
+ []
+
+[14]
+No file main.bbl.
+
+Package natbib Warning: There were undefined citations.
+
+(./main.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ ) 
+Here is how much of TeX's memory you used:
+ 4104 strings out of 494881
+ 61522 string characters out of 6179628
+ 131367 words of memory out of 5000000
+ 7367 multiletter control sequences out of 15000+600000
+ 15334 words of font info for 41 fonts, out of 8000000 for 9000
+ 36 hyphenation exceptions out of 8191
+ 42i,10n,40p,1140b,305s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+Output written on main.dvi (14 pages, 62140 bytes).
