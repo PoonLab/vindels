@@ -19,8 +19,8 @@
 %removed to get full size citations as per their request
 \usepackage{natbib}
 
-\newcommand*{\doubledag}[2]{\includegraphics[height=#2,width=#1, trim={3cm 5cm 3cm 3cm }, clip]{doubledag-symbol.pdf}}
-\newcommand*{\singledag}[2]{\includegraphics[height=#2,width=#1, trim={3cm 5cm 3cm 3cm }, clip]{singledag-symbol.pdf}}
+\newcommand*{\doubledag}[2]{\includegraphics[height=#2,width=#1, trim={1cm 5cm 1cm 3cm }, clip]{doubledag-symbol.pdf}}
+\newcommand*{\singledag}[2]{\includegraphics[height=#2,width=#1, trim={1cm 5cm 1cm 3cm }, clip]{singledag-symbol.pdf}}
 
 \usepackage{graphicx}
 \graphicspath{{images/}} 
@@ -207,9 +207,9 @@ Table \ref{tab:xint} summarizes the substantial differences between the strict c
     %\noindent\rule[0.5ex]{\linewidth}{.5pt}
     \includegraphics[height=195mm, width=0.97\textwidth]{branch-lengths}
     \caption{%
-    The relationship between root-to-tip branch lengths and associated collection dates of sequences within seven clade-wise phylogenetic trees generated from gp120 conserved region (C1-C5) alignments.
-    Panels are labelled by the group M clade
-    The y-axis describes the total branch length from the root to the tips of the tree in units of expected nucleotide substitutions, while the x-axis describes the collection dates of all sequences related by the given phylogeny. 
+    The relationship between sequence root-to-tip branch lengths and sequence collection dates in seven clade-wise phylogenetic trees reconstructed from gp120 conserved region (C1-C5) alignments.
+    Each panel is labelled by the clade that its tree represents. 
+    %The y-axis describes the total branch lengths of sequences from the root to its tip in units of expected nucleotide substitutions, while the x-axis describes the collection dates of all sequences related by the given phylogeny. 
     All plot axes have been adjusted to the same scales for comparison. 
     Regions of greater color density indicate the clustering of multiple plotted points.  
     The solid line on each plot describes the linear regression of branch lengths on collection dates. 
@@ -240,8 +240,8 @@ Estimated interaction effects in the model also indicated that indels were signi
     Maximum likelihood estimation was applied to cherry indel outcomes using a binomial-Poisson model to determine the above indel rates. 
     Error bars represent the 95\% confidence intervals within which indel rates were estimated. 
     Arrows labeled with a * symbol indicate the presence and direction of significant differences among the mean indel rates of group M clades, relative to the CRF AE reference. 
-    Arrows labeled by a \protect\singledag{2.5mm}{3.5mm} symbol denote significant differences among the variable loops irrespective of clade, relative to V1.  
-    Arrows labeled by a \protect\doubledag{2.5mm}{3.5mm} symbol denote individual interactions between variable loop and clade which are significantly different than their predicted value.
+    Arrows labeled by a \protect\singledag{2.9mm}{2.8mm} symbol denote significant differences among the variable loops irrespective of clade, relative to V1.  
+    Arrows labeled by a \protect\doubledag{2.9mm}{2.8mm} symbol denote individual interactions between variable loop and clade which are significantly different than their predicted value.
     No meaningful rate estimate was provided for V3 of clade F1 because no indels were detected in this data set.   
     }
     \label{indel-rates}
@@ -261,9 +261,9 @@ Conversely, the variable loops V1, V2 and V4 tended to contain longer indels tha
     \centering
     \includegraphics[scale=0.37, trim={12mm 5mm 0 5mm},clip]{mosaic-combined3.pdf}
     \caption{
-    The distribution of indel lengths within the seven group M clades (a) and the five gp120 variable loops (b). 
+    The distribution of indel lengths within (a) the seven group M clades and (b) the five gp120 variable loops . 
     Indel lengths, measured in nucleotides, were classified into three categories: 3 nt, 6 nt, and 9 nt or longer. 
-    Box heights indicate the proportion of indels belonging to the given length category, while box widths indicate the proportion of indels belonging to each clade (a) or each variable loop (b).  
+    Box heights indicate the proportion of indels belonging to the given length category, while box widths indicate the proportion of indels belonging to (a) each clade or (b) each variable loop .  
     Pearson $\chi^2$ residuals --- quantified measures of the difference between observed and expected values --- were calculated for every group on these plots to determine if, and in what direction, these proportions significantly deviated from the $\chi^2$ value. 
     Pearson residuals are comparable to the number of standard deviations away from the $\chi^2$ value, meaning that values greater than 2, and especially those greater than 4, describe groups whose proportions significantly deviate from the predicted outcome.
     Blue shading indicates higher indel counts than expected, while red indicates lower counts.
@@ -343,7 +343,7 @@ It is not feasible to quantify this potential bias; however, the extensive lengt
 %This emphasis on cherries would have also reduced the probability of multiple indel events accumulating between the lineages in the same variable region.
 We chose to focus on cherry sequences derived from between-host data as it provided phylogenetically-independent observations of indel evolution while attempting to reduce the probability of multiple hits and the impacts of purifying selection.  
 While the comparison of within-host HIV-1 sequences would provide even shorter time scales and thereby more accurate measures of indel rates before selection, some HIV-1 subtypes and CRFs remain underrepresented in publicly available, large and longitudinal same-patient sequence data sets.
-In addition, results from \citet{wood2009hiv} suggest that purifying selection against indels is relaxed in the variable regions of HIV-1 gp120, thus offering support for our approach.
+In addition, results from \citet{wood2009hiv} suggest that purifying selection against indels is relaxed in the variable regions of HIV-1 gp120.
 
 
 
@@ -365,9 +365,8 @@ As expected, our average estimate ($5\times 10^{-4}$ indels/nt/year) was conside
 Since our study compares HIV-1 sequences isolated from different hosts, the indels have been filtered by purifying selection so that only a subset become fixed within the respective hosts.
 We found that indel rates in subtype B gp120 were significantly lower than the reference clade AE, and generally lower than the other clades in our study.
 We postulate that this variation of indel rates among subtypes might be associated with differences in the predominant modes of transmission.
-\todo{Art}{The following sentence was edited}
-For instance, more frequent exposure to the vaginal mucosal layer, \textit{e.g.}, heterosexual transmission, in non-B subtypes may episodically select for reduced levels of glycosylation in the HIV-1 envelope to avoid lectin binding \citep{joseph2015bott]lenecks}.
-We postulate that this selective pressure may not be present to the same extent in the rectal mucosa, \textit{e.g} transmission via males who have sex with males, which is commonly exposed 
+For instance, more frequent exposure to the vaginal mucosal layer, \textit{e.g.}, heterosexual transmission, in non-B subtypes may episodically select for reduced levels of glycosylation in the HIV-1 envelope to avoid capture by lectins, such as langerin found on vaginal Langerhans cells \citep{joseph2015bottlenecks, lederman2006microbicides, Hladik:2009}.
+%We postulate that this selective pressure may not be present to the same extent in the rectal mucosa, \textit{e.g} transmission via males who have sex with males, which is commonly exposed 
 The significantly lower indel rate estimates in V3 irrespective of HIV-1 clade (Figure \ref{indel-rates}) were consistent with the functional importance of this variable loop. 
 As V3 contributes to HIV entry by binding to the CCR5 or CXCR4 coreceptors, there is substantial purifying selection to conserve its overall structure \citep{Liang:1999, Jiang:2010}. 
 This lower tolerance for mutational change, relative to other variable loops of gp120, is consistent with reduced numbers of fixed indels among hosts. 
@@ -489,7 +488,7 @@ To further analyze the composition of indels, we generated pairwise alignments f
 From these pairwise alignments, we calculated the proportions of adenine, thymine, guanine, and cytosine (A,C,G,T) nucleotides in the indel and non-indel regions of the gp120 variable loops.
 In addition, we recorded the positions and numbers of PNGSs in the five gp120 variable loops by scanning the unaligned amino acid sequences with the regular expression `N[\^{}P][ST][\^{}P]', where `\^{}P' maps to any symbol except P (proline). 
 We then used these data to investigate how commonly indels tended to change PNGSs in the variable loops.   
-\todo{Art}{This sentence was changed}
+%\todo{Art}{This sentence was changed}
 By combining PNGS and indel location data, we searched for instances where an indel overlapped with a PNGS in one of the two sequences of a cherry, indicating either the deletion of a PNGS or the insertion of a sequence containing one.
 To avoid recording instances of partial indel overlap that leave the PNGS intact, we verified the PNGS was disrupted by scanning it again with a regular expression. 
 
