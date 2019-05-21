@@ -31,8 +31,6 @@ for (idx in 1:6){
   }
 }
 
-
-
 # A.2) Log plot 
 gd.order2 <- genetic.dists[genetic.dists$GD != 0,]
 gd.order2$logged <- log10(gd.order2$GD)
@@ -53,7 +51,7 @@ plot(gd.order2$subtype, gd.order2$logged, xlab="Group M Clade", ylab="log(Cherry
 
 # perform a wilcoxon test on this 
 for (idx in 1:6){
-  test <- wilcox.test(new.df[[idx]]$GD, new.df[[idx+1]]$GD)
+  test <- wilcox.test(new.df[[idx]]$logged, new.df[[idx+1]]$logged)
   if (test$p.value < (0.05/6)){
     arrows(idx+0.1, -3.4, idx+0.9, -3.4, length=0, lwd=2.5)
     text(idx+0.5, -3.45, labels="*", cex=2)
