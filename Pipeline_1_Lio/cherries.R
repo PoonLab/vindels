@@ -12,7 +12,8 @@ len.diff <- list() #data.frame(subtype=character(),stringsAsFactors = F)
 
 # This code reads phylogenetic trees and variable loop sequences in csv format. 
 branch.lengths <- data.frame()
-
+genetic.dists <- data.frame()
+filtered.indels2 <- data.frame(stringsAsFactors = F)
 for (i in 1:length(tfolder)){
   tre <- read.tree(tfolder[i])
   csv <- read.csv(vfolder[i], header=FALSE, stringsAsFactors = F)
@@ -71,13 +72,15 @@ for (i in 1:length(tfolder)){
   indels <- df[,c(6:9)]
   indels$total.length <- indels$tip1.len + indels$tip2.len
   
+  #genetic.dists <- rbind(genetic.dists, data.frame(accno=rep(subtype, nrow(indels)),tip1=indels$tip1.len,tip2=indels$tip2.len, cherry=indels$total.length, ))
+  filtered.indels <- indels
+
   
-  filtered.indels <- indels[indels$total.length != 0,]
-  
-  filtered.indels2 <- data.frame(stringsAsFactors = F)
   indel2 <- data.frame(stringsAsFactors = F)
   nonindel2 <- data.frame(stringsAsFactors = F)
   lens <- c(0,78,120,108,102,33)
+  
+  
   
   count = 0
   #COUNT THROUGH EACH CHERRY PAIR LISTED IN FILTERED.INDELS
@@ -103,10 +106,7 @@ for (i in 1:length(tfolder)){
       
       #NAMES : bln, len, VR length
       names <- c(paste0("VR",as.character(t-1),".indel"), paste0("VR",as.character(t-1),".nt"), paste0("VR",as.character(t-1),".len"))
-      
-      
-      
-      
+
       #FILTER ----------------------------
       # ? greater than 15% 
       # length is less than 50% of the standard vloop length 
@@ -144,7 +144,7 @@ for (i in 1:length(tfolder)){
     } #COLUMNS END
     indel2 <- rbind(indel2, indel)
     nonindel2 <- rbind(nonindel2, nonindel)
-    filtered.indels2 <- rbind(filtered.indels2, filtered.indels[x,])
+    
     
     
   } #ROWS END 
@@ -171,9 +171,14 @@ for (i in 1:length(tfolder)){
     len.diff[[paste0(filename, ".VR",j,".six")]] <-  values == 6
     len.diff[[paste0(filename, ".VR",j,".nine")]] <-  values >= 9
   }
+  filtered.indels2 <- rbind(filtered.indels2, data.frame(subtype=rep(subtype,nrow(filtered.indels)),filtered.indels))
 
 }
-  
+
+# cross with the tree_dating file 
+#filtered.indels3 <- filtered.indels2[match(genetic.dists$tip1.label, filtered.indels2$tip1.label),]
+
+write.csv(filtered.indels2, "~/vindels/Pipeline_2_Within/filtered-indels.csv")
   
 #Used to load the indel.sizes data frame containing 3/6+ indel frequencies
 indel.sizes <- data.frame(stringsAsFactors = FALSE)

@@ -1,10 +1,5 @@
 #DATING TREES USING ASSOCIATED TIP DATES
 
-require(ape)
-dfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/Dates/edit",full.names=TRUE)
-tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/6Trees", full.names=TRUE)
-afolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/5_1_final", full.names=TRUE)
-
 
 #----FUNCTIONS----
 n.days <- function(year, month) {
@@ -69,6 +64,12 @@ get.range <- function(x) {
   return (c(low, high))
 }
 
+require(ape)
+dfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/Dates/edit",full.names=TRUE)
+tfolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/6Trees", full.names=TRUE)
+afolder <- list.files(path="~/PycharmProjects/hiv-evolution-master/5_1_final", full.names=TRUE)
+
+
 branch.lengths <- data.frame()
 genetic.dists <- data.frame()
 big.df <- data.frame(stringsAsFactors = F)
@@ -105,7 +106,8 @@ for (n in 1:length(tfolder)){
   #ROOTING THE TREE
   rtdtree <- root.to.tip(tre, sample.times, 5)
   if (is.null(rtdtree)){
-    next
+    print(filename)
+    print("TREE PROBLEM")
   }
   
   #ROOTED (UNDATED) TREE ANALYSIS 
@@ -143,7 +145,7 @@ for (n in 1:length(tfolder)){
   branch.lengths <- rbind(branch.lengths, data.frame(subtype=rep(filename,nrow(indels)), length=indels$total.length))
   
   #CHERRY GENETIC DISTANCES PLOT
-  genetic.dists <- rbind(genetic.dists, data.frame(subtype=rep(filename,2*(nrow(df))),GD=c(df$tip1.len, df$tip2.len)))
+  genetic.dists <- rbind(genetic.dists, data.frame(subtype=rep(filename,nrow(indels)), indels))
   
   #ROOT TO TIP DISTANCE PLOT
   sample.times <- sample.times + 1970
@@ -188,7 +190,7 @@ for (n in 1:length(tfolder)){
 file.remove('date_file.txt')
 file.remove('rtt2lsd.nwk')
 
-
+#genetic.dists <- cbind(genetic.dists, filtered.indels3[,7:21])
 # BRANCH LENGTHS PLOT --------------------------------
 #par(mar=c(6,7,2,2))
 #branch.len2 <- split(branch.lengths$length, branch.lengths$subtype)
@@ -196,7 +198,7 @@ file.remove('rtt2lsd.nwk')
 #par(las=3)
 #mtext(side = 2, text = "Terminal Branch Lengths (Expected Substitutions)", line = 4, cex=1.3)
 
-write.csv(genetic.dists, "~/genetic-dists.csv")
+write.csv(genetic.dists, "~/vindels/Pipeline_2_Within/genetic-dists.csv")
 
 # GENETIC DISTANCES PLOTS --------------
 
