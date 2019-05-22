@@ -251,7 +251,7 @@ Estimated interaction effects in the model also indicated that indels were signi
 
 %\subsection * {Indel Lengths}
 
-Under the assumption that differences in sequence lengths of variable loops was caused by a single fixed indel (\textit{i.e.}, no multiple hits), we examined the distribution of indel lengths among variable loops and clades .
+Under the assumption that differences in sequence lengths of variable loops was caused by a single fixed indel (\textit{i.e.}, no multiple hits), we examined the distribution of indel lengths among variable loops and clades.
 Cherries with putative indels in the HIV-1 subtype C phylogeny tended to contain significantly longer indels than expected (Figure \ref{mosaic}).
 Conversely, the variable loops V1, V2 and V4 tended to contain longer indels than expected irrespective of clade, whereas V3 and V5 tended to contain shorter indels.
 
@@ -311,7 +311,7 @@ When we adjusted for the relative proportions of the variable loops occupied by 
 
 \begin{figure}
     \centering
-	\includegraphics[width=.7\textwidth,trim={35mm 10mm 15mm 10mm}, clip]{indel-disrupt}
+	\includegraphics[width=.7\textwidth,trim={35mm 10mm 15mm 10mm}, clip]{indel-disrupt2}
     \caption{
     The proportion of indels in a variable region that knocked out at least one PNGS, relative to the PNGS content of the given variable loop. 
     Data sets were represented by a colored shape to denote their variable loop and contained seven points derived from the group M clades.
@@ -363,8 +363,8 @@ Our estimates of region- and subtype-specific indel rates ranged from $3.0\times
 As expected, our average estimate ($5\times 10^{-4}$ indels/nt/year) was considerably lower than the rate inferred from Mansky and Temin's \textit{in vitro} experiments (about $1.5\times 10^{-3}$ indels/nt/year) \citep{Mansky:1995} , where we used parameter estimates from \citet{Perelson:1999} to convert the observed numbers of indel counts to a rate.
 Since our study compares HIV-1 sequences isolated from different hosts, the indels have been filtered by purifying selection so that only a subset become fixed within the respective hosts.
 We found that indel rates in subtype B gp120 were significantly lower than the reference clade 01\_AE, and generally lower than the other clades in our study.
-We postulate that this variation of indel rates among subtypes might be associated with differences in the predominant modes of transmission.
-For instance, more frequent exposure to the vaginal mucosal layer, \textit{e.g.}, heterosexual transmission, in non-B subtypes may episodically select for reduced levels of glycosylation in the HIV-1 envelope to avoid capture by lectins, such as langerin found on vaginal Langerhans cells \citep{joseph2015bottlenecks, lederman2006microbicides, Hladik:2009}.
+%We postulate that this variation of indel rates among subtypes might be associated with differences in the predominant modes of transmission, \textit{e.g.}, sexual transmission versus injection drug use.
+%For instance, more frequent exposure to the vaginal mucosal layer, \textit{e.g.}, heterosexual transmission, in non-B subtypes may episodically select for reduced levels of glycosylation in the HIV-1 envelope to avoid capture by lectins, such as langerin found on vaginal Langerhans cells \citep{joseph2015bottlenecks, lederman2006microbicides, Hladik:2009}.
 %We postulate that this selective pressure may not be present to the same extent in the rectal mucosa, \textit{e.g} transmission via males who have sex with males, which is commonly exposed 
 The significantly lower indel rate estimates in V3 irrespective of HIV-1 clade (Figure \ref{indel-rates}) were consistent with the functional importance of this variable loop. 
 As V3 contributes to HIV entry by binding to the CCR5 or CXCR4 coreceptors, there is substantial purifying selection to conserve its overall structure \citep{Liang:1999, Jiang:2010}. 
@@ -456,13 +456,14 @@ Dates lacking either month or day fields were specified as bounded intervals.
 % generated a collection of time-scaled, rooted phylogenetic trees which contained branch lengths measured in units of time.
 The time-scaled tree outputs from LSD were imported into R to extract the `cherries': pairs of sequences directly descended from a common ancestor with no intervening ancestral nodes. 
 Focusing on sequences in cherries provides phylogenetically independent observations and minimizes the divergence times, thereby reducing the chance of encountering multiple indel events as well as the effect of purifying selection on indels.
+Cherries with time-scaled branch lengths totaling zero years were removed from our analysis as they did not provide meaningful indel observations and caused problems for rate estimation.
 
 
 \subsection * {Indel rate estimation}
 
 To estimate the rate of indels in the variable loops, homologous variable regions from each pair of sequences in a cherry were compared for length differences. 
 The presence of a length difference was reported as a binomial outcome implying that an indel event had occurred along these branches; this approach does not account for the possibility of multiple indels causing reversion to the same sequence lengths.  
-Additionally, the total branch lengths comprising the cherry was employed as an estimate of divergence time in years.  
+Additionally, the total branch lengths comprising the cherry was employed as an estimate of divergence time in years (Supplementary Figure \ref{boxplot_GD}).  
 %These two parameters --- a true or false indicating the presence or absence of an indel, and the total time elapsed in years ---were collected for all cherries in each subtype tree. 
 The indel rate was estimated from these data by fitting the following model using maximum likelihood, where the Bernoulli likelihood for the $i$-th cherry is: 
 \[%
@@ -487,7 +488,6 @@ To further analyze the composition of indels, we generated pairwise alignments f
 From these pairwise alignments, we calculated the proportions of adenine, thymine, guanine, and cytosine (A,C,G,T) nucleotides in the indel and non-indel regions of the gp120 variable loops.
 In addition, we recorded the positions and numbers of PNGSs in the five gp120 variable loops by scanning the unaligned amino acid sequences with the regular expression `N[\^{}P][ST][\^{}P]', where `\^{}P' maps to any symbol except P (proline). 
 We then used these data to investigate how commonly indels tended to change PNGSs in the variable loops.   
-%\todo{Art}{This sentence was changed}
 By combining PNGS and indel location data, we searched for instances where an indel overlapped with a PNGS in one of the two sequences of a cherry, indicating either the deletion of a PNGS or the insertion of a sequence containing one.
 To avoid recording instances of partial indel overlap that leave the PNGS intact, we verified the PNGS was disrupted by scanning it again with a regular expression. 
 
