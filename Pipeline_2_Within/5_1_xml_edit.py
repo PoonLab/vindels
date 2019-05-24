@@ -33,6 +33,12 @@ for infile in xmlFolder:
                 element = parent.find("parameter")
                 element.attrib = {"dimension":"5", "id":"skyline.popSize" ,"lower":"0.0" ,"value":"1.0"}
 
+        if parent.tag == "groupSizes":
+            if parent != None:
+                element = parent.find("parameter")
+                element.attrib = {"dimension":"5", "id":"skyline.groupSize"}
+
+
         # removes the simulator element and replaces it with the starting tree
         if parent.tag == "coalescentSimulator":
             parent.clear()

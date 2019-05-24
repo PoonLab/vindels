@@ -28,7 +28,7 @@ for f in files:
         #stem = xmlpath+name+"/"
 
         #override stem to test output location
-        stem = '/home/jpalmer/6BEASTout2/' + name
+        stem = '/home/jpalmer/6BEASTout/' + name
         print(stem)
         print(out)
         parse(template_file, f, stem, out, 'days', 1)
