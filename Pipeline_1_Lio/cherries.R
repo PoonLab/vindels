@@ -73,7 +73,9 @@ for (i in 1:length(tfolder)){
   indels$total.length <- indels$tip1.len + indels$tip2.len
   
   #genetic.dists <- rbind(genetic.dists, data.frame(accno=rep(subtype, nrow(indels)),tip1=indels$tip1.len,tip2=indels$tip2.len, cherry=indels$total.length, ))
-  filtered.indels <- indels
+  filtered.indels <- indels[indels$total.length != 0,]
+  
+  filtered.indels2 <- data.frame(stringsAsFactors = F)
 
   
   indel2 <- data.frame(stringsAsFactors = F)
