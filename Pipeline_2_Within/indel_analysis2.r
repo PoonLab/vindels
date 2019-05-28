@@ -43,74 +43,117 @@ cutHeader <- function(header){
 
 
 #TESTING ----------------------
-#csvfile <- read.csv(file, sep="\t", stringsAsFactors = F)
-#output <- sapply(csvfile$Ins, extractInfo)
+#iCSV <- read.csv(file, sep="\t", stringsAsFactors = F)
+#dTemp <- sapply(iCSV$Ins, extractInfo)
 
 
 
 # INSERTION PARSING ----------
-folder <- Sys.glob("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/insertions/*.csv")
-dfolder <- Sys.glob("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/deletions/*.csv")
-treedir <- "/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/"
+ifolder <- Sys.glob("~/Lio/insertions/*.csv")
+dfolder <- Sys.glob("~/Lio/deletions/*.csv")
+treedir <- "~/Lio/prelim/"
 data.df <- data.frame()
-vr.df <- list()
-total.df <- data.frame()
+ins.vr <- list()
+del.vr <- list()
+iTotal <- data.frame()
+dTotal <- data.frame()
 count <- 0
-for (file in folder){
+for (file in 1:length(ifolder)){
   print(file)
-  basename <- str_split(basename(file),"\\.")[[1]][1]
+  basename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
   count <- count + 1
-  csvfile <- read.csv(file,sep="\t", stringsAsFactors = F)
-  if (all(is.na(csvfile$Ins))){
-    csvfile$Ins <- ""
+  iCSV <- read.csv(ifolder[file],sep="\t", stringsAsFactors = F)
+  dCSV <- read.csv(dfolder[file],sep="\t", stringsAsFactors = F)
+  if (all(is.na(iCSV$Ins))){
+    iCSV$Ins <- ""
   }
-  csvfile$Count <- sapply(csvfile$Ins, csvcount) 
+  
+  if (all(is.na(dCSV$Del))){
+    dCSV$Del <- ""
+  }
+  iCSV$Count <- sapply(iCSV$Ins, csvcount) 
+  dCSV$Count <- sapply(dCSV$Del, csvcount)
   
   tre <- read.tree(paste0(treedir, basename, ".tree.sample"))
   #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x, "_")[[1]][1]}))
   branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   #branches will match exactly with the tre$tip.label order
-  csvfile$Date <- branches[match(csvfile$Accno, tre$tip.label)]
-  csvfile$Accno <- unname(sapply(csvfile$Accno, cutHeader))
+  iCSV$Date <- branches[match(iCSV$Accno, tre$tip.label)]
+  dCSV$Date <- branches[match(dCSV$Accno, tre$tip.label)]
   
-  output <- sapply(csvfile$Ins, extractInfo)
-  output <- unname(output)
-  output <- t(output)
-  output <- as.data.frame(output)
-  output$V1 <- as.character(output$V1)
-  output$V2 <- as.character(output$V2)
-  csvfile <- cbind(csvfile, output)
-  csvfile$Ins <- NULL
+  iCSV$Accno <- unname(sapply(iCSV$Accno, cutHeader))
+  dCSV$Accno <- unname(sapply(dCSV$Accno, cutHeader))
   
-  colnames(csvfile) <- c("Accno", "Vloop", "Vlength", "Count","Date", "Seq", "Pos")
-  total.df <- rbind(total.df, csvfile)
-  temp.df <- split(csvfile, csvfile$Vloop)
+  insInfo <- sapply(iCSV$Ins, extractInfo)
+  insInfo <- unname(insInfo)
+  insInfo <- t(insInfo)
+  insInfo <- as.data.frame(insInfo)
+  insInfo$V1 <- as.character(insInfo$V1)
+  insInfo$V2 <- as.character(insInfo$V2)
+  iCSV <- cbind(iCSV, insInfo)
+  iCSV$Ins <- NULL
+  
+  delInfo <- sapply(dCSV$Del, extractInfo)
+  delInfo <- unname(delInfo)
+  delInfo <- t(delInfo)
+  delInfo <- as.data.frame(delInfo)
+  delInfo$V1 <- as.character(delInfo$V1)
+  delInfo$V2 <- as.character(delInfo$V2)
+  dCSV <- cbind(dCSV, delInfo)
+  dCSV$Del <- NULL
+  
+  colnames(iCSV) <- c("Accno","Vloop", "Vlength", "Count","Date", "Seq", "Pos")
+  colnames(dCSV) <- c("Accno", "Vloop", "Vlength", "Count","Date", "Seq", "Pos")
+  
+  iTotal <- rbind(iTotal, iCSV)
+  dTotal <- rbind(dTotal, dCSV)
+  
+  iTemp <- split(iCSV, iCSV$Vloop)
+  dTemp <- split(dCSV, dCSV$Vloop)
   
   
   for (i in 1:5){
-    vr.df[i][[1]] <- rbind(vr.df[i][[1]], temp.df[i][[1]])
+    ins.vr[i][[1]] <- rbind(ins.vr[i][[1]], iTemp[i][[1]])
+    #del.vr[i][[1]] <- rbind(del.vr[i][[1]], dTemp[i][[1]])
   }
 }
+
+
+
+for (i in 1:5){
+  write.csv(ins.vr[i][[1]], paste0("~/Lio/V",i,".csv"))
+}
+
 require(BSDA)
 # RATE ANALYSIS -------------
-rates <- c()
+irates <- c()
+drates <- c()
 vlengths <- c(84,156,105,90,33)
 all.df <- data.frame()
 for (vloop in 1:5){
-  current <- vr.df[[vloop]]
-  finalized <- current[current$Date < 325 & current$Count < 2,]
-  #print(nrow(current) - nrow(finalized))
+  iData <- ins.vr[[vloop]]
+  dData <- del.vr[[vloop]]
   
-  fit <- glm(finalized$Count ~ 1, offset=log(finalized$Date), family="poisson")
-  rate <- exp(coef(fit)[[1]])*365/vlengths[vloop]
-  rates <- c(rates, rate)
-  print(summary(fit))
+  iFinal <- iData[iData$Date < 325 & iData$Count < 2,]
+  dFinal <- dData[dData$Date < 325 & dData$Count < 2,]
+  #print(nrow(current) - nrow(iFinal))
+  
+  ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
+  irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
+  irates <- c(irates, irate)
+  print(summary(ifit))
+  
+  dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
+  drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
+  drates <- c(drates, drate)
+  print(summary(dfit))
+  
   #print(1 - (fit$deviance/fit$null.deviance))
-  #all.df <- rbind(all.df, finalized)
+  #all.df <- rbind(all.df, iFinal)
   #EDA(residuals(fit))
   
   #to.remove <- c(order(residuals(fit), decreasing = T)[1:52])
-  #finalized2 <- finalized[-to.remove,]
-  #fit2 <- glm(finalized2$Count ~ finalized2$Date, family="poisson")
+  #iFinal2 <- iFinal[-to.remove,]
+  #fit2 <- glm(iFinal2$Count ~ iFinal2$Date, family="poisson")
   #EDA(residuals(fit2))
 }
 
