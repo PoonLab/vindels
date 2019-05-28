@@ -18,7 +18,7 @@ extractInfo <- function(input){
   if (length(input)==1 && input == ""){
     return(c("",""))
   }else{
-    insertions <- str_split(input, ",")
+    insertions <- strsplit(input, ":")
   }
   seq <- c()
   pos <- c()
