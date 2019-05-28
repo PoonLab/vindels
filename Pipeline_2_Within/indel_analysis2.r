@@ -1,11 +1,6 @@
 require(bbmle)
 require(stringr)
 require(ape)
-poisll <- function (rate, counts, times){
-  prob <- (exp(-rate*times))*((rate*times)^(counts))/(factorial(counts))    # (e^-rt)*((rt)^k)/(k!)
-  sum(log(prob))
-}
-
 
 csvcount <- function(input){
   commas <- str_count(input, ",")
@@ -29,7 +24,7 @@ extractInfo <- function(input){
   pos <- c()
   
   for (ins in insertions[[1]]){
-     fields <- str_split(ins, "-")
+     fields <- strsplit(ins, "-")
      seq <- c(seq, fields[[1]][1])
      pos <- c(pos, as.numeric(fields[[1]][2]))
   }
@@ -40,12 +35,6 @@ cutHeader <- function(header){
   newheader <- str_split(as.character(header),"_")[[1]][1]
   newheader
 }
-
-
-#TESTING ----------------------
-#iCSV <- read.csv(file, sep="\t", stringsAsFactors = F)
-#dTemp <- sapply(iCSV$Ins, extractInfo)
-
 
 
 # INSERTION PARSING ----------
@@ -62,8 +51,8 @@ for (file in 1:length(ifolder)){
   print(file)
   basename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
   count <- count + 1
-  iCSV <- read.csv(ifolder[file],sep="\t", stringsAsFactors = F)
-  dCSV <- read.csv(dfolder[file],sep="\t", stringsAsFactors = F)
+  iCSV <- read.csv(ifolder[file], stringsAsFactors = F)
+  dCSV <- read.csv(dfolder[file], stringsAsFactors = F)
   if (all(is.na(iCSV$Ins))){
     iCSV$Ins <- ""
   }
@@ -113,7 +102,7 @@ for (file in 1:length(ifolder)){
   
   for (i in 1:5){
     ins.vr[i][[1]] <- rbind(ins.vr[i][[1]], iTemp[i][[1]])
-    #del.vr[i][[1]] <- rbind(del.vr[i][[1]], dTemp[i][[1]])
+    del.vr[i][[1]] <- rbind(del.vr[i][[1]], dTemp[i][[1]])
   }
 }
 

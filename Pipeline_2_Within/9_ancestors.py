@@ -81,7 +81,6 @@ def extractIndels(anFile, vSeqFile):
     dDict = {}
     vLen = {}
     for accno in terminals.keys():
-
         iTemp = ''
         dTemp = ''
 
@@ -202,9 +201,11 @@ def main():
 
         for accno in iDict:      
                  
-            insertions = iDict[accno]
-            deletions = dDict[accno]
-            vlengths = vLen[accno]   # will be a list containing the lengths of each variable loop 
+            insertions = iDict[accno] # [ [], [], [], [], [] ]
+            deletions = dDict[accno] # [ [], [], [], [], [] ]
+            vlengths = vLen[accno]   # [ V1-len, V2-len, V3-len, V4-len, V5-len]
+			
+			# j/k count from 0 to 4 for each variable loop 
             for j, ins in enumerate(insertions):
                 insList = ",".join(ins)
                 if insList == "":
@@ -214,7 +215,7 @@ def main():
                 delList = ",".join(dl)
                 if delList == "":
                     delList = ""
-                del_out.write(",".join([accno,delList,str(j+1), str(vlengths[j])])+"\n")
+                del_out.write(",".join([accno,delList,str(k+1), str(vlengths[k])])+"\n")
 
 
 
