@@ -63,18 +63,21 @@ for header, seq  in data.items():
 
     vseqdict[header] = vseq
 
+gmotif = re.compile("N[^P][ST][^P]")
 
+nglycs = {}
 for header in vseqdict.keys():
 
+    nglycs[header] = []
     for seq in vseqdict[header]:
-        print(seq)
         aaseq = translate_nuc(seq,0)
-        print(aaseq)
-        nglycs = re.findall("N[^P][ST][^P]", aaseq)
-        print(nglycs)
 
+        nglycs[header].append(str(len(gmotif.findall(aaseq))))
 
-    #output.write(header+","+vseqdict[header]+"\n")
+output.write("header,V1,V2,V3,V4,V5\n")
+for seq in nglycs.keys():
+    print(nglycs[seq])
+    output.write(seq+","+",".join(nglycs[seq])+"\n")
         
 
 

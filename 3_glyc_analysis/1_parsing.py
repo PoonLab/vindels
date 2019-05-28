@@ -42,8 +42,8 @@ for sub in subtypes.keys():
     print(len(subtypes[sub]))
 '''
 
-write_fasta(filtered,"/home/jpalmer/PycharmProjects/glyc-analysis/1_filtered/gp120-glycs.fasta")
+#write_fasta(filtered,"/home/jpalmer/PycharmProjects/glyc-analysis/1_filtered/gp120-glycs.fasta")
 
-#print(len(fasta))
-#print(len(filtered))
+print(len(fasta))
+print(len(filtered))
 #print(filtered.keys())

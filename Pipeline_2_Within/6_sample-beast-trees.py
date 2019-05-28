@@ -24,10 +24,11 @@ def sample_beast(infile, outdir, numsample=10 ):
         if len(data) == 6:
             states.append(data[1].lstrip("STATE_"))
     input.close()
-
+    print(infile)
     total = len(states) - 1
+    print(total)
     start = int(total*0.1) + 1
-
+    print(start)
     rsample = []
     for x in range(numsample):
         #chose 101 just in case (left 101 states for the burn in and sampled from last 900 states out of 1001)
@@ -50,8 +51,8 @@ def sample_beast(infile, outdir, numsample=10 ):
             line = line.strip("\t\n,").split()
             header = line[1].strip("'").split(".")
             date = line[1].strip("'").split("_")[1]
-            print(line[0])
-            print(date)
+            #print(line[0])
+            #print(date)
             
             #NEW SEQUENCE HEADER FORMAT
             seqDict[line[0]] = header[4] + "_" + date
@@ -67,7 +68,7 @@ def sample_beast(infile, outdir, numsample=10 ):
             fixed = re.sub("\[&rate[^\]]*\]", "", rawtree)
 
             handle = cStringIO.StringIO(fixed)
-            print(type(handle))
+            #print(type(handle))
             #read the tree as a newick phylo object
             tree = Phylo.read(handle, 'newick')
             #convert all the tip names using the seqDict dictionary
@@ -76,13 +77,11 @@ def sample_beast(infile, outdir, numsample=10 ):
                 tip.name = seqDict[tip.name]
                 
             Phylo.write(tree, outdir+name+".tree.sample", 'newick')
-            print(tree)
-    print(seqDict)
+            #print(tree)
+    #print(seqDict)
 
 
-#folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*.trees")
-#for infile in folder:
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/*.time.trees")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout3/trees/*.time.trees")
 
 for infile in folder:
     sample_beast(infile,"/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/", 1)

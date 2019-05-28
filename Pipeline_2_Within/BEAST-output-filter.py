@@ -34,28 +34,40 @@ files = glob(inFolder + "*")
 
 
 for f in files: 
-    
-    if f.endswith(".time.trees"):
-        base = os.path.basename(f)
-        os.rename(f, inFolder+"trees/"+base)
 
-    if f.endswith(".ops"):
-        base = os.path.basename(f)
-        os.rename(f, inFolder+"operators/"+base)
 
     if f.endswith(".log"):
+        
         logFile = open(f, "rU")
 
         lastLine = subprocess.check_output(['tail', '-1', f])
         trace = lastLine.split()
 
+        base = os.path.basename(f)
+        tree = base.split(".")[0] + ".time.trees"
+        ops = base.split(".")[0] + ".ops"
+
         if len(trace) > 0:
+
             if trace[0] != "100000000":
-                base = os.path.basename(f)
                 os.rename(f, inFolder+"unfinished/"+base)
+                if os.path.isfile(inFolder+tree):
+                    os.rename(inFolder+tree, inFolder+"unfinished/"+tree)
+                if os.path.isfile(inFolder+ops):
+                    os.rename(inFolder+ops, inFolder+"unfinished/"+ops)
+            
+            else:
+                if os.path.isfile(inFolder+tree):
+                    os.rename(inFolder+tree, inFolder+"trees/"+tree)
+                if os.path.isfile(inFolder+ops):
+                    os.rename(inFolder+ops, inFolder+"operators/"+ops)
+
         else:
-            base = os.path.basename(f)
             os.rename(f, inFolder+"unfinished/"+base)
+            if os.path.isfile(inFolder+tree):
+                os.rename(inFolder+tree, inFolder+"unfinished/"+tree)
+            if os.path.isfile(inFolder+ops):
+                os.rename(inFolder+ops, inFolder+"unfinished/"+ops)
 
 
     

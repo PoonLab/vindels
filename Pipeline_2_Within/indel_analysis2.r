@@ -16,6 +16,7 @@ csvcount <- function(input){
   }else{
     result <- 1
   }
+  result
 }
 
 extractInfo <- function(input){
@@ -49,6 +50,7 @@ cutHeader <- function(header){
 
 # INSERTION PARSING ----------
 folder <- Sys.glob("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/insertions/*.csv")
+dfolder <- Sys.glob("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/deletions/*.csv")
 treedir <- "/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/"
 data.df <- data.frame()
 vr.df <- list()
@@ -65,6 +67,7 @@ for (file in folder){
   csvfile$Count <- sapply(csvfile$Ins, csvcount) 
   
   tre <- read.tree(paste0(treedir, basename, ".tree.sample"))
+  #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x, "_")[[1]][1]}))
   branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   #branches will match exactly with the tre$tip.label order
   csvfile$Date <- branches[match(csvfile$Accno, tre$tip.label)]
   csvfile$Accno <- unname(sapply(csvfile$Accno, cutHeader))
@@ -78,7 +81,7 @@ for (file in folder){
   csvfile <- cbind(csvfile, output)
   csvfile$Ins <- NULL
   
-  colnames(csvfile) <- c("Accno", "Vloop", "Count","Date", "Seq", "Pos")
+  colnames(csvfile) <- c("Accno", "Vloop", "Vlength", "Count","Date", "Seq", "Pos")
   total.df <- rbind(total.df, csvfile)
   temp.df <- split(csvfile, csvfile$Vloop)
   
@@ -111,7 +114,36 @@ for (vloop in 1:5){
   #EDA(residuals(fit2))
 }
 
+indelrates <- data.frame(VLoop=c("V1","V2","V3","V4","V5"), Rate=rates)
 
+require(ggplot2)
+
+plot <- ggplot(indelrates, aes(x=VLoop, 
+                            y=AdjRate,
+                            width=1)) + geom_bar(colour="black",
+                                                 stat="identity", 
+                                                 fill="dodgerblue",
+                                                 position="dodge", 
+                                                 show.legend=F) 
+
+plot <- plot + labs(x="Variable Loop", 
+            y=expression(paste("Indel Rate (Events/Nt/Year x ", 10^-3, ")", sep = "")))+scale_fill_manual(values=colors2)+scale_y_continuous(expand = c(0, 0),
+                                                                                                                                             limits = c(0, 1.5))+theme(panel.grid.major.y = element_line(color="black",size=0.3),
+                                                                                                                                                                     panel.grid.major.x = element_blank(),
+                                                                                                                                                                     panel.grid.minor.y = element_blank(),
+                                                                                                                                                                     panel.grid.minor.x = element_blank(),
+                                                                                                                                                                     panel.spacing=unit(1, "mm"),
+                                                                                                                                                                     #panel.background=element_rect(fill="gray88",colour="white",size=0),
+                                                                                                                                                                     plot.margin =margin(t = 20, r = 20, b = 20, l = 8, unit = "pt"),
+                                                                                                                                                                     axis.line = element_line(colour = "black"), 
+                                                                                                                                                                     axis.title.y=element_text(size=20,margin=margin(t = 0, r = 15, b = 0, l = 0)),
+                                                                                                                                                                     axis.title.x=element_text(size=20,margin=margin(t = 15, r = 0, b = 0, l = 0)),
+                                                                                                                                                                     strip.text.x = element_text(size=16),
+                                                                                                                                                                     axis.text=element_text(size=14),
+                                                                                                                                                                     legend.position="none")
+
+
+ggplot()
 ggplot(all.df, aes(x=Date, y=Count, group=Count)) + geom_density_ridges(colour="white", fill="blue", scale=1, bandwidth=5)
 
 # Get raw insertion counts 

@@ -1,3 +1,8 @@
+# CHERRY GENETIC DISTANCES
+
+# this script is to plot different breakdowns of cherry genetic distances 
+
+
 genetic.dists <- read.csv("~/vindels/Pipeline_2_Within/genetic-dists.csv", row.names=1)
 filtered.indels <- read.csv("~/vindels/Pipeline_2_Within/filtered-indels.csv", row.names = 1)
 

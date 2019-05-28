@@ -11,14 +11,18 @@ for (treefile in tree.folder){
   
   logname <- paste0(strsplit(filename, "\\.")[[1]][1], ".log")
   
-  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout/",logname), sep="\t", skip=3)
+  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout3/",logname), sep="\t", skip=3)
   
+  print(logname)
   loglen <- nrow(logfile) -1
+  print(loglen)
   interval <- c(loglen*0.1+1,loglen+1)
+  print(interval)
   rescale.factor <- median(logfile$ucld.mean[interval[1]:interval[2]])
+  print(rescale.factor)
   intree$edge.length <- (intree$edge.length * rescale.factor)
-  print(intree)
-  #write.tree(intree,paste0(path,"rescaled/",filename))
+  #print(intree)
+  write.tree(intree,paste0(path,"rescaled/",filename))
 }
 #modify all tree edge lengths using the value from the log file 
 

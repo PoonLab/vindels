@@ -7,34 +7,46 @@ require(ape)
 require(Biostrings)
 
 
-folder <- Sys.glob("~/Github/vindels/Laptop/VariableLoopSeqs/*.csv")
+csvfile <- read.csv("~/PycharmProjects/glyc-analysis/3_glycs/glycs.csv")
 
 nglycs <- data.frame(stringsAsFactors = F)
 
-for (file in folder){
-  file <- folder[1]
-  
-  data <- read.csv(file, stringsAsFactors = F)
-  
-  # remove the unneeded start and stop columns
-  data <- data[,-c(3,4,6,7,9,10,12,13,15,16)]
-  
-  for (seq in 1:nrow(data)){
-    accno <- data[seq,1]
-    ngCounts <- c()
-    for (idx in 1:5){
-      vloop <- data[seq,idx+1]
 
-      aaseq <- as.character(trans(as.DNAbin(DNAString(vloop))))[[1]]
-      aaseq <- paste(aaseq,collapse="")
-
-      search <- gregexpr("N[^P][ST][^P]", aaseq)[[1]]
-      ngCounts <- c(ngCounts, length(search))
+for (seq in 1:nrow(csvfile)){
+  csvfile[,1] <- as.character(csvfile[,1])
+  
+  subtype <- sapply(csvfile[,1], function(x){strsplit(x, "\\.")[[1]][1]})
+  subtype <-unname(subtype)
+  
+  accno <- sapply(csvfile[,1], function(x){strsplit(x, "\\.")[[1]][2]})
+  accno <- unname(accno)
+  
+  status <- sapply(csvfile[,1], function(x){
+    temp <- strsplit(x, "\\.")[[1]][5]
+    if (temp == "AIDS"){
+      temp <- "chronic"
+    }else if(temp == "acute_infection"){
+      temp <- "acute"
     }
-    nglycs <- rbind(nglycs, data.frame(accno=accno, v1=ngCounts[1],v2=ngCounts[2],v3=ngCounts[3],v4=ngCounts[4],v5=ngCounts[5]))
-    
-  }
-    
+    temp 
+    })
+  status <- unname(status)
+  
+  csvfile[,1] <- NULL
+  csvfile <- cbind(accno, subtype, status, csvfile)
+  
+  spl <- sample(nrow(csvfile), 610)
+  glyc_train <- csvfile[spl,-c(1,2)]
+  glyc_test <- csvfile[-spl,-c(1,2)]
+  
+  svmfit <- svm(status ~ ., data=glyc_train, kernel="polynomial", cost=0.1, scale=F)
+  print(svmfit)
+  
+  tuned <- tune(svm, status~., data=glyc_train, kernel="linear", ranges=list(cost=c(0.001, 0.01, 0.1,1,10,100)))
+  
+  p <- predict(svmfit, glyc_test, type="class")
+  
 }
+  
 
 

@@ -4,7 +4,9 @@ import os
 import csv
 from seqUtils import * 
 
-def getAncestors(anFile):
+
+
+def getTerminals(anFile):
     terminals = {}
     
     with open(anFile) as handle:
@@ -67,14 +69,13 @@ def vrSwitch(position, boundaries):
     return -1
     
             
-# Dependencies: 1) getAncestors   2) vrSwitch   3) getVRegions  
+# Dependencies: 1) getTerminals   2) vrSwitch   3) getVRegions  
 def extractIndels(anFile, vSeqFile):
     count = 0
 
     # {"accno":[seq1,anseq]}
-    terminals = getAncestors(anFile)
+    terminals = getTerminals(anFile)
 
-    #
     vregions, positions = getVRegions(vSeqFile)
     iDict = {}
     dDict = {}
@@ -160,7 +161,7 @@ def extractIndels(anFile, vSeqFile):
         iDict[accno] = insertions
         dDict[accno] = deletions
         vLen[accno] = [len(vloop) for vloop in vseqs]
-        print(vLen)
+        #print(vLen)
         '''
         #SANITY CHECK 
         #ensures that the iterated sequences are the proper variable loops and that they are identical to the one found in the csv file 
@@ -183,7 +184,7 @@ def extractIndels(anFile, vSeqFile):
     return iDict, dDict, vLen
 
 def main():
-    hFolder = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/*.fasta')
+    hFolder = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/finished/*.fasta')
     vPath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
 
     for infile in hFolder:
@@ -208,12 +209,12 @@ def main():
                 insList = ",".join(ins)
                 if insList == "":
                     insList = ""
-                ins_out.write("\t".join([accno,insList,str(j+1),vlength[j]])+"\n")
+                ins_out.write("\t".join([accno,insList,str(j+1),str(vlengths[j])])+"\n")
             for k, dl in enumerate(deletions):
                 delList = ",".join(dl)
                 if delList == "":
                     delList = ""
-                del_out.write("\t".join([accno,delList,str(j+1), vlength[j]])+"\n")
+                del_out.write("\t".join([accno,delList,str(j+1), str(vlengths[j])])+"\n")
 
 
 
