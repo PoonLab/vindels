@@ -207,12 +207,12 @@ def main():
 			
 			# j/k count from 0 to 4 for each variable loop 
             for j, ins in enumerate(insertions):
-                insList = ",".join(ins)
+                insList = ":".join(ins)
                 if insList == "":
                     insList = ""
                 ins_out.write(",".join([accno,insList,str(j+1),str(vlengths[j])])+"\n")
             for k, dl in enumerate(deletions):
-                delList = ",".join(dl)
+                delList = ":".join(dl)
                 if delList == "":
                     delList = ""
                 del_out.write(",".join([accno,delList,str(k+1), str(vlengths[k])])+"\n")
