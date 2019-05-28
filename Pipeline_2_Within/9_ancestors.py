@@ -197,8 +197,8 @@ def main():
         del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/deletions/"+reconfile,'w')
         iDict, dDict, vLen = extractIndels(infile, vPath+csvfile)
 
-        ins_out.write("Accno\tIns\tVloop\tVlen\n")
-        del_out.write("Accno\tDel\tVloop\tVlen\n")
+        ins_out.write("Accno,Ins,Vloop,Vlen\n")
+        del_out.write("Accno,Del,Vloop,Vlen\n")
 
         for accno in iDict:      
                  
@@ -209,12 +209,12 @@ def main():
                 insList = ",".join(ins)
                 if insList == "":
                     insList = ""
-                ins_out.write("\t".join([accno,insList,str(j+1),str(vlengths[j])])+"\n")
+                ins_out.write(",".join([accno,insList,str(j+1),str(vlengths[j])])+"\n")
             for k, dl in enumerate(deletions):
                 delList = ",".join(dl)
                 if delList == "":
                     delList = ""
-                del_out.write("\t".join([accno,delList,str(j+1), str(vlengths[j])])+"\n")
+                del_out.write(",".join([accno,delList,str(j+1), str(vlengths[j])])+"\n")
 
 
 
