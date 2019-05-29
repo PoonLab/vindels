@@ -109,7 +109,9 @@ for (file in 1:length(ifolder)){
 
 
 for (i in 1:5){
-  write.csv(ins.vr[i][[1]], paste0("~/Lio/V",i,".csv"))
+  write.csv(ins.vr[i][[1]], paste0("~/Lio/nucleotides/Ins_V",i,".csv"))
+  write.csv(del.vr[i][[1]], paste0("~/Lio/nucleotides/Del_V",i,".csv"))
+  
 }
 
 require(BSDA)
@@ -146,33 +148,54 @@ for (vloop in 1:5){
   #EDA(residuals(fit2))
 }
 
-indelrates <- data.frame(VLoop=c("V1","V2","V3","V4","V5"), Rate=rates)
+insrates <- data.frame(VLoop=c("V1","V2","V3","V4","V5"), Rate=irates, AdjRate=irates*10^3)
+delrates <- data.frame(VLoop=c("V1","V2","V3","V4","V5"), Rate=drates, AdjRate=drates*10^3)
+
 
 require(ggplot2)
 
-plot <- ggplot(indelrates, aes(x=VLoop, 
-                            y=AdjRate,
-                            width=1)) + geom_bar(colour="black",
-                                                 stat="identity", 
-                                                 fill="dodgerblue",
-                                                 position="dodge", 
-                                                 show.legend=F) 
+g1 <- ggplot(insrates, aes(x=VLoop, y=AdjRate,width=1)) + 
+  geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) + 
+  labs(x="Variable Loop", 
+       y=expression(paste("Insertion Rate \n(Events/Nt/Year x  ", 10^-3, ")", sep = "")))+
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 5))+
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 42, r = 10, b = 4, l = 2, unit = "pt"),
+        axis.line = element_line(colour = "black"), 
+        axis.title.y=element_text(size=12,margin=margin(t = 0, r = 3, b = 0, l = 12)),
+        axis.title.x=element_blank(),
+        strip.text.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size=12),
+        legend.position="none")
 
-plot <- plot + labs(x="Variable Loop", 
-            y=expression(paste("Indel Rate (Events/Nt/Year x ", 10^-3, ")", sep = "")))+scale_fill_manual(values=colors2)+scale_y_continuous(expand = c(0, 0),
-                                                                                                                                             limits = c(0, 1.5))+theme(panel.grid.major.y = element_line(color="black",size=0.3),
-                                                                                                                                                                     panel.grid.major.x = element_blank(),
-                                                                                                                                                                     panel.grid.minor.y = element_blank(),
-                                                                                                                                                                     panel.grid.minor.x = element_blank(),
-                                                                                                                                                                     panel.spacing=unit(1, "mm"),
-                                                                                                                                                                     #panel.background=element_rect(fill="gray88",colour="white",size=0),
-                                                                                                                                                                     plot.margin =margin(t = 20, r = 20, b = 20, l = 8, unit = "pt"),
-                                                                                                                                                                     axis.line = element_line(colour = "black"), 
-                                                                                                                                                                     axis.title.y=element_text(size=20,margin=margin(t = 0, r = 15, b = 0, l = 0)),
-                                                                                                                                                                     axis.title.x=element_text(size=20,margin=margin(t = 15, r = 0, b = 0, l = 0)),
-                                                                                                                                                                     strip.text.x = element_text(size=16),
-                                                                                                                                                                     axis.text=element_text(size=14),
-                                                                                                                                                                     legend.position="none")
+
+g2 <- ggplot(delrates, aes(x=VLoop, y=AdjRate,width=1)) + 
+  geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) + 
+  labs(x="Variable Loop", 
+       y="Deletion Rate")+
+  #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
+  scale_y_reverse(lim=c(5,0))+
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 0, r = 10, b = 0, l = 8, unit = "pt"),
+        axis.line = element_line(colour = "black"), 
+        axis.title.y=element_text(size=12,margin=margin(t = 0, r = 9, b = 0, l = 6)),
+        axis.title.x=element_text(size=12,margin=margin(t = 5, r = 0, b = 0, l = 0)),
+        strip.text.x = element_text(size=16),
+        axis.text=element_text(size=12),
+        legend.position="none")
+  
+multiplot(g1,g2,rows=2)
 
 
 ggplot()
