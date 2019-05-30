@@ -79,7 +79,7 @@ def extractIndels(anFile, vSeqFile):
     vregions, positions = getVRegions(vSeqFile)
     iDict = {}
     dDict = {}
-    vLen = {}
+    vSeq = {}
     for accno in terminals.keys():
         iTemp = ''
         dTemp = ''
@@ -89,7 +89,7 @@ def extractIndels(anFile, vSeqFile):
         deletions = [[],[],[],[],[]]
 
         #for compiling the variable regions to ensure they are properly examined
-        vseqs = ['','','','','']
+        seqs = ['','','','','']
         
         # ai will count the number of nucleotides, skipping gaps 
         ai = 0
@@ -111,7 +111,7 @@ def extractIndels(anFile, vSeqFile):
             if vregion != -1:
                 
                 #sanity check to ensure the code is covering the variable regions 
-                vseqs[vregion] += schar
+                seqs[vregion] += schar
 
                 #1 : ancestral gap, sequence gap  = nothing 
                 #2 : ancestral gap, sequence char = insertion 
@@ -157,9 +157,12 @@ def extractIndels(anFile, vSeqFile):
                         if dTemp:
                             deletions[vregion].append(dTemp+"-"+str(n-1))
                             dTemp = ''
+
+        for n in range(5):
+            seqs[n] = seqs[n].replace("-","")
         iDict[accno] = insertions
         dDict[accno] = deletions
-        vLen[accno] = [len(vloop) for vloop in vseqs]
+        vSeq[accno] = seqs 
         #print(vLen)
         '''
         #SANITY CHECK 
@@ -180,12 +183,13 @@ def extractIndels(anFile, vSeqFile):
                 print(csvSeq)
                 count +=1'''
 
-    return iDict, dDict, vLen
+    return iDict, dDict, vSeq
 
 def main():
     hFolder = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/finished/*.fasta')
     vPath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
 
+    totalseqs = 0
     for infile in hFolder:
         filename = os.path.basename(infile)
 
@@ -194,30 +198,31 @@ def main():
         reconfile = filename.split("_")[0] + ".csv"   #101827-a.csv
         ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/insertions/"+reconfile,'w')
         del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/deletions/"+reconfile,'w')
-        iDict, dDict, vLen = extractIndels(infile, vPath+csvfile)
+        iDict, dDict, vSeq = extractIndels(infile, vPath+csvfile)
 
-        ins_out.write("Accno,Ins,Vloop,Vlen\n")
-        del_out.write("Accno,Del,Vloop,Vlen\n")
+        ins_out.write("Accno,Ins,Vloop,Vlen,Seq\n")
+        del_out.write("Accno,Del,Vloop,Vlen,Seq\n")
 
         for accno in iDict:      
-                 
+            totalseqs += 1
+
             insertions = iDict[accno] # [ [], [], [], [], [] ]
             deletions = dDict[accno] # [ [], [], [], [], [] ]
-            vlengths = vLen[accno]   # [ V1-len, V2-len, V3-len, V4-len, V5-len]
+            vsequences = vSeq[accno]   # [ V1-len, V2-len, V3-len, V4-len, V5-len]
 			
-			# j/k count from 0 to 4 for each variable loop 
+	    # j/k count from 0 to 4 for each variable loop 
             for j, ins in enumerate(insertions):
                 insList = ":".join(ins)
                 if insList == "":
                     insList = ""
-                ins_out.write(",".join([accno,insList,str(j+1),str(vlengths[j])])+"\n")
+                ins_out.write(",".join([accno,insList,str(j+1),str(len(vsequences[j])),vsequences[j]])+"\n")
             for k, dl in enumerate(deletions):
                 delList = ":".join(dl)
                 if delList == "":
                     delList = ""
-                del_out.write(",".join([accno,delList,str(k+1), str(vlengths[k])])+"\n")
+                del_out.write(",".join([accno,delList,str(k+1), str(len(vsequences[k])), vsequences[k]])+"\n")
 
-
+    print(totalseqs)
 
 
 if __name__ == '__main__': 

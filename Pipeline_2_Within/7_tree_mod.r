@@ -1,69 +1,52 @@
 # Tree modifications 
 # used for modifying different attributes of a tree and returning the result
- 
 
 require(ape)
-tree.folder <- Sys.glob("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/*.tree.sample")
-for (treefile in tree.folder){
-  path <- strsplit(treefile,"prelim")[[1]][1]
-  intree <- read.tree(treefile)
-  filename <- basename(treefile)
+
+# input directory of sampled BEAST trees
+# relies on the presence of a "prelim" folder being present
+folders <- Sys.glob("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim_multi/*")
+
+path <- "~/PycharmProjects/hiv-withinhost/7SampleTrees/"
+
+for (f in folders){
+  trees <- Sys.glob(paste0(f, "/*.tree.sample"))
+  foldername <- paste0(basename(f),"/") 
   
-  logname <- paste0(strsplit(filename, "\\.")[[1]][1], ".log")
+  dir.create(paste0(path,"rescaled_multi/",foldername), showWarnings = FALSE)
   
-  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout3/",logname), sep="\t", skip=3)
-  
-  print(logname)
-  loglen <- nrow(logfile) -1
-  print(loglen)
-  interval <- c(loglen*0.1+1,loglen+1)
-  print(interval)
-  rescale.factor <- median(logfile$ucld.mean[interval[1]:interval[2]])
-  print(rescale.factor)
-  intree$edge.length <- (intree$edge.length * rescale.factor)
-  #print(intree)
-  write.tree(intree,paste0(path,"rescaled/",filename))
+  for (treefile in trees){
+    
+    print(treefile)
+    
+    intree <- read.tree(treefile)
+    filename <- basename(treefile)
+
+    # edits the tree file name to get the BEAST log file name
+    logname <- paste0(strsplit(filename, "_")[[1]][1], ".log")
+
+    # uses log file name to find and read BEAST log file
+    logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout3/",logname), sep="\t", skip=3)
+
+    print(logname)
+
+    #counts the number of MCMC steps
+    loglen <- nrow(logfile) -1
+    print(loglen)
+
+    # calculates the start and end interval of MCMC steps AFTER the burn in (assuming last 90%)
+    interval <- c(loglen*0.1+1,loglen+1)
+    print(interval)
+
+    # calculates the rescale factor using the median of the UCLD.MEAN column (can check that this matches UCLD.MEDIAN on tracer)
+    rescale.factor <- median(logfile$ucld.mean[interval[1]:interval[2]])
+    print(rescale.factor)
+
+    # rescales all the edge lengths of the tree
+    intree$edge.length <- (intree$edge.length * rescale.factor)
+
+    # writes the rescaled tree to a new folder called "rescaled"
+    write.tree(intree,paste0(path,"rescaled_multi/",foldername, filename))
+  }
 }
-#modify all tree edge lengths using the value from the log file 
 
-
-
-
-
-
-
-#CUSTOM EDITS
-# ----------------------
-#bifurcating only
-intree <- multi2di(intree)
-
-#adding in numeric node labels  (1 to Nnode)
-nNode <- intree$Nnode
-intree$node.label <- as.character(seq(from=1,to=nNode))
-
-#find all cherries 
-ntips <- Ntip(intree)
-numtips <- tabulate(intree$edge[which(intree$edge[,2] <= ntips),1])
-is.cherry <- which(numtips == 2)
-
-print(is.cherry)
-c.nodes <- data.frame()
-
-print(intree$edge)
-print(intree$edge.length)
-for (node in is.cherry){
-	#print(node)
-  idx.cherry <- which(intree$edge[,1]==node)
-	tips <- intree$edge[idx.cherry,2]
-	lengths <- intree$edge.length[idx.cherry]
-	#print(tips)
-	node.name <- paste0("(",intree$tip.label[tips[1]] , ":",lengths[1],",", intree$tip.label[tips[2]],":",lengths[2], ")")
-	print(node.name)  
-	#c.nodes <- rbind(c.nodes, data.frame(name=node, ,]
-  
-}
-  
-
-
-
-#write.tree(intree2,'~/historian/data/F1_relabel.tree')

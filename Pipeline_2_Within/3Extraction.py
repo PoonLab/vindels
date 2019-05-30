@@ -117,7 +117,7 @@ for infile in folder:
             full[patid] = patdict[patid]
         
 
-
+total = 0
 patcount = 0
 for pat in full.keys():
     
@@ -209,13 +209,14 @@ for pat in full.keys():
     if len(vseqdict[pat]) == 0 or len(full[pat]) == 0:
         continue    
 
-    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta","w")
-    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv", "w")
+    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta2","w")
+    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv2", "w")
     outputv.write("header,V1,start,stop,V2,start,stop,V3,start,stop,V4,start,stop,V5,start,stop\n")
 
     patcount += 1
     for n, header in enumerate(full[pat].keys()):
         #print(pat)
+        total += 1
         if pat != "VN_Data":
             fields = header.split(".")
             date = fields[bestIdx]
@@ -236,7 +237,7 @@ for pat in full.keys():
 
             outputfull.write(">"+newheader + "\n" + full[pat][header] + "\n")
             outputv.write(newheader + "," + vseqdict[pat][header] + "\n")
-            
+print(total)
 print(patcount)
 
 

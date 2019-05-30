@@ -4,10 +4,11 @@ from glob import glob
 import re
 import random
 import os 
-
+import sys
+import shutil
 
 def sample_beast(infile, outdir, numsample=10 ):
-    tcount = 0
+    
     states = []
     
     if not os.path.isdir(outdir):
@@ -33,12 +34,14 @@ def sample_beast(infile, outdir, numsample=10 ):
     for x in range(numsample):
         #chose 101 just in case (left 101 states for the burn in and sampled from last 900 states out of 1001)
         rsample.append(str(random.randint(start,total)*int(states[1])))
-
+    print(len(rsample))
+    sample_count = 0
 
     input2 = open(infile,'rU')
 
     seqDict = {}
     
+    d = open(outdir+name+".dictionary", "w")
 
     for line in input2:
 
@@ -49,16 +52,17 @@ def sample_beast(infile, outdir, numsample=10 ):
         # this will load the translate dictionary (when search has been found)
         if search != None:
             line = line.strip("\t\n,").split()
-            header = line[1].strip("'").split(".")
-            date = line[1].strip("'").split("_")[1]
+            header = line[1].strip("'")
+            #date = line[1].strip("'").split("_")[1]
             #print(line[0])
             #print(date)
             
             #NEW SEQUENCE HEADER FORMAT
-            seqDict[line[0]] = header[4] + "_" + date
+            seqDict[line[0]] = header
         
         # this finds and processes each tree state in the rsample
         elif len(data) == 6 and data[1].lstrip("STATE_") in rsample:
+            sample_count += 1
             state = data[1].lstrip("STATE_")
             if len(state) >1:
                 state = state[:-5]
@@ -76,44 +80,40 @@ def sample_beast(infile, outdir, numsample=10 ):
             for tip in tree.get_terminals():
                 tip.name = seqDict[tip.name]
                 
-            Phylo.write(tree, outdir+name+".tree.sample", 'newick')
+            #Phylo.write(tree, outdir+name+"_"+str(sample_count)+".tree.sample", 'newick')
             #print(tree)
+
+
+    # used for making dictionaries to convert sequences back to full header (bc i messed up)
+    for num in seqDict.keys():
+        d.write(seqDict[num].split(".")[4]+","+seqDict[num]+"\n")
     #print(seqDict)
 
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout3/trees/*.time.trees")
+'''if sys.argv[1][-1] != "/":
+    sys.argv[1] += "/"
+if sys.argv[2][-1] != "/":
+    sys.argv[2] += "/"
+'''
 
-for infile in folder:
-    sample_beast(infile,"/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/", 1)
-
-
-
-
-'''states =[]
-for line in ininfile:
-    data = line.split()
-    if len(data) == 6:
-            states.append(int(data[1].lstrip("STATE_")))
-ininfile.close()
-
-total = len(states) - 1
-start = int(total*0.1) + 1
-print(start)
-rsample = []
-
-for x in range(10):
-    #chose 101 just in case (left 101 states for the burn in and sampled from last 900 states out of 1001)
-    rsample.append(str(random.randint(start,total)*int(states[1])))
-
-print(rsample)'''
-'''for x in range(10):
-    #chose 101 just in case (left 101 states for the burn in and sampled from last 900 states out of 1001)
-    rsample.append(str(random.randint(101,1000)*100000))
-print(rsample)'''
+infolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout3/trees/*.time.trees")
+outfolder = "/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/"
 
 
+for infile in infolder:
+    filename = os.path.basename(infile).split(".")[0]
+    
+    '''
+    patfolder = outfolder + filename + "/"
+    if not os.path.isdir(patfolder):
+        os.makedirs(patfolder)
+    else:
+        shutil.rmtree(patfolder,ignore_errors=False)
+        os.makedirs(patfolder)
+    '''
+    sample_beast(infile,outfolder, 1)
 
-        #write the tree using Phylo
+
 
 
 

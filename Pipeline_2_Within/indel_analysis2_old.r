@@ -38,16 +38,16 @@ cutHeader <- function(header){
 
 
 # INSERTION PARSING ----------
+#Sys.glob("~/Lio/deletions/*.csv")
 ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/insertions/*.csv")
 dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/deletions/*.csv")
 treedir <- "~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/"
 data.df <- data.frame()
-ins.vr <- data.frame()
-del.vr <- data.frame()
+ins.vr <- list()
+del.vr <- list()
 iTotal <- data.frame()
 dTotal <- data.frame()
 count <- 0
-sequences <- list()
 for (file in 1:length(ifolder)){
   print(file)
   basename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
@@ -61,16 +61,6 @@ for (file in 1:length(ifolder)){
   if (all(is.na(dCSV$Del))){
     dCSV$Del <- ""
   }
-  
-  # store the sequences from these two data frames for nucleotide analysis
-  sequences$ins <- as.character(iCSV$Seq)
-  sequences$del <- as.character(dCSV$Seq)
-  
-  # remove them as they arent needed for this analysis
-  dCSV$Seq <- NULL
-  iCSV$Seq <- NULL
-  
-  # creates the counts column
   iCSV$Count <- sapply(iCSV$Ins, csvcount) 
   dCSV$Count <- sapply(dCSV$Del, csvcount)
   
@@ -104,27 +94,25 @@ for (file in 1:length(ifolder)){
   colnames(iCSV) <- c("Accno","Vloop", "Vlength", "Count","Date", "Seq", "Pos")
   colnames(dCSV) <- c("Accno", "Vloop", "Vlength", "Count","Date", "Seq", "Pos")
   
-  iTotal <- rbind(iTotal, cbind(iCSV, sequences[[1]]))
-  dTotal <- rbind(dTotal, cbind(dCSV, sequences[[2]]))
+  iTotal <- rbind(iTotal, iCSV)
+  dTotal <- rbind(dTotal, dCSV)
   
-  iTotal[,8] <- as.character(iTotal[,8])
-  dTotal[,8] <- as.character(dTotal[,8])
+  iTemp <- split(iCSV, iCSV$Vloop)
+  dTemp <- split(dCSV, dCSV$Vloop)
   
-  # iTemp <- split(iCSV, iCSV$Vloop)
-  # dTemp <- split(dCSV, dCSV$Vloop)
-
-  # for (i in 1:5){
-  #   ins.vr[i][[1]] <- rbind(ins.vr[i][[1]], iTemp[i][[1]])
-  #   del.vr[i][[1]] <- rbind(del.vr[i][[1]], dTemp[i][[1]])
-  # }
+  
+  for (i in 1:5){
+    ins.vr[i][[1]] <- rbind(ins.vr[i][[1]], iTemp[i][[1]])
+    del.vr[i][[1]] <- rbind(del.vr[i][[1]], dTemp[i][[1]])
+  }
 }
+
+
 
 for (i in 1:5){
-  write.csv(iTotal[iTotal$Vloop==i,c(1,2,6,8)], paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/ins/Ins_V",i,".csv"))
-  write.csv(dTotal[dTotal$Vloop==i,c(1,2,6,8)], paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/del/Del_V",i,".csv"))
-
+  write.csv(ins.vr[i][[1]], paste0("~/Lio/V",i,".csv"))
+  write.csv(ins.vr[i][[1]], paste0("~/Lio/V",i,".csv"))
 }
-
 
 require(BSDA)
 # RATE ANALYSIS -------------
@@ -160,55 +148,33 @@ for (vloop in 1:5){
   #EDA(residuals(fit2))
 }
 
-insrates <- data.frame(VLoop=c("V1","V2","V3","V4","V5"), Rate=irates, AdjRate=irates*10^3)
-delrates <- data.frame(VLoop=c("V1","V2","V3","V4","V5"), Rate=drates, AdjRate=drates*10^3)
+indelrates <- data.frame(VLoop=c("V1","V2","V3","V4","V5"), Rate=rates)
 
-require(Rmisc)
 require(ggplot2)
 
-g1 <- ggplot(insrates, aes(x=VLoop, y=AdjRate,width=1)) + 
-  geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) + 
-  labs(x="Variable Loop", 
-       y=expression(paste("       Insertion Rate \n(Events/Nt/Year x  ", 10^-3, ")", sep = "")))+
-  scale_y_continuous(expand = c(0, 0),limits = c(0, 5))+
-  theme(panel.grid.major.y = element_line(color="black",size=0.3),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.spacing=unit(1, "mm"),
-        #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 42, r = 10, b = 8, l = 18, unit = "pt"),
-        axis.line = element_line(colour = "black"), 
-        axis.title.y=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
-        axis.title.x=element_blank(),
-        strip.text.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_text(size=14),
-        legend.position="none")
+plot <- ggplot(indelrates, aes(x=VLoop, 
+                            y=AdjRate,
+                            width=1)) + geom_bar(colour="black",
+                                                 stat="identity", 
+                                                 fill="dodgerblue",
+                                                 position="dodge", 
+                                                 show.legend=F) 
 
-
-g2 <- ggplot(delrates, aes(x=VLoop, y=AdjRate,width=1)) + 
-  geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) + 
-  labs(x="Variable Loop", 
-       y="Deletion Rate")+
-  #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
-  scale_y_reverse(lim=c(5,0))+
-  theme(panel.grid.major.y = element_line(color="black",size=0.3),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.spacing=unit(1, "mm"),
-        #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = -10, r = 10, b = 8, l = 24, unit = "pt"),
-        axis.line = element_line(colour = "black"), 
-        axis.title.y=element_text(size=18,margin=margin(t = 0, r = 11, b = 0, l = 6)),
-        axis.title.x=element_text(size=18,margin=margin(t = 5, r = 0, b = 0, l = 0)),
-        strip.text.x = element_text(size=16),
-        axis.text.x=element_text(size=18),
-        axis.text.y=element_text(size=14),
-        legend.position="none")
-  
-multiplot(g1,g2)
+plot <- plot + labs(x="Variable Loop", 
+            y=expression(paste("Indel Rate (Events/Nt/Year x ", 10^-3, ")", sep = "")))+scale_fill_manual(values=colors2)+scale_y_continuous(expand = c(0, 0),
+                                                                                                                                             limits = c(0, 1.5))+theme(panel.grid.major.y = element_line(color="black",size=0.3),
+                                                                                                                                                                     panel.grid.major.x = element_blank(),
+                                                                                                                                                                     panel.grid.minor.y = element_blank(),
+                                                                                                                                                                     panel.grid.minor.x = element_blank(),
+                                                                                                                                                                     panel.spacing=unit(1, "mm"),
+                                                                                                                                                                     #panel.background=element_rect(fill="gray88",colour="white",size=0),
+                                                                                                                                                                     plot.margin =margin(t = 20, r = 20, b = 20, l = 8, unit = "pt"),
+                                                                                                                                                                     axis.line = element_line(colour = "black"), 
+                                                                                                                                                                     axis.title.y=element_text(size=20,margin=margin(t = 0, r = 15, b = 0, l = 0)),
+                                                                                                                                                                     axis.title.x=element_text(size=20,margin=margin(t = 15, r = 0, b = 0, l = 0)),
+                                                                                                                                                                     strip.text.x = element_text(size=16),
+                                                                                                                                                                     axis.text=element_text(size=14),
+                                                                                                                                                                     legend.position="none")
 
 
 ggplot()
