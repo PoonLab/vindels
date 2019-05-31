@@ -351,7 +351,74 @@ g2 <- ggplot(sub_drates, aes(x=VLoop, y=adjrate,fill=subtype)) +
                                                                                                                     size=6)
 g2
 
+# LENGTH ANALYSIS
+# --------------------------------------------------------
 
+categorize <- function(count){
+  if (count <= 3){
+    "1-3"
+  }else if(count > 3 & count <= 6){
+    "4-6"
+  }else{
+    "7+"
+  }
+}
+
+iLength <- iTotal[,c(2,4,7)]
+dLength <- dTotal[,c(2,4,7)]
+
+iLength$Len <- sapply(iLength$Seq, nchar)
+dLength$Len <- sapply(dLength$Seq, nchar)
+
+iLength <- iLength[iLength$Len!=0,]
+dLength <- dLength[dLength$Len!=0,]
+
+
+iLength$Bin <- sapply(iLength$Len,categorize)
+dLength$Bin <- sapply(dLength$Len,categorize)
+
+iLength$Bin <- factor(iLength$Bin,levels=c("7+","4-6","1-3"))
+dLength$Bin <- factor(dLength$Bin,levels=c("7+","4-6","1-3"))
+
+
+colnames(iLength) <- c("Variable Loop", "Subtype", "Seq", "Len", "Insertion Length (nt)")
+
+mosaic(~Vloop + Bin, data=iLength,
+       shade=T, main=NULL, direction="v",
+       spacing=spacing_equal(sp = unit(0.7, "lines")),
+       residuals_type="Pearson",
+       margins=c(2,2,6,2),
+       labeling_args = list(tl_labels = c(F,T), 
+                            tl_varnames=c(F,T),
+                            gp_labels=gpar(fontsize=20),
+                            gp_varnames=gpar(fontsize=26),
+                            set_varnames = c(Vloop="Variable Loop", 
+                                             Bin="Insertion Length (nt)"),
+                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
+       legend=legend_resbased(fontsize = 20, fontfamily = "",
+                              x = unit(0.5, "lines"), y = unit(2,"lines"),
+                              height = unit(0.8, "npc"),
+                              width = unit(1, "lines"), range=c(-10,10)),
+       set_labels=list(Vloop=c("V1","V2","V4","V5")))
+
+
+mosaic(~Vloop + Bin, data=dLength,
+       shade=T, main=NULL, direction="v",
+       spacing=spacing_equal(sp = unit(0.7, "lines")),
+       residuals_type="Pearson",
+       margins=c(2,2,6,2),
+       labeling_args = list(tl_labels = c(F,T), 
+                            tl_varnames=c(F,T),
+                            gp_labels=gpar(fontsize=20),
+                            gp_varnames=gpar(fontsize=26),
+                            set_varnames = c(Vloop="Variable Loop", 
+                                             Bin="Deletion Length (nt)"),
+                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
+       legend=legend_resbased(fontsize = 20, fontfamily = "",
+                              x = unit(0.5, "lines"), y = unit(2,"lines"),
+                              height = unit(0.8, "npc"),
+                              width = unit(1, "lines"), range=c(-10,10)),
+       set_labels=list(Vloop=c("V1","V2","V4","V5")))
 
 
 

@@ -21,8 +21,8 @@ removeNA <- function(input){
 }
 
 ntcount <- c()
-all.ins <- data.frame(stringsAsFactors = F)
-all.del <- data.frame(stringsAsFactors = F)
+total.ins <- list()
+total.del <- list()
 for (file in 1:length(ifolder)){
   iCSV <- read.csv(ifolder[file], na.strings=c("NA"),row.names = 1, stringsAsFactors = F)
   dCSV <- read.csv(dfolder[file], na.strings=c("NA"),row.names = 1, stringsAsFactors = F)
@@ -34,47 +34,56 @@ for (file in 1:length(ifolder)){
     colnames(iCSV) <- c("Accno", "Vloop", "Seq", "VSeq")
     colnames(dCSV) <- c("Accno", "Vloop", "Seq", "VSeq")
     
-    all.ins <- rbind(all.ins, iCSV)
-    all.del <- rbind(all.del, dCSV)
+    total.ins[[file]] <- iCSV
+    total.del[[file]] <- dCSV
   }
 }
 
-all.ins <- all.ins[all.ins$Seq!="",]
-all.del <- all.del[all.del$Seq!="",]
+for (i in c(1,2,4,5)){
+  total.ins[[i]] <- total.ins[[i]][total.ins[[i]]$Seq!="",]
+  total.del[[i]] <- total.del[[i]][total.del[[i]]$Seq!="",]
+}
 
+vloops <- c(1, 2,3,4,5)
+vloops2 <- c("V1","V2","V4","V5")
+ins.props <- data.frame(stringsAsFactors = F)
+del.props <- data.frame(stringsAsFactors = F)
 
-
-
-ins <- list()
-del <- list()
-nucleotides <- c("A","C","G","T")
-
-ins <- data.frame(nucl=nucleotides)
-del <- data.frame(nucl=nucleotides)
-
-# a vector of two totals
-# iTotals[1] = total number of nucleotides in insertion sequences
-# iTotals[2] = total nuimebr of nucleotides in the vloops associated with insertion sequences 
-iTotals <- c(sum(unname(sapply(all.ins$Seq, nchar))), sum(unname(sapply(all.ins$VSeq, nchar))))
-dTotals <- c(sum(unname(sapply(all.del$Seq, nchar))), sum(unname(sapply(all.del$VSeq, nchar))))
-
-iProps <- c()
-dProps <- c()
-
-iVProps <- c()
-dVProps <- c()
-for (nuc in nucleotides){
-  iProps <- c(iProps, sum(str_count(all.ins$Seq, nuc)) / iTotals[1])
-  dProps <- c(dProps, sum(str_count(all.del$Seq, nuc)) / dTotals[1])
+for (i in c(1,2,4,5)){
+  all.ins <- total.ins[[i]]
+  all.del <- total.del[[i]]
   
-  iVProps <- c(iVProps, sum(str_count(all.ins$VSeq, nuc)) / iTotals[2])
-  dVProps <- c(dVProps, sum(str_count(all.del$VSeq, nuc)) / dTotals[2])
+  nucleotides <- c("A","C","G","T")
+  
+
+  
+  # a vector of two totals
+  # iTotals[1] = total number of nucleotides in insertion sequences
+  # iTotals[2] = total nuimebr of nucleotides in the vloops associated with insertion sequences 
+  iTotals <- c(sum(unname(sapply(all.ins$Seq, nchar))), sum(unname(sapply(all.ins$VSeq, nchar))))
+  dTotals <- c(sum(unname(sapply(all.del$Seq, nchar))), sum(unname(sapply(all.del$VSeq, nchar))))
+  
+  iProps <- c()
+  dProps <- c()
+  
+  iVProps <- c()
+  dVProps <- c()
+  for (nuc in nucleotides){
+    iProps <- c(iProps, sum(str_count(all.ins$Seq, nuc)) / iTotals[1])
+    dProps <- c(dProps, sum(str_count(all.del$Seq, nuc)) / dTotals[1])
+    
+    iVProps <- c(iVProps, sum(str_count(all.ins$VSeq, nuc)) / iTotals[2])
+    dVProps <- c(dVProps, sum(str_count(all.del$VSeq, nuc)) / dTotals[2])
+  }
+  
+
+  ins.props <- rbind(ins.props, data.frame(nt=nucleotides, iprops=iProps, vprop=iVProps, vloop=rep(vloops[i],4)))
+  del.props <- rbind(del.props, data.frame(nt=nucleotides, dprops=dProps, vprop=dVProps, vloop=rep(vloops[i],4)))
+
 }
 
 
 
-ins.props <- data.frame(nt=nucleotides, iprops=iProps, vloop=iVProps)
-del.props <- data.frame(nt=nucleotides, dprops=dProps, vloop=dVProps)
 
 
 
@@ -85,17 +94,40 @@ colors <- brewer.pal(4, "Set1")
 cex=2
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
-lim = c(0.10,0.45)
-plot(ins.props[,c(3,2)], pch=21, bg=colors,xlim=lim,ylim=lim,
+lim = c(0,0.5)
+plot(ins.props[,c(3,2)], pch=ins.props[,4]+20, bg=ins.props[,1],xlim=lim,ylim=lim,
      cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.5, main="Insertions")
 #text(0.187,0.475,labels="a)", cex=1.5)
 #text(0.245,0.452,labels="A", cex=1.5)
 title(ylab="Proportion Inside Insertions", line=3.5,cex.lab=1.75)
 title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.38,0.22,legend=nucleotides, pch=21,cex=1.9, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.43,0.18,legend=nucleotides, pch=21,cex=1.9, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.33,0.18,legend=vloops2, pch=c(21,22,24,25),cex=1.9, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 par(xpd=F)
 abline(0,1)
 
+
+
+
+
+require(RColorBrewer)
+colors <- brewer.pal(4, "Set1")
+
+#A
+cex=2
+par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
+
+lim = c(0,0.5)
+plot(del.props[,c(3,2)], pch=del.props[,4]+20, bg=del.props[,1],xlim=lim,ylim=lim,
+     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.5, main="Deletions")
+#text(0.187,0.475,labels="a)", cex=1.5)
+#text(0.245,0.452,labels="A", cex=1.5)
+title(ylab="Proportion Inside Deletions", line=3.5,cex.lab=1.75)
+title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
+legend(0.43,0.18,legend=nucleotides, pch=21,cex=1.9, pt.bg=del.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.33,0.18,legend=vloops2, pch=c(21,22,24,25),cex=1.9, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+par(xpd=F)
+abline(0,1)
 
 
 
