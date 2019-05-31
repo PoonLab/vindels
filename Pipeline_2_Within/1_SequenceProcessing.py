@@ -11,6 +11,7 @@ subtypes = {}
 location = {}
 Cstudies = []
 minlen = 1000000
+total = 0 
 for infile in folder:
 
     fasta = open(infile, 'r')
@@ -25,7 +26,7 @@ for infile in folder:
     # filter : screen for sequences missing subtype, collection year, and those without sampling collection info
     for x in data:
         header = x.split(".")
-        
+        total += 1 
         if len(data[x]) < minlen:
             minlen = len(data[x])
         subtypes[header[0]] = subtypes.get(header[0],0) + 1
@@ -42,6 +43,7 @@ for infile in folder:
         if x == "C":
             Cstudies.append(filename)
 print(minlen)
+print(total)
 print(subtypes)
 print(location)
 print(sorted(Cstudies))

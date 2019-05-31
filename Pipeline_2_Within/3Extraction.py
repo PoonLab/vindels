@@ -214,9 +214,13 @@ for pat in full.keys():
     outputv.write("header,V1,start,stop,V2,start,stop,V3,start,stop,V4,start,stop,V5,start,stop\n")
 
     patcount += 1
+    
+
     for n, header in enumerate(full[pat].keys()):
         #print(pat)
-        total += 1
+        #total += 1
+
+        #final[pat][header] = full[pat][header]
         if pat != "VN_Data":
             fields = header.split(".")
             date = fields[bestIdx]
@@ -237,7 +241,29 @@ for pat in full.keys():
 
             outputfull.write(">"+newheader + "\n" + full[pat][header] + "\n")
             outputv.write(newheader + "," + vseqdict[pat][header] + "\n")
+
+
+final = {}
+for pat in full.keys():
+    for header in full[pat].keys():
+        total += 1
+        subtype = header.split(".")[0]
+        #print(subtype)
+        if subtype not in final.keys():
+            final[subtype] = {}
+        final[subtype][header] = full[pat][header]
+
+        
+
+
 print(total)
+sttotal = 0
+for st in final.keys():
+    if len(final[st]) > 1:
+        print(st)
+        print(str(len(final[st])))
+    sttotal += len(final[st])
+print(sttotal)
 print(patcount)
 
 

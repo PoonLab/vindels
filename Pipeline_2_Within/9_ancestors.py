@@ -204,8 +204,6 @@ def main():
         del_out.write("Accno,Del,Vloop,Vlen,Seq\n")
 
         for accno in iDict:      
-            totalseqs += 1
-
             insertions = iDict[accno] # [ [], [], [], [], [] ]
             deletions = dDict[accno] # [ [], [], [], [], [] ]
             vsequences = vSeq[accno]   # [ V1-len, V2-len, V3-len, V4-len, V5-len]

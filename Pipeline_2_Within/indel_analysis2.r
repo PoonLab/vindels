@@ -32,14 +32,26 @@ extractInfo <- function(input){
 }
 
 cutHeader <- function(header){
-  newheader <- str_split(as.character(header),"_")[[1]][1]
+  newheader <- str_split(as.character(header),"\\.")[[1]][1]
   newheader
+}
+
+removeNA <- function(input){
+  if (all(is.na(input))){
+    input <- ""
+  }
+  input
+}
+
+getAccno <- function(input){
+  accno <- strsplit(input, "\\.")[[1]][5]
+  accno
 }
 
 
 # INSERTION PARSING ----------
-ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/insertions/*.csv")
-dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/deletions/*.csv")
+ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/ins_fix/*.csv")
+dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/del_fix/*.csv")
 treedir <- "~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/"
 data.df <- data.frame()
 ins.vr <- data.frame()
@@ -57,10 +69,19 @@ for (file in 1:length(ifolder)){
   if (all(is.na(iCSV$Ins))){
     iCSV$Ins <- ""
   }
-  
+
   if (all(is.na(dCSV$Del))){
     dCSV$Del <- ""
   }
+  #iCSV$Ins <- removeNA(iCSV$Ins)
+  #dCSV$Del <- removeNA(dCSV$Del)
+  iAccno <- unname(sapply(iCSV$Accno, getAccno))
+  dAccno <- unname(sapply(dCSV$Accno, getAccno))
+  
+  
+  iCSV$Subtype <- unname(sapply(iCSV$Accno, cutHeader))
+  dCSV$Subtype <- unname(sapply(dCSV$Accno, cutHeader))
+  
   
   # store the sequences from these two data frames for nucleotide analysis
   sequences$ins <- as.character(iCSV$Seq)
@@ -76,12 +97,15 @@ for (file in 1:length(ifolder)){
   
   tre <- read.tree(paste0(treedir, basename, ".tree.sample"))
   #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x, "_")[[1]][1]}))
-  branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   #branches will match exactly with the tre$tip.label order
-  iCSV$Date <- branches[match(iCSV$Accno, tre$tip.label)]
-  dCSV$Date <- branches[match(dCSV$Accno, tre$tip.label)]
   
-  iCSV$Accno <- unname(sapply(iCSV$Accno, cutHeader))
-  dCSV$Accno <- unname(sapply(dCSV$Accno, cutHeader))
+  # adjusts the tre tip labels to match 
+  tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
+  
+  branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   #branches will match exactly with the tre$tip.label order
+  iCSV$Date <- branches[match(iAccno, tre$tip.label)]
+  dCSV$Date <- branches[match(dAccno, tre$tip.label)]
+  
+
   
   insInfo <- sapply(iCSV$Ins, extractInfo)
   insInfo <- unname(insInfo)
@@ -100,15 +124,13 @@ for (file in 1:length(ifolder)){
   delInfo$V2 <- as.character(delInfo$V2)
   dCSV <- cbind(dCSV, delInfo)
   dCSV$Del <- NULL
+
   
-  colnames(iCSV) <- c("Accno","Vloop", "Vlength", "Count","Date", "Seq", "Pos")
-  colnames(dCSV) <- c("Accno", "Vloop", "Vlength", "Count","Date", "Seq", "Pos")
+  colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos")
+  colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos")
   
   iTotal <- rbind(iTotal, cbind(iCSV, sequences[[1]]))
   dTotal <- rbind(dTotal, cbind(dCSV, sequences[[2]]))
-  
-  iTotal[,8] <- as.character(iTotal[,8])
-  dTotal[,8] <- as.character(dTotal[,8])
   
   # iTemp <- split(iCSV, iCSV$Vloop)
   # dTemp <- split(dCSV, dCSV$Vloop)
@@ -118,12 +140,14 @@ for (file in 1:length(ifolder)){
   #   del.vr[i][[1]] <- rbind(del.vr[i][[1]], dTemp[i][[1]])
   # }
 }
+iTotal[,8] <- as.character(iTotal[,8])
+dTotal[,8] <- as.character(dTotal[,8])
 
-for (i in 1:5){
-  write.csv(iTotal[iTotal$Vloop==i,c(1,2,6,8)], paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/ins/Ins_V",i,".csv"))
-  write.csv(dTotal[dTotal$Vloop==i,c(1,2,6,8)], paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/del/Del_V",i,".csv"))
-
-}
+# for (i in 1:5){
+#   write.csv(iTotal[iTotal$Vloop==i,c(1,2,6,8)], paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/ins/Ins_V",i,".csv"))
+#   write.csv(dTotal[dTotal$Vloop==i,c(1,2,6,8)], paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/del/Del_V",i,".csv"))
+# 
+# }
 
 
 require(BSDA)
@@ -133,8 +157,8 @@ drates <- c()
 vlengths <- c(84,156,105,90,33)
 all.df <- data.frame()
 for (vloop in 1:5){
-  iData <- ins.vr[[vloop]]
-  dData <- del.vr[[vloop]]
+  iData <- iTotal[iTotal$Vloop==vloop,]
+  dData <- dTotal[dTotal$Vloop==vloop,]
   
   iFinal <- iData[iData$Date < 325 & iData$Count < 2,]
   dFinal <- dData[dData$Date < 325 & dData$Count < 2,]
@@ -160,8 +184,14 @@ for (vloop in 1:5){
   #EDA(residuals(fit2))
 }
 
-insrates <- data.frame(VLoop=c("V1","V2","V3","V4","V5"), Rate=irates, AdjRate=irates*10^3)
-delrates <- data.frame(VLoop=c("V1","V2","V3","V4","V5"), Rate=drates, AdjRate=drates*10^3)
+
+
+vloops <- c("V1","V2","V3","V4","V5")
+
+insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
+delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
+
+indels <- cbind(insrates, delrates[,c(2,3)])
 
 require(Rmisc)
 require(ggplot2)
@@ -184,11 +214,13 @@ g1 <- ggplot(insrates, aes(x=VLoop, y=AdjRate,width=1)) +
         strip.text.x = element_blank(),
         axis.text.x = element_blank(),
         axis.text.y = element_text(size=14),
-        legend.position="none")
+        legend.position="none")+ geom_text(aes(y=0.3,x=3 ),
+                                           label="N/A", 
+                                           size=6)
 
 
 g2 <- ggplot(delrates, aes(x=VLoop, y=AdjRate,width=1)) + 
-  geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) + 
+  geom_bar(colour="black", stat="identity",fill="firebrick1",position="dodge",show.legend=F) + 
   labs(x="Variable Loop", 
        y="Deletion Rate")+
   #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
@@ -206,9 +238,121 @@ g2 <- ggplot(delrates, aes(x=VLoop, y=AdjRate,width=1)) +
         strip.text.x = element_text(size=16),
         axis.text.x=element_text(size=18),
         axis.text.y=element_text(size=14),
-        legend.position="none")
+        legend.position="none") + geom_text(aes(y=0.3,x=3 ),
+                                            label="N/A", 
+                                            size=6)
   
 multiplot(g1,g2)
+
+
+
+# SUBTYPE STRATIFICATION 
+# ----------------------------------------------
+ins <- list()
+ins$B <- iTotal[iTotal$Subtype=="B",]
+ins$C <- iTotal[iTotal$Subtype=="C",]
+del <- list()
+del$B <- dTotal[dTotal$Subtype=="B",]
+del$C <- dTotal[dTotal$Subtype=="C",]
+
+sub_irates <- data.frame()
+sub_drates <- data.frame()
+
+for (i in 1:2){
+  
+  iData <- ins[[i]]
+  dData <- del[[i]]
+  irates <- c()
+  drates <- c()
+  
+  st <- c("B", "C")
+  
+  for (vloop in 1:5){
+    iFinal <- iData[iData$Vloop==vloop & iData$Date < 325 & iData$Count < 2,]
+    dFinal <- dData[dData$Vloop==vloop & dData$Date < 325 & dData$Count < 2,]
+    #print(nrow(current) - nrow(iFinal))
+    
+    ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
+    irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
+    irates <- c(irates, irate)
+    print(summary(ifit))
+    
+    dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
+    drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
+    drates <- c(drates, drate)
+    print(summary(dfit))
+    
+    #print(1 - (fit$deviance/fit$null.deviance))
+    #all.df <- rbind(all.df, iFinal)
+    #EDA(residuals(fit))
+    
+    #to.remove <- c(order(residuals(fit), decreasing = T)[1:52])
+    #iFinal2 <- iFinal[-to.remove,]
+    #fit2 <- glm(iFinal2$Count ~ iFinal2$Date, family="poisson")
+    #EDA(residuals(fit2))
+  }
+  sub_irates <- rbind(sub_irates, data.frame(rate=irates, adjrate=(irates*10^3),subtype=rep(st[[i]],5), VLoop=vloops))
+  sub_drates <- rbind(sub_drates, data.frame(rate=drates, adjrate=(drates*10^3),subtype=rep(st[[i]],5), VLoop=vloops))
+}
+
+
+# SUBTYPE PLOT 
+g1 <- ggplot(sub_irates, aes(x=VLoop, y=adjrate,fill=subtype)) + 
+  geom_bar(stat="identity",position="dodge") + 
+  labs(title="Insertions",x="Variable Loop", 
+       y="Insertion Rate")+
+  #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 2))+
+  scale_fill_brewer(palette="Set1")+
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 12, r = 12, b = 15, l = 24, unit = "pt"),
+        axis.line = element_line(colour = "black"), 
+        axis.title.y=element_text(size=20,margin=margin(t = 0, r = 11, b = 0, l = 6)),
+        axis.title.x=element_text(size=20,margin=margin(t = 5, r = 0, b = 0, l = 0)),
+        strip.text.x = element_text(size=16),
+        axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=18),
+        plot.title = element_text(size=25,hjust=0.5),
+        legend.position="right", legend.text=element_text(size=18), legend.title=element_text(size=20)) + geom_text(aes(y=0.1,x=3 ),
+                                            label="N/A", 
+                                            size=6)
+g1
+
+
+# SUBTYPE PLOT 
+g2 <- ggplot(sub_drates, aes(x=VLoop, y=adjrate,fill=subtype)) + 
+  geom_bar(stat="identity",position="dodge") + 
+  labs(title="Deletions",x="Variable Loop", 
+       y="Deletion Rate")+
+  #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
+  scale_fill_brewer(palette="Set1")+
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 12, r = 12, b = 15, l = 24, unit = "pt"),
+        axis.line = element_line(colour = "black"), 
+        axis.title.y=element_text(size=20,margin=margin(t = 0, r = 11, b = 0, l = 6)),
+        axis.title.x=element_text(size=20,margin=margin(t = 5, r = 0, b = 0, l = 0)),
+        strip.text.x = element_text(size=16),
+        axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=18),
+        plot.title = element_text(size=25,hjust=0.5),
+        legend.position="right", legend.text=element_text(size=18), legend.title=element_text(size=20)) + geom_text(aes(y=0.1,x=3 ),
+                                                                                                                    label="N/A", 
+                                                                                                                    size=6)
+g2
+
+
+
 
 
 ggplot()
