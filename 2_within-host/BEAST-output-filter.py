@@ -19,19 +19,14 @@ if not os.path.isdir(inFolder):
 if not os.path.isdir(inFolder+"trees/"):
     os.mkdir(inFolder+"trees/")
 
-
 if not os.path.isdir(inFolder+"operators/"):
     os.mkdir(inFolder+"operators/")
-
 
 if not os.path.isdir(inFolder+"unfinished/"):
     os.mkdir(inFolder+"unfinished/")
 
 
-
-
 files = glob(inFolder + "*")
-
 
 for f in files: 
 

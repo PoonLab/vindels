@@ -14,6 +14,7 @@ csvcount <- function(input){
   result
 }
 
+# used for extracting condensed CSV information 
 extractInfo <- function(input){
   if (length(input)==1 && input == ""){
     return(c("",""))
@@ -31,11 +32,13 @@ extractInfo <- function(input){
   return(c(paste(seq,collapse=","), paste(pos,collapse=",")))
 }
 
-cutHeader <- function(header){
+# for changing headers from ACCNO_DATE format to ACCNO
+getSubtype <- function(header){
   newheader <- str_split(as.character(header),"\\.")[[1]][1]
   newheader
 }
 
+# used for handling entire columns of NA values
 removeNA <- function(input){
   if (all(is.na(input))){
     input <- ""
@@ -43,6 +46,7 @@ removeNA <- function(input){
   input
 }
 
+# retrieves the accno field from the full scale header 
 getAccno <- function(input){
   accno <- strsplit(input, "\\.")[[1]][5]
   accno
@@ -50,38 +54,45 @@ getAccno <- function(input){
 
 
 # INSERTION PARSING ----------
-ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/ins_fix/*.csv")
-dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/del_fix/*.csv")
-treedir <- "~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/"
+ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/ins_20/*.csv")
+dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/del_20/*.csv")
+treedir <- 
 data.df <- data.frame()
 ins.vr <- data.frame()
 del.vr <- data.frame()
-iTotal <- data.frame()
-dTotal <- data.frame()
+iTotal <- list()
+dTotal <- list()
 count <- 0
 sequences <- list()
+
+
 for (file in 1:length(ifolder)){
   print(file)
-  basename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
+  filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
+  runno <- strsplit(filename, "_")[[1]][2]
   count <- count + 1
   iCSV <- read.csv(ifolder[file], stringsAsFactors = F)
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F)
+  
+  # used for handling cases where there are no indels
   if (all(is.na(iCSV$Ins))){
     iCSV$Ins <- ""
   }
-
   if (all(is.na(dCSV$Del))){
     dCSV$Del <- ""
   }
-  #iCSV$Ins <- removeNA(iCSV$Ins)
-  #dCSV$Del <- removeNA(dCSV$Del)
+  
+  # retrieving subtype field from the header
+  iCSV$Subtype <- unname(sapply(iCSV$Accno, getSubtype))
+  dCSV$Subtype <- unname(sapply(dCSV$Accno, getSubtype))
+  
+  # retrieving the accno from the header
   iAccno <- unname(sapply(iCSV$Accno, getAccno))
   dAccno <- unname(sapply(dCSV$Accno, getAccno))
   
-  
-  iCSV$Subtype <- unname(sapply(iCSV$Accno, cutHeader))
-  dCSV$Subtype <- unname(sapply(dCSV$Accno, cutHeader))
-  
+  # 
+  iCSV$Accno <- iAccno
+  dCSV$Accno <- dAccno
   
   # store the sequences from these two data frames for nucleotide analysis
   sequences$ins <- as.character(iCSV$Seq)
@@ -95,18 +106,20 @@ for (file in 1:length(ifolder)){
   iCSV$Count <- sapply(iCSV$Ins, csvcount) 
   dCSV$Count <- sapply(dCSV$Del, csvcount)
   
-  tre <- read.tree(paste0(treedir, basename, ".tree.sample"))
-  #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x, "_")[[1]][1]}))
+  # reads in the tree
+  tre <- read.tree(paste0("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim_multi/",strsplit(filename,"_")[[1]][1],"/",filename , ".tree.sample"))
   
-  # adjusts the tre tip labels to match 
+  # adjusts the tre tip labels to match the accession numbers
   tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
   
-  branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   #branches will match exactly with the tre$tip.label order
+  # retrieves branch lengths from the tree
+  branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   
+  
+  # matches the branch length to each of the sequences 
   iCSV$Date <- branches[match(iAccno, tre$tip.label)]
   dCSV$Date <- branches[match(dAccno, tre$tip.label)]
   
-
-  
+  # extracts info from the indel column and puts it into two separate columns
   insInfo <- sapply(iCSV$Ins, extractInfo)
   insInfo <- unname(insInfo)
   insInfo <- t(insInfo)
@@ -124,24 +137,26 @@ for (file in 1:length(ifolder)){
   delInfo$V2 <- as.character(delInfo$V2)
   dCSV <- cbind(dCSV, delInfo)
   dCSV$Del <- NULL
-
+  
   
   colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos")
   colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos")
   
-  iTotal <- rbind(iTotal, cbind(iCSV, sequences[[1]]))
-  dTotal <- rbind(dTotal, cbind(dCSV, sequences[[2]]))
+  # output by run number
+  if (runno %in% names(iTotal)){
+    iTotal[[runno]] <- rbind(iTotal[[runno]], iCSV)
+  }else{
+    iTotal[[runno]] <- iCSV
+  }
   
-  # iTemp <- split(iCSV, iCSV$Vloop)
-  # dTemp <- split(dCSV, dCSV$Vloop)
-
-  # for (i in 1:5){
-  #   ins.vr[i][[1]] <- rbind(ins.vr[i][[1]], iTemp[i][[1]])
-  #   del.vr[i][[1]] <- rbind(del.vr[i][[1]], dTemp[i][[1]])
-  # }
+  if (runno %in% names(dTotal)){
+    dTotal[[runno]] <- rbind(dTotal[[runno]], dCSV)
+  }else{
+    dTotal[[runno]] <- dCSV
+  }
+  
 }
-iTotal[,8] <- as.character(iTotal[,8])
-dTotal[,8] <- as.character(dTotal[,8])
+
 
 # for (i in 1:5){
 #   write.csv(iTotal[iTotal$Vloop==i,c(1,2,6,8)], paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/ins/Ins_V",i,".csv"))
@@ -152,39 +167,56 @@ dTotal[,8] <- as.character(dTotal[,8])
 
 require(BSDA)
 # RATE ANALYSIS -------------
-irates <- c()
-drates <- c()
+ins.df <- data.frame()
+del.df <- data.frame()
 vlengths <- c(84,156,105,90,33)
 all.df <- data.frame()
-for (vloop in 1:5){
-  iData <- iTotal[iTotal$Vloop==vloop,]
-  dData <- dTotal[dTotal$Vloop==vloop,]
+for (run in 1:19){
+  iData <- iTotal[[run]]
+  dData <- dTotal[[run]]
   
-  iFinal <- iData[iData$Date < 325 & iData$Count < 2,]
-  dFinal <- dData[dData$Date < 325 & dData$Count < 2,]
-  #print(nrow(current) - nrow(iFinal))
+  irates <- c()
+  drates <- c()
   
-  ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
-  irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
-  irates <- c(irates, irate)
-  print(summary(ifit))
+  for (vloop in 1:5){
+    itemp <- iData[iData$Vloop==vloop,]
+    dtemp <- dData[dData$Vloop==vloop,]
+    
+    iFinal <- itemp[itemp$Date < 325 & itemp$Count < 2,]
+    dFinal <- dtemp[dtemp$Date < 325 & dtemp$Count < 2,]
+    #print(nrow(current) - nrow(iFinal))
+    
+    ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
+    irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
+    irates <- c(irates, irate)
+    print(summary(ifit))
+    
+    dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
+    drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
+    drates <- c(drates, drate)
+    print(summary(dfit))
+    
+    #print(1 - (fit$deviance/fit$null.deviance))
+    #all.df <- rbind(all.df, iFinal)
+    #EDA(residuals(fit))
+    
+    #to.remove <- c(order(residuals(fit), decreasing = T)[1:52])
+    #iFinal2 <- iFinal[-to.remove,]
+    #fit2 <- glm(iFinal2$Count ~ iFinal2$Date, family="poisson")
+    #EDA(residuals(fit2))
+  }
   
-  dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
-  drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
-  drates <- c(drates, drate)
-  print(summary(dfit))
-  
-  #print(1 - (fit$deviance/fit$null.deviance))
-  #all.df <- rbind(all.df, iFinal)
-  #EDA(residuals(fit))
-  
-  #to.remove <- c(order(residuals(fit), decreasing = T)[1:52])
-  #iFinal2 <- iFinal[-to.remove,]
-  #fit2 <- glm(iFinal2$Count ~ iFinal2$Date, family="poisson")
-  #EDA(residuals(fit2))
+  irates <- irates*10^3
+  drates <- drates*10^3
+  ins.df <- rbind(ins.df, data.frame(V1=irates[1],V2=irates[2],V3=irates[3],V4=irates[4],V5=irates[5]))
+  del.df <- rbind(del.df, data.frame(V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5]))
 }
 
-
+par(mar=c(6,6,3,2))
+boxplot(ins.df, main="Insertions", xlab="Variable Loop", ylab="Events/Nt/Year x 10^-3",cex.main=1.7,cex.lab=1.5,cex.axis=1.3)
+boxplot(del.df, main="Deletions", xlab="Variable Loop", ylab="Events/Nt/Year x 10^-3",cex.main=1.8,cex.lab=1.6,cex.axis=1.4)
+ins.df <- t(ins.df)
+del.df <- t(del.df)
 
 vloops <- c("V1","V2","V3","V4","V5")
 

@@ -50,12 +50,14 @@ csvfile <- cbind(accno, subtype, status, csvfile)
 subC <- csvfile[csvfile$subtype=="C",]
 subB <- csvfile[csvfile$subtype=="B",]
 
+require(reshape)
+
 newC <- melt(subC, id=c("accno","subtype","status"))
 newB <- melt(subB, id=c("accno","subtype","status"))
 
-splitC <- split(subC, subC$status)
-
-boxplot(splitC)
+boxplot(value ~ variable + status, data=newB)
+boxplot(value ~ variable + status, data=newC, main="Subtype C")
+abline(v=5.5)
 
 
 

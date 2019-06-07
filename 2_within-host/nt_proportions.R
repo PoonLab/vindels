@@ -4,6 +4,7 @@ require(stringr)
 ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/10_nucleotides/ins/*.csv")
 dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/10_nucleotides/del/*.csv")
 
+
 charCount <- function(str){
   if (str == ""){
     print(str)
@@ -23,10 +24,13 @@ removeNA <- function(input){
 ntcount <- c()
 total.ins <- list()
 total.del <- list()
+
+
 for (file in 1:length(ifolder)){
   iCSV <- read.csv(ifolder[file], na.strings=c("NA"),row.names = 1, stringsAsFactors = F)
   dCSV <- read.csv(dfolder[file], na.strings=c("NA"),row.names = 1, stringsAsFactors = F)
   
+  # if the csv is not 
   if (all(!is.na(iCSV$Seq))){
     iCSV$Seq <- sapply(iCSV$Seq, removeNA)
     dCSV$Seq <- sapply(dCSV$Seq, removeNA)
@@ -39,10 +43,13 @@ for (file in 1:length(ifolder)){
   }
 }
 
+# cut down the data frames to only focus on the indels 
 for (i in c(1,2,4,5)){
   total.ins[[i]] <- total.ins[[i]][total.ins[[i]]$Seq!="",]
   total.del[[i]] <- total.del[[i]][total.del[[i]]$Seq!="",]
 }
+
+
 
 vloops <- c(1, 2,3,4,5)
 vloops2 <- c("V1","V2","V4","V5")
@@ -85,12 +92,12 @@ for (i in c(1,2,4,5)){
 
 
 
-
-
+# NT PROP INSERTIONS PLOT 
+# broken down by variable loop and nucleotide
+# -------------------------------------
 require(RColorBrewer)
 colors <- brewer.pal(4, "Set1")
 
-#A
 cex=2
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
@@ -107,9 +114,9 @@ par(xpd=F)
 abline(0,1)
 
 
-
-
-
+# NT PROP DELETIONS PLOT 
+# broken down by variable loop and nucleotide
+# -------------------------------------
 require(RColorBrewer)
 colors <- brewer.pal(4, "Set1")
 
