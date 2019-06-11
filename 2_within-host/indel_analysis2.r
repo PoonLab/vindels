@@ -56,10 +56,8 @@ getAccno <- function(input){
 # INSERTION PARSING ----------
 ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/ins_20/*.csv")
 dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/del_20/*.csv")
-treedir <- 
-data.df <- data.frame()
-ins.vr <- data.frame()
-del.vr <- data.frame()
+all.ins <- data.frame()
+all.del <- data.frame()
 iTotal <- list()
 dTotal <- list()
 count <- 0
@@ -69,7 +67,7 @@ sequences <- list()
 for (file in 1:length(ifolder)){
   print(file)
   filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
-  runno <- strsplit(filename, "_")[[1]][2]
+  runno <- as.double(strsplit(filename, "_")[[1]][2])
   count <- count + 1
   iCSV <- read.csv(ifolder[file], stringsAsFactors = F)
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F)
@@ -138,9 +136,22 @@ for (file in 1:length(ifolder)){
   dCSV <- cbind(dCSV, delInfo)
   dCSV$Del <- NULL
   
+  iCSV$Vseq <- sequences$ins
+  dCSV$Vseq <- sequences$del
   
-  colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos")
-  colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos")
+  iCSV$Run <- rep(runno, nrow(iCSV))
+  dCSV$Run <- rep(runno, nrow(dCSV))
+  
+  colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos", "Vseq", "Run")
+  colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos", "Vseq", "Run")
+  
+  
+  # OUTPUT 
+  # -----------------------------
+  
+  all.ins <- rbind(all.ins, iCSV)
+  all.del <- rbind(all.del, dCSV)
+  
   
   # output by run number
   if (runno %in% names(iTotal)){
@@ -154,15 +165,41 @@ for (file in 1:length(ifolder)){
   }else{
     dTotal[[runno]] <- dCSV
   }
+}
+
+# NUCLEOTIDE PROPORTIONS OUTPUT 
+# ----------------------------------------------
+for (i in 1:5){
+  iOutput <- data.frame()
+  dOutput <- data.frame()
   
+  for (run in 1:20){
+    iOutput <- rbind(iOutput, iTotal[[run]][iTotal[[run]]$Vloop==i,c(1,2,7,9,10)])
+    dOutput <- rbind(dOutput, dTotal[[run]][dTotal[[run]]$Vloop==i,c(1,2,7,9,10)])
+  }
+  write.csv(iOutput, paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/ins/Ins-V",i,".csv"))
+  write.csv(dOutput, paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/del/Del-V",i,".csv"))
 }
 
 
-# for (i in 1:5){
-#   write.csv(iTotal[iTotal$Vloop==i,c(1,2,6,8)], paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/ins/Ins_V",i,".csv"))
-#   write.csv(dTotal[dTotal$Vloop==i,c(1,2,6,8)], paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/del/Del_V",i,".csv"))
-# 
-# }
+for (run in 1:20){
+  iTotal[[run]]$Vseq <- NULL
+  dTotal[[run]]$Vseq <- NULL
+
+  iTotal[[run]]$Run <- NULL
+  dTotal[[run]]$Run <- NULL
+}
+
+all.ins$Vseq <- NULL
+all.del$Vseq <- NULL
+
+# INDEL LENGTHS OUTPUT 
+# ---------------------------------------------
+
+write.csv(all.ins[,c(1,2,4,5,7,9)], paste0("~/PycharmProjects/hiv-withinhost/11_lengths/ins.csv"))
+write.csv(all.del[,c(1,2,4,5,7,9)], paste0("~/PycharmProjects/hiv-withinhost/11_lengths/del.csv"))
+
+
 
 
 require(BSDA)
@@ -212,27 +249,46 @@ for (run in 1:19){
   del.df <- rbind(del.df, data.frame(V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5]))
 }
 
+vloops <- c("V1","V2","V3","V4","V5")
+
+
+# BOXPLOTS 
+# --------------------------
 par(mar=c(6,6,3,2))
-boxplot(ins.df, main="Insertions", xlab="Variable Loop", ylab="Events/Nt/Year x 10^-3",cex.main=1.7,cex.lab=1.5,cex.axis=1.3)
+boxplot(ins.df, main="Insertions", xlab="Variable Loop", ylab="Events/Nt/Year x 10^-3",cex.main=1.8,cex.lab=1.6,cex.axis=1.4)
 boxplot(del.df, main="Deletions", xlab="Variable Loop", ylab="Events/Nt/Year x 10^-3",cex.main=1.8,cex.lab=1.6,cex.axis=1.4)
 ins.df <- t(ins.df)
 del.df <- t(del.df)
 
-vloops <- c("V1","V2","V3","V4","V5")
 
-insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
-delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
 
-indels <- cbind(insrates, delrates[,c(2,3)])
+#insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
+#delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
+
+insrates <- data.frame(vloop=vloops,
+                       rate=apply(ins.df, 2, median), 
+                       lower=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                       upper=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
+delrates <- data.frame(vloop=vloops,
+                       rate=apply(del.df, 2, median), 
+                       lower=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                       upper=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
+
+#indels <- cbind(insrates, delrates[,c(2,3)])
+
+# INDEL ABOVE/BELOW MULTIPLOTS 
+# -------------------------------------
 
 require(Rmisc)
 require(ggplot2)
 
-g1 <- ggplot(insrates, aes(x=VLoop, y=AdjRate,width=1)) + 
-  geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) + 
+g1 <- ggplot(insrates, aes(x=vloop, y=rate,width=0.8)) + 
+  geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) +
+  geom_errorbar(aes(ymax = insrates$upper, ymin = insrates$lower), 
+                width = 0.25, size=1.1) +
   labs(x="Variable Loop", 
        y=expression(paste("       Insertion Rate \n(Events/Nt/Year x  ", 10^-3, ")", sep = "")))+
-  scale_y_continuous(expand = c(0, 0),limits = c(0, 5))+
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 5)) +
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
@@ -249,10 +305,13 @@ g1 <- ggplot(insrates, aes(x=VLoop, y=AdjRate,width=1)) +
         legend.position="none")+ geom_text(aes(y=0.3,x=3 ),
                                            label="N/A", 
                                            size=6)
+g1
 
 
-g2 <- ggplot(delrates, aes(x=VLoop, y=AdjRate,width=1)) + 
+g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) + 
   geom_bar(colour="black", stat="identity",fill="firebrick1",position="dodge",show.legend=F) + 
+  geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower), 
+                width = 0.25, size=1.1) +
   labs(x="Variable Loop", 
        y="Deletion Rate")+
   #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
@@ -328,7 +387,7 @@ for (i in 1:2){
 }
 
 
-# SUBTYPE PLOT 
+# SUBTYPE PLOT INSERTIONS
 g1 <- ggplot(sub_irates, aes(x=VLoop, y=adjrate,fill=subtype)) + 
   geom_bar(stat="identity",position="dodge") + 
   labs(title="Insertions",x="Variable Loop", 
@@ -356,7 +415,7 @@ g1 <- ggplot(sub_irates, aes(x=VLoop, y=adjrate,fill=subtype)) +
 g1
 
 
-# SUBTYPE PLOT 
+# SUBTYPE PLOT DELETIONS 
 g2 <- ggplot(sub_drates, aes(x=VLoop, y=adjrate,fill=subtype)) + 
   geom_bar(stat="identity",position="dodge") + 
   labs(title="Deletions",x="Variable Loop", 
@@ -382,80 +441,6 @@ g2 <- ggplot(sub_drates, aes(x=VLoop, y=adjrate,fill=subtype)) +
                                                                                                                     label="N/A", 
                                                                                                                     size=6)
 g2
-
-# LENGTH ANALYSIS
-# --------------------------------------------------------
-
-categorize <- function(count){
-  if (count <= 3){
-    "1-3"
-  }else if(count > 3 & count <= 6){
-    "4-6"
-  }else{
-    "7+"
-  }
-}
-
-iLength <- iTotal[,c(2,4,7)]
-dLength <- dTotal[,c(2,4,7)]
-
-iLength$Len <- sapply(iLength$Seq, nchar)
-dLength$Len <- sapply(dLength$Seq, nchar)
-
-iLength <- iLength[iLength$Len!=0,]
-dLength <- dLength[dLength$Len!=0,]
-
-
-iLength$Bin <- sapply(iLength$Len,categorize)
-dLength$Bin <- sapply(dLength$Len,categorize)
-
-iLength$Bin <- factor(iLength$Bin,levels=c("7+","4-6","1-3"))
-dLength$Bin <- factor(dLength$Bin,levels=c("7+","4-6","1-3"))
-
-
-colnames(iLength) <- c("Variable Loop", "Subtype", "Seq", "Len", "Insertion Length (nt)")
-
-mosaic(~Vloop + Bin, data=iLength,
-       shade=T, main=NULL, direction="v",
-       spacing=spacing_equal(sp = unit(0.7, "lines")),
-       residuals_type="Pearson",
-       margins=c(2,2,6,2),
-       labeling_args = list(tl_labels = c(F,T), 
-                            tl_varnames=c(F,T),
-                            gp_labels=gpar(fontsize=20),
-                            gp_varnames=gpar(fontsize=26),
-                            set_varnames = c(Vloop="Variable Loop", 
-                                             Bin="Insertion Length (nt)"),
-                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
-       legend=legend_resbased(fontsize = 20, fontfamily = "",
-                              x = unit(0.5, "lines"), y = unit(2,"lines"),
-                              height = unit(0.8, "npc"),
-                              width = unit(1, "lines"), range=c(-10,10)),
-       set_labels=list(Vloop=c("V1","V2","V4","V5")))
-
-
-mosaic(~Vloop + Bin, data=dLength,
-       shade=T, main=NULL, direction="v",
-       spacing=spacing_equal(sp = unit(0.7, "lines")),
-       residuals_type="Pearson",
-       margins=c(2,2,6,2),
-       labeling_args = list(tl_labels = c(F,T), 
-                            tl_varnames=c(F,T),
-                            gp_labels=gpar(fontsize=20),
-                            gp_varnames=gpar(fontsize=26),
-                            set_varnames = c(Vloop="Variable Loop", 
-                                             Bin="Deletion Length (nt)"),
-                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
-       legend=legend_resbased(fontsize = 20, fontfamily = "",
-                              x = unit(0.5, "lines"), y = unit(2,"lines"),
-                              height = unit(0.8, "npc"),
-                              width = unit(1, "lines"), range=c(-10,10)),
-       set_labels=list(Vloop=c("V1","V2","V4","V5")))
-
-
-
-ggplot()
-ggplot(all.df, aes(x=Date, y=Count, group=Count)) + geom_density_ridges(colour="white", fill="blue", scale=1, bandwidth=5)
 
 # Get raw insertion counts 
 sum(vr.df[[1]]$Count)

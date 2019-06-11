@@ -196,8 +196,8 @@ def main():
         #create names for both the csv file and the output recon file 
         csvfile = filename.split('-')[0] + ".csv"     #101827.csv
         reconfile = filename.split("_recon")[0] + ".csv"   #101827-a_15.csv
-        ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/ins_20/"+reconfile,'w')
-        del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/del_20/"+reconfile,'w')
+        ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/ins_20/pre-edit/"+reconfile,'w')
+        del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/del_20/pre-edit/"+reconfile,'w')
         iDict, dDict, vSeq = extractIndels(infile, vPath+csvfile)
 
         ins_out.write("Accno,Ins,Vloop,Vlen,Seq\n")
