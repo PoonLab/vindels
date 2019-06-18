@@ -29,7 +29,7 @@ data = parse_fasta(infile)
 
 unequal = []
 
-#output = open(outpath, "w")
+output = open(outpath, "w")
 
 for header in data:
 
@@ -83,8 +83,8 @@ for header in data:
         print("")
         continue
 
-    #output.write(">" + header + '\n')
-    #output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
+    output.write(">" + header + '\n')
+    output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
 
 
 

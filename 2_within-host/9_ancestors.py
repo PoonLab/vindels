@@ -186,7 +186,11 @@ def extractIndels(anFile, vSeqFile):
     return iDict, dDict, vSeq
 
 def main():
-    hFolder = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/8_1_Hfinished/*.fasta')
+
+    if not sys.argv[1].endswith("/"):
+        sys.argv[1] += "/"
+    hFolder = glob(sys.argv[1]+"*.fasta")
+    
     vPath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
 
     totalseqs = 0
@@ -196,29 +200,31 @@ def main():
         #create names for both the csv file and the output recon file 
         csvfile = filename.split('-')[0] + ".csv"     #101827.csv
         reconfile = filename.split("_recon")[0] + ".csv"   #101827-a_15.csv
-        ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/ins_20/pre-edit/"+reconfile,'w')
-        del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/del_20/pre-edit/"+reconfile,'w')
-        iDict, dDict, vSeq = extractIndels(infile, vPath+csvfile)
 
-        ins_out.write("Accno,Ins,Vloop,Vlen,Seq\n")
-        del_out.write("Accno,Del,Vloop,Vlen,Seq\n")
+        if os.path.isfile(vPath+csvfile):
+            ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/ins_mcc/"+reconfile,'w')
+            del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/del_mcc/"+reconfile,'w')
+            iDict, dDict, vSeq = extractIndels(infile, vPath+csvfile)
 
-        for accno in iDict:      
-            insertions = iDict[accno] # [ [], [], [], [], [] ]
-            deletions = dDict[accno] # [ [], [], [], [], [] ]
-            vsequences = vSeq[accno]   # [ V1-len, V2-len, V3-len, V4-len, V5-len]
-			
-	    # j/k count from 0 to 4 for each variable loop 
-            for j, ins in enumerate(insertions):
-                insList = ":".join(ins)
-                if insList == "":
-                    insList = ""
-                ins_out.write(",".join([accno,insList,str(j+1),str(len(vsequences[j])),vsequences[j]])+"\n")
-            for k, dl in enumerate(deletions):
-                delList = ":".join(dl)
-                if delList == "":
-                    delList = ""
-                del_out.write(",".join([accno,delList,str(k+1), str(len(vsequences[k])), vsequences[k]])+"\n")
+            ins_out.write("Accno,Ins,Vloop,Vlen,Seq\n")
+            del_out.write("Accno,Del,Vloop,Vlen,Seq\n")
+
+            for accno in iDict:      
+                insertions = iDict[accno] # [ [], [], [], [], [] ]
+                deletions = dDict[accno] # [ [], [], [], [], [] ]
+                vsequences = vSeq[accno]   # [ V1-len, V2-len, V3-len, V4-len, V5-len]
+                
+            # j/k count from 0 to 4 for each variable loop 
+                for j, ins in enumerate(insertions):
+                    insList = ":".join(ins)
+                    if insList == "":
+                        insList = ""
+                    ins_out.write(",".join([accno,insList,str(j+1),str(len(vsequences[j])),vsequences[j]])+"\n")
+                for k, dl in enumerate(deletions):
+                    delList = ":".join(dl)
+                    if delList == "":
+                        delList = ""
+                    del_out.write(",".join([accno,delList,str(k+1), str(len(vsequences[k])), vsequences[k]])+"\n")
 
     print(totalseqs)
 

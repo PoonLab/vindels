@@ -7,8 +7,7 @@ import os
 import sys
 import shutil
 
-def sample_beast(infile, outdir, numsample=10 ):
-    
+def sample_beast(infile, outdir, numsample=5):
     states = []
     
     if not os.path.isdir(outdir):
@@ -41,7 +40,10 @@ def sample_beast(infile, outdir, numsample=10 ):
 
     seqDict = {}
     
-    d = open(outdir+name+".dictionary", "w")
+    if not os.path.isdir(outdir+"dict/"):
+        os.makedirs(outdir+"dict/")
+
+    d = open(outdir+"dict/"+name+".dictionary", "w")
 
     for line in input2:
 
@@ -97,7 +99,7 @@ if sys.argv[2][-1] != "/":
 '''
 
 infolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout3/trees/*.time.trees")
-outfolder = "/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/"
+outfolder = "/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim_multi/"
 
 
 for infile in infolder:
@@ -111,7 +113,7 @@ for infile in infolder:
         shutil.rmtree(patfolder,ignore_errors=False)
         os.makedirs(patfolder)
     '''
-    sample_beast(infile,outfolder, 1)
+    sample_beast(infile,outfolder, 20)
 
 
 
