@@ -39,9 +39,9 @@ getSubtype <- function(header){
 }
 
 # used for handling entire columns of NA values
-removeNA <- function(input){
-  if (all(is.na(input))){
-    input <- ""
+removeNA <- function(input, repl){
+  if (is.na(input)){
+    input <- repl
   }
   input
 }
@@ -194,9 +194,8 @@ for (n in c(1,2,4,5)){
   del.df <- all.del[all.del$Vloop==n,c(1,2,6,8)]
   # if the csv is not entirely blank with NAs 
   if (all(!is.na(ins.df$Seq))){
-    ins.df$Seq <- sapply(ins.df$Seq, removeNA)
-    del.df$Seq <- sapply(del.df$Seq, removeNA)
-    
+    ins.df$Seq <- sapply(ins.df$Seq, removeNA, repl="")
+    del.df$Seq <- sapply(del.df$Seq, removeNA, repl="")
     #colnames(ins.df) <- c("Accno", "Vloop", "Seq", "VSeq", "Run")
     #colnames(del.df) <- c("Accno", "Vloop", "Seq", "VSeq", "Run")
     
@@ -204,6 +203,15 @@ for (n in c(1,2,4,5)){
     total.del <- rbind(total.del, del.df[del.df$Seq!="",])
   }
 }
+total.ins$len <- sapply(total.ins$Seq, nchar)
+total.del$len <- sapply(total.del$Seq, nchar)
+
+total.ins <- total.ins[total.ins$len>1, ]
+total.del <- total.del[total.del$len>1, ]
+
+write.csv(total.ins, "~/PycharmProjects/hiv-withinhost/12_dinucleotide/total-ins.csv")
+write.csv(total.del, "~/PycharmProjects/hiv-withinhost/12_dinucleotide/total-del.csv")
+
 nucleotides <- c("A","C","G","T")
 
 
@@ -224,7 +232,8 @@ for (nuc in nucleotides){
   dVProps <- c(dVProps, sum(str_count(total.del$Vseq, nuc)) / dTotals[2])
 }
 
-indel.nt <- data.frame(nt=rep(nucleotides,2),indel=c(rep(1,4),rep(2,4)),props=c(iProps, dProps),vprops=c(iVProps,dVProps))
+ins.nt <- data.frame(nt=nucleotides,props=iProps,vprops=iVProps)
+del.nt <- data.frame(nt=nucleotides,props=dProps,vprops=dVProps)
 
 
 
@@ -241,15 +250,6 @@ sampleString <- function(len, vloop){
   list(a,c,g,t)
 }
 
-
-total.ins$len <- sapply(total.ins$Seq, nchar)
-total.del$len <- sapply(total.del$Seq, nchar)
-
-#total.ins$indel <- rep(TRUE, nrow(total.ins))
-#total.del$indel <- rep(FALSE, nrow(total.del))
-
-#all.ins$len <- sapply(all.ins$Seq, getLength)
-#all.del$len <- sapply(all.del$Seq, getLength)
 iSample <- list(c(),c(),c(),c())
 dSample <- list(c(),c(),c(),c())
 
@@ -274,8 +274,8 @@ for (i in 1:4){
   iQT <- quantile(idist, probs=c(0.025,0.975))
   dQT <- quantile(ddist, probs=c(0.025,0.975))
   
-  ins.p <- indel.nt[i,3]
-  del.p <- indel.nt[i+4,3]
+  ins.p <- ins.nt[i,2]
+  del.p <- del.nt[i,2]
   
   # highlight significant differences 
   if (ins.p < iQT[[1]]){
@@ -297,38 +297,8 @@ for (i in 1:4){
 
 }
 
-
-ins.final <- cbind(total.ins[,c(1,2,3,5)], isign)
-del.final <- cbind(total.del[,c(1,2,3,5)], dsign)
-
-
-
-
-dinucleotide <- function(seq){
-  ditotal <- nchar(seq)-1
-  dinucl <- matrix(nrow=4,ncol=4)
-  colnames(dinucl) <- c("A","C","G","T")
-  rownames(dinucl) <- c("A","C","G","T")
-  for (n in 1:(nchar(seq)-1)){
-    di <- substr(seq,n,n+1)
-    pos1 <- substr(di,1,1)
-    pos2 <- substr(di,2,2)
-    
-    if (is.na(dinucl[pos2,pos1])){
-      dinucl[pos2,pos1] <- 1
-    }else{
-      dinucl[pos2,pos1] <- dinucl[pos2,pos1] + 1
-    }
-  }
-  dinucl
-}
-
-# DINUCLEOTIDE PROPORTIONS 
-
-for (row in 1:nrow(total.ins)){
-  
-  
-}
+ins.nt$sign <- isign
+del.nt$sign <- dsign
 
 
 

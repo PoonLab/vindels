@@ -40,7 +40,7 @@ getSubtype <- function(header){
 
 # used for handling entire columns of NA values
 removeNA <- function(input){
-  if (all(is.na(input))){
+  if (is.na(input)){
     input <- ""
   }
   input
