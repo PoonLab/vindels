@@ -1,4 +1,3 @@
-# INSERTIONS nucleotide proportions
 require(bbmle)
 require(stringr)
 require(ape)
@@ -52,13 +51,17 @@ getAccno <- function(input){
   accno <- strsplit(input, "\\.")[[1]][5]
   accno
 }
-charCount <- function(str){
-  if (str == ""){
-    print(str)
-  }
-  else{
-    print(str)
-  }
+
+
+# specifically handles fields containing a comma
+splitRows <- function(row){
+  row <- data.frame(t(row),stringsAsFactors = F)
+  seqs <- str_split(row[1,6], ",")[[1]]
+  pos <- str_split(row[1,7],",")[[1]]
+  len <- length(seqs)
+  #print(seqs)
+  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8])
+  
 }
 
 
@@ -138,12 +141,47 @@ for (file in 1:length(ifolder)){
   colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq")
   colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq")
   
+  # COMMA SEPARATION FIX
+  
+  new.ins <- data.frame()
+  new.del <- data.frame()
+  # make a new data.frame for each CSV df
+  # transport over all rows which do NOT contain a comma
+  new.ins <- iCSV[!grepl(",",iCSV$Seq),]
+  new.del <- dCSV[!grepl(",",dCSV$Seq),]
+  
+  # handle comma rows separately with a function 
+  iCommas <- iCSV[grepl(",",iCSV$Seq),]
+  dCommas <- dCSV[grepl(",",dCSV$Seq),]
+  #c()
+  if (nrow(iCommas) > 0){
+    newrows <- apply(iCommas,1,splitRows)
+    for (i in 1:length(newrows)){
+      idx <- as.double(names(newrows)[i])
+      len <- nrow(newrows[[i]])
+      rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
+      colnames(newrows[[i]]) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq")
+      new.ins <- rbind(new.ins, newrows[[i]])
+    }
+  }
+  if (nrow(dCommas) > 0){
+    newrows <- apply(dCommas,1,splitRows)
+    for (i in 1:length(newrows)){
+      idx <- as.double(names(newrows)[i])
+      len <- nrow(newrows[[i]])
+      rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
+      colnames(newrows[[i]]) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq")
+      new.del <- rbind(new.del, newrows[[i]])
+    }
+  }
   
   # OUTPUT 
+  # for other analyses
   # -----------------------------
   
-  all.ins <- rbind(all.ins, iCSV)
-  all.del <- rbind(all.del, dCSV)
+  all.ins <- rbind(all.ins, new.ins)
+  all.del <- rbind(all.del, new.del)
+
 }
 
 
@@ -169,21 +207,6 @@ for (n in c(1,2,4,5)){
 nucleotides <- c("A","C","G","T")
 
 
-
-
-
-
-# INDEL LENGTHS OUTPUT  
-# --------------------------------
-write.csv(all.ins[,c(1,2,4,5,6)], "~/PycharmProjects/hiv-withinhost/11_lengths/ins-lengths.csv")
-write.csv(all.del[,c(1,2,4,5,6)], "~/PycharmProjects/hiv-withinhost/11_lengths/del-lengths.csv")
-
-
-
-
-
-
-
 # NT PROPORTIONS -- ALL
 # ---------------------------------------------
 iProps <- c()
@@ -207,15 +230,6 @@ indel.nt <- data.frame(nt=rep(nucleotides,2),indel=c(rep(1,4),rep(2,4)),props=c(
 
 # RANDOMIZATION TEST 
 # -----------------------------------------
-
-getLength <- function(input){
-  check <- grepl(",", input)
-  if (check){
-    return(NA)
-  }
-  nchar(input)
-}
-
 sampleString <- function(len, vloop){
   len <- len-1
   idx <- sample(1:(nchar(vloop)-len),100, replace=TRUE)
@@ -228,54 +242,65 @@ sampleString <- function(len, vloop){
 }
 
 
-total.ins$len <- sapply(total.ins$Seq, getLength)
-total.del$len <- sapply(total.del$Seq, getLength)
+total.ins$len <- sapply(total.ins$Seq, nchar)
+total.del$len <- sapply(total.del$Seq, nchar)
 
 #total.ins$indel <- rep(TRUE, nrow(total.ins))
 #total.del$indel <- rep(FALSE, nrow(total.del))
 
 #all.ins$len <- sapply(all.ins$Seq, getLength)
 #all.del$len <- sapply(all.del$Seq, getLength)
+iSample <- list(c(),c(),c(),c())
+dSample <- list(c(),c(),c(),c())
 
-total.ins <-total.ins[!is.na(total.ins$len),]
-all.props <- list(c(),c(),c(),c())
-probs.df <- data.frame()
-sign.df <- data.frame()
+
+# generates the randomly sampled substrings for each indel
 for (row in 1:nrow(total.ins)){
-
-  props <- sampleString(total.ins[row,"len"], total.ins[row,"Vseq"])
+  itemp <- sampleString(total.ins[row,"len"], total.ins[row,"Vseq"])
+  dtemp <- sampleString(total.del[row,"len"], total.del[row,"Vseq"])
   for (i in 1:4){
-    
-    all.props[[i]] <- c(all.props[[i]], props[[i]])
+    iSample[[i]] <- c(iSample[[i]], itemp[[i]])
+    dSample[[i]] <- c(dSample[[i]], dtemp[[i]])
   }
-
 }
-prob <- c()
-sign <- c()
+
+# compares the observed proportion to the overall distribution of each nucleotide 
+isign <- c()
+dsign <- c()
 for (i in 1:4){
-  dist <- all.props[[i]]
-  fit <- fitdistr(dist, "normal")
-  p <- pnorm(indel.nt[i,3], mean=fit$estimate[[1]], sd=fit$estimate[[2]])
-  prob <- c(prob, p)
+  idist <- iSample[[i]]
+  ddist <- dSample[[i]]
   
+  iQT <- quantile(idist, probs=c(0.025,0.975))
+  dQT <- quantile(ddist, probs=c(0.025,0.975))
+  
+  ins.p <- indel.nt[i,3]
+  del.p <- indel.nt[i+4,3]
   
   # highlight significant differences 
-  if (p < 0.025){
-    sign <- c(sign, "lower")
-  }else if(p > 0.975){
-    sign <- c(sign, "higher")
+  if (ins.p < iQT[[1]]){
+    isign <- c(isign, "lower")
+  }else if(ins.p > iQT[[2]]){
+    isign <- c(isign, "higher")
   }else{
-    sign <- c(sign, "")
+    isign <- c(isign, "")
   }
+  
+  # highlight significant differences 
+  if (del.p < dQT[[1]]){
+    dsign <- c(dsign, "lower")
+  }else if(del.p > dQT[[2]]){
+    dsign <- c(dsign, "higher")
+  }else{
+    dsign <- c(dsign, "")
+  }
+
 }
 
 
-dist <- props[[i]]
-sign.df <- rbind(sign.df, data.frame(a=sign[1],c=sign[2],g=sign[3],t=sign[4]))
-probs.df <- rbind(probs.df, data.frame(a=prob[1],c=prob[2],g=prob[3],t=prob[4]))
+ins.final <- cbind(total.ins[,c(1,2,3,5)], isign)
+del.final <- cbind(total.del[,c(1,2,3,5)], dsign)
 
-
-nt.final <- cbind(total.ins[,c(1,2,3,5)], sign.df)
 
 
 
@@ -320,8 +345,6 @@ par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 lim = c(0.1,0.45)
 plot(indel.nt[,c(4,3)], pch=indel.nt[,2]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,
      cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.5, main="Nucleotide Proportions")
-#text(0.187,0.475,labels="a)", cex=1.5)
-#text(0.245,0.452,labels="A", cex=1.5)
 title(ylab="Proportion Inside Indels", line=3.5,cex.lab=1.75)
 title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
 legend(0.38,0.24,legend=nucleotides, pch=21,cex=1.9, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
@@ -344,24 +367,18 @@ del.props <- data.frame()
 for (i in c(1,2,4,5)){
   iTemp <- total.ins[total.ins$Vloop==i,]
   dTemp <- total.del[total.del$Vloop==i,]
-  
 
-
-  # a vector of two totals
-  # iTotals[1] = total number of nucleotides in insertion sequences
-  # iTotals[2] = total nuimebr of nucleotides in the vloops associated with insertion sequences
-  
   iProps <- c()
   dProps <- c()
   
   iVProps <- c()
   dVProps <- c()
   
+  # a vector of two totals
+  # iTotals[1] = total number of nucleotides in insertion sequences
+  # iTotals[2] = total nuimebr of nucleotides in the vloops associated with insertion sequences
   iTotals <- c(sum(unname(sapply(iTemp$Seq, nchar))), sum(unname(sapply(iTemp$Vseq, nchar))))
   dTotals <- c(sum(unname(sapply(dTemp$Seq, nchar))),sum(unname(sapply(dTemp$Vseq, nchar))))
-  
-  # old version ----------
-  # dTotals <- c(sum(unname(sapply(dTemp$Seq, nchar))), sum(unname(sapply(dTemp$VSeq, nchar))))
   
   for (nuc in nucleotides){
     iProps <- c(iProps, sum(str_count(iTemp$Seq, nuc)) / iTotals[1])
@@ -370,10 +387,8 @@ for (i in c(1,2,4,5)){
     iVProps <- c(iVProps, sum(str_count(iTemp$Vseq, nuc)) / iTotals[2])
     dVProps <- c(dVProps, sum(str_count(dTemp$Vseq, nuc)) / dTotals[2])
   }
-  
   ins.props <- rbind(ins.props, data.frame(nt=nucleotides, iprops=iProps, vprops=iVProps, vloop=rep(vloops[i],4)))
   del.props <- rbind(del.props, data.frame(nt=nucleotides, dprops=dProps, vprops=dVProps, vloop=rep(vloops[i],4)))
-
 }
 
 

@@ -53,11 +53,26 @@ getAccno <- function(input){
 }
 
 
+# specifically handles fields containing a comma
+splitRows <- function(row){
+  row <- data.frame(t(row),stringsAsFactors = F)
+  seqs <- str_split(row[1,7], ",")[[1]]
+  pos <- str_split(row[1,8],",")[[1]]
+  len <- length(seqs)
+  #print(seqs)
+  data.frame(row[rep(1,len),1:6], Seq=seqs, Pos=pos, row[rep(1,len),9:10])
+
+}
+
+
 # INSERTION PARSING ----------
 ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/ins_20/*.csv")
 dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/del_20/*.csv")
 all.ins <- data.frame()
 all.del <- data.frame()
+csv.ins <- data.frame()
+csv.del <- data.frame()
+
 iTotal <- list()
 dTotal <- list()
 count <- 0
@@ -67,7 +82,7 @@ sequences <- list()
 for (file in 1:length(ifolder)){
   print(file)
   filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
-  runno <- as.double(strsplit(filename, "_")[[1]][2])
+  runno <- strsplit(filename, "_")[[1]][2]
   count <- count + 1
   iCSV <- read.csv(ifolder[file], stringsAsFactors = F)
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F)
@@ -85,12 +100,12 @@ for (file in 1:length(ifolder)){
   dCSV$Subtype <- unname(sapply(dCSV$Accno, getSubtype))
   
   # retrieving the accno from the header
-  iAccno <- unname(sapply(iCSV$Accno, getAccno))
-  dAccno <- unname(sapply(dCSV$Accno, getAccno))
+  #iAccno <- unname(sapply(iCSV$Accno, getAccno))
+  #dAccno <- unname(sapply(dCSV$Accno, getAccno))
   
   # 
-  iCSV$Accno <- iAccno
-  dCSV$Accno <- dAccno
+  #iCSV$Accno <- iAccno
+  #dCSV$Accno <- dAccno
   
   # store the sequences from these two data frames for nucleotide analysis
   sequences$ins <- as.character(iCSV$Seq)
@@ -105,17 +120,17 @@ for (file in 1:length(ifolder)){
   dCSV$Count <- sapply(dCSV$Del, csvcount)
   
   # reads in the tree
-  tre <- read.tree(paste0("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim_multi/",strsplit(filename,"_")[[1]][1],"/",filename , ".tree.sample"))
+  tre <- read.tree(paste0("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim_multi/",filename , ".tree.sample"))
   
   # adjusts the tre tip labels to match the accession numbers
-  tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
+  #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
   
   # retrieves branch lengths from the tree
   branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   
   
   # matches the branch length to each of the sequences 
-  iCSV$Date <- branches[match(iAccno, tre$tip.label)]
-  dCSV$Date <- branches[match(dAccno, tre$tip.label)]
+  iCSV$Date <- branches[match(iCSV$Accno, tre$tip.label)]
+  dCSV$Date <- branches[match(dCSV$Accno, tre$tip.label)]
   
   # extracts info from the indel column and puts it into two separate columns
   insInfo <- sapply(iCSV$Ins, extractInfo)
@@ -145,40 +160,90 @@ for (file in 1:length(ifolder)){
   colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos", "Vseq", "Run")
   colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos", "Vseq", "Run")
   
+  # COMMA SEPARATION FIX
+  
+  new.ins <- data.frame()
+  new.del <- data.frame()
+  # make a new data.frame for each CSV df
+  # transport over all rows which do NOT contain a comma
+  new.ins <- iCSV[!grepl(",",iCSV$Seq),]
+  new.del <- dCSV[!grepl(",",dCSV$Seq),]
+  
+  # handle comma rows separately with a function 
+  iCommas <- iCSV[grepl(",",iCSV$Seq),]
+  dCommas <- dCSV[grepl(",",dCSV$Seq),]
+  #c()
+  if (nrow(iCommas) > 0){
+    newrows <- apply(iCommas,1,splitRows)
+    for (i in 1:length(newrows)){
+      idx <- as.double(names(newrows)[i])
+      len <- nrow(newrows[[i]])
+      rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
+      new.ins <- rbind(new.ins, newrows[[i]])
+    }
+    #new.ins <- new.ins[order(as.double(rownames(new.ins)))]
+  }
+  if (nrow(dCommas) > 0){
+    newrows <- apply(dCommas,1,splitRows)
+    for (i in 1:length(newrows)){
+      idx <- as.double(names(newrows)[i])
+      len <- nrow(newrows[[i]])
+      rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
+      new.del <- rbind(new.del, newrows[[i]])
+    }
+    #new.del <- new.del[order(as.double(rownames(new.del)))]
+  }
   
   # OUTPUT 
+  # for other analyses
   # -----------------------------
   
-  all.ins <- rbind(all.ins, iCSV)
-  all.del <- rbind(all.del, dCSV)
+  all.ins <- rbind(all.ins, new.ins)
+  all.del <- rbind(all.del, new.del)
   
   
-  # output by run number
-  if (runno %in% names(iTotal)){
-    iTotal[[runno]] <- rbind(iTotal[[runno]], iCSV)
-  }else{
-    iTotal[[runno]] <- iCSV
-  }
+  # OUTPUT 2 
+  # used for indel rates 
   
-  if (runno %in% names(dTotal)){
-    dTotal[[runno]] <- rbind(dTotal[[runno]], dCSV)
-  }else{
-    dTotal[[runno]] <- dCSV
-  }
+  csv.ins <- rbind(csv.ins, iCSV)
+  csv.del <- rbind(csv.del, dCSV)
+
+  # if (!is.null(iTotal[[runno]])){
+  #   iTotal[[runno]] <- rbind(iTotal[[runno]], iCSV)
+  # }else{
+  #   iTotal[[runno]] <- iCSV
+  # }
+  # 
+  # if (!is.null(dTotal[[runno]])){
+  #   dTotal[[runno]] <- rbind(dTotal[[runno]], dCSV)
+  # }else{
+  #   dTotal[[runno]] <- dCSV
+  # }
 }
+iTotal <- split(csv.ins, csv.ins$Run)
+dTotal <- split(csv.del, csv.del$Run)
+
+# 10_DATA OUTPUT 
+write.csv(all.ins, "~/PycharmProjects/hiv-withinhost/10_data/all.ins")
+write.csv(all.del, "~/PycharmProjects/hiv-withinhost/10_data/all.del")
+
+
 
 # NUCLEOTIDE PROPORTIONS OUTPUT 
 # ----------------------------------------------
 for (i in 1:5){
-  iOutput <- data.frame()
-  dOutput <- data.frame()
+  iOutput <- all.ins[all.ins$Vloop==i, c(1,2,7,9,10)]
+  dOutput <- all.del[all.del$Vloop==i, c(1,2,7,9,10)]
   
-  for (run in 1:20){
-    iOutput <- rbind(iOutput, iTotal[[run]][iTotal[[run]]$Vloop==i,c(1,2,7,9,10)])
-    dOutput <- rbind(dOutput, dTotal[[run]][dTotal[[run]]$Vloop==i,c(1,2,7,9,10)])
-  }
-  write.csv(iOutput, paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/ins/Ins-V",i,".csv"))
-  write.csv(dOutput, paste0("~/PycharmProjects/hiv-withinhost/10_nucleotides/del/Del-V",i,".csv"))
+  # iOutput <- data.frame()
+  # dOutput <- data.frame()
+  # 
+  # for (run in 1:20){
+  #   iOutput <- rbind(iOutput, iTotal[[run]][iTotal[[run]]$Vloop==i,c(1,2,7,9,10)])
+  #   dOutput <- rbind(dOutput, dTotal[[run]][dTotal[[run]]$Vloop==i,c(1,2,7,9,10)])
+  # }
+  write.csv(iOutput, paste0("~/PycharmProjects/hiv-withinhost/11_nucleotides/ins/Ins-V",i,"-full.csv"))
+  write.csv(dOutput, paste0("~/PycharmProjects/hiv-withinhost/11_nucleotides/del/Del-V",i,"-full.csv"))
 }
 
 
@@ -196,8 +261,8 @@ all.del$Vseq <- NULL
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
 
-write.csv(all.ins[,c(1,2,4,5,7,9)], paste0("~/PycharmProjects/hiv-withinhost/11_lengths/ins.csv"))
-write.csv(all.del[,c(1,2,4,5,7,9)], paste0("~/PycharmProjects/hiv-withinhost/11_lengths/del.csv"))
+write.csv(all.ins[,c(1,2,4,5,7,9)], paste0("~/PycharmProjects/hiv-withinhost/11_lengths/ins-full.csv"))
+write.csv(all.del[,c(1,2,4,5,7,9)], paste0("~/PycharmProjects/hiv-withinhost/11_lengths/del-full.csv"))
 
 
 
@@ -206,9 +271,11 @@ require(BSDA)
 # RATE ANALYSIS -------------
 ins.df <- data.frame()
 del.df <- data.frame()
-vlengths <- c(84,156,105,90,33)
+
+#median(as.numeric(all.ins[all.ins$Vloop==2,3])) # used to determine the median lengths of the variable loops
+vlengths <- c(72,126,105,87,33)
 all.df <- data.frame()
-for (run in 1:19){
+for (run in 1:20){
   iData <- iTotal[[run]]
   dData <- dTotal[[run]]
   
@@ -245,6 +312,8 @@ for (run in 1:19){
   
   irates <- irates*10^3
   drates <- drates*10^3
+  
+  # contain the 20 
   ins.df <- rbind(ins.df, data.frame(V1=irates[1],V2=irates[2],V3=irates[3],V4=irates[4],V5=irates[5]))
   del.df <- rbind(del.df, data.frame(V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5]))
 }
@@ -266,13 +335,13 @@ del.df <- t(del.df)
 #delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
 
 insrates <- data.frame(vloop=vloops,
-                       rate=apply(ins.df, 2, median), 
-                       lower=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
-                       upper=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
+                       rate=apply(ins.df, 1, median), 
+                       lower=apply(ins.df,1,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                       upper=apply(ins.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
 delrates <- data.frame(vloop=vloops,
-                       rate=apply(del.df, 2, median), 
-                       lower=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
-                       upper=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
+                       rate=apply(del.df, 1, median), 
+                       lower=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                       upper=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
 
 #indels <- cbind(insrates, delrates[,c(2,3)])
 
@@ -340,11 +409,11 @@ multiplot(g1,g2)
 # SUBTYPE STRATIFICATION 
 # ----------------------------------------------
 ins <- list()
-ins$B <- iTotal[iTotal$Subtype=="B",]
-ins$C <- iTotal[iTotal$Subtype=="C",]
+ins$B <- csv.ins[csv.ins$Subtype=="B",]
+ins$C <- csv.ins[csv.ins$Subtype=="C",]
 del <- list()
-del$B <- dTotal[dTotal$Subtype=="B",]
-del$C <- dTotal[dTotal$Subtype=="C",]
+del$B <- csv.del[csv.del$Subtype=="B",]
+del$C <- csv.del[csv.del$Subtype=="C",]
 
 sub_irates <- data.frame()
 sub_drates <- data.frame()
@@ -393,7 +462,7 @@ g1 <- ggplot(sub_irates, aes(x=VLoop, y=adjrate,fill=subtype)) +
   labs(title="Insertions",x="Variable Loop", 
        y="Insertion Rate")+
   #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
-  scale_y_continuous(expand = c(0, 0),limits = c(0, 2))+
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 3))+
   scale_fill_brewer(palette="Set1")+
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),
@@ -441,9 +510,4 @@ g2 <- ggplot(sub_drates, aes(x=VLoop, y=adjrate,fill=subtype)) +
                                                                                                                     label="N/A", 
                                                                                                                     size=6)
 g2
-
-# Get raw insertion counts 
-sum(vr.df[[1]]$Count)
-sum(vr.df[[5]]$Count)
-
 
