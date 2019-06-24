@@ -223,48 +223,6 @@ for (file in 1:length(ifolder)){
 iTotal <- split(csv.ins, csv.ins$Run)
 dTotal <- split(csv.del, csv.del$Run)
 
-# 10_DATA OUTPUT 
-write.csv(all.ins, "~/PycharmProjects/hiv-withinhost/10_data/all.ins")
-write.csv(all.del, "~/PycharmProjects/hiv-withinhost/10_data/all.del")
-
-
-
-# NUCLEOTIDE PROPORTIONS OUTPUT 
-# ----------------------------------------------
-for (i in 1:5){
-  iOutput <- all.ins[all.ins$Vloop==i, c(1,2,7,9,10)]
-  dOutput <- all.del[all.del$Vloop==i, c(1,2,7,9,10)]
-  
-  # iOutput <- data.frame()
-  # dOutput <- data.frame()
-  # 
-  # for (run in 1:20){
-  #   iOutput <- rbind(iOutput, iTotal[[run]][iTotal[[run]]$Vloop==i,c(1,2,7,9,10)])
-  #   dOutput <- rbind(dOutput, dTotal[[run]][dTotal[[run]]$Vloop==i,c(1,2,7,9,10)])
-  # }
-  write.csv(iOutput, paste0("~/PycharmProjects/hiv-withinhost/11_nucleotides/ins/Ins-V",i,"-full.csv"))
-  write.csv(dOutput, paste0("~/PycharmProjects/hiv-withinhost/11_nucleotides/del/Del-V",i,"-full.csv"))
-}
-
-
-for (run in 1:20){
-  iTotal[[run]]$Vseq <- NULL
-  dTotal[[run]]$Vseq <- NULL
-
-  iTotal[[run]]$Run <- NULL
-  dTotal[[run]]$Run <- NULL
-}
-
-all.ins$Vseq <- NULL
-all.del$Vseq <- NULL
-
-# INDEL LENGTHS OUTPUT 
-# ---------------------------------------------
-
-write.csv(all.ins[,c(1,2,4,5,7,9)], paste0("~/PycharmProjects/hiv-withinhost/11_lengths/ins-full.csv"))
-write.csv(all.del[,c(1,2,4,5,7,9)], paste0("~/PycharmProjects/hiv-withinhost/11_lengths/del-full.csv"))
-
-
 
 
 require(BSDA)

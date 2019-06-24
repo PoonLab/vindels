@@ -185,6 +185,23 @@ for (file in 1:length(ifolder)){
 }
 
 
+# INDEL LENGTHS OUTPUT 
+# ---------------------------------------------
+
+write.csv(all.ins[,c(1,2,4,5,6)], "~/PycharmProjects/hiv-withinhost/12_lengths/ins-full.csv")
+write.csv(all.del[,c(1,2,4,5,6)], "~/PycharmProjects/hiv-withinhost/12_lengths/del-full.csv")
+
+
+# N - GLYC SITE OUTPUTS 
+# ---------------------------------------------
+write.csv(all.ins,"~/PycharmProjects/hiv-withinhost/13_nglycs/insertions.csv")
+write.csv(all.del,"~/PycharmProjects/hiv-withinhost/13_nglycs/deletions.csv")
+
+
+
+
+
+
 ntcount <- c()
 total.ins <- data.frame()
 total.del <- data.frame()
@@ -221,21 +238,29 @@ iProps <- c()
 dProps <- c()
 iVProps <- c()
 dVProps <- c()
+counts <- data.frame()
 iTotals <- c(sum(unname(sapply(total.ins$Seq, nchar))), sum(unname(sapply(total.ins$Vseq, nchar))))
 dTotals <- c(sum(unname(sapply(total.del$Seq, nchar))),sum(unname(sapply(total.del$Vseq, nchar))))
 
 for (nuc in nucleotides){
-  iProps <- c(iProps, sum(str_count(total.ins$Seq, nuc)) / iTotals[1])
-  dProps <- c(dProps, sum(str_count(total.del$Seq, nuc)) / dTotals[1])
+  icount <- sum(str_count(total.ins$Seq, nuc))
+  dcount <- sum(str_count(total.del$Seq, nuc))
+  counts <- rbind(counts, data.frame(nucl=nuc, ins=icount, del=dcount))
+  
+  iProps <- c(iProps, count / iTotals[1])
+  dProps <- c(dProps, count / dTotals[1])
   
   iVProps <- c(iVProps, sum(str_count(total.ins$Vseq, nuc)) / iTotals[2])
   dVProps <- c(dVProps, sum(str_count(total.del$Vseq, nuc)) / dTotals[2])
 }
+require(reshape)
+counts <- melt(counts)
 
 ins.nt <- data.frame(nt=nucleotides,props=iProps,vprops=iVProps)
 del.nt <- data.frame(nt=nucleotides,props=dProps,vprops=dVProps)
-
-
+indel.nt <- rbind(ins.nt, del.nt)
+indel.nt$indel <- c(rep(1,4),rep(2,4))
+indel.nt$counts <- counts$value
 
 # RANDOMIZATION TEST 
 # -----------------------------------------
@@ -313,11 +338,11 @@ cex=2
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
 lim = c(0.1,0.45)
-plot(indel.nt[,c(4,3)], pch=indel.nt[,2]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.5, main="Nucleotide Proportions")
+plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,
+     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=indel.nt$counts*1.8*10^(-2), main="Nucleotide Proportions")
 title(ylab="Proportion Inside Indels", line=3.5,cex.lab=1.75)
 title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.38,0.24,legend=nucleotides, pch=21,cex=1.9, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.38,0.24,legend=nucleotides, pch=21,cex=1.9, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(22,23),cex=1.9, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 par(xpd=F)
 abline(0,1)

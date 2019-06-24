@@ -65,8 +65,8 @@ def vrSwitch(position, boundaries):
         start = int(start)
         stop = int(stop)
         if position in range(start,stop):
-            return i 
-    return -1
+            return i, position-start
+    return -1, -1
     
             
 # Dependencies: 1) getTerminals   2) vrSwitch   3) getVRegions  
@@ -101,9 +101,9 @@ def extractIndels(anFile, vSeqFile):
             achar = terminals[accno][1][n]
 
             #retrieves a numeric value (0,1,2,3,4) to indicate which variable region the nucleotide is in, and -1 if outside of a vloop
-            vregion = vrSwitch(ai, positions[accno]) 
+            vregion, pos = vrSwitch(ai, positions[accno]) 
             
-            #this counts up the number of nucleotides found in the SOI (seq of interest)
+            #this counts up the number of nucleotides found in the seq of interest
             if schar != '-':
                 ai += 1
 
@@ -125,17 +125,17 @@ def extractIndels(anFile, vSeqFile):
                         
                     #clear the dTemp 
                         if dTemp:
-                            deletions[vregion].append(dTemp+"-"+str(n-1))
+                            deletions[vregion].append(dTemp+"-"+str(pos-1))
                             dTemp = ''
                 
                     #nothing -- both gaps 
                     else:
                         #clear iTemp and dTemp
                         if iTemp:
-                            insertions[vregion].append(iTemp+"-"+str(n-1))
+                            insertions[vregion].append(iTemp+"-"+str(pos-1))
                             iTemp = ''
                         if dTemp:
-                            deletions[vregion].append(dTemp+"-"+str(n-1))
+                            deletions[vregion].append(dTemp+"-"+str(pos-1))
                             dTemp = ''
                         
                 elif achar != "-":
@@ -145,17 +145,17 @@ def extractIndels(anFile, vSeqFile):
         
                         #clear iTemp
                         if iTemp:
-                            insertions[vregion].append(iTemp+"-"+str(n-1))
+                            insertions[vregion].append(iTemp+"-"+str(pos-1))
                             iTemp = ''
                         
                     #nothing -- both have character
                     else:
                         #clear iTemp and dTemp
                         if iTemp:
-                            insertions[vregion].append(iTemp+"-"+str(n-1))
+                            insertions[vregion].append(iTemp+"-"+str(pos-1))
                             iTemp = ''
                         if dTemp:
-                            deletions[vregion].append(dTemp+"-"+str(n-1))
+                            deletions[vregion].append(dTemp+"-"+str(pos-1))
                             dTemp = ''
 
         for n in range(5):
@@ -225,6 +225,7 @@ def main():
                     if delList == "":
                         delList = ""
                     del_out.write(",".join([accno,delList,str(k+1), str(len(vsequences[k])), vsequences[k]])+"\n")
+        
 
     print(totalseqs)
 
