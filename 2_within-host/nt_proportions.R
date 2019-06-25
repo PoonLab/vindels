@@ -39,7 +39,7 @@ getSubtype <- function(header){
 }
 
 # used for handling entire columns of NA values
-removeNA <- function(input, repl){
+removeNA <- function(input, repl=""){
   if (is.na(input)){
     input <- repl
   }
@@ -201,7 +201,7 @@ write.csv(all.del,"~/PycharmProjects/hiv-withinhost/13_nglycs/deletions.csv")
 
 
 
-
+nucleotides <- c("A","C","G","T")
 ntcount <- c()
 total.ins <- data.frame()
 total.del <- data.frame()
@@ -211,8 +211,8 @@ for (n in c(1,2,4,5)){
   del.df <- all.del[all.del$Vloop==n,c(1,2,6,8)]
   # if the csv is not entirely blank with NAs 
   if (all(!is.na(ins.df$Seq))){
-    ins.df$Seq <- sapply(ins.df$Seq, removeNA, repl="")
-    del.df$Seq <- sapply(del.df$Seq, removeNA, repl="")
+    ins.df$Seq <- sapply(ins.df$Seq, removeNA)
+    del.df$Seq <- sapply(del.df$Seq, removeNA)
     #colnames(ins.df) <- c("Accno", "Vloop", "Seq", "VSeq", "Run")
     #colnames(del.df) <- c("Accno", "Vloop", "Seq", "VSeq", "Run")
     
@@ -226,10 +226,17 @@ total.del$len <- sapply(total.del$Seq, nchar)
 total.ins <- total.ins[total.ins$len>1, ]
 total.del <- total.del[total.del$len>1, ]
 
+
+
+
+
+
+# DINUCLEOTIDE PROPORTIONS OUTPUT 
+# ------------------------------------
 write.csv(total.ins, "~/PycharmProjects/hiv-withinhost/12_dinucleotide/total-ins.csv")
 write.csv(total.del, "~/PycharmProjects/hiv-withinhost/12_dinucleotide/total-del.csv")
 
-nucleotides <- c("A","C","G","T")
+
 
 
 # NT PROPORTIONS -- ALL
@@ -247,8 +254,8 @@ for (nuc in nucleotides){
   dcount <- sum(str_count(total.del$Seq, nuc))
   counts <- rbind(counts, data.frame(nucl=nuc, ins=icount, del=dcount))
   
-  iProps <- c(iProps, count / iTotals[1])
-  dProps <- c(dProps, count / dTotals[1])
+  iProps <- c(iProps, icount / iTotals[1])
+  dProps <- c(dProps, dcount / dTotals[1])
   
   iVProps <- c(iVProps, sum(str_count(total.ins$Vseq, nuc)) / iTotals[2])
   dVProps <- c(dVProps, sum(str_count(total.del$Vseq, nuc)) / dTotals[2])
