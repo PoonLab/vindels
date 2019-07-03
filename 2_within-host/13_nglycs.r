@@ -20,6 +20,7 @@ translate <- function(dna) {
 }
 
 extractGlycs <- function(seq){
+  require(ape)
   dnabin <- as.DNAbin.DNAString(seq)
   aabin <- trans(dnabin)[[1]]
   aaseq <- paste(as.character(aabin),collapse="")
@@ -28,10 +29,20 @@ extractGlycs <- function(seq){
   result
 }
 
+countGlycs <- function(field){
+  if ("," %in% field){
+    return(str_count(field, ",") + 1)
+  }else if (field == ""){
+    return(0)
+  }else{
+    return(1)
+  }
+}
 
 
-ins <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/insertions.csv", row.names=1, stringsAsFactors = F)
-del <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/deletions.csv", row.names=1, stringsAsFactors = F)
+#PycharmProjects/hiv-withinhost/
+ins <- read.csv("~/Lio/13_nglycs/insertions.csv", row.names=1, stringsAsFactors = F)
+del <- read.csv("~/Lio/13_nglycs/deletions.csv", row.names=1, stringsAsFactors = F)
 
 #ins$Pos <- ins$Pos + 1
 #del$Pos <- del$Pos + 1
@@ -48,5 +59,24 @@ del$Vseq <- sapply(del$Vseq, translate)
 ins$glycs <- sapply(ins$Vseq, extractGlycs)
 del$glycs <- sapply(del$Vseq, extractGlycs)
 
+# for both: 
+# determine the start and stop of all nglycs 
+# collect them in one column separated by "-", comma separated
 
-ins$
+
+# insertions 
+# determine what the original sequence is 
+# start = pos - nchar(insertion sequence)
+# end = pos 
+
+# original seq: insertion removed  
+# original <- paste0(substring(vloop, 0, start), substring(vloop, end, nchar(vloop)))
+
+
+# deletions 
+# start = pos - nchar(insertion sequence)
+# end = pos 
+
+# original seq: deletion added back in 
+# original <- paste0(substring(vloop,0,start), del, substring(vloop,end,nchar(vloop)))
+
