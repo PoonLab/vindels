@@ -4,8 +4,14 @@ from glob import glob
 import sys
 import os
 import xml.etree.ElementTree as ET 
+import lxml
 
-xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/*.xml")
+'''
+for s in range(len(sys.argv)):
+    if not sys.argv[s].endswith("/"):
+        sys.argv[s] = sys.argv[s] + "/"'''
+
+xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/strict/*.xml")
 
 for infile in xmlFolder:
     xml = ET.parse(infile)
@@ -16,37 +22,98 @@ for infile in xmlFolder:
 
     tree = treefile.readline()
     root = xml.getroot()
+    previous = root
 
-    for parent in root.iter():
+    removelist = []
+    #tempremove = []
 
-        # removes all operators responsible for modifying the tree 
-        if parent.tag == "operators":
-            for toRemove in ["subtreeSlide", "narrowExchange", "wideExchange", "wilsonBalding"]:
-                element = parent.find(toRemove)
-                if element != None:
-                    #print(element.tag)
-                    parent.remove(element)
+    for element in root.iter():
+        #print(element.tag)
+
 
         # changes the population size to 5 
-        if parent.tag == "populationSizes":
-            if parent != None:
-                element = parent.find("parameter")
-                element.attrib = {"dimension":"5", "id":"skyline.popSize" ,"lower":"0.0" ,"value":"1.0"}
+        if element.tag == "populationSizes":
+            if element != None:
+                elem = element.find("parameter")
+                elem.set("dimension","5")
 
-        if parent.tag == "groupSizes":
-            if parent != None:
-                element = parent.find("parameter")
-                element.attrib = {"dimension":"5", "id":"skyline.groupSize"}
+        if element.tag == "groupSizes":
+            if element != None:
+                elem = element.find("parameter")
+                elem.set("dimension","5")
+
+        # removes all operators responsible for modifying the tree 
+        if element.tag == "operators":
+            for toRemove in ["subtreeSlide", "narrowExchange", "wideExchange", "wilsonBalding"]:
+                elem = element.find(toRemove)
+                if elem != None:
+                    #print(elem.tag)
+                    element.remove(elem)
+        if element.tag == "coalescentSimulator":
+            element.clear()
+            element.tag = "newick"
+            element.attrib = {'id':'startingTree'}
+            element.text = "\n"+tree
+        
 
 
-        # removes the simulator element and replaces it with the starting tree
-        if parent.tag == "coalescentSimulator":
-            parent.clear()
-            parent.tag = "newick"
-            parent.attrib = {'id':'startingTree'}
-            parent.text = "\n"+tree
+        # for changing the clock model to strict 
+        # ------------------------------------------    
+        if element.get("id") in ["coefficientOfVariation", "covariance"]:
+            removelist.append(element)
+
+
+        # remove the log elements 
+        if element.get("id") == "fileLog":
+            tempremove = []
+            for elem in element.iter():
+                if elem.get("idref") in ["coefficientOfVariation", "covariance", "ucld.stdev"]:
+                    tempremove.append(elem)
+            for i in tempremove:
+                element.remove(i)
+
+        if element.get("id") == "operators":
+            tempremove = [element.find("swapOperator"), element.find("uniformIntegerOperator")]
+            for e in element.iter():
+                p = e.find("parameter")
+                if p != None:
+                    if p.get("idref") == "ucld.stdev":
+                        tempremove.append(e)
+            
+            for i in tempremove:
+                print(i.tag)
+                element.remove(i)
+
+        if element.get("id") == "prior":
+            tempremove = []
+            for e in element.iter():
+                if e.get("mean") == "0.3333333333333333":
+                    tempremove.append(e)
+            
+            for i in tempremove:
+                element.remove(i)
     
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/"+xmlname)
+        if element.get("idref") == "branchRates":
+            element.tag = "strictClockBranchRates"
+
+        if element.get("idref") == "ucld.mean":
+            element.set("idref", "clock.rate")
+        if element.get("label") == "ucld.mean":
+            element.set("label", "clock.rate")
+
+        if element.get("id") == "branchRates":
+            element.clear()
+            element.tag = "strictClockBranchRates"
+            element.attrib = {'id':'branchRates'}
+            element.append(ET.Element("rate"))
+            element.find("rate").append(ET.Element("parameter", attrib={'id':'clock.rate', 'value':'1.0', 'lower':'0.0'}))
+
+        previous = element
+    for r in removelist:
+        #print(r)
+        root.remove(r)
+
+    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_2_strict/"+xmlname)
     
 
 

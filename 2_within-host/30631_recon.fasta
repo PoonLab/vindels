@@ -1,1 +1,0 @@
-historian r -vvv -guide /home/jpalmer/PycharmProjects/hiv-withinhost/4_1Accno/30631.fasta -tree /home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/rescaled/30631-a_744.tree -output fasta

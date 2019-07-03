@@ -27,7 +27,7 @@ extractInfo <- function(input){
   for (ins in insertions[[1]]){
     fields <- strsplit(ins, "-")
     seq <- c(seq, fields[[1]][1])
-    pos <- c(pos, as.numeric(fields[[1]][2]))
+    pos <- c(pos, as.numeric(fields[[1]][2]) + 1)
   }
   return(c(paste(seq,collapse=","), paste(pos,collapse=",")))
 }
@@ -60,10 +60,17 @@ splitRows <- function(row){
   pos <- str_split(row[1,7],",")[[1]]
   len <- length(seqs)
   #print(seqs)
-  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8])
+  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:9])
   
 }
-
+add <- function(arg1, arg2){
+  if (arg1 == "" | arg2 == ""){
+    return(NA)
+  }
+  arg1 <- as.numeric(arg1)
+  arg2 <- as.numeric(arg2)
+  arg1 + arg2
+}
 
 
 # INSERTION PARSING ----------
@@ -138,8 +145,11 @@ for (file in 1:length(ifolder)){
   iCSV$Vseq <- sequences$ins
   dCSV$Vseq <- sequences$del
   
-  colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq")
-  colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq")
+  iCSV$pat <- rep(strsplit(filename, "-")[[1]][1], nrow(iCSV))
+  dCSV$pat <- rep(strsplit(filename, "-")[[1]][1], nrow(dCSV))
+  
+  colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Pat")
+  colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Pat")
   
   # COMMA SEPARATION FIX
   
@@ -160,7 +170,7 @@ for (file in 1:length(ifolder)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
       rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      colnames(newrows[[i]]) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq")
+      colnames(newrows[[i]]) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Pat")
       new.ins <- rbind(new.ins, newrows[[i]])
     }
   }
@@ -170,7 +180,7 @@ for (file in 1:length(ifolder)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
       rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      colnames(newrows[[i]]) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq")
+      colnames(newrows[[i]]) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Pat")
       new.del <- rbind(new.del, newrows[[i]])
     }
   }
@@ -178,11 +188,16 @@ for (file in 1:length(ifolder)){
   # OUTPUT 
   # for other analyses
   # -----------------------------
+  testpos <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
+  testpos <- testpos[,c(3,6,9,12,15)]
+  
+  all.ins$Vpos <- as.numeric(all.ins[which(all.ins$Count>0), 7]) + as.numeric(testpos[which(all.ins$Count>0),as.numeric(all.ins$Vloop)])
   
   all.ins <- rbind(all.ins, new.ins)
   all.del <- rbind(all.del, new.del)
-
+  
 }
+
 
 
 # INDEL LENGTHS OUTPUT 

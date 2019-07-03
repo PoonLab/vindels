@@ -75,9 +75,6 @@ for infile in folder:
             vseq.append(str(len(query[:index[n2]].replace("-",""))))
         vseq = ",".join(vseq)
 
-        '''cseq = ""
-        for c1, c2 in c_regions:
-            cseq += query[index[c1]:index[c2]].replace("-","")'''
 
         #load the patient-wise dictionary
         if patid in patdict.keys():
@@ -85,19 +82,6 @@ for infile in folder:
         else:
             patdict[patid] = {header:query.replace("-","")}
         
-
-        #------------
-        #used for generated concatenated conserved sequences for MSAs
-        '''if patid in unique.keys():
-            #add sequence to the existing list
-            if cseq in unique[patid].keys():
-                unique[patid][cseq].append(header)
-
-            #initialize new sequence as a list
-            else:
-                unique[patid][cseq] = [header]
-        else:
-            unique[patid] = {cseq:[header]}'''
 
         #used for making the vseqdict which is used to create the library of variable region sequences 
         if patid in vseqdict.keys():
@@ -210,8 +194,8 @@ for pat in full.keys():
         continue    
 
     outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta2","w")
-    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv2", "w")
-    outputv.write("header,V1,start,stop,V2,start,stop,V3,start,stop,V4,start,stop,V5,start,stop\n")
+    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/abbrev/" + pat + ".csv", "w")
+    outputv.write("header,V1,start.1,stop.1,V2,start.2,stop.2,V3,start.3,stop.3,V4,start.4,stop.4,V5,start.5,stop.5\n")
 
     patcount += 1
     
@@ -268,5 +252,18 @@ print(patcount)
 
 
 
+'''cseq = ""
+for c1, c2 in c_regions:
+    cseq += query[index[c1]:index[c2]].replace("-","")'''
+#------------
+#used for generated concatenated conserved sequences for MSAs
+'''if patid in unique.keys():
+    #add sequence to the existing list
+    if cseq in unique[patid].keys():
+        unique[patid][cseq].append(header)
 
-
+    #initialize new sequence as a list
+    else:
+        unique[patid][cseq] = [header]
+else:
+    unique[patid] = {cseq:[header]}'''

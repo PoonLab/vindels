@@ -26,7 +26,7 @@ for infile in vfolder:
         vfile.readline()
 
         outfile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/"+filename,"w")
-        outfile.write("header,V1,start,stop,V2,start,stop,V3,start,stop,V4,start,stop,V5,start,stop\n")
+        outfile.write("header,V1,start.1,stop.1,V2,start.2,stop.2,V3,start.3,stop.3,V4,start.4,stop.4,V5,start.5,stop.5\n")
         
         
         for line in vfile:

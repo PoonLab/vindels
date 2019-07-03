@@ -1,11 +1,10 @@
-
 # DINUCLEOTIDE PROPORTIONS 
 # -------------------------------------------
 nucleotides <- c("A","C","G","T")
 
 
-total.ins <- read.csv("~/PycharmProjects/hiv-withinhost/12_dinucleotide/total-ins.csv", stringsAsFactors = F)
-total.del <- read.csv("~/PycharmProjects/hiv-withinhost/12_dinucleotide/total-del.csv", stringsAsFactors = F)
+total.ins <- read.csv("~/PycharmProjects/hiv-withinhost/11_dinucleotide/total-ins.csv", stringsAsFactors = F)
+total.del <- read.csv("~/PycharmProjects/hiv-withinhost/11_dinucleotide/total-del.csv", stringsAsFactors = F)
 
 
 dinucleotide <- function(seq){
@@ -55,15 +54,80 @@ di.iv$sum <- rowSums(di.iv)
 di.d$sum <- rowSums(di.d)
 di.dv$sum <- rowSums(di.dv)
 
+di.ifinal <- data.frame(seq=colSums(di.i)[1:16]/colSums(di.i)[['sum']], vloop=colSums(di.iv)[1:16]/colSums(di.iv)[['sum']])
+di.dfinal <- data.frame(seq=colSums(di.d)[1:16]/colSums(di.d)[['sum']], vloop=colSums(di.dv)[1:16]/colSums(di.dv)[['sum']])
 
-itot <- colSums(di.i)[1:16]/colSums(di.i)[['sum']]
-ivtot <- colSums(di.iv)[1:16]/colSums(di.iv)[['sum']]
-dtot <- colSums(di.d)[1:16]/colSums(di.d)[['sum']]
-dvtot <- colSums(di.dv)[1:16]/colSums(di.dv)[['sum']]
 
-di.ifinal <- data.frame(seq=itot, vloop=ivtot)
-di.dfinal <- data.frame(seq=dtot, vloop=dvtot)
 
+# RANDOMIZATION TEST 
+# -----------------------------------------
+sampleString <- function(len, vloop){
+  nucl <- c("A","C", "G" ,"T")
+  len <- len-1
+  idx <- sample(1:(nchar(vloop)-len),100, replace=TRUE)
+  strings <- sapply(idx, function(x){substr(vloop, x, x+len)})
+  result <- list()
+  for (a in 1:4){
+    for (b in 1:4){
+      dinucl <- paste0(nucl[a], nucl[b])
+      result[[dinucl]] <- unname(sapply(strings, function(x){str_count(x, dinucl)/nchar(x)}))
+    }
+  }
+  result
+}
+
+iSample <- list()
+dSample <- list()
+
+
+# generates the randomly sampled substrings for each indel
+for (row in 1:nrow(total.ins)){
+  itemp <- sampleString(total.ins[row,"len"], total.ins[row,"Vseq"])
+  dtemp <- sampleString(total.del[row,"len"], total.del[row,"Vseq"])
+  for (i in 1:16){
+    iSample[[nts[i]]] <- c(iSample[[nts[i]]], itemp[[nts[i]]])
+    dSample[[nts[i]]] <- c(dSample[[nts[i]]], dtemp[[nts[i]]])
+  }
+}
+
+# compares the observed proportion to the overall distribution of each nucleotide 
+isign <- c()
+dsign <- c()
+for (i in 1:16){
+  idist <- iSample[[nts[i]]]
+  ddist <- dSample[[nts[i]]]
+  
+  iQT <- quantile(idist, probs=c(0.025,0.975))
+  dQT <- quantile(ddist, probs=c(0.025,0.975))
+  
+  ins.p <- di.ifinal[i,1]
+  del.p <- di.dfinal[i,1]
+  
+  # highlight significant differences 
+  if (ins.p < iQT[[1]]){
+    isign <- c(isign, "lower")
+  }else if(ins.p > iQT[[2]]){
+    isign <- c(isign, "higher")
+  }else{
+    isign <- c(isign, "")
+  }
+  
+  # highlight significant differences 
+  if (del.p < dQT[[1]]){
+    dsign <- c(dsign, "lower")
+  }else if(del.p > dQT[[2]]){
+    dsign <- c(dsign, "higher")
+  }else{
+    dsign <- c(dsign, "")
+  }
+  
+}
+di.ifinal$sign <- isign
+di.dfinal$sign <- dsign
+
+
+# DINUCLEOTIDE FIGURES 
+# -----------------------------------------
 cex=2
 par(pty="s", mar=c(6,8,4,1),las=0)
 
@@ -79,6 +143,8 @@ par(xpd=F)
 abline(0,1)
 
 
+ex <- rep(1,16)
+ex[7] <- 2
 
 cex=2
 par(pty="s", mar=c(6,8,4,1),las=0)
@@ -86,7 +152,7 @@ par(pty="s", mar=c(6,8,4,1),las=0)
 lim = c(0.0,0.15)
 plot(NA, xlim=lim,ylim=lim,
      cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.5, main="Deletions")
-text(x=di.dfinal$vloop, y=di.dfinal$seq, labels=rownames(di.dfinal), cex=1.5)
+text(x=di.dfinal$vloop, y=di.dfinal$seq, labels=rownames(di.dfinal), cex=ex)
 title(ylab="Proportion In Indels", line=3.5,cex.lab=1.75)
 title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
 #legend(0.38,0.24,legend=nucleotides, pch=21,cex=1.9, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
