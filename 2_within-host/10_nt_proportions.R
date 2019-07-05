@@ -63,14 +63,18 @@ splitRows <- function(row){
   data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:9])
   
 }
-add <- function(arg1, arg2){
-  if (arg1 == "" | arg2 == ""){
+
+add <- function(x, accno, vloop){
+  if (x == ""){
     return(NA)
   }
-  arg1 <- as.numeric(arg1)
-  arg2 <- as.numeric(arg2)
-  arg1 + arg2
+  x <- as.numeric(x)
+  vloop <- as.numeric(vloop)
+  arg2 <- as.numeric(var.pos[var.pos$header==accno, vloop+1])
+  x + arg2
 }
+
+
 
 
 # INSERTION PARSING ----------
@@ -145,8 +149,8 @@ for (file in 1:length(ifolder)){
   iCSV$Vseq <- sequences$ins
   dCSV$Vseq <- sequences$del
   
-  iCSV$pat <- rep(strsplit(filename, "-")[[1]][1], nrow(iCSV))
-  dCSV$pat <- rep(strsplit(filename, "-")[[1]][1], nrow(dCSV))
+  iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
+  dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
   
   colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Pat")
   colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Pat")
@@ -188,17 +192,19 @@ for (file in 1:length(ifolder)){
   # OUTPUT 
   # for other analyses
   # -----------------------------
-  testpos <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
-  testpos <- testpos[,c(3,6,9,12,15)]
+  var.pos <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
+  var.pos <- var.pos[,c(1,3,6,9,12,15)]
+  var.pos$header <- unname(sapply(var.pos$header, getAccno))
   
-  all.ins$Vpos <- as.numeric(all.ins[which(all.ins$Count>0), 7]) + as.numeric(testpos[which(all.ins$Count>0),as.numeric(all.ins$Vloop)])
-  
+  new.ins$Vpos <- as.numeric(unname(mapply(add, x=new.ins$Pos, accno=new.ins$Accno, vloop=new.ins$Vloop)))
+  new.del$Vpos <- as.numeric(unname(mapply(add, x=new.del$Pos, accno=new.del$Accno, vloop=new.del$Vloop)))
+
   all.ins <- rbind(all.ins, new.ins)
   all.del <- rbind(all.del, new.del)
-  
+
 }
-
-
+ins <- all.ins[all.ins$Seq!="",]
+del <- all.del[all.del$Seq!="",]
 
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
@@ -209,8 +215,8 @@ write.csv(all.del[,c(1,2,4,5,6)], "~/PycharmProjects/hiv-withinhost/12_lengths/d
 
 # N - GLYC SITE OUTPUTS 
 # ---------------------------------------------
-write.csv(all.ins,"~/PycharmProjects/hiv-withinhost/13_nglycs/insertions.csv")
-write.csv(all.del,"~/PycharmProjects/hiv-withinhost/13_nglycs/deletions.csv")
+write.csv(all.ins[,1:8],"~/PycharmProjects/hiv-withinhost/13_nglycs/insertions.csv")
+write.csv(all.del[,1:8],"~/PycharmProjects/hiv-withinhost/13_nglycs/deletions.csv")
 
 
 
@@ -248,8 +254,8 @@ total.del <- total.del[total.del$len>1, ]
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
-write.csv(total.ins, "~/PycharmProjects/hiv-withinhost/12_dinucleotide/total-ins.csv")
-write.csv(total.del, "~/PycharmProjects/hiv-withinhost/12_dinucleotide/total-del.csv")
+write.csv(total.ins, "~/PycharmProjects/hiv-withinhost/11_dinucleotide/total-ins.csv")
+write.csv(total.del, "~/PycharmProjects/hiv-withinhost/11_dinucleotide/total-del.csv")
 
 
 

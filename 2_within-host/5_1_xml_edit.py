@@ -11,7 +11,7 @@ for s in range(len(sys.argv)):
     if not sys.argv[s].endswith("/"):
         sys.argv[s] = sys.argv[s] + "/"'''
 
-xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/strict/*.xml")
+xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/*.xml")
 
 for infile in xmlFolder:
     xml = ET.parse(infile)

@@ -4,7 +4,7 @@ import os
 import csv
 from seqUtils import * 
 
-ifolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/abbrev/*.csv")
+ifolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/ins_20/pre-edit/*.csv")
 dpath = "/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/del_20/pre-edit/"
 
 for infile in ifolder:

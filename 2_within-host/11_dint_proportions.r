@@ -143,8 +143,8 @@ par(xpd=F)
 abline(0,1)
 
 
-ex <- rep(1,16)
-ex[7] <- 2
+ex <- rep(1.5,16)
+ex[7] <- 2.5
 
 cex=2
 par(pty="s", mar=c(6,8,4,1),las=0)

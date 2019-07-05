@@ -15,13 +15,10 @@ nglycs <- data.frame(stringsAsFactors = F)
 
 csvfile[,1] <- as.character(csvfile[,1])
 
-subtype <- sapply(csvfile[,1], function(x){strsplit(x, "\\.")[[1]][1]})
-subtype <-unname(subtype)
+subtype <- unname(sapply(csvfile[,1], function(x){strsplit(x, "\\.")[[1]][1]}))
+accno <- unname(sapply(csvfile[,1], function(x){strsplit(x, "\\.")[[1]][2]}))
 
-accno <- sapply(csvfile[,1], function(x){strsplit(x, "\\.")[[1]][2]})
-accno <- unname(accno)
-
-status <- sapply(csvfile[,1], function(x){
+status <- unname(sapply(csvfile[,1], function(x){
   temp <- strsplit(x, "\\.")[[1]][5]
   if (temp == "AIDS"){
     temp <- "chronic"
@@ -29,8 +26,7 @@ status <- sapply(csvfile[,1], function(x){
     temp <- "acute"
   }
   temp 
-  })
-status <- unname(status)
+  }))
 
 csvfile[,1] <- NULL
 csvfile <- cbind(accno, subtype, status, csvfile)
