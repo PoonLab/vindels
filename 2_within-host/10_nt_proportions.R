@@ -112,8 +112,8 @@ for (file in 1:length(ifolder)){
   dAccno <- unname(sapply(dCSV$Accno, getAccno))
   
   # 
-  iCSV$Accno <- iAccno
-  dCSV$Accno <- dAccno
+  #iCSV$Accno <- iAccno
+  #dCSV$Accno <- dAccno
   
   # store the sequences from these two data frames for nucleotide analysis
   sequences$ins <- as.character(iCSV$Seq)
@@ -194,7 +194,7 @@ for (file in 1:length(ifolder)){
   # -----------------------------
   var.pos <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
   var.pos <- var.pos[,c(1,3,6,9,12,15)]
-  var.pos$header <- unname(sapply(var.pos$header, getAccno))
+  #var.pos$header <- unname(sapply(var.pos$header, getAccno))
   
   new.ins$Vpos <- as.numeric(unname(mapply(add, x=new.ins$Pos, accno=new.ins$Accno, vloop=new.ins$Vloop)))
   new.del$Vpos <- as.numeric(unname(mapply(add, x=new.del$Pos, accno=new.del$Accno, vloop=new.del$Vloop)))

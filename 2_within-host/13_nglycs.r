@@ -43,10 +43,13 @@ insOriginal <- function(indel, pos, vseq){
   paste0(substr(vseq, 0, pos-len) , substr(vseq, pos+1, nchar(vseq)))
 }
 
-delOriginal <- function(indel, pos, seq){
+delOriginal <- function(indel, pos, vseq){
+  if (indel == ""){
+    return(NA)
+  }
   len <- nchar(indel)
   pos <- as.numeric(pos)
-  paste0(substr(seq, 0, pos+1), substr(seq,pos+len,nchar(s)))
+  paste0(substr(vseq, 0, pos+1), "X", substr(vseq,pos+len,nchar(vseq)))
 }
 
 
@@ -68,8 +71,10 @@ ins$glycs <- sapply(ins$aaseq, extractGlycs)
 del$glycs <- sapply(del$aaseq, extractGlycs)
 
 ins$aaseq <- NULL
+del$aaseq <- NULL
 
 ins$original <- mapply(insOriginal, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq)
+del$original <- mapply(delOriginal, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq)
 # for both: 
 # determine the start and stop of all nglycs 
 # collect them in one column separated by "-", comma separated
