@@ -27,7 +27,7 @@ extractInfo <- function(input){
   for (ins in insertions[[1]]){
     fields <- strsplit(ins, "-")
     seq <- c(seq, fields[[1]][1])
-    pos <- c(pos, as.numeric(fields[[1]][2]) + 1)
+    pos <- c(pos, as.numeric(fields[[1]][2]) )
   }
   return(c(paste(seq,collapse=","), paste(pos,collapse=",")))
 }
@@ -74,6 +74,24 @@ add <- function(x, accno, vloop){
   x + arg2
 }
 
+insOriginal <- function(indel, pos, vseq){
+  if (indel == ""){
+    return(vseq)
+  }
+  len <- nchar(indel)
+  pos <- as.numeric(pos)
+  paste0(substr(vseq, 0, pos-len) , substr(vseq, pos+1, nchar(vseq)))
+}
+
+delOriginal <- function(indel, pos, vseq){
+  if (indel == ""){
+    return(vseq)
+  }
+  len <- nchar(indel)
+  pos <- as.numeric(pos)
+  paste0(substr(vseq, 0, pos+1), "X", substr(vseq,pos+len,nchar(vseq)))
+}
+
 
 
 
@@ -116,10 +134,9 @@ for (file in 1:length(ifolder)){
   #dCSV$Accno <- dAccno
   
   # store the sequences from these two data frames for nucleotide analysis
+  # remove them as they arent needed for this analysis
   sequences$ins <- as.character(iCSV$Seq)
   sequences$del <- as.character(dCSV$Seq)
-  
-  # remove them as they arent needed for this analysis
   dCSV$Seq <- NULL
   iCSV$Seq <- NULL
   
@@ -198,13 +215,28 @@ for (file in 1:length(ifolder)){
   
   new.ins$Vpos <- as.numeric(unname(mapply(add, x=new.ins$Pos, accno=new.ins$Accno, vloop=new.ins$Vloop)))
   new.del$Vpos <- as.numeric(unname(mapply(add, x=new.del$Pos, accno=new.del$Accno, vloop=new.del$Vloop)))
-
+  
+  # REMOVE INSERTIONS
+  new.ins$Vseq <- mapply(insOriginal, indel=new.ins$Seq, pos=new.ins$Pos, vseq=new.ins$Vseq)
+  
+  #RESTORE DELETIONS 
+  new.del$Vseq <- mapply(delOriginal, indel=new.del$Seq, pos=new.del$Pos, vseq=new.del$Vseq)
+  
+  # ADJUST POSITIONS TO MATCH THE PLACE WHERE THE INSERTION WAS
+  new.ins$Pos <- as.numeric(new.ins$Pos) - nchar(new.ins$Seq)
+  
+  # DELETIONS NEED WORK ***************
+  #new.del$Pos <- as.numeric(new.del$Pos) - nchar(new.del$Seq)
+  
   all.ins <- rbind(all.ins, new.ins)
   all.del <- rbind(all.del, new.del)
 
 }
 ins <- all.ins[all.ins$Seq!="",]
 del <- all.del[all.del$Seq!="",]
+
+
+
 
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
@@ -218,6 +250,8 @@ write.csv(all.del[,c(1,2,4,5,6)], "~/PycharmProjects/hiv-withinhost/12_lengths/d
 write.csv(all.ins[,1:8],"~/PycharmProjects/hiv-withinhost/13_nglycs/insertions.csv")
 write.csv(all.del[,1:8],"~/PycharmProjects/hiv-withinhost/13_nglycs/deletions.csv")
 
+
+# FLANKING INSERTION SEQUENCES CHECK 
 
 
 

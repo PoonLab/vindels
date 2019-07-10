@@ -193,8 +193,8 @@ for pat in full.keys():
     if len(vseqdict[pat]) == 0 or len(full[pat]) == 0:
         continue    
 
-    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta2","w")
-    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/abbrev/" + pat + ".csv", "w")
+    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/fullname/" + pat + ".fasta","w")
+    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv", "w")
     outputv.write("header,V1,start.1,stop.1,V2,start.2,stop.2,V3,start.3,stop.3,V4,start.4,stop.4,V5,start.5,stop.5\n")
 
     patcount += 1
@@ -213,17 +213,21 @@ for pat in full.keys():
                 print("SOMETHINGS WRONG")
                 print(pat)
                 print(date)
-                
-            # fields[0:5] . number of time points . selected time scale . which time scale was chosen
-            #newheader = ".".join(fields[0:5]) + "." + fields[9] + "." + str(bestIdx) + "_" + str(chosenDate[n])
-            outputfull.write(">" + fields[4] +"_" + date + "\n" + full[pat][header] + "\n")
-            outputv.write(fields[4] + "_" + date + "," + vseqdict[pat][header] + "\n")
+            
+            # FULL HEADER
+            # fields[0:5] . number of time points . which time scale was chosen .  time
+            newheader = ".".join(fields[0:5]) + "." + fields[9] + "." + str(bestIdx-5) + "_" + str(fields[bestIdx])
+            
+            # CONDENSE HEADER
+            #fields[4] +"_" + date
+            outputfull.write(">" + newheader + "\n" + full[pat][header] + "\n")
+            outputv.write(newheader + "," + vseqdict[pat][header] + "\n")
         else:
             fields = header.rstrip("\r._").split("_")
             #rearrange the header to have date last
             newheader = fields[0] + "_" + fields[2] + "_" +fields[1]
 
-            outputfull.write(">"+newheader + "\n" + full[pat][header] + "\n")
+            outputfull.write(">"+ newheader + "\n" + full[pat][header] + "\n")
             outputv.write(newheader + "," + vseqdict[pat][header] + "\n")
 
 

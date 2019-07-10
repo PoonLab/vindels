@@ -22,6 +22,7 @@ def getTerminals(anFile):
         check1 = pos1.search(entry)
         check2 = pos2.search(entry)
 
+        # FORMAT : terminals[header] = [sequence, ancestor]
         if check1 != None:
             header = entry.split(",")[0].strip(">(,").split(":")[0]
             terminals[header] = [data[header], data[entry].upper()]
@@ -125,17 +126,17 @@ def extractIndels(anFile, vSeqFile):
                         
                     #clear the dTemp 
                         if dTemp:
-                            deletions[vregion].append(dTemp+"-"+str(pos-1))
+                            deletions[vregion].append(dTemp+"-"+str(pos))
                             dTemp = ''
                 
                     #nothing -- both gaps 
                     else:
                         #clear iTemp and dTemp
                         if iTemp:
-                            insertions[vregion].append(iTemp+"-"+str(pos-1))
+                            insertions[vregion].append(iTemp+"-"+str(pos))
                             iTemp = ''
                         if dTemp:
-                            deletions[vregion].append(dTemp+"-"+str(pos-1))
+                            deletions[vregion].append(dTemp+"-"+str(pos))
                             dTemp = ''
                         
                 elif achar != "-":
@@ -145,17 +146,17 @@ def extractIndels(anFile, vSeqFile):
         
                         #clear iTemp
                         if iTemp:
-                            insertions[vregion].append(iTemp+"-"+str(pos-1))
+                            insertions[vregion].append(iTemp+"-"+str(pos))
                             iTemp = ''
                         
                     #nothing -- both have character
                     else:
                         #clear iTemp and dTemp
                         if iTemp:
-                            insertions[vregion].append(iTemp+"-"+str(pos-1))
+                            insertions[vregion].append(iTemp+"-"+str(pos))
                             iTemp = ''
                         if dTemp:
-                            deletions[vregion].append(dTemp+"-"+str(pos-1))
+                            deletions[vregion].append(dTemp+"-"+str(pos))
                             dTemp = ''
 
         for n in range(5):
