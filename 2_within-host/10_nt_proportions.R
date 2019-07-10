@@ -92,12 +92,37 @@ delOriginal <- function(indel, pos, vseq){
   paste0(substr(vseq, 0, pos+1), "X", substr(vseq,pos+len,nchar(vseq)))
 }
 
+insCheck <- function(indel,pos,vseq,wobble){
+  len <- nchar(indel)
+  pos <- as.numeric(pos)
+  
+  chars <- str_split(indel, "")[[1]]
+    
+  if ((pos - len) >= 0){
+    # then the PRECEDING position can be checked
+    before <- substr(vseq, pos-len, pos)
+  }else{
+    before <- ""
+  }
+  
+  if ((pos + len) <= len(vseq)){
+    # then the FOLLOWING position can be checked
+    after <- substr(vseq, pos, pos+len)
+  }else{
+    after <- ""
+  }
+}
 
 
+# Lio
+path <- "~/Lio/"
+
+ifolder <- Sys.glob(paste0(path,"9Indels/ins_mcc/*.csv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/del_mcc/*.csv"))
 
 # INSERTION PARSING ----------
-ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/ins_mcc/*.csv")
-dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/del_mcc/*.csv")
+#ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/ins_mcc/*.csv")
+#dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/del_mcc/*.csv")
 all.ins <- data.frame()
 all.del <- data.frame()
 iTotal <- list()
@@ -209,7 +234,7 @@ for (file in 1:length(ifolder)){
   # OUTPUT 
   # for other analyses
   # -----------------------------
-  var.pos <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
+  var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
   var.pos <- var.pos[,c(1,3,6,9,12,15)]
   #var.pos$header <- unname(sapply(var.pos$header, getAccno))
   
@@ -235,6 +260,11 @@ for (file in 1:length(ifolder)){
 ins <- all.ins[all.ins$Seq!="",]
 del <- all.del[all.del$Seq!="",]
 
+# FLANKING INSERTION SEQUENCES CHECK
+# --------------------------------------------
+
+
+
 
 
 
@@ -251,7 +281,7 @@ write.csv(all.ins[,1:8],"~/PycharmProjects/hiv-withinhost/13_nglycs/insertions.c
 write.csv(all.del[,1:8],"~/PycharmProjects/hiv-withinhost/13_nglycs/deletions.csv")
 
 
-# FLANKING INSERTION SEQUENCES CHECK 
+ 
 
 
 
