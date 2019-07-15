@@ -33,6 +33,7 @@ output = open(outpath, "w")
 
 for header in data:
 
+    # PART 1 NUCLEOTIDE BASED ALIGNMENT TO REMOVE EXTRANEOUS SEQUENCE
     nt_pair = Aligner()
     nt_pair.set_model('HYPHY_NUC')
     nt_pair.is_global = False
@@ -45,6 +46,8 @@ for header in data:
 
     ntqry = result[1][left:right].replace("-","")
 
+
+    # PART 2 CODON BASED NUCLEOTIDE ALIGNMENT 
     aaqry = translate_nuc(ntqry,0)
 
     aa_pair = Aligner()
@@ -85,9 +88,4 @@ for header in data:
 
     output.write(">" + header + '\n')
     output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
-
-
-
-
-
 

@@ -77,7 +77,7 @@ def extractIndels(anFile, vSeqFile):
     # {"accno":[seq1,anseq]}
     terminals = getTerminals(anFile)
 
-    vregions, positions = getVRegions(vSeqFile)
+    vregions, boundaries = getVRegions(vSeqFile)
     iDict = {}
     dDict = {}
     vSeq = {}
@@ -102,7 +102,7 @@ def extractIndels(anFile, vSeqFile):
             achar = terminals[accno][1][n]
 
             #retrieves a numeric value (0,1,2,3,4) to indicate which variable region the nucleotide is in, and -1 if outside of a vloop
-            vregion, pos = vrSwitch(ai, positions[accno]) 
+            vregion, pos = vrSwitch(ai, boundaries[accno]) 
             
             #this counts up the number of nucleotides found in the seq of interest
             if schar != '-':
@@ -173,7 +173,7 @@ def extractIndels(anFile, vSeqFile):
             
             csvSeq = vregions[accnos[i]][n] 
             
-            start, stop = positions[accnos[i]][n]
+            start, stop = boundaries[accnos[i]][n]
             start = int(start)
             stop = int(stop)
             sliced = terminals[header][i].replace("-","")[start:stop]
@@ -203,12 +203,12 @@ def main():
         reconfile = filename.split("_recon")[0] + ".csv"   #101827-a_15.csv
 
         if os.path.isfile(vPath+csvfile):
-            ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/ins_mcc/"+reconfile,'w')
-            del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/del_mcc/"+reconfile,'w')
+            #ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/ins_mcc/"+reconfile,'w')
+            #del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/del_mcc/"+reconfile,'w')
             iDict, dDict, vSeq = extractIndels(infile, vPath+csvfile)
 
-            ins_out.write("Accno,Ins,Vloop,Vlen,Seq\n")
-            del_out.write("Accno,Del,Vloop,Vlen,Seq\n")
+            #ins_out.write("Accno,Ins,Vloop,Vlen,Seq\n")
+            #del_out.write("Accno,Del,Vloop,Vlen,Seq\n")
 
             for accno in iDict:      
                 insertions = iDict[accno] # [ [], [], [], [], [] ]
@@ -220,12 +220,12 @@ def main():
                     insList = ":".join(ins)
                     if insList == "":
                         insList = ""
-                    ins_out.write(",".join([accno,insList,str(j+1),str(len(vsequences[j])),vsequences[j]])+"\n")
+                    #ins_out.write(",".join([accno,insList,str(j+1),str(len(vsequences[j])),vsequences[j]])+"\n")
                 for k, dl in enumerate(deletions):
                     delList = ":".join(dl)
                     if delList == "":
                         delList = ""
-                    del_out.write(",".join([accno,delList,str(k+1), str(len(vsequences[k])), vsequences[k]])+"\n")
+                    #del_out.write(",".join([accno,delList,str(k+1), str(len(vsequences[k])), vsequences[k]])+"\n")
         
 
     print(totalseqs)

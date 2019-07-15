@@ -69,8 +69,8 @@ add <- function(x, accno, vloop){
     return(NA)
   }
   x <- as.numeric(x)
-  vloop <- as.numeric(vloop)
-  arg2 <- as.numeric(var.pos[var.pos$header==accno, vloop+1])
+  vloop <- as.character(vloop)
+  arg2 <- as.numeric(var.pos[var.pos$header==accno, paste0('start.',vloop)])
   x + arg2
 }
 
@@ -78,44 +78,89 @@ insOriginal <- function(indel, pos, vseq){
   if (indel == ""){
     return(vseq)
   }
-  len <- nchar(indel)
-  pos <- as.numeric(pos)
-  paste0(substr(vseq, 0, pos-len) , substr(vseq, pos+1, nchar(vseq)))
+  seqs <- strsplit(indel, ",")[[1]]
+  idxs <- as.numeric(strsplit(pos, ",")[[1]])
+  # iterate through the sequences and positions
+  for (i in 1:length(seqs)){
+    len <- nchar(seqs[i])
+    idx <- idxs[i]
+    
+    # cut out insertion : substring before and up to start of insertion, substring from end of insertion until the end 
+    vseq <- paste0(substr(vseq, 0, idx-len) , substr(vseq, idx+1, nchar(vseq)))
+    for (i in idxs[(i+1):length(idxs)]){
+      if (i >= idx){
+        idxs[(i+1):length(idxs)] <- idxs[(i+1):length(idxs)] - len
+      }
+      
+    }
+    
+    
+  }
+  vseq
 }
 
 delOriginal <- function(indel, pos, vseq){
   if (indel == ""){
     return(vseq)
   }
-  len <- nchar(indel)
-  pos <- as.numeric(pos)
-  paste0(substr(vseq, 0, pos+1), "X", substr(vseq,pos+len,nchar(vseq)))
+  
+  seqs <- strsplit(indel, ",")[[1]]
+  idxs <- as.numeric(strsplit(pos, ",")[[1]])
+  # iterate through the sequences and positions
+  for (i in 1:length(seqs)){
+    len <- nchar(seqs[i])
+    idx <- idxs[i]
+    
+    # add back deletion : substring before and up to the point of deletion, deletion sequence, substring after point of deletion until end 
+    vseq <- paste0(substr(vseq, 0, idx) , seqs[i], substr(vseq, idx+1, nchar(vseq)))
+    idxs[(i+1):length(idxs)] <- idxs[(i+1):length(idxs)] + len
+  }
+  vseq
+}
+
+checkDiff <- function(seq1, seq2){
+  if (seq1 == seq2){
+    return(NULL)
+  }
+  
+  seq1 <- str_split(seq1, "")[[1]]
+  seq2 <- str_split(seq2, "")[[1]]
+  
+  chars <- rbind(seq1, seq2)
+  which(chars[1,]!=chars[2,])
 }
 
 insCheck <- function(indel,pos,vseq,wobble){
   len <- nchar(indel)
   pos <- as.numeric(pos)
   
-  chars <- str_split(indel, "")[[1]]
-    
+  r1 <- NA
+  r2 <- NA
+  
   if ((pos - len) >= 0){
     # then the PRECEDING position can be checked
-    before <- substr(vseq, pos-len, pos)
-  }else{
-    before <- ""
+    before <- substr(vseq, pos-len+1, pos)
+    diffs <- checkDiff(indel, before)
+    if (length(diffs) <= wobble){
+      r1 <- length(diffs)
+    }
   }
   
-  if ((pos + len) <= len(vseq)){
+  diffs <- c()
+  if ((pos + len) <= nchar(vseq)){
     # then the FOLLOWING position can be checked
-    after <- substr(vseq, pos, pos+len)
-  }else{
-    after <- ""
+    after <- substr(vseq, pos+1, pos+len)
+    diffs <- checkDiff(indel, after)
+    if (length(diffs) <= wobble){
+      r2 <- length(diffs)
+    }
   }
+  c(r1,r2)
 }
 
 
 # Lio
-path <- "~/Lio/"
+path <- "~/PycharmProjects/hiv-withinhost/"
 
 ifolder <- Sys.glob(paste0(path,"9Indels/ins_mcc/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/del_mcc/*.csv"))
@@ -197,8 +242,15 @@ for (file in 1:length(ifolder)){
   colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Pat")
   colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Pat")
   
-  # COMMA SEPARATION FIX
+  # REMOVE INSERTIONS
+  iCSV$Vseq <- mapply(insOriginal, indel=iCSV$Seq, pos=iCSV$Pos, vseq=iCSV$Vseq)
   
+  #RESTORE DELETIONS 
+  dCSV$Vseq <- mapply(delOriginal, indel=dCSV$Seq, pos=dCSV$Pos, vseq=dCSV$Vseq)
+  
+  # DELETIONS POSITIONS DO NOT NEED FIXING 
+
+  # COMMA SEPARATION FIX
   new.ins <- data.frame()
   new.del <- data.frame()
   # make a new data.frame for each CSV df
@@ -209,7 +261,8 @@ for (file in 1:length(ifolder)){
   # handle comma rows separately with a function 
   iCommas <- iCSV[grepl(",",iCSV$Seq),]
   dCommas <- dCSV[grepl(",",dCSV$Seq),]
-  #c()
+
+  # APPLY THE SPLIT ROWS TO GET ONE INDEL PER ROW
   if (nrow(iCommas) > 0){
     newrows <- apply(iCommas,1,splitRows)
     for (i in 1:length(newrows)){
@@ -231,28 +284,29 @@ for (file in 1:length(ifolder)){
     }
   }
   
-  # OUTPUT 
-  # for other analyses
-  # -----------------------------
+  # RESTORE ORIGINAL VARIABLE LOOP SEQUENCES 
   var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
-  var.pos <- var.pos[,c(1,3,6,9,12,15)]
-  #var.pos$header <- unname(sapply(var.pos$header, getAccno))
+  var.pos <- var.pos[,-c(2,5,8,11,14)]
   
+  new.ins[is.na(new.ins$Pos),"Pos"] <- ""
+  new.del[is.na(new.del$Pos),"Pos"] <- ""
+  
+  # Add the V position column into the two final data frames 
   new.ins$Vpos <- as.numeric(unname(mapply(add, x=new.ins$Pos, accno=new.ins$Accno, vloop=new.ins$Vloop)))
   new.del$Vpos <- as.numeric(unname(mapply(add, x=new.del$Pos, accno=new.del$Accno, vloop=new.del$Vloop)))
   
-  # REMOVE INSERTIONS
-  new.ins$Vseq <- mapply(insOriginal, indel=new.ins$Seq, pos=new.ins$Pos, vseq=new.ins$Vseq)
-  
-  #RESTORE DELETIONS 
-  new.del$Vseq <- mapply(delOriginal, indel=new.del$Seq, pos=new.del$Pos, vseq=new.del$Vseq)
   
   # ADJUST POSITIONS TO MATCH THE PLACE WHERE THE INSERTION WAS
   new.ins$Pos <- as.numeric(new.ins$Pos) - nchar(new.ins$Seq)
+  new.ins$Vpos <- new.ins$Vpos - nchar(new.ins$Seq)
   
-  # DELETIONS NEED WORK ***************
-  #new.del$Pos <- as.numeric(new.del$Pos) - nchar(new.del$Seq)
+  # no adjustment needed for deletions
+  new.del$Pos <- as.numeric(new.del$Pos)
   
+  
+  # OUTPUT 
+  # for other analyses
+  # -----------------------------
   all.ins <- rbind(all.ins, new.ins)
   all.del <- rbind(all.del, new.del)
 
@@ -263,10 +317,20 @@ del <- all.del[all.del$Seq!="",]
 # FLANKING INSERTION SEQUENCES CHECK
 # --------------------------------------------
 
+flanking <- unname(mapply(insCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1))
+flanking <- as.data.frame(t(flanking))
+colnames(flanking) <- c("before", "after")
+ins <- cbind(ins,flanking)
 
 
+# SET A CUTOFF 
+# negates any results that are below a certain length threshold (I chose 6 nt as the minimum)
+ins[which(nchar(ins$Seq)< 6),"before"] <- NA
+ins[which(nchar(ins$Seq)< 6),"after"] <- NA
 
-
+# proportion of insertions that have a match within x nucl before, and after the insertion
+length(ins[!is.na(ins$before), 'before'])/nrow(ins[which(nchar(ins$Seq) >=6),])
+length(ins[!is.na(ins$after), 'after'])/nrow(ins[which(nchar(ins$Seq) >=6),])
 
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------

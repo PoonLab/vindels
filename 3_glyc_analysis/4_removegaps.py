@@ -5,7 +5,7 @@ from seqUtils import *
 
 
 
-infile = open("/home/jpalmer/PycharmProjects/glyc-analysis/4_msa/prelim/gp120.msa","rU")
+infile = open("/home/jpalmer/PycharmProjects/glyc-analysis/4_msa/gaps-in/gp120.msa","rU")
 output = open("/home/jpalmer/PycharmProjects/glyc-analysis/4_msa/gp120.msa",'w')
 count = 0
 
@@ -21,7 +21,7 @@ infile.close()
 
 
 
-with open("/home/jpalmer/PycharmProjects/glyc-analysis/4_msa/prelim/gp120.msa","rU") as fasta:
+with open("/home/jpalmer/PycharmProjects/glyc-analysis/4_msa/gaps-in/gp120.msa","rU") as fasta:
     data = parse_fasta(fasta)
 
 for header in data.keys():

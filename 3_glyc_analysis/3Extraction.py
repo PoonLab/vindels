@@ -44,7 +44,10 @@ for header, seq in fasta.items():
     for c1, c2 in c_regions:
         cseq += query[index[c1]:index[c2]].replace("-","")
     cseqdict[header] = cseq
-
+    print(ref)
+    print("")
+    print(query)
+    print("")
 
     # extracting the whole gene sequence
     fulldict[header] = query.replace("-","")
@@ -68,9 +71,11 @@ for header, seq in fasta.items():
     vposdict[header] = vpos
 
 
-fullout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/full/gp120.csv","w")
-vout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/variable/gp120.csv", "w")
-cout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/conserved/gp120.fasta", "w")
+
+
+fullout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/full/gp1202.csv","w")
+vout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/variable/gp1202.csv", "w")
+cout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/conserved/gp1202.fasta", "w")
 fullout.write("header,seq,V1st,V1end,V2st,V2end,V3st,V3end,V4st,V4end,V5st,V5end\n")
 vout.write("header,V1,V2,V3,V4,V5\n")
 total = 0
@@ -88,8 +93,6 @@ for header in fulldict.keys():
         else:
             vout.write(vseqdict[header][n] + "," + ",".join(vposdict[header][n]) + "\n")
             fullout.write("," + ",".join(vposdict[header][n]) +"\n")
-
-
 
 
 
