@@ -58,6 +58,12 @@ di.ifinal <- data.frame(seq=colSums(di.i)[1:16]/colSums(di.i)[['sum']], vloop=co
 di.dfinal <- data.frame(seq=colSums(di.d)[1:16]/colSums(di.d)[['sum']], vloop=colSums(di.dv)[1:16]/colSums(di.dv)[['sum']])
 
 
+# RESIDUAL ANALYSIS
+
+
+
+
+
 
 # RANDOMIZATION TEST 
 # -----------------------------------------

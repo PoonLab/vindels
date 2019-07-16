@@ -10,14 +10,14 @@ for line in gp120:
     line = line.strip("\n")
     ntref += line
 
-print(ntref)
+#print(ntref)
 aaref = translate_nuc(ntref, 0)
 
-inpath = "/home/jpalmer/PycharmProjects/glyc-analysis/1_filtered/gp120-glycs.fasta"
-outpath = "/home/jpalmer/PycharmProjects/glyc-analysis/2_pairwise/gp120.fasta"
+inpath = "/home/jpalmer/PycharmProjects/glyc-analysis/7_prnseq/gp120.fasta"
+outpath = "/home/jpalmer/PycharmProjects/glyc-analysis/8_aapairwise/gp120.fasta"
 
 if not os.path.isdir(os.path.dirname(outpath)):
-    os.mkdir("/home/jpalmer/PycharmProjects/glyc-analysis/2_pairwise/")
+    os.mkdir("/home/jpalmer/PycharmProjects/glyc-analysis/8_aapairwise/")
 
 infile = open(inpath,"rU")
 
@@ -32,60 +32,59 @@ unequal = []
 output = open(outpath, "w")
 
 for header in data:
-
-    # PART 1 NUCLEOTIDE BASED ALIGNMENT TO REMOVE EXTRANEOUS SEQUENCE
-    nt_pair = Aligner()
-    nt_pair.set_model('HYPHY_NUC')
-    nt_pair.is_global = False
-    nt_pair.gap_open_penalty = 30
-    nt_pair.gap_extend_penalty = 10
-
-    result = nt_pair.align(ntref, data[header])
-
-    left, right = get_boundaries(result[0])
-
-    ntqry = result[1][left:right].replace("-","")
-
+    
 
     # PART 2 CODON BASED NUCLEOTIDE ALIGNMENT 
-    aaqry = translate_nuc(ntqry,0)
 
+    aaqry = translate_nuc(data[header],0)
     aa_pair = Aligner()
     aa_pair.set_model('EmpHIV25')
     aa_pair.gap_extend_penalty = 10
     aa_pair.gap_open_penalty = 30
     aa_pair.is_global = True
 
-    result2 = aa_pair.align(aaref,aaqry)
+    result = aa_pair.align(aaref,aaqry)
 
-    newref = list(ntref)
-    newqry = list(ntqry)
-
-    # reads through the amino acid alignment and adds codon gaps to the proper locations
-    for i in range(len(result2[0])):
-        if result2[0][i] == '-':
-            newref[i * 3:i * 3] = ['-', '-', '-']
-
-        if result2[1][i] == '-':
-            newqry[i * 3:i * 3] = ['-', '-', '-']
-
-    finalRef = "".join(newref)
-    finalQry = "".join(newqry)
-    
-    if len(newref) != len(newqry):
-        unequal.append(header)
-        print(header)
-        print(ntqry)
-        print("")
-        print(ntref)
-        print("")
-        print(aaref)
-        print("")
-        print(aaqry)
-        print("--------------------")
-        print("")
+    if ("*" in result[0]) or ("*" in result[1]):
         continue
 
-    output.write(">" + header + '\n')
-    output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
 
+        # block below used to check the best reading frames 
+        # found that they still suck overall
+        # therefore, chose to ignore these sequences 
+        '''
+        lowest = 10^8
+        for i in range(3):
+            aaqry = translate_nuc(data[header],i)
+            aa_pair = Aligner()
+            aa_pair.set_model('EmpHIV25')
+            aa_pair.gap_extend_penalty = 10
+            aa_pair.gap_open_penalty = 30
+            aa_pair.is_global = True
+
+            result = aa_pair.align(aaref,aaqry)
+            if result[2] < lowest:
+                choice = i
+                lowest = result[2]
+        
+        aaqry = translate_nuc(data[header],choice)
+        aa_pair = Aligner()
+        aa_pair.set_model('EmpHIV25')
+        aa_pair.gap_extend_penalty = 10
+        aa_pair.gap_open_penalty = 30
+        aa_pair.is_global = True
+        result = aa_pair.align(aaref,aaqry)
+
+        print(result[0][:100])
+        print(result[1][:100])
+        print("")
+        '''
+    print(result[0])
+    print(result[1])
+    print("")
+    
+    output.write(">" + header + '\n')
+    output.write(">ref\n" + result[0] + "\n>query\n" + result[1] + '\n')
+
+output.close()
+    

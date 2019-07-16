@@ -28,7 +28,7 @@ for header, seq in fasta.items():
     ref, query = seq
 
     left, right = get_boundaries(ref)
-    ref = ref[left:right]
+    query = query[left:right]
 
     #creates an alignment index to locate the variable regions 
     index = {}
@@ -73,9 +73,9 @@ for header, seq in fasta.items():
 
 
 
-fullout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/full/gp1202.csv","w")
-vout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/variable/gp1202.csv", "w")
-cout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/conserved/gp1202.fasta", "w")
+fullout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/full/gp120.csv","w")
+vout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/variable/gp120.csv", "w")
+cout = open("/home/jpalmer/PycharmProjects/glyc-analysis/3_sequences/conserved/gp120.fasta", "w")
 fullout.write("header,seq,V1st,V1end,V2st,V2end,V3st,V3end,V4st,V4end,V5st,V5end\n")
 vout.write("header,V1,V2,V3,V4,V5\n")
 total = 0

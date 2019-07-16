@@ -87,14 +87,7 @@ insOriginal <- function(indel, pos, vseq){
     
     # cut out insertion : substring before and up to start of insertion, substring from end of insertion until the end 
     vseq <- paste0(substr(vseq, 0, idx-len) , substr(vseq, idx+1, nchar(vseq)))
-    for (i in idxs[(i+1):length(idxs)]){
-      if (i >= idx){
-        idxs[(i+1):length(idxs)] <- idxs[(i+1):length(idxs)] - len
-      }
-      
-    }
-    
-    
+    idxs[(i+1):length(idxs)] <- idxs[(i+1):length(idxs)] - len
   }
   vseq
 }
@@ -141,19 +134,19 @@ insCheck <- function(indel,pos,vseq,wobble){
     # then the PRECEDING position can be checked
     before <- substr(vseq, pos-len+1, pos)
     diffs <- checkDiff(indel, before)
-    if (length(diffs) <= wobble){
-      r1 <- length(diffs)
-    }
+    #if (length(diffs) <= wobble){
+    r1 <- length(diffs)
+    
   }
   
   diffs <- c()
   if ((pos + len) <= nchar(vseq)){
-    # then the FOLLOWING position can be checked
+    # then the SUCCEEDING position can be checked
     after <- substr(vseq, pos+1, pos+len)
     diffs <- checkDiff(indel, after)
-    if (length(diffs) <= wobble){
-      r2 <- length(diffs)
-    }
+    #if (length(diffs) <= wobble){
+    r2 <- length(diffs)
+    
   }
   c(r1,r2)
 }
@@ -321,6 +314,30 @@ flanking <- unname(mapply(insCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, w
 flanking <- as.data.frame(t(flanking))
 colnames(flanking) <- c("before", "after")
 ins <- cbind(ins,flanking)
+
+
+# HISTOGRAMS OF NUCLEOTIDE DIFFERENCES STRATIFIED BY INSERTION LENGTH
+# ---------------------------------------------
+toTest <- data.frame(counts=c(ins$before,ins$after), len=rep(nchar(ins$Seq),2))
+caxis=1.1
+clab=1.3
+cmain=1.6
+main=
+
+dev.off()
+cex=2
+par(mfrow=c(4,2), xpd=NA, mar=c(4,6,4,5),las=0)
+#hist(toTest[toTest$len==1,1], col="red", ylim=c(0,4),main="Indel Length: 1", xlab="Number of Differences ",cex.lab=clab, cex.axis=caxis, cex.main=cmain)
+hist(toTest[toTest$len==3,1], breaks=seq(-0.5,max(toTest[toTest$len==3,1], na.rm=T)+0.5),col="red", main="Ins Length: 3", xlab="Number of Differences ",cex.lab=clab, cex.axis=caxis, cex.main=cmain)
+hist(toTest[toTest$len==4,1], breaks=seq(-0.5,max(toTest[toTest$len==4,1], na.rm=T)+0.5),col="red", ylim=c(0,2), main="Ins Length: 4", xlab="Number of Differences ",cex.lab=clab, cex.axis=caxis, cex.main=cmain)
+hist(toTest[toTest$len==6,1], breaks=seq(-0.5,max(toTest[toTest$len==6,1], na.rm=T)+0.5),col="red",  main="Ins Length: 6", xlab="Number of Differences ",cex.lab=clab, cex.axis=caxis, cex.main=cmain)
+hist(toTest[toTest$len==7,1], breaks=seq(-0.5,max(toTest[toTest$len==7,1], na.rm=T)+0.5),col="red", ylim=c(0,4), main="Ins Length: 7", xlab="Number of Differences ",cex.lab=clab, cex.axis=caxis, cex.main=cmain)
+hist(toTest[toTest$len==9,1], breaks=seq(-0.5,max(toTest[toTest$len==9,1], na.rm=T)+0.5),col="red", main="Ins Length: 9", xlab="Number of Differences ",cex.lab=clab, cex.axis=caxis, cex.main=cmain)
+hist(toTest[toTest$len==12,1], breaks=seq(-0.5,max(toTest[toTest$len==12,1], na.rm=T)+0.5),col="red", main="Ins Length: 12", xlab="Number of Differences ",cex.lab=clab, cex.axis=caxis, cex.main=cmain)
+hist(toTest[toTest$len==15,1],breaks=seq(-0.5,max(toTest[toTest$len==15,1], na.rm=T)+0.5), col="red", main="Ins Length: 15", xlab="Number of Differences ",cex.lab=clab, cex.axis=caxis, cex.main=cmain)
+hist(toTest[toTest$len>15,1], breaks=seq(-0.5,max(toTest[toTest$len>15,1], na.rm=T)+0.5),col="red", main="Ins Length: > 15", xlab="Number of Differences ",cex.lab=clab, cex.axis=caxis, cex.main=cmain)
+
+
 
 
 # SET A CUTOFF 

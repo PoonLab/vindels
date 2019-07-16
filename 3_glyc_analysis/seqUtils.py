@@ -74,6 +74,16 @@ def parse_fasta2(handle):
     res[head].append(nt)
     return res
 
+def alignidx(seq):
+
+    idx = {}
+    ai = 0 
+    for n, char in enumerate(seq):
+        if char != "-":
+            idx.update({ai:n})
+            ai += 1 
+    return idx   
+
 def get_boundaries (str):
 
     gap_prefix = re.compile('^[-]+')
