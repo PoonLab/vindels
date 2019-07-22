@@ -16,3 +16,4 @@ names(x) <- fasta$header
 y <-as.DNAbin.DNAStringSet(x)
 
 write.FASTA(y, "~/PycharmProjects/glyc-analysis/7_prnseq/gp120.fasta")
+density

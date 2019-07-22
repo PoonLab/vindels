@@ -1,104 +1,104 @@
 import re
 
 
-gene = '''atgagagtgagggggatacagaggaattatccacaatggtggatatggag
-catgttaggcttgtggatgctaatgatttgtaatgggatgtgggtcacag
-tctactatggggtacctgtgtggaaagaagcaaaaactactctattttgt
-gcatc---------------------------------------------
---------------------------------------------------
--------agatgctaaagcacatgagaaagaagtgcataatgtctgggct
-acacatgcctgtgtacccacagaccccaatccacaagaaatggttttaaa
-aaatgtaacagaaaatttcaacatgtgggaaaatgacatggtagatcaga
-tgcatgaagatgtaattagtttatgggatcaaagcctcaagccatgtgta
-aagttgaccccactctgtgtcactctatactg------------tacc--
-----------aa---------t---------------------------g
-c------------------tactgc-------------------------
---------------------------------------------------
---------------------------------------------------
---------------------------------------------c-----
----aa------------------------------------------t--
--------------------gc--------------------tact-----
-----------------------------g---t---------------ca
-------------------------------g---c---------------
----------a------------------a---t-----------------
--------agc------------------------------------agta
-------ta------------------------a---t-------------
------------------------------------agaggaaatgaaaaa
-ttgctctttcaatataaccacagaattaagagataagagagagaaaaagt
-atgcacttttttataaacttgatatagtacaactag------------at
-ggcaactctagtggca------actctagtcagtatagattaataaattg
-taatacctcagccataacacaagcctgtccaaaggtctcttttgacccaa
-ttcctatacattattgtgctccagctggttatgcgattctaaagtgtaat
-aataagacattcaatggaacaggaccgtgtaataatgtcagcacagtaca
-atgtacacatggaattaagccagtggtttcaactcaactattgttaaatg
-gtagcctagcagaaggagagataataattagatctaaaaatataacagac
-aatggccaaacaataatagtacatctcaatgaatctgtaaagattgagtg
-tacgagacccagtaataacacaagaacaagtataagaataggaccaggac
-aagcattttatgcaacaggacaagtaataggagacataagaaaagcacat
-tgtaacattagtgaaagtaaatggaatgaaactttacaaagggtaagtga
-aaaattaaaagaatacttccctaataagaatataacatttcaaccatcct
-caggaggggacccagaaattacaacacatagctttaattgtggaggagaa
-tttttctattgcaatacatcaagcctgtttaataggacat----------
---------ac------------------------------------atgg
-ctaatagtacagaaactaacagtacacgaaccatcacactccactgcaga
-ataaaacaaattataaacatgtggcaggaggtgggacgagcaatgtatgc
-ccctcccattgcaggaaacataacatgtatatcaaatatcacaggactac
-tattg------------------------------------------a--
--------------------ca---------------------aggga---
-------------tggagg------------------a---aac---agca
----------------------g------t---------------a-----
--ag------------------gagacag------------a------ga-
---------ca---------------------ttcagacctggaggaggaa
-atatgaaggacaattggagaagtgaattatataaatataaagtggtagag
-gttaagccattaggagtagcacccactaatgcaagaaggagagtggtgga
-gagagaaaaaaga'''
-anc = '''atgagagtgagggggatacagaggaattatccacaatggtggatatggag
-catgttaggcttgtggatgctaatgatttgtaatgggatgtgggtcacag
+gene = '''atgagagtgatggggatacagaggaattatccacaatggtggatatggag
+catgttaggcttttggatgctaatgatttgtaatgggatgtgggtcacag
 tctactatggggtacctgtgtggaaagaagcaaaaactactctattttgt
 gcatc---------------------------------------------
 --------------------------------------------------
 -------agatgctaaagcatatgagaaagaagtgcataatgtctgggct
 acacatgcctgtgtacccacagaccccaatccacaagaaatggttttaaa
-aaatgtaacagaaaatttcaacatgtgggaaaatgacatggtggatcaga
-tgcatgaagatgtaattagtttatgggatcaaagcctcaagccatgtgta
-aagttgaccccactctgtgtcactctaaactg------------tacc--
-----------aa---------t---------------------------g
-c------------------tactgccag------------caa-------
------t-------gc----------taatgctact---------------
----------------------g---------------ccag---------
-------------------c------a--------------atacc-----
----aa------------------------------------------t--
+aaatgtaacagaaaatttcaacatgtggaaaaatgacatggtggatcaga
+tgcatgaagacgtaattagtttatgggatcaaagcctcaagccatgtgta
+aagttgaccccactctgtgtcactctaaactgtaccaatgctactac---
+--------------------------------------------------
+--------------------------------------------------
+--------------------------------------------------
+--------------------------------------------------
+------------------c------a------------------------
+----a------------------------------------------t--
 -------------------gc--------------------tact-----
-----------------------------g---t---------------ca
+----------------------------g---c---------------ca
 ------------------------------g---c---------------
 ---------a------------------a---t-----------------
 -------agc------------------------------------agta
 ------ta------------------------a---t-------------
------------------------------------agaggaaatgaaaaa
-ttgctctttcaatataaccacagaattaagagataagagagagaaaaagt
+-----------------------------------agagggaatgaaaaa
+ttgctctttcaatataaccacagaattaagagataagagagagaaaaaga
 atgcacttttttataaacttgatatagtacaactag------------at
 ------------ggca------actctagtcagtatagattaataaattg
-taatacctcagccataacacaagcctgtccaaaggtctcttttgacccaa
+taatacctcagtcataacacaagcctgtccaaaggtctcttttgacccaa
 ttcctatacattattgtgctccagctggttatgcgattctaaagtgtaat
-aataagacattcaatggaacaggaccgtgtaataatgtcagcacagtaca
+aataagacattcactggaacaggaccgtgtaataatgtcagcacagtaca
 atgtacacatggaattaagccagtggtttcaactcaactattgttaaatg
-gtagcctagcagaaggagagataataattagatctaaaaatataacagac
-aatggcaaaacaataatagtacatctcaatgaatctgtaaagattgagtg
-tacgagacccagtaataacacaagaacaagtataagaataggaccaggac
-aagcattttatgcaacaggacaagtaataggagacataagaaaagcacat
-tgtaacattagtgaaagtaaatggaatgaaactttacaaagggtaagtga
-aaaattaaaagaatacttccctgataagaatataacatttcaaccatcct
-caggaggggacccagaaattacaacacatagctttaattgtggaggagaa
+gtagcctagcagaaggagagataataattagatctgaaaatataacaaac
+aatgccaaaacaataatagtacatctcaatgaatctgtaaagattgagtg
+tacgagacccagtaataaaacaagaacaagtataagaataggaccaggac
+aagcattttatgcaacaggacaagtaataggagacataagagaagcatat
+tgtaacattagtgaaagtaaatggaatgaaactttacaaagggtaagtaa
+aaaattaaaagaatacttccctcataagaatataacatttcaaccatcct
+caggaggggacctagaaattacaacacatagctttaattgtggaggagaa
 tttttctattgcaatacatcaagcctgtttaataggacat----------
---------ac------------------------------------atgg
-ctaatagtacagaaactaacagtacacgaaccatcacactccactgcaga
+--------at------------------atggctaatagtacagatatgg
+ctaatagtacagaaactaacagtacacgaaccatcacaatccgctgcaga
 ataaaacaaattataaacatgtggcaggaggtgggacgagcaatgtatgc
 ccctcccattgcaggaaacataacatgtatatcaaatatcacaggactac
 tattg------------------------------------------a--
 -------------------ca---------------------aggga---
-------------tggagg------------------a---aac---agca
----------------------g------t---------------a-----
--cg------------------gagacag------------a------ga-
+------------tggagg------------------a---aaa---acca
+--------------------------------------------------
+----------------------------------atacgga------ga-
+--------ca---------------------ttcagacctggaggaggaa
+atatgaaggacaattggagaagtgaattatataaatataaagtggtagaa
+gttaagccattaggagtagcacccactaatgcaagaaggagagtggtgga
+gagagaaaaaaga'''
+anc = '''atgagagtgatggggatacagaggaattatccacaatggtggatatggag
+catgttaggcttttggatgctaatgatttgtaatgggatgtgggtcacag
+tctactatggggtacctgtgtggaaagaagcaaaaactactctattttgt
+gcatc---------------------------------------------
+--------------------------------------------------
+-------agatgctaaagcatatgagaaagaagtgcataatgtctgggct
+acacatgcctgtgtacccacagaccccaatccacaagaaatggttttaaa
+aaatgtaacagaaaatttcaacatgtggaaaaatgacatggtggatcaga
+tgcatgaagacgtaattagtttatgggatcaaagcctcaagccatgtgta
+aagttgaccccactctgtgtcactctaaactgtaccaatgctactac---
+--------------------------------------------------
+--------------------------------------------------
+--------------------------------------------------
+--------------------------------------------------
+------------------c------a------------------------
+----a------------------------------------------t--
+-------------------gc--------------------tact-----
+----------------------------g---c---------------ca
+------------------------------g---c---------------
+---------a------------------a---t-----------------
+-------agc------------------------------------agta
+------ta------------------------a---t-------------
+-----------------------------------agagggaatgaaaaa
+ttgctctttcaatataaccacagaattaagagataagagagagaaaaaga
+atgcacttttttataaacttgatatagtacaactag------------at
+------------ggca------actctagtcagtatagattaataaattg
+taatacctcagtcataacacaagcctgtccaaaggtctcttttgacccaa
+ttcctatacattattgtgctccagctggttatgcgattctaaagtgtaat
+aataagacattcactggaacaggaccgtgtaataatgtcagcacagtaca
+atgtacacatggaattaagccagtggtttcaactcaactattgttaaatg
+gtagcctagcagaaggagagataataattagatctgaaaatataacaaac
+aatgccaaaacaataatagtacatctcaatgaatctgtaaagattgagtg
+tacgagacccagtaataaaacaagaacaagtataagaataggaccaggac
+aagcattttatgcaacaggacaagtaataggagacataagagaagcatat
+tgtaacattagtgaaagtaaatggaatgaaactttacaaagggtaagtaa
+aaaattaaaagaatacttccctcataagaatataacatttcaaccatcct
+caggaggggacctagaaattacaacacatagctttaattgtggaggagaa
+tttttctattgcaatacatcaagcctgtttaataggacat----------
+--------at------------------atggctaatagtacagatatgg
+ctaatagtacagaaactaacagtacacgaaccatcacaatccgctgcaga
+ataaaacaaattataaacatgtggcaggaggtgggacgagcaatgtatgc
+ccctcccattgcaggaaacataacatgtatatcaaatatcacaggactac
+tattg------------------------------------------a--
+-------------------ca---------------------aggga---
+------------tggagg------------------a---aaa---aaca
+---------------------a------t---------------a-----
+-cg------------------------g------atacgga------ga-
 --------ca---------------------ttcagacctggaggaggaa
 atatgaaggacaattggagaagtgaattatataaatataaagtggtagaa
 gttaagccattaggagtagcacccactaatgcaagaaggagagtggtgga
@@ -130,13 +130,13 @@ for n, i in enumerate(gene):
 
 aidx = {}
 ai = 0
-for n, i in enumerate(gene):
+for n, i in enumerate(anc):
     if i != "-":
         aidx.update({ai:n})
         ai += 1
 
-print(gene[gidx[378]:gidx[453]])
-print(anc[aidx[378]:aidx[453]])
+print(gene[gidx[1348]:gidx[1354]])
+print(anc[gidx[1348]:gidx[1354]])
 
 
 #gv5 = gene2.find(v5.lower())

@@ -11,7 +11,8 @@ aapairs = parse_fasta2(infile)
 
 positions = {"acute":{},"chronic":{}}
 
-
+acount = 0
+ccount = 0
 for header, seq in aapairs.items():
 
     #if header == "C.HM215294.2003.35293.acute_infection.-.2547":
@@ -39,8 +40,11 @@ for header, seq in aapairs.items():
     status = header.split(".")[4]
     if status == "acute_infection":
         print(header.split(".")[4])
+        acount+=1
         stage = "acute"
     else:
+        print(header.split("."))
+        ccount+=1
         stage = "chronic"
     
     for ng in nglycs:
@@ -64,8 +68,10 @@ for header, seq in aapairs.items():
 
 outfile = open('/home/jpalmer/PycharmProjects/glyc-analysis/9_glycs/acute.csv', 'w')
 outfile.write("position,count\n")
+
 for pos in positions["acute"]:
     outfile.write(str(pos)+","+str(positions["acute"][pos])+"\n")
+    
 outfile.close()
 
 outfile = open('/home/jpalmer/PycharmProjects/glyc-analysis/9_glycs/chronic.csv', 'w')
@@ -74,6 +80,8 @@ for pos in positions["chronic"]:
     outfile.write(str(pos)+","+str(positions["chronic"][pos])+"\n")
 outfile.close()
 
+print("acute: "+str(acount))
+print("chronic: "+str(ccount))
 
 
         

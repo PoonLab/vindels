@@ -12,7 +12,7 @@ def getTerminals(anFile):
     with open(anFile) as handle:
         data = parse_fasta(handle)
 
-    #cherry = re.compile("\([^()]*:[^()]*,[^()]*\)")
+    # pos1 and pos2 check for an ancestor that directly links to a tip 
     pos1 = re.compile("^>\([^(:,)]*:[^(:,)]*,")
     pos2 = re.compile(",[^(:,)]*:[^(:,)]*\)$")
     
@@ -21,14 +21,39 @@ def getTerminals(anFile):
         #check = cherry.match(entry)
         check1 = pos1.search(entry)
         check2 = pos2.search(entry)
-
+        #print("HELLO")
         # FORMAT : terminals[header] = [sequence, ancestor]
         if check1 != None:
             header = entry.split(",")[0].strip(">(,").split(":")[0]
-            terminals[header] = [data[header], data[entry].upper()]
+            #print(check1)
+            tip = data[header]
+            anc = data[entry].upper()
+            new_tip = []
+            new_anc = []
+            for t, a in zip(tip,anc):
+                if t != "-" or a != "-":
+                    new_tip.append(t)
+                    new_anc.append(a)
+            new_tip = "".join(new_tip)
+            new_anc = "".join(new_anc)
+
+            terminals[header] = [new_tip, new_anc]
+
         if check2 != None:
             header = entry.split(",")[-1].strip(",)").split(":")[0]
-            terminals[header] = [data[header], data[entry].upper()]
+            
+            tip = data[header]
+            anc = data[entry].upper()
+            new_tip = []
+            new_anc = []
+            for t, a in zip(tip,anc):
+                if t != "-" or a != "-":
+                    new_tip.append(t)
+                    new_anc.append(a)
+            new_tip = "".join(new_tip)
+            new_anc = "".join(new_anc)
+
+            terminals[header] = [new_tip, new_anc]
 
     # RETURNS:
     # terminals[accession number] = [sequence, ancestral sequence]
@@ -77,6 +102,7 @@ def extractIndels(anFile, vSeqFile):
     # {"accno":[seq1,anseq]}
     terminals = getTerminals(anFile)
 
+    # returns a list of 1) vregion sequences and 2) boundaries for those sequences
     vregions, boundaries = getVRegions(vSeqFile)
     iDict = {}
     dDict = {}
@@ -187,6 +213,13 @@ def extractIndels(anFile, vSeqFile):
     return iDict, dDict, vSeq
 
 def main():
+    '''hFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/mcc/*.fasta")
+    print(hFolder[0])
+    result = getTerminals(hFolder[0])
+    for r in result:
+        print(r)
+        print(result[r][0][:250])
+        print(result[r][1][:250])'''
 
     if not sys.argv[1].endswith("/"):
         sys.argv[1] += "/"
@@ -203,12 +236,12 @@ def main():
         reconfile = filename.split("_recon")[0] + ".csv"   #101827-a_15.csv
 
         if os.path.isfile(vPath+csvfile):
-            #ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/ins_mcc/"+reconfile,'w')
-            #del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/del_mcc/"+reconfile,'w')
+            ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/ins_mcc/"+reconfile,'w')
+            del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/del_mcc/"+reconfile,'w')
             iDict, dDict, vSeq = extractIndels(infile, vPath+csvfile)
 
-            #ins_out.write("Accno,Ins,Vloop,Vlen,Seq\n")
-            #del_out.write("Accno,Del,Vloop,Vlen,Seq\n")
+            ins_out.write("Accno,Ins,Vloop,Vlen,Seq\n")
+            del_out.write("Accno,Del,Vloop,Vlen,Seq\n")
 
             for accno in iDict:      
                 insertions = iDict[accno] # [ [], [], [], [], [] ]
@@ -220,12 +253,12 @@ def main():
                     insList = ":".join(ins)
                     if insList == "":
                         insList = ""
-                    #ins_out.write(",".join([accno,insList,str(j+1),str(len(vsequences[j])),vsequences[j]])+"\n")
+                    ins_out.write(",".join([accno,insList,str(j+1),str(len(vsequences[j])),vsequences[j]])+"\n")
                 for k, dl in enumerate(deletions):
                     delList = ":".join(dl)
                     if delList == "":
                         delList = ""
-                    #del_out.write(",".join([accno,delList,str(k+1), str(len(vsequences[k])), vsequences[k]])+"\n")
+                    del_out.write(",".join([accno,delList,str(k+1), str(len(vsequences[k])), vsequences[k]])+"\n")
         
 
     print(totalseqs)

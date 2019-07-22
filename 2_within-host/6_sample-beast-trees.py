@@ -13,7 +13,7 @@ def sample_beast(infile, outdir, numsample=5):
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
 
-    if outdir[-1] != "/":
+    if not outdir.endswith("/"):
         outdir += "/"
 
     name = os.path.basename(infile).split(".")[0]
@@ -24,16 +24,19 @@ def sample_beast(infile, outdir, numsample=5):
         if len(data) == 6:
             states.append(data[1].lstrip("STATE_"))
     input.close()
-    print(infile)
     total = len(states) - 1
-    print(total)
+    #print(total)
     start = int(total*0.1) + 1
-    print(start)
+    #print(start)
     rsample = []
+
+    randpool = list(range(start, total))
+    
     for x in range(numsample):
         #chose 101 just in case (left 101 states for the burn in and sampled from last 900 states out of 1001)
-        rsample.append(str(random.randint(start,total)*int(states[1])))
-    print(len(rsample))
+        random.shuffle(randpool)
+        x = randpool.pop()
+        rsample.append(str(x*int(states[1])))
     sample_count = 0
 
     input2 = open(infile,'rU')
@@ -43,7 +46,7 @@ def sample_beast(infile, outdir, numsample=5):
     if not os.path.isdir(outdir+"dict/"):
         os.makedirs(outdir+"dict/")
 
-    d = open(outdir+"dict/"+name+".dictionary", "w")
+    #d = open(outdir+"dict/"+name+".dictionary", "w")
 
     for line in input2:
 
@@ -82,13 +85,13 @@ def sample_beast(infile, outdir, numsample=5):
             for tip in tree.get_terminals():
                 tip.name = seqDict[tip.name]
                 
-            #Phylo.write(tree, outdir+name+"_"+str(sample_count)+".tree.sample", 'newick')
+            Phylo.write(tree, outdir+name+"_"+str(sample_count)+".tree.sample", 'newick')
             #print(tree)
 
 
     # used for making dictionaries to convert sequences back to full header (bc i messed up)
-    for num in seqDict.keys():
-        d.write(seqDict[num].split(".")[4]+","+seqDict[num]+"\n")
+    #for num in seqDict.keys():
+    #    d.write(seqDict[num].split(".")[4]+","+seqDict[num]+"\n")
     #print(seqDict)
 
 
@@ -98,13 +101,13 @@ if sys.argv[2][-1] != "/":
     sys.argv[2] += "/"
 '''
 
-infolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout3/trees/*.time.trees")
+infolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/trees/*.time.trees")
 outfolder = "/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim_multi/"
 
 
 for infile in infolder:
     filename = os.path.basename(infile).split(".")[0]
-    
+
     '''
     patfolder = outfolder + filename + "/"
     if not os.path.isdir(patfolder):

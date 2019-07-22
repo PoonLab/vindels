@@ -33,29 +33,10 @@ countGlycs <- function(field){
     return(1)
   }
 }
-
-insOriginal <- function(indel, pos, vseq){
-  if (indel == ""){
-    return(NA)
-  }
-  len <- nchar(indel)
-  pos <- as.numeric(pos)
-  paste0(substr(vseq, 0, pos-len) , substr(vseq, pos+1, nchar(vseq)))
-}
-
-delOriginal <- function(indel, pos, vseq){
-  if (indel == ""){
-    return(NA)
-  }
-  len <- nchar(indel)
-  pos <- as.numeric(pos)
-  paste0(substr(vseq, 0, pos+1), "X", substr(vseq,pos+len,nchar(vseq)))
-}
-
-
+CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
 #PycharmProjects/hiv-withinhost/
-ins <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/insertions.csv", row.names=1, stringsAsFactors = F)
-del <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/deletions.csv", row.names=1, stringsAsFactors = F)
+ins <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/ins.csv", row.names=1, stringsAsFactors = F)
+del <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/del.csv", row.names=1, stringsAsFactors = F)
 
 #ins$Pos <- ins$Pos + 1
 #del$Pos <- del$Pos + 1

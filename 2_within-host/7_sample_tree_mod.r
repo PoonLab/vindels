@@ -38,7 +38,7 @@ for (treefile in infolder){
   logname <- paste0(strsplit(filename, "_")[[1]][1], ".log")
 
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout3/",logname), sep="\t", skip=3)
+  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout/",logname), sep="\t", skip=3)
 
   print(logname)
 

@@ -13,6 +13,8 @@ for s in range(len(sys.argv)):
 
 xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/*.xml")
 
+outpath = '/home/jpalmer/fixed-relaxed-pop3/'
+
 for infile in xmlFolder:
     xml = ET.parse(infile)
     xmlname = os.path.basename(infile)
@@ -22,7 +24,7 @@ for infile in xmlFolder:
 
     tree = treefile.readline()
     root = xml.getroot()
-    previous = root
+
 
     removelist = []
     #tempremove = []
@@ -35,12 +37,12 @@ for infile in xmlFolder:
         if element.tag == "populationSizes":
             if element != None:
                 elem = element.find("parameter")
-                elem.set("dimension","5")
+                elem.set("dimension","3")
 
         if element.tag == "groupSizes":
             if element != None:
                 elem = element.find("parameter")
-                elem.set("dimension","5")
+                elem.set("dimension","3")
 
         # removes all operators responsible for modifying the tree 
         if element.tag == "operators":
@@ -54,12 +56,20 @@ for infile in xmlFolder:
             element.tag = "newick"
             element.attrib = {'id':'startingTree'}
             element.text = "\n"+tree
-        
+        if element.get('id') == "mcmc":
+            old = element.get('operatorAnalysis')
+            element.set('operatorAnalysis', outpath+old.split("/")[-1])
+            #print(element.get('operatorAnalysis'))
+
+        if element.get('id') == "fileLog":
+            old = element.get('fileName')
+            element.set('fileName', outpath+old.split("/")[-1])
+            print(element.get('fileName'))
 
 
         # for changing the clock model to strict 
         # ------------------------------------------    
-        if element.get("id") in ["coefficientOfVariation", "covariance"]:
+        '''if element.get("id") in ["coefficientOfVariation", "covariance"]:
             removelist.append(element)
 
 
@@ -106,14 +116,13 @@ for infile in xmlFolder:
             element.tag = "strictClockBranchRates"
             element.attrib = {'id':'branchRates'}
             element.append(ET.Element("rate"))
-            element.find("rate").append(ET.Element("parameter", attrib={'id':'clock.rate', 'value':'1.0', 'lower':'0.0'}))
+            element.find("rate").append(ET.Element("parameter", attrib={'id':'clock.rate', 'value':'1.0', 'lower':'0.0'}))'''
 
-        previous = element
     for r in removelist:
         #print(r)
         root.remove(r)
 
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_2_strict/"+xmlname)
+    #xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_2_strict/"+xmlname)
     
 
 

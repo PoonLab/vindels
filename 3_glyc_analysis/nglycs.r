@@ -1,5 +1,7 @@
+require(ape)
 
-
+total_acute <- 257
+total_chronic <- 198 
 
 acute <- read.csv("~/PycharmProjects/glyc-analysis/9_glycs/acute.csv")
 chronic <- read.csv("~/PycharmProjects/glyc-analysis/9_glycs/chronic.csv")
@@ -7,21 +9,34 @@ chronic <- read.csv("~/PycharmProjects/glyc-analysis/9_glycs/chronic.csv")
 rownames(acute) <- acute$position
 rownames(chronic) <- chronic$position
 
-acute$prop <- acute$count / sum(acute$count)
-chronic$prop <- chronic$count / sum(chronic$count)
+acute$prop <- acute$count / total_acute
+chronic$prop <- chronic$count / total_chronic
 
 combined <- c(acute$position, chronic$position)
-dupl <- combined[duplicated(combined)]
+#dupl <- combined[duplicated(combined)]
 
-toPlot <- data.frame(Acute=acute[acute$position %in% dupl, "prop"], Chronic=chronic[chronic$position %in% dupl, "prop"])
+unq <- unique(combined)
+aprops <- unname(sapply(unq, function(x){if (x %in% acute$position){acute[acute$position==x,"prop"]}else{0}}))
+cprops <- unname(sapply(unq, function(x){if (x %in% chronic$position){chronic[chronic$position==x,"prop"]}else{0}}))
+
+newData <- data.frame(position=unq, acute=aprops, chronic=cprops)
+
+# SCATTER PLOT SHOWING ACUTE AND CHRONIC NGLYC PREVALENCE 
+# ----------------------------------
+
+#toPlot <- data.frame(Acute=acute[acute$position %in% dupl, "prop"], Chronic=chronic[chronic$position %in% dupl, "prop"])
 par(pty="s", mar=c(5,8,4,1))
 lim <- c(0,0.04)
-plot(toPlot, xlim=lim, ylim=lim, cex.lab=1.4, cex.main=1.6, cex.axis=1.1, main="N-Glyc site prevalence")
+plot(newData[,2:3], cex.lab=1.4, cex.main=1.6, cex.axis=1.1, main="N-Glyc site prevalence", xlab="Acute", ylab="Chronic")
 abline(0,1)
 
-acute$unique <- unname(sapply(acute$position, function(x){x %in% dupl}))
+#$dupl <- unname(sapply(acute$dupl, function(x){x %in% dupl}))
 
+acounts <- unname(sapply(unq, function(x){if (x %in% acute$position){acute[acute$position==x,"count"]}else{0}}))
+ccounts <- unname(sapply(unq, function(x){if (x %in% chronic$position){chronic[chronic$position==x,"count"]}else{0}}))
 
+toPlot <- data.frame(Position=unq,Acute=acounts, Chronic=ccounts)
+toPlot <- toPlot[order(toPlot$Position),]
 
 # INDEL ABOVE/BELOW MULTIPLOTS 
 # -------------------------------------
@@ -29,11 +44,11 @@ acute$unique <- unname(sapply(acute$position, function(x){x %in% dupl}))
 require(Rmisc)
 require(ggplot2)
 
-g1 <- ggplot(toPlot2, aes(x=Position, y=Acute)) + 
+g1 <- ggplot(toPlot, aes(x=Position, y=Acute)) + 
   geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F)+
   labs(x="Position", 
        y="")+
-  ylim(0,250)+
+  ylim(0,260)+
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
@@ -47,18 +62,18 @@ g1 <- ggplot(toPlot2, aes(x=Position, y=Acute)) +
         strip.text.x = element_blank(),
         axis.text.x = element_blank(),
         axis.text.y = element_text(size=14),
-        legend.position="none") + geom_text(aes(y=225,x=30 ),
+        legend.position="none") + geom_text(aes(y=225,x=20 ),
                                           label="Acute", 
                                           size=8)
 #g1
 
 
 
-g2 <- ggplot(toPlot2, aes(x=Position, y=Chronic)) + 
+g2 <- ggplot(toPlot, aes(x=Position, y=Chronic)) + 
   geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F)+
   labs(x="Position", 
        y="                                         Count")+
-  scale_y_reverse(lim=c(250,0))+
+  scale_y_reverse(lim=c(260,0))+
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
@@ -72,7 +87,7 @@ g2 <- ggplot(toPlot2, aes(x=Position, y=Chronic)) +
         strip.text.x = element_text(size=14),
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
-        legend.position="none")+ geom_text(aes(y=175,x=35),
+        legend.position="none")+ geom_text(aes(y=225,x=20),
                                            label="Chronic", 
                                            size=8)
 #g2

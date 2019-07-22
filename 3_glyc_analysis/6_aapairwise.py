@@ -29,8 +29,8 @@ data = parse_fasta(infile)
 
 unequal = []
 
-output = open(outpath, "w")
-
+#output = open(outpath, "w")
+'''
 for header in data:
     
 
@@ -52,7 +52,6 @@ for header in data:
         # block below used to check the best reading frames 
         # found that they still suck overall
         # therefore, chose to ignore these sequences 
-        '''
         lowest = 10^8
         for i in range(3):
             aaqry = translate_nuc(data[header],i)
@@ -78,13 +77,36 @@ for header in data:
         print(result[0][:100])
         print(result[1][:100])
         print("")
-        '''
-    print(result[0])
-    print(result[1])
-    print("")
+        
+    #print(result[0])
+    #print(result[1])
+    #print("")
     
     output.write(">" + header + '\n')
     output.write(">ref\n" + result[0] + "\n>query\n" + result[1] + '\n')
 
 output.close()
+'''
+
+
+nov = open("/home/jpalmer/PycharmProjects/glyc-analysis/7_prnseq/novitsky.fasta","rU")
+nov_ref = ntref[390:]
+
+fasta = parse_fasta(nov)
+
+for header,seq in fasta.items():
     
+    # PART 1 NUCLEOTIDE BASED ALIGNMENT TO REMOVE EXTRANEOUS SEQUENCE
+    nt_pair = Aligner()
+    nt_pair.set_model('HYPHY_NUC')
+    nt_pair.is_global = False
+    nt_pair.gap_open_penalty = 30
+    nt_pair.gap_extend_penalty = 10
+
+    result = nt_pair.align(nov_ref, seq)
+
+    left, right = get_boundaries(result[0])
+
+    ntqry = result[1][left:right].replace("-","")
+    print(ntqry)
+nov.close()
