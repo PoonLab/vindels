@@ -112,7 +112,7 @@ delOriginal <- function(indel, pos, vseq){
 }
 
 # Lio
-path <- "~/PycharmProjects/hiv-withinhost/"
+path <- "~/Lio/"
 
 ifolder <- Sys.glob(paste0(path,"9Indels/ins_mcc/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/del_mcc/*.csv"))
@@ -273,6 +273,13 @@ for (file in 1:length(ifolder)){
 }
 ins <- all.ins[all.ins$Seq!="",]
 del <- all.del[all.del$Seq!="",]
+
+# N - GLYC SITE OUTPUTS 
+# ---------------------------------------------
+ins.glycs2 <- ins.glycs[ins.glycs$Seq!="",-c(3,4,5,9)]
+del.glycs2 <- del.glycs[del.glycs$Seq!="",-c(3,4,5,9)]
+write.table(ins.glycs2,paste0(path, "13_nglycs/ins.csv"), row.names=F, sep="\t", quote=F)
+write.table(del.glycs2,paste0(path, "13_nglycs/del.csv"), row.names=F, sep="\t", quote=F)
 
 # FLANKING INSERTION SEQUENCES CHECK
 # --------------------------------------------
@@ -489,12 +496,7 @@ write.csv(all.ins[,c(1,2,4,5,6)], "~/PycharmProjects/hiv-withinhost/12_lengths/i
 write.csv(all.del[,c(1,2,4,5,6)], "~/PycharmProjects/hiv-withinhost/12_lengths/del-full.csv")
 
 
-# N - GLYC SITE OUTPUTS 
-# ---------------------------------------------
-ins.glycs <- ins.glycs[,-c(3,4,5,)]
-del.glycs <- del.glycs[,-c(3,4,5)]
-write.csv(ins.glycs,"~/PycharmProjects/hiv-withinhost/13_nglycs/ins.csv")
-write.csv(del.glycs,"~/PycharmProjects/hiv-withinhost/13_nglycs/del.csv")
+
 
 
  
@@ -535,7 +537,7 @@ TGTAGTCATAAGGTTATCATCAATAATGTCATCAATGGGAATATTAGCATCAATGGGACGATAAAGGAAGGAATGAAAAA
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
 write.csv(ins, "~/PycharmProjects/hiv-withinhost/11_dinucleotide/total-ins.csv")
-write.csv(del), "~/PycharmProjects/hiv-withinhost/11_dinucleotide/total-del.csv")
+write.csv(del, "~/PycharmProjects/hiv-withinhost/11_dinucleotide/total-del.csv")
 
 
 

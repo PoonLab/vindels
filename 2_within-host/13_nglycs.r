@@ -13,7 +13,7 @@ translate <- function(dna) {
   if (nchar(dna) %% 3 != 0) {
     return(NA)
   }
-  dnabin <- as.DNAbin.DNAString(dna)
+  dnabin <- as.DNAbin(DNAString(dna))
   aabin <- trans(dnabin)[[1]]
   aaseq <- paste(as.character(aabin),collapse="")
   aaseq
@@ -33,23 +33,70 @@ countGlycs <- function(field){
     return(1)
   }
 }
-CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
+
+insAlign <- function(indels, pos, ancestor, seq){
+  i.list <- str_split(indels, ",")[[1]]
+  p.list <- str_split(pos, ",")[[1]]
+  
+  for (idx in 1:length(i.list)){
+    
+    len <- nchar(i.list[idx])
+    ix <- i.list[idx]
+    px <- as.numeric(p.list[idx])
+    
+    ancestor <- paste0(substr(ancestor, 0, px-len), paste(rep("-", len),collapse=""), substr(ancestor,px-len+1, nchar(ancestor)))
+  }
+  
+  ancestor
+}
+
+delAlign <- function(indels, pos, ancestor, seq){
+  i.list <- str_split(indels, ",")[[1]]
+  p.list <- str_split(pos, ",")[[1]]
+  p.list <- as.numeric(p.list)
+  
+  for (idx in 1:length(i.list)){
+    len <- nchar(i.list[idx])
+    ix <- i.list[idx]
+    px <- p.list[idx]
+    
+    seq <- paste0(substr(seq, 0, px), paste(rep("-", len),collapse=""), substr(seq,px+1, nchar(seq)))
+    p.list[(idx+1):length(p.list)] <- p.list[(idx+1):length(p.list)] + len
+  }
+  
+  seq
+}
+#CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
 #PycharmProjects/hiv-withinhost/
-ins <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/ins.csv", row.names=1, stringsAsFactors = F)
-del <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/del.csv", row.names=1, stringsAsFactors = F)
+path <- "~/Lio/"
+ins <- read.csv(paste0(path, "13_nglycs/ins.csv"),  sep="\t", stringsAsFactors = F)
+del <- read.csv(paste0(path,"13_nglycs/del.csv"), sep="\t", stringsAsFactors = F)
 
-#ins$Pos <- ins$Pos + 1
-#del$Pos <- del$Pos + 1
-
+headers <- c("accno", "vloop", "seq", "pos", "ancestor", "tipseq")
+colnames(ins) <- headers
+colnames(del) <- headers
 
 #ins$Seq <- sapply(ins$Seq, translate)
 #del$Seq <- sapply(del$Seq, translate)
 
-ins$aaseq <- sapply(ins$Vseq, translate)
-del$aaseq <- sapply(del$Vseq, translate)
+new.ins <- ins[,c(1:4)]
+new.del <- del[,c(1:4)]
 
-ins$glycs <- sapply(ins$aaseq, extractGlycs)
-del$glycs <- sapply(del$aaseq, extractGlycs)
+new.ins$ancestor <- unname(mapply(insAlign, ins$seq, ins$pos, ins$ancestor, ins$tipseq))
+new.ins$tipseq <- ins$tipseq
+
+new.del$ancestor <- del$ancestor
+new.del$tipseq <- unname(mapply(delAlign, del$seq, del$pos, del$ancestor, del$tipseq))
+
+new.ins$anc.glycs <- sapply(sapply(ins$ancestor, translate), extractGlycs)
+new.del$anc.glycs <- sapply(sapply(del$ancestor, translate), extractGlycs)
+
+new.ins$tip.glycs <- sapply(sapply(ins$tipseq, translate), extractGlycs)
+new.del$tip.glycs <- sapply(sapply(del$tipseq, translate), extractGlycs)
+
+checkGlycs <- function(list1, list2){
+  
+}
 
 ins$aaseq <- NULL
 del$aaseq <- NULL
