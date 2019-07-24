@@ -6,7 +6,7 @@
 require(ape)  # if ape is not installed, run `install.packages("ape")`
 args <- commandArgs(trailingOnly = T)
 
-treefolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/4_5_Raxml/RAxML_bestTree.*")
+treefolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/4_5_Raxml/rooted_trees/*.tree")
 
 for (infile in treefolder){
     filename <- basename(infile)
