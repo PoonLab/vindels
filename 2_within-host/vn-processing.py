@@ -36,10 +36,21 @@ for header,seq in fasta.items():
         patDict[pat] = {}
     patDict[pat][newheader] = seq
 
+for pat in patDict.keys():
+    unique = set()
+    for header in patDict[pat]:
+        date = header.split("_")[1]
+        unique.add(date)
+    
+    if len(unique) < 5: 
+        del patDict[pat]
+    else:
+        print(pat)
+
 
 for pat in patDict.keys():
     outfile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/"+pat+".fasta", "w")
-    print(len(patDict[pat]))
+    #print(len(patDict[pat]))
     for header,seq  in patDict[pat].items():
         #print(header)
         outfile.write(">"+ header + "\n" + seq + "\n" )

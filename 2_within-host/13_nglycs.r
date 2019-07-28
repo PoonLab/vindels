@@ -1,5 +1,6 @@
 require(ape)
 require(stringr)
+require(Biostrings)
 removeNA <- function(input, repl=""){
   if (is.na(input)){
     input <- repl
@@ -44,7 +45,7 @@ insAlign <- function(indels, pos, ancestor, seq){
     ix <- i.list[idx]
     px <- as.numeric(p.list[idx])
     
-    ancestor <- paste0(substr(ancestor, 0, px-len), paste(rep("-", len),collapse=""), substr(ancestor,px-len+1, nchar(ancestor)))
+    ancestor <- paste0(substr(ancestor, 0, px-len), past`e(rep("-", len),collapse=""), substr(ancestor,px-len+1, nchar(ancestor)))
   }
   
   ancestor
@@ -68,7 +69,7 @@ delAlign <- function(indels, pos, ancestor, seq){
 }
 #CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
 #PycharmProjects/hiv-withinhost/
-path <- "~/Lio/"
+path <- "~/PycharmProjects/hiv-withinhost/"
 ins <- read.csv(paste0(path, "13_nglycs/ins.csv"),  sep="\t", stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/del.csv"), sep="\t", stringsAsFactors = F)
 
@@ -123,4 +124,3 @@ del$original <- mapply(delOriginal, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq)
 
 # original seq: deletion added back in 
 # original <- paste0(substring(vloop,0,start), del, substring(vloop,end,nchar(vloop)))
-
