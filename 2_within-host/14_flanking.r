@@ -82,6 +82,25 @@ ins <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/ins.csv", string
 
 rownames(ins) <- 1:nrow(ins)
 
+
+
+
+# randomly rearrange the same nucleotides found in the vseq 
+
+# find the locations of matches with INDEL in this random vseq
+
+# repeat the process 1000 times and get a null distribution describing the distribution of matches expected by chance
+ 
+# compare this distribution to the 
+
+
+
+# TO DO 
+# incorporate the 
+
+
+
+
 flanking <- unname(mapply(insCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=0, offset=10000))
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)
 flanking <- cbind( ins[,c(1,7)], len=nchar(ins$Seq), flanking)
