@@ -13,7 +13,7 @@ for s in range(len(sys.argv)):
 
 xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/*.xml")
 
-outpath = '/home/jpalmer/8BEAST/output/'
+outpath = '/home/jpalmer/6BEAST/output/'
 
 for infile in xmlFolder:
     xml = ET.parse(infile)

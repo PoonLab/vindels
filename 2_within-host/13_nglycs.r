@@ -45,7 +45,7 @@ insAlign <- function(indels, pos, ancestor, seq){
     ix <- i.list[idx]
     px <- as.numeric(p.list[idx])
     
-    ancestor <- paste0(substr(ancestor, 0, px-len), past`e(rep("-", len),collapse=""), substr(ancestor,px-len+1, nchar(ancestor)))
+    ancestor <- paste0(substr(ancestor, 0, px-len), paste(rep("-", len),collapse=""), substr(ancestor,px-len+1, nchar(ancestor)))
   }
   
   ancestor
@@ -67,6 +67,9 @@ delAlign <- function(indels, pos, ancestor, seq){
   
   seq
 }
+
+
+
 #CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"

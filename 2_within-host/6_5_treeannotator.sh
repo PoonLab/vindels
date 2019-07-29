@@ -1,8 +1,8 @@
 # tree annotator bash script 
 # used for batch processing the generation of MCC trees from BEAST outputs
 
-folder="/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout3/trees/"
-outdir="/home/jpalmer/PycharmProjects/hiv-withinhost/7_5_MCC/"
+folder="/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout-comb/trees/"
+outdir="/home/jpalmer/PycharmProjects/hiv-withinhost/7_5_MCC/prelim/"
 
 for filename in $folder*trees; do 
     outfile="$(cut -d'.' -f1 <<< `basename $filename`).tree"

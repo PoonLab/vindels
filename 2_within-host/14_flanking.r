@@ -78,6 +78,8 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
   c(indel, vseq, as.logical(beforeBool),  as.numeric(beforeIdx),  as.numeric(beforeDiff), beforeSeq, as.logical(afterBool), as.numeric(afterIdx), as.numeric(afterDiff),afterSeq)
 }
 
+
+
 ins <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/ins.csv", stringsAsFactors = F, row.names = 1)
 
 rownames(ins) <- 1:nrow(ins)
@@ -86,6 +88,17 @@ rownames(ins) <- 1:nrow(ins)
 
 
 # randomly rearrange the same nucleotides found in the vseq 
+indel <- ins$Seq[1]
+x <- ins$ins.unchanged[1]
+letters <- str_split(x,"")[[1]]
+
+null_dist <- c()
+for (row in 1:nrow(ins))
+for (i in 1:100){
+  rseq <- paste(letters[sample(1:nchar(x))], collapse = "")
+  
+}
+}
 
 # find the locations of matches with INDEL in this random vseq
 
