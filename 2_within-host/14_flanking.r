@@ -1,5 +1,7 @@
 # flanking insertion sequences 
 # trying to develop a model for interstrand jumping of polymerase 
+require(ape)
+require(stringr)
 
 checkDiff <- function(seq1, seq2){
   if (seq1 == seq2){
@@ -79,8 +81,8 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
 }
 
 
-
-ins <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/ins.csv", stringsAsFactors = F, row.names = 1)
+path <- '~/Lio/'
+ins <- read.csv(paste0(path,"10_nucleotide/ins.csv"), stringsAsFactors = F, row.names = 1)
 
 rownames(ins) <- 1:nrow(ins)
 
@@ -93,12 +95,26 @@ x <- ins$ins.unchanged[1]
 letters <- str_split(x,"")[[1]]
 
 null_dist <- c()
-for (row in 1:nrow(ins))
-for (i in 1:100){
-  rseq <- paste(letters[sample(1:nchar(x))], collapse = "")
+for (i in 1:nrow(ins)){
+  seq <- str_split(ins$Seq[i], ",")[[1]]
+  pos <- str_split(ins$Pos[i], ",")[[1]]
+  vseq <- ins$ins.unchanged[i]
+  letters <- str_split(vseq, "")[[1]]
   
+  for (s in 1:length(seq)){
+    px <- as.numeric(pos[s]) - nchar(seq[s])
+    for (j in 1:100){
+      rseq <- paste(letters[sample(1:nchar(vseq))], collapse = "")
+      res <- gregexpr(seq[s],rseq)[[1]]
+      if (length(res) > 1 | res != -1){
+        res <- res - px
+        null_dist <- c(null_dist, res)
+      }
+    }
+  }
 }
-}
+
+
 
 # find the locations of matches with INDEL in this random vseq
 
