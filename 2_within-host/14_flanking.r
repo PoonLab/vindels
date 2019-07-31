@@ -35,7 +35,11 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
   # find the best matching position from 0 to offset 
   lowest <- 1000
   bestIdx <- -1
+
   for (idx in 0:offset){
+    #print(pos)
+    #print(len)
+    #print(idx)
     if ((pos - len - idx) >= 0){
       # then the PRECEDING position can be checked
       before <- substr(vseq, pos-len-idx+1, pos-idx)
@@ -77,11 +81,12 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
     afterDiff <- lowest
     afterSeq <- substr(vseq,pos+bestIdx+1, pos+len+bestIdx)
   }
+
   c(indel, vseq, as.logical(beforeBool),  as.numeric(beforeIdx),  as.numeric(beforeDiff), beforeSeq, as.logical(afterBool), as.numeric(afterIdx), as.numeric(afterDiff),afterSeq)
 }
 
 
-path <- '~/Lio/'
+path <- '~/PycharmProjects/hiv-withinhost/'
 ins <- read.csv(paste0(path,"10_nucleotide/ins.csv"), stringsAsFactors = F, row.names = 1)
 
 rownames(ins) <- 1:nrow(ins)
@@ -90,9 +95,6 @@ rownames(ins) <- 1:nrow(ins)
 
 
 # randomly rearrange the same nucleotides found in the vseq 
-indel <- ins$Seq[1]
-x <- ins$ins.unchanged[1]
-letters <- str_split(x,"")[[1]]
 
 null_dist <- c()
 for (i in 1:nrow(ins)){
@@ -102,35 +104,62 @@ for (i in 1:nrow(ins)){
   letters <- str_split(vseq, "")[[1]]
   
   for (s in 1:length(seq)){
-    px <- as.numeric(pos[s]) - nchar(seq[s])
-    for (j in 1:100){
+    if (nchar(seq[s]) > 3){
+    px <- as.numeric(pos[s]) - nchar(seq[s]) +1
+    for (j in 1:1000){
       rseq <- paste(letters[sample(1:nchar(vseq))], collapse = "")
       res <- gregexpr(seq[s],rseq)[[1]]
-      if (length(res) > 1 | res != -1){
+      if (res != -1){
         res <- res - px
         null_dist <- c(null_dist, res)
       }
     }
+    }
   }
 }
 
+test_dist <- c()
+findMatch <- function(indel, pos, vseq){
+  seq <- str_split(indel, ",")[[1]]
+  pos <- str_split(pos, ",")[[1]]
+  
+  res <- c()
+  for (s in 1:length(seq)){
+    if (nchar(seq[s]) >= 3){
+      px <- as.numeric(pos[s]) - nchar(seq[s]) +1
+      #print(seq[s])
+      #print(vseq)
+      match <- gregexpr(seq[s],vseq)[[1]]
+      if (length(match) > 1 | match != -1){
+        match <- match - px
+        res <- c(res, match)
+      }
+    }
+  }
+  res
+}
 
+testDist <- unname(unlist(mapply(findMatch, ins$Seq, ins$Pos, ins$Vseq)))
+
+hist(testDist, breaks=seq(min(testDist)-0.5,max(testDist)+0.5), col='red', xlab="Relative distance from insertion")
 
 # find the locations of matches with INDEL in this random vseq
 
 # repeat the process 1000 times and get a null distribution describing the distribution of matches expected by chance
  
 # compare this distribution to the 
+ACAACAAAACTGT  
 
+AGTACTTGG
 
 
 # TO DO 
 # incorporate the 
 
 
+ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
 
-
-flanking <- unname(mapply(insCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=0, offset=10000))
+flanking <- unname(mapply(insCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1, offset=3))
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)
 flanking <- cbind( ins[,c(1,7)], len=nchar(ins$Seq), flanking)
 colnames(flanking) <- c("accno","pos", "len", "indel", "vseq","before.bool", "before.offset", "before.diff", "before.seq","after.bool", "after.offset", "after.diff",  "after.seq")

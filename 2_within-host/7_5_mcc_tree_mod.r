@@ -5,11 +5,11 @@ require(ape)
 
 #args <- commandArgs(trailingOnly = T)
 
-for (i in 1:length(args)){
-  if (!endsWith(args[i],"/")){
-    args[i] <- args[i] + "/"
-  }
-}
+#for (i in 1:length(args)){
+#  if (!endsWith(args[i],"/")){
+#    args[i] <- args[i] + "/"
+#  }
+#}
 
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
@@ -38,7 +38,7 @@ for (treefile in infolder){
   logname <- paste0(strsplit(filename, "\\.")[[1]][1], ".log")
 
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout3/",logname), sep="\t", skip=3)
+  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout-comb/",logname), sep="\t", skip=3)
 
   print(logname)
 

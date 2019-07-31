@@ -229,6 +229,7 @@ def main():
 
     totalseqs = 0
     for infile in hFolder:
+        print(infile)
         filename = os.path.basename(infile)
 
         #create names for both the csv file and the output recon file 
@@ -236,8 +237,8 @@ def main():
         reconfile = filename.split("_recon")[0] + ".csv"   #101827-a_15.csv
 
         if os.path.isfile(vPath+csvfile):
-            ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/ins_mcc/"+reconfile,'w')
-            del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/del_mcc/"+reconfile,'w')
+            ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/new-VN/ins/"+reconfile,'w')
+            del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/new-VN/del/"+reconfile,'w')
             iDict, dDict, vSeq = extractIndels(infile, vPath+csvfile)
 
             ins_out.write("Accno,Ins,Vloop,Vlen,Seq\n")

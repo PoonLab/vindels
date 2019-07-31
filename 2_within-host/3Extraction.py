@@ -25,13 +25,21 @@ studyno = 0
 full = {}
 
 for infile in folder:
+    
     v_regions = [(390, 468), (468, 588), (885, 993), (1152, 1254), (1377, 1410)]
     patdict = {}
     filename = os.path.basename(infile)
+    
+    # used for handling the VN data set 
     if filename == "novitsky.fasta":
         handleNov = True
     else:
         handleNov = False
+
+    #overwrites the v_regions indexing list with the novitsky one, if the file is Vlad's
+    if handleNov:
+        v_regions = nov_regions
+
     studyno += 1
     #print(file)
 
@@ -48,11 +56,18 @@ for infile in folder:
             accno = header.split(".")[4]
             patid = header.split(".")[3]
         else:
-            accno = header
-            patid="VN_Data"
+            header = header.strip("\r._")
+            fields = header.split("_")
+            patid = header.split("_")[0]
+            # NEW HEADER FORMAT 
+            # Subtype . Identifier . Identifier #2 . Date  
+            header = "C.-.-."+fields[0]+"."+fields[2]+".-.-_"+fields[1]
+            
 
         #extract the reference and query sequences 
         ref, query = seq
+
+        query = query.strip("\r")
 
 
         #creates an alignment index to locate the variable regions 
@@ -62,10 +77,6 @@ for infile in folder:
             if x != "-":
                 index.update({ri:ai})
                 ri += 1
-
-        #overwrites the v_regions indexing list with the novitsky one, if the file is Vlad's
-        if handleNov:
-            v_regions = nov_regions
 
         #extracts the variable region sequences and loads them into VSEQ
         vseq=[]
@@ -99,13 +110,13 @@ for infile in folder:
         #if patient hasnt been loaded yet, make a new entry
         else:
             full[patid] = patdict[patid]
-        
+
 
 total = 0
 patcount = 0
 for pat in full.keys():
-    
-    if pat != "VN_Data":
+    print(pat)
+    if not pat.isalpha():
         dates = [[], [], [], [],[]]
 
         for header in full[pat].keys():
@@ -131,7 +142,8 @@ for pat in full.keys():
             dateset = set(dates[x])
             unique.append(len(dateset))
 
-        #skip the patient if they contain no unique timepoints 
+        # NO UNIQUE TIMEPOINTS 
+        # skip the patient if they contain no unique timepoints 
         if not any(i > 1 for i in unique):
             print(pat + " has no unique timepoints in ALL date fields")
             continue
@@ -142,9 +154,9 @@ for pat in full.keys():
         for n, x in enumerate(unique):
             if x > 1 and x > bestIdx:
                 bestIdx = n
-
         bestIdx = bestIdx + 5
         
+        # NEGATIVES --------------------------
         #used to detect and fix negative date values in the chosen date list (dates[bestIdx])
         hasNeg = False
         lowest = 0
@@ -190,11 +202,21 @@ for pat in full.keys():
         if all(i in ("-", "2222", None) for i in chosenDates):
             print(pat + " had no valuable date information")
             continue
+
+    else:
+        unique = set()
+        for header in full[pat]:
+            date = header.split("_")[1]
+            unique.add(date)
+
+        if len(unique) < 5:     
+            continue
+
     if len(vseqdict[pat]) == 0 or len(full[pat]) == 0:
         continue    
 
-    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/fullname/" + pat + ".fasta","w")
-    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv", "w")
+    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta2","w")
+    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv2", "w")
     outputv.write("header,V1,start.1,stop.1,V2,start.2,stop.2,V3,start.3,stop.3,V4,start.4,stop.4,V5,start.5,stop.5\n")
 
     patcount += 1
@@ -205,7 +227,7 @@ for pat in full.keys():
         #total += 1
 
         #final[pat][header] = full[pat][header]
-        if pat != "VN_Data":
+        if not pat.isalpha():
             fields = header.split(".")
             date = fields[bestIdx]
             #skips the sequences that do not contain a proper date 
@@ -223,14 +245,11 @@ for pat in full.keys():
             outputfull.write(">" + newheader + "\n" + full[pat][header] + "\n")
             outputv.write(newheader + "," + vseqdict[pat][header] + "\n")
         else:
-            fields = header.rstrip("\r._").split("_")
-            #rearrange the header to have date last
-            newheader = fields[0] + "_" + fields[2] + "_" +fields[1]
-
-            outputfull.write(">"+ newheader + "\n" + full[pat][header] + "\n")
-            outputv.write(newheader + "," + vseqdict[pat][header] + "\n")
+            outputfull.write(">"+ header + "\n" + full[pat][header] + "\n")
+            outputv.write(header + "," + vseqdict[pat][header] + "\n")
 
 
+'''
 final = {}
 for pat in full.keys():
     for header in full[pat].keys():
@@ -253,10 +272,12 @@ for st in final.keys():
     sttotal += len(final[st])
 print(sttotal)
 print(patcount)
+'''
 
 
 
-'''cseq = ""
+'''
+cseq = ""
 for c1, c2 in c_regions:
     cseq += query[index[c1]:index[c2]].replace("-","")'''
 #------------

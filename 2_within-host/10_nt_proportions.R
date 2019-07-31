@@ -319,6 +319,11 @@ total.del <- total.del[total.del$len>1, ]
 write.csv(ins.glycs2, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins.csv")
 write.csv(del.glycs2, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del.csv")
 
+# DINUCLEOTIDE PROPORTIONS OUTPUT 
+# ------------------------------------
+write.csv(ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep.csv")
+write.csv(del, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-sep.csv")
+
 
 
 

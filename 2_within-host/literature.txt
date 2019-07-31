@@ -1,0 +1,26 @@
+# notes for replication slippage 
+
+- hamburgh et al 2006 
+    - -1 frameshifting is a common artifact in HIV reverse transcriptase 
+
+- viguera et al 2001
+    - slippage involved DNA polymerase pausing 
+    - pausing polymerase dissociates from the DNA 
+    - resumption of replication then introduces the slippage and 
+
+- tachida and iizuka 1992 
+    - modeled using a linear birth and death process 
+
+- guglietta et al 2009/2010 Virology 
+    - glycan shield evolves in response to continuously changing landscape of immunological pressures
+    - V4 in particular is a hotspot for glycosylation sites 
+    - all the variable loops, V4 for one, is made highly variable due to insertion and deletion events 
+    - indels in V4 are essentially ALWAYS multiples of 3, preventing stop codons (Castro et al 2008, Belair et al. 2009)
+    - V4 exists as a swarm of variants, constantly replenishing as parts of it are wiped out by antibody targeting 
+    - misalignment during DNA synthesis occurs most frequently in areas containing repeats and  
+
+
+
+
+
+
