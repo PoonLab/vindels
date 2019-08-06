@@ -141,7 +141,7 @@ findMatch <- function(indel, pos, vseq){
 
 testDist <- unname(unlist(mapply(findMatch, ins$Seq, ins$Pos, ins$Vseq)))
 
-hist(testDist, breaks=seq(min(testDist)-0.5,max(testDist)+0.5), col='red', xlab="Relative distance from insertion")
+hist(testDist, breaks=seq(min(testDist)-0.5,max(testDist)+0.5), col='red', xlab="Length (nt)")
 
 # find the locations of matches with INDEL in this random vseq
 

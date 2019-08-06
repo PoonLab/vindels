@@ -30,9 +30,6 @@ for infile in xmlFolder:
     #tempremove = []
 
     for element in root.iter():
-        #print(element.tag)
-
-
         # changes the population size to 5 
         if element.tag == "populationSizes":
             if element != None:
@@ -43,6 +40,8 @@ for infile in xmlFolder:
                 elem = element.find("parameter")
                 elem.set("dimension","5")
 
+        # FIXING THE GUIDE TREE 
+        # -----------------------------------------------
         # removes all operators responsible for modifying the tree 
         if element.tag == "operators":
             for toRemove in ["subtreeSlide", "narrowExchange", "wideExchange", "wilsonBalding"]:
@@ -58,7 +57,8 @@ for infile in xmlFolder:
             element.attrib = {'id':'startingTree'}
             element.text = "\n"+tree
 
-        # for editing the output folder path         
+        # for editing the output folder path  
+        # ------------------------------------------------       
         if element.get('id') == "mcmc":
             old = element.get('operatorAnalysis')
             element.set('operatorAnalysis', outpath+old.split("/")[-1])
@@ -69,9 +69,11 @@ for infile in xmlFolder:
             element.set('fileName', outpath+old.split("/")[-1])
             print(element.get('fileName'))
 
-        # for changing the clock model to strict 
+
+        '''
+        # STRICT CLOCK MODEL
         # ------------------------------------------    
-        '''if element.get("id") in ["coefficientOfVariation", "covariance"]:
+        if element.get("id") in ["coefficientOfVariation", "covariance"]:
             removelist.append(element)
 
 
@@ -118,13 +120,14 @@ for infile in xmlFolder:
             element.tag = "strictClockBranchRates"
             element.attrib = {'id':'branchRates'}
             element.append(ET.Element("rate"))
-            element.find("rate").append(ET.Element("parameter", attrib={'id':'clock.rate', 'value':'1.0', 'lower':'0.0'}))'''
+            element.find("rate").append(ET.Element("parameter", attrib={'id':'clock.rate', 'value':'1.0', 'lower':'0.0'}))
+        '''
 
     '''for r in removelist:
         #print(r)
         root.remove(r)'''
 
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/"+xmlname)
+    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/pop5/"+xmlname)
     
 
 
