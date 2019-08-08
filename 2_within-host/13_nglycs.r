@@ -21,8 +21,8 @@ translate <- function(dna) {
 }
 
 extractGlycs <- function(aaseq){
-  result <- gregexpr("N[^P][ST][^P]", aaseq)[[1]] * 3 - 2
-  result
+  result <- gregexpr("N[^P][ST][^P]", aaseq)[[1]]  # used for 0 indexing these position values for analysis in python 
+  c(result)
 }
 
 countGlycs <- function(field){
@@ -68,6 +68,10 @@ delAlign <- function(indels, pos, ancestor, seq){
   seq
 }
 
+csvFormat <- function(vec){
+  
+  
+}
 
 
 #CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
@@ -92,11 +96,16 @@ new.ins$tipseq <- ins$tipseq
 new.del$ancestor <- del$ancestor
 new.del$tipseq <- unname(mapply(delAlign, del$seq, del$pos, del$ancestor, del$tipseq))
 
-new.ins$anc.glycs <- sapply(sapply(ins$ancestor, translate), extractGlycs)
-new.del$anc.glycs <- sapply(sapply(del$ancestor, translate), extractGlycs)
+new.ins$anc.glycs <- unlist(sapply(sapply(sapply(ins$ancestor, translate), extractGlycs), function(x) paste(x, collapse=",")))
+new.del$anc.glycs <- unlist(sapply(sapply(sapply(del$ancestor, translate), extractGlycs), function(x) paste(x, collapse=",")))
 
-new.ins$tip.glycs <- sapply(sapply(ins$tipseq, translate), extractGlycs)
-new.del$tip.glycs <- sapply(sapply(del$tipseq, translate), extractGlycs)
+new.ins$tip.glycs <- unlist(sapply(sapply(sapply(ins$tipseq, translate), extractGlycs), function(x) paste(x, collapse=",")))
+new.del$tip.glycs <- unlist(sapply(sapply(sapply(del$tipseq, translate), extractGlycs), function(x) paste(x, collapse=",")))
+
+
+write.table(new.ins, "~/PycharmProjects/hiv-withinhost/13_nglycs/ins-edit.csv", sep="\t", quote=F, row.names=F)
+write.table(new.del, "~/PycharmProjects/hiv-withinhost/13_nglycs/del-edit.csv", sep="\t", quote=F, row.names=F)
+
 
 checkGlycs <- function(list1, list2){
   

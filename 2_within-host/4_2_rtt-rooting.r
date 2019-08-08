@@ -20,8 +20,10 @@ rtdfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/4_5_Raxml/rooted_trees/*
 
 for (file in rtdfolder){
   filename <- basename(file)
-  rescaled <- read.tree(file)
-  rescaled$edge.length <- rep(1, times=length(rescaled$edge.length))
-  write.tree(rescaled, file=paste0("~/PycharmProjects/hiv-withinhost/4_5_Raxml/guide_trees/", filename))
+  rtd <- read.tree(file)
+  lens <- node.depth.edgelength(rtd)[1:Ntip(rtd)]
+  tip.dates <- as.numeric(unname(sapply(rtd$tip.label, function(x) strsplit(x, "_")[[1]][2])))
+  linear <- lm(lens ~ tip.dates)
+  #write.tree(rtd, file=paste0("~/PycharmProjects/hiv-withinhost/4_5_Raxml/guide_trees/", filename))
 }
 

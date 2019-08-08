@@ -35,7 +35,7 @@ vlad_aaref = translate_nuc(vlad_ntref, 0)
 
 print(vlad_aaref)
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/*.fasta")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/novitsky.fasta")
 
 pairwise = {}
 

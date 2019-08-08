@@ -61,13 +61,13 @@ for infile in folder:
             patid = header.split("_")[0]
             # NEW HEADER FORMAT 
             # Subtype . Identifier . Identifier #2 . Date  
-            header = "C.-.-."+fields[0]+"."+fields[2]+".-.-_"+fields[1]
+            #header = "C.-.-."+fields[0]+"."+fields[2]+".-.-_"+fields[1]
             
 
         #extract the reference and query sequences 
         ref, query = seq
 
-        query = query.strip("\r")
+        #query = query.strip("\r")
 
 
         #creates an alignment index to locate the variable regions 

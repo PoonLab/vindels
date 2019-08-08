@@ -87,7 +87,7 @@ for header in data:
 
 output.close()
 '''
-
+TGTAATACAACAAAACTGTTTAATAGTACTTGGAATAGTACTGAGAATAGTACTAAGAATGTGAAGGAAGGGCCAGATAACAATATCATACTCCCATGC
 
 nov = open("/home/jpalmer/PycharmProjects/glyc-analysis/7_prnseq/novitsky.fasta","rU")
 nov_ref = ntref[390:]

@@ -98,7 +98,7 @@ tattg------------------------------------------a--
 -------------------ca---------------------aggga---
 ------------tggagg------------------a---aaa---aaca
 ---------------------a------t---------------a-----
--cg------------------------g------atacgga------ga-
+-cg------------------------g------atacgga------gaplot(tre)-
 --------ca---------------------ttcagacctggaggaggaa
 atatgaaggacaattggagaagtgaattatataaatataaagtggtagaa
 gttaagccattaggagtagcacccactaatgcaagaaggagagtggtgga

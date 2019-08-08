@@ -5,15 +5,15 @@ import sys
 import os
 import xml.etree.ElementTree as ET 
 import lxml
-
+import re 
 '''
 for s in range(len(sys.argv)):
     if not sys.argv[s].endswith("/"):
         sys.argv[s] = sys.argv[s] + "/"'''
 
-xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/*.xml")
+xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/skygrid/*.xml")
 
-outpath = '/home/jpalmer/6BEAST/output/'
+outpath = '/home/jpalmer/9BEAST-skygrid/output/'
 
 for infile in xmlFolder:
     xml = ET.parse(infile)
@@ -25,20 +25,21 @@ for infile in xmlFolder:
     tree = treefile.readline()
     root = xml.getroot()
 
-
+    seqcount = 0
     removelist = []
     #tempremove = []
-
+    dates = []
     for element in root.iter():
         # changes the population size to 5 
-        if element.tag == "populationSizes":
+        #print(element.tag)
+        '''if element.tag == "populationSizes":
             if element != None:
                 elem = element.find("parameter")
                 elem.set("dimension","5")
         if element.tag == "groupSizes":
             if element != None:
                 elem = element.find("parameter")
-                elem.set("dimension","5")
+                elem.set("dimension","5")'''
 
         # FIXING THE GUIDE TREE 
         # -----------------------------------------------
@@ -56,19 +57,30 @@ for infile in xmlFolder:
             element.tag = "newick"
             element.attrib = {'id':'startingTree'}
             element.text = "\n"+tree
-
+        
+        '''
         # for editing the output folder path  
         # ------------------------------------------------       
         if element.get('id') == "mcmc":
             old = element.get('operatorAnalysis')
             element.set('operatorAnalysis', outpath+old.split("/")[-1])
             #print(element.get('operatorAnalysis'))
+        '''
+        
+        # For Bayesian Skygrid Coalescent
+        
+        #if element.tag == "date":
+        #    dates.append(float(element.get("value")))
+        
 
-        if element.get('id') in ["fileLog", "treeFileLog"]:
-            old = element.get('fileName')
-            element.set('fileName', outpath+old.split("/")[-1])
-            print(element.get('fileName'))
 
+        '''# For Bayesian skyride 
+        if element.get("id") != None:
+            tip_check = re.search('.*\..*\..*\..*\..*\..*\..*\_\d*', element.get("id"))
+        else:
+            tip_check = None
+        if tip_check != None:
+            seqcount += 1'''
 
         '''
         # STRICT CLOCK MODEL
@@ -126,8 +138,25 @@ for infile in xmlFolder:
     '''for r in removelist:
         #print(r)
         root.remove(r)'''
+    '''print(seqcount)
+    print(xmlname)
 
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/pop5/"+xmlname)
+    # For editing the Skyride
+    for element in root.iter():
+        #print(element.tag)
+        if element.get("id") in ["skyride.logPopSize","skyride.groupSize"]: 
+            element.set("dimension", str(seqcount - 1))
+            print(element.attrib)'''
+    #print(xmlname)
+    #print(max(dates))
+
+    # For editing the SkyGrid
+    #for element in root.iter():
+    #    if element.get("id") == "skygrid.cutOff":
+    #        print(element.attrib)
+    #        element.set("value", str(max(dates)))
+    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/pop5-skygrid/"+xmlname)
+    
     
 
 
