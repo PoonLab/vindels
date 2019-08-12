@@ -14,8 +14,8 @@ for x in files:
     filename = x.split("/")[-1].split(".")[0]
 
     #output = open("/home/jpalme56/PycharmProjects/hiv-evolution-master/10_7_NGlycs/" + filename +"_overlap.fasta", "w")
-    totOut = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/10_9_Indels_total/" + filename +"_t.fasta", "w")
-    intOut = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/10_10_Indels_i/" + filename + "_i.fasta", 'w')
+    #totOut = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/10_9_Indels_total/" + filename +"_t.fasta", "w")
+    #intOut = open("/home/jpalmer/PycharmProjects/hiv-evolution-master/10_10_Indels_i/" + filename + "_i.fasta", 'w')
 
     #Records EVERY N glyc sites in all pairs of cherry sequences
     ngCount = {}
@@ -30,9 +30,9 @@ for x in files:
 
         header = ".".join(i.split(".")[0:3])
 
-        print(header)
-        print(data[i][0])
-        print(data[i][1])
+        #print(header)
+        #print(data[i][0])
+        #print(data[i][1])
 
         #List of tuples containing insertion sequences (0) and their end positions (1)
         rqInsert = tuple(([],[]))
@@ -225,14 +225,15 @@ for x in files:
 
 
 
-    print(x)
-    print(total)
-    print(overlap)
+    #print(x)
+    #print(total)
+    #print(overlap)
     print(interfered)
 
     #totOut.write("header:seq1:seq2\n")
-    for j in total:
-        totOut.write(str(j) + ":" + ",".join(map(str, total[j][0])) + ":" + ",".join(map(str, total[j][1])) + "\n")
+    #for j in total:
+        #totOut.write(str(j) + ":" + ",".join(map(str, total[j][0])) + ":" + ",".join(map(str, total[j][1])) + "\n")
+        
 
 
     #intOut.write("header:seq1:seq2\n")
@@ -245,7 +246,7 @@ for x in files:
                 y = tup[0].split(":")[1]
                 out[o].append(y)
 
-        intOut.write(str(n) + ":" + ",".join(map(str, out[0])) + ":" + ",".join(map(str, out[1])) + "\n")
+        #intOut.write(str(n) + ":" + ",".join(map(str, out[0])) + ":" + ",".join(map(str, out[1])) + "\n")
 
 
 

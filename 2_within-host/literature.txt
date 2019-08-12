@@ -58,13 +58,17 @@ RNA
 11
 12
 13
-14 NOT RNA ; genomic DNA 
+14 NOT RNA ; genomic DNA; but not in study 
 15
 16 -- 
 17
 18 N/A 
 19 
-
+20
+21
+22 FOUND THAT PAT 31622 IS GENOMIC DNA
+23 
+24 FOUND THAT PAT 16362 IS GENOMIC DNA 
 
 
 
