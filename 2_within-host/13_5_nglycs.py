@@ -128,10 +128,16 @@ for line in icsv:
                     ins_overlap[header].append(tuple((istr, gstr)))
                 else:
                     ins_overlap[header] = [tuple((istr, gstr))]
+infile.close()
 
 print(ins_overlap)
 i_interfered = {}
+
+infile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/13_nglycs/ins-edit.csv", "rU")
+icsv = csv.DictReader(infile,  delimiter="\t")
+
 for line in icsv:
+    
     header = line["accno"]
     anc = line["ancestor"]
     tip = line["tipseq"]
@@ -141,40 +147,46 @@ for line in icsv:
     aa_anc = translate_nuc(anc, 0).replace("?", "-")
     aa_tip = translate_nuc(tip, 0).replace("?", "-")
 
-    if header in ins_overlap[header] and ins_overlap[header]:
-        print(ins_overlap[header])
-        for tpl in ins_overlap[header]:
-            ngStart = int(tpl[1].split(":")[0])
-            ngEnd = int(tpl[1].split(":")[1]) + 1
-
-            inSeq = aa_tip[ngStart:ngEnd]
-            beyond = aa_tip[ngEnd:].replace('-', '')
-
-            dashes = inSeq.count('-')
-
-            if inSeq[0] == "N" and '-' in inSeq and len(beyond) >= dashes :
-                i = 0
-                inSeq = list(inSeq.replace("-", ""))
-                while i < dashes and inSeq:
-                    inSeq.append(beyond[i])
-                    i += 1
-                inSeq = ''.join(inSeq)
-
-            test = re.search("N[^P][ST][^P]", inSeq)
-
-            if not test:
+    print(header)
+    print(aa_anc)
+    print(aa_tip)
+    if header in ins_overlap: 
+        if ins_overlap[header]:
+            print(ins_overlap[header])
+            for tpl in ins_overlap[header]:
+                ngStart = int(tpl[1].split(":")[0])
+                ngEnd = int(tpl[1].split(":")[1]) + 1
+            
                 print(ngStart)
                 print(ngEnd)
-                #add it to the i_interfered list
-                duple = False
-                if header in i_interfered:
-                    for x in i_interfered[header]:
-                        if x[0] == tpl[0]:
-                            duple = True
-                    if not duple:
-                        i_interfered[header].append(tpl)
-                    else:
-                        i_interfered[header] = [tpl]
+                inSeq = aa_tip[ngStart:ngEnd]
+                beyond = aa_tip[ngEnd:].replace('-', '')
+
+                dashes = inSeq.count('-')
+
+                if inSeq[0] == "N" and '-' in inSeq and len(beyond) >= dashes :
+                    i = 0
+                    inSeq = list(inSeq.replace("-", ""))
+                    while i < dashes and inSeq:
+                        inSeq.append(beyond[i])
+                        i += 1
+                    inSeq = ''.join(inSeq)
+
+                test = re.search("N[^P][ST][^P]", inSeq)
+
+                if not test:
+                    print(ngStart)
+                    print(ngEnd)
+                    #add it to the i_interfered list
+                    duple = False
+                    if header in i_interfered:
+                        for x in i_interfered[header]:
+                            if x[0] == tpl[0]:
+                                duple = True
+                        if not duple:
+                            i_interfered[header].append(tpl)
+                        else:
+                            i_interfered[header] = [tpl]
 
 
 print(i_interfered)
