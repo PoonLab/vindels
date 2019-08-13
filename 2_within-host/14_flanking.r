@@ -148,9 +148,6 @@ hist(testDist, breaks=seq(min(testDist)-0.5,max(testDist)+0.5), col='red', xlab=
 # repeat the process 1000 times and get a null distribution describing the distribution of matches expected by chance
  
 # compare this distribution to the 
-ACAACAAAACTGT  
-
-AGTACTTGG
 
 
 # TO DO 

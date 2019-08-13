@@ -32,6 +32,7 @@ for line in icsv:
     aa_anc = translate_nuc(anc, 0).replace("?", "-")
     aa_tip = translate_nuc(tip, 0).replace("?", "-")
 
+    #print(header)
     #print(aa_anc)
     #print(aa_tip)
 
@@ -115,16 +116,71 @@ for line in icsv:
             #print(ngStart)
             #print(ngEnd)
 
-                # minus 1 inserted so the start refers to the first amino acid
+            # minus 1 inserted so the start refers to the first amino acid
 
             #CHECK FOR OVERLAP
             if not ((inStart > ngEnd and inEnd > ngEnd) or (inStart < ngStart and inEnd < ngStart)):
                 istr = str(inStart) + ":" + str(inEnd)
                 gstr = str(ngStart) + ":" + str(ngEnd)
+                #print(inStart)
+                #print(inEnd)
                 if header in ins_overlap.keys():
                     ins_overlap[header].append(tuple((istr, gstr)))
                 else:
                     ins_overlap[header] = [tuple((istr, gstr))]
+
+print(ins_overlap)
+i_interfered = {}
+for line in icsv:
+    header = line["accno"]
+    anc = line["ancestor"]
+    tip = line["tipseq"]
+
+    #print(anc + "\n" + tip)
+
+    aa_anc = translate_nuc(anc, 0).replace("?", "-")
+    aa_tip = translate_nuc(tip, 0).replace("?", "-")
+
+    if header in ins_overlap[header] and ins_overlap[header]:
+        print(ins_overlap[header])
+        for tpl in ins_overlap[header]:
+            ngStart = int(tpl[1].split(":")[0])
+            ngEnd = int(tpl[1].split(":")[1]) + 1
+
+            inSeq = aa_tip[ngStart:ngEnd]
+            beyond = aa_tip[ngEnd:].replace('-', '')
+
+            dashes = inSeq.count('-')
+
+            if inSeq[0] == "N" and '-' in inSeq and len(beyond) >= dashes :
+                i = 0
+                inSeq = list(inSeq.replace("-", ""))
+                while i < dashes and inSeq:
+                    inSeq.append(beyond[i])
+                    i += 1
+                inSeq = ''.join(inSeq)
+
+            test = re.search("N[^P][ST][^P]", inSeq)
+
+            if not test:
+                print(ngStart)
+                print(ngEnd)
+                #add it to the i_interfered list
+                duple = False
+                if header in i_interfered:
+                    for x in i_interfered[header]:
+                        if x[0] == tpl[0]:
+                            duple = True
+                    if not duple:
+                        i_interfered[header].append(tpl)
+                    else:
+                        i_interfered[header] = [tpl]
+
+
+print(i_interfered)
+
+
+'''
 ioutput = open("/home/jpalmer/PycharmProjects/hiv-withinhost/13_nglycs/interfered/insertions.csv", "w")
 for header in ins_overlap:
     outlist = []
@@ -282,7 +338,7 @@ props = [float(ngTotal[1]) / aaTotal[1],
         float(ngTotal[2]) / aaTotal[2],
         float(ngTotal[4]) / aaTotal[4],
         float(ngTotal[5]) / aaTotal[5]]
-totals.write("deletions,{},{},{},{}\n".format(props[0],props[1],props[2],props[3]))
+totals.write("deletions,{},{},{},{}\n".format(props[0],props[1],props[2],props[3]))'''
 
 #CSNATLNCNNAINN------GSSSNNGSCSIDDGKIKEEMKN
 #CSNATLNCNNAINNGSSSNNGSSSNNGSCSIDDGKIKEEMKN
