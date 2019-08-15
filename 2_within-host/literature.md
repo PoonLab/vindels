@@ -1,4 +1,4 @@
-# notes for replication slippage 
+# Notes - Replication Slippage 
 
 - hamburgh et al 2006 
     - -1 frameshifting is a common artifact in HIV reverse transcriptase 
@@ -11,7 +11,7 @@
 - tachida and iizuka 1992 
     - modeled using a linear birth and death process 
 
-- guglietta et al 2009/2010 Virology     ;   https://reader.elsevier.com/reader/sd/pii/S0042682209008150?token=2E6D3FB76CC6164C1F79D1757C0D12649BD17CE86D0210B6AC4C48CE380FC3F39698625FE5D3D06BB9E49C5D68C8AB93
+- guglietta et al 2009/2010 Virology     ;   [link](https://reader.elsevier.com/reader/sd/pii/S0042682209008150?token=2E6D3FB76CC6164C1F79D1757C0D12649BD17CE86D0210B6AC4C48CE380FC3F39698625FE5D3D06BB9E49C5D68C8AB93)
     - glycan shield evolves in response to continuously changing landscape of immunological pressures
     - V4 in particular is a hotspot for glycosylation sites 
     - all the variable loops, V4 for one, is made highly variable due to insertion and deletion events 
@@ -31,7 +31,7 @@
             - supporting the rearrangement of PNG sites (glycan shield)
         
         
-- Garcia-Diaz et al 2006 Trends in Biochem Sciences    ; https://www.sciencedirect.com/science/article/pii/S0968000406000582
+- Garcia-Diaz et al 2006 Trends in Biochem Sciences    ; [link](https://www.sciencedirect.com/science/article/pii/S0968000406000582)
     - streisingers "strand-slippage hypothesis" 
         - indels are generated from strand slippage of repetitive DNA sequences that create intermediates containing more or fewer bases 
 
@@ -40,17 +40,21 @@
 
 - bebenek et al 1989 
     - error prone replication by HIV reverse transcriptase 
-- Alizon 2013 (https://retrovirology.biomedcentral.com/articles/10.1186/1742-4690-10-49)
+
+
+# Notes - Within host HIV evolutionary rates 
+
+- Alizon 2013 ; [link](https://retrovirology.biomedcentral.com/articles/10.1186/1742-4690-10-49)
     - withinhost and between host evolutionary rates across HIV genome 
     - withinhost rates are found to be an order of magnitude higher than between host rates 
     - based on data retrieved from ENV:
-        - within host is roughly 10^-2 
-        - between host is roughly 10^-3
+        - within host is roughly 10<sup>-2 
+        - between host is roughly 10<sup>-3</sup>
 
 
 
 
-STUDY CHECK : 
+# STUDY CHECK  
 
 RNA
 1

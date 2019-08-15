@@ -3,7 +3,7 @@
 require(ape)
 require(stringr)
 
-checkDiff <- function(seq1, seq2){
+checkDiff <- functiWon(seq1, seq2){
   if (seq1 == seq2){
     return(NULL)
   }
@@ -31,17 +31,15 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
   beforeSeq <- ""
   afterSeq <- ""
   
-  # BEFORE 
+  # BEFORE (5')
   # find the best matching position from 0 to offset 
   lowest <- 1000
   bestIdx <- -1
 
   for (idx in 0:offset){
-    #print(pos)
-    #print(len)
-    #print(idx)
+    # subtract length to get the start of the sequence 
+    # needs to be enough nucleotides to check
     if ((pos - len - idx) >= 0){
-      # then the PRECEDING position can be checked
       before <- substr(vseq, pos-len-idx+1, pos-idx)
       diffs <- checkDiff(indel, before)
       if (length(diffs) < lowest){
@@ -156,9 +154,9 @@ toTest <- data.frame(counts=c(ins$before,ins$after), len=rep(nchar(ins$Seq),2))
 caxis=1.1
 clab=1.3
 cmain=1.6
-main=
+#main=
   
-  dev.off()
+dev.off()
 cex=2
 par(mfrow=c(4,2), xpd=NA, mar=c(4,6,4,5),las=0)
 #hist(toTest[toTest$len==1,1], col="red", ylim=c(0,4),main="Indel Length: 1", xlab="Number of Differences ",cex.lab=clab, cex.axis=caxis, cex.main=cmain)

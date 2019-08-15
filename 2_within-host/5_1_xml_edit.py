@@ -11,9 +11,9 @@ for s in range(len(sys.argv)):
     if not sys.argv[s].endswith("/"):
         sys.argv[s] = sys.argv[s] + "/"'''
 
-xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/skygrid/*.xml")
+xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/grid-clock/*.xml")
 
-outpath = '/home/jpalmer/9BEAST-skygrid/output/'
+#outpath = '/home/jpalmer/9BEAST-skygrid/output/'
 
 for infile in xmlFolder:
     xml = ET.parse(infile)
@@ -30,8 +30,10 @@ for infile in xmlFolder:
     #tempremove = []
     dates = []
     for element in root.iter():
+
+        # POP SIZE = 5 
+        # ---------------------
         # changes the population size to 5 
-        #print(element.tag)
         '''if element.tag == "populationSizes":
             if element != None:
                 elem = element.find("parameter")
@@ -43,7 +45,7 @@ for infile in xmlFolder:
 
         # FIXING THE GUIDE TREE 
         # -----------------------------------------------
-        # removes all operators responsible for modifying the tree 
+        # sets guide tree and removes all operators responsible for modifying the tree 
         if element.tag == "operators":
             for toRemove in ["subtreeSlide", "narrowExchange", "wideExchange", "wilsonBalding"]:
                 elem = element.find(toRemove)
@@ -138,24 +140,13 @@ for infile in xmlFolder:
     '''for r in removelist:
         #print(r)
         root.remove(r)'''
-    '''print(seqcount)
-    print(xmlname)
-
-    # For editing the Skyride
-    for element in root.iter():
-        #print(element.tag)
-        if element.get("id") in ["skyride.logPopSize","skyride.groupSize"]: 
-            element.set("dimension", str(seqcount - 1))
-            print(element.attrib)'''
-    #print(xmlname)
-    #print(max(dates))
 
     # For editing the SkyGrid
     #for element in root.iter():
     #    if element.get("id") == "skygrid.cutOff":
     #        print(element.attrib)
     #        element.set("value", str(max(dates)))
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/pop5-skygrid/"+xmlname)
+    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/pop5-skygrid-clock/"+xmlname)
     
     
 

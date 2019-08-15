@@ -32,12 +32,13 @@ for header,seq in fasta.items():
     #print(newheader)
     #outfile.write(">"+ newheader + "\n" + seq + "\n" )
 
-    if pat not in patDict.keys():
-        patDict[pat] = {}
-    patDict[pat][newheader] = seq
-
+    if id not in patDict.keys():
+        patDict[id] = {}
+    patDict[id][newheader] = seq
+total = 0
 for pat in patDict.keys():
     unique = set()
+    total += len(patDict[pat])
     for header in patDict[pat]:
         date = header.split("_")[1]
         unique.add(date)
@@ -46,10 +47,11 @@ for pat in patDict.keys():
         del patDict[pat]
     else:
         print(pat)
-
+print(len(patDict))
+print(total)
 
 for pat in patDict.keys():
-    outfile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/"+pat+".fasta", "w")
+    outfile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/test/"+pat+".fasta", "w")
     #print(len(patDict[pat]))
     for header,seq  in patDict[pat].items():
         #print(header)
