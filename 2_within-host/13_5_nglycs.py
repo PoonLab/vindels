@@ -27,6 +27,7 @@ for line in icsv:
     else:
         tglycs = []
 
+
     #print(anc + "\n" + tip)
 
     aa_anc = translate_nuc(anc, 0).replace("?", "-")
@@ -43,12 +44,12 @@ for line in icsv:
 
     vloop = int(line["vloop"])
     
-    # for retrieving the PNG site proportion of each vloop
+    # for retrieving total aa count for each vloop
     temp = aa_anc.replace("-", "")
     aaCount = len(temp)
-    nglycs = re.findall("N[^P][ST][^P]", temp)
-    #print(nglycs)
-    ngCount = 4*(len(nglycs))
+
+    # for retrieving the number of PNG amino acids for each vloop
+    ngCount = 4*(len(re.findall("N[^P][ST][^P]", temp)))
 
     aaTotal[vloop] += aaCount
     ngTotal[vloop] += ngCount
@@ -130,7 +131,7 @@ for line in icsv:
                     ins_overlap[header] = [tuple((istr, gstr))]
 infile.close()
 
-print(ins_overlap)
+#print(ins_overlap)
 i_interfered = {}
 
 infile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/13_nglycs/ins-edit.csv", "rU")
@@ -152,34 +153,37 @@ for line in icsv:
     print(aa_tip)
     if header in ins_overlap: 
         if ins_overlap[header]:
-            print(ins_overlap[header])
+            #print(ins_overlap[header])
             for tpl in ins_overlap[header]:
                 ngStart = int(tpl[1].split(":")[0])
-                ngEnd = int(tpl[1].split(":")[1]) + 1
+                ngEnd = int(tpl[1].split(":")[1]) 
             
                 print(ngStart)
                 print(ngEnd)
-                inSeq = aa_tip[ngStart:ngEnd]
-                beyond = aa_tip[ngEnd:].replace('-', '')
+                inSeq = aa_anc[ngStart:ngEnd+1]
+                beyond = aa_anc[ngEnd+1:].replace('-', '')
 
                 dashes = inSeq.count('-')
-
-                if inSeq[0] == "N" and '-' in inSeq and len(beyond) >= dashes :
+                print(beyond)
+                print(dashes)
+                print(inSeq)
+                if inSeq[0] == "N" and '-' in inSeq and len(beyond) > dashes :
                     i = 0
                     inSeq = list(inSeq.replace("-", ""))
                     while i < dashes and inSeq:
                         inSeq.append(beyond[i])
                         i += 1
                     inSeq = ''.join(inSeq)
-
+                print(inSeq)
                 test = re.search("N[^P][ST][^P]", inSeq)
-
+                print(test)
                 if not test:
                     print(ngStart)
                     print(ngEnd)
                     #add it to the i_interfered list
                     duple = False
                     if header in i_interfered:
+                        print("HELLO")
                         for x in i_interfered[header]:
                             if x[0] == tpl[0]:
                                 duple = True
@@ -190,7 +194,6 @@ for line in icsv:
 
 
 print(i_interfered)
-
 
 '''
 ioutput = open("/home/jpalmer/PycharmProjects/hiv-withinhost/13_nglycs/interfered/insertions.csv", "w")

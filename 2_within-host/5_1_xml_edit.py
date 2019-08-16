@@ -11,7 +11,7 @@ for s in range(len(sys.argv)):
     if not sys.argv[s].endswith("/"):
         sys.argv[s] = sys.argv[s] + "/"'''
 
-xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/grid-clock/*.xml")
+xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/grid-clock-norm/*.xml")
 
 #outpath = '/home/jpalmer/9BEAST-skygrid/output/'
 
@@ -146,7 +146,7 @@ for infile in xmlFolder:
     #    if element.get("id") == "skygrid.cutOff":
     #        print(element.attrib)
     #        element.set("value", str(max(dates)))
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/pop5-skygrid-clock/"+xmlname)
+    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/pop5-skygrid-norm/"+xmlname)
     
     
 

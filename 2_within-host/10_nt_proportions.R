@@ -276,10 +276,10 @@ del <- all.del[all.del$Seq!="",]
 
 # N - GLYC SITE OUTPUTS 
 # ---------------------------------------------
-ins.glycs2 <- ins.glycs[ins.glycs$Seq!="",-c(3,4,5,9)]
-del.glycs2 <- del.glycs[del.glycs$Seq!="",-c(3,4,5,9)]
-write.table(ins.glycs2,paste0(path, "13_nglycs/ins.csv"), row.names=F, sep="\t", quote=F)
-write.table(del.glycs2,paste0(path, "13_nglycs/del.csv"), row.names=F, sep="\t", quote=F)
+ins.glycs2 <- ins.glycs[ins.glycs$Seq!="",-c(3,4,5)]
+del.glycs2 <- del.glycs[del.glycs$Seq!="",-c(3,4,5)]
+write.table(ins.glycs2[,c(1,2,6,3,4,5,7)],paste0(path, "13_nglycs/ins.csv"), row.names=F, sep="\t", quote=F)
+write.table(del.glycs2[,c(1,2,6,3,4,5,7)],paste0(path, "13_nglycs/del.csv"), row.names=F, sep="\t", quote=F)
 
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------

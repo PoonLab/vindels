@@ -68,11 +68,10 @@ delAlign <- function(indels, pos, ancestor, seq){
   seq
 }
 
-csvFormat <- function(vec){
-  
-  
+labels <- function(header, patient, vloop){
+  letter <- strsplit(patient, "-")[[1]][2]
+  paste0(header,"_", letter, "_", vloop)
 }
-
 
 #CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
 #PycharmProjects/hiv-withinhost/
@@ -80,15 +79,18 @@ path <- "~/PycharmProjects/hiv-withinhost/"
 ins <- read.csv(paste0(path, "13_nglycs/ins.csv"),  sep="\t", stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/del.csv"), sep="\t", stringsAsFactors = F)
 
-headers <- c("accno", "vloop", "seq", "pos", "ancestor", "tipseq")
+headers <- c("accno", "vloop", "patient", "seq", "pos", "ancestor", "tipseq")
 colnames(ins) <- headers
 colnames(del) <- headers
+
+ins$accno <- unname(mapply(labels, ins$accno, ins$patient, ins$vloop))
+del$accno <- unname(mapply(labels, del$accno, del$patient, del$vloop))
 
 #ins$Seq <- sapply(ins$Seq, translate)
 #del$Seq <- sapply(del$Seq, translate)
 
-new.ins <- ins[,c(1:4)]
-new.del <- del[,c(1:4)]
+new.ins <- ins[,c(1:5)]
+new.del <- del[,c(1:5)]
 
 new.ins$ancestor <- unname(mapply(insAlign, ins$seq, ins$pos, ins$ancestor, ins$tipseq))
 new.ins$tipseq <- ins$tipseq
@@ -107,9 +109,6 @@ write.table(new.ins, "~/PycharmProjects/hiv-withinhost/13_nglycs/ins-edit.csv", 
 write.table(new.del, "~/PycharmProjects/hiv-withinhost/13_nglycs/del-edit.csv", sep="\t", quote=F, row.names=F)
 
 
-checkGlycs <- function(list1, list2){
-  
-}
 
 ins$aaseq <- NULL
 del$aaseq <- NULL
