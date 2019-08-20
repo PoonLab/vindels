@@ -2272,7 +2272,7 @@
 				<logNormalPrior mean="1.0" stdev="1.25" offset="0.0">
 					<parameter idref="kappa2"/>
 				</logNormalPrior>
-                <uniformPrior lower="0.0" upper="1.0">
+                		<uniformPrior lower="0.0" upper="1.0">
 					<parameter idref="frequencies"/>
 				</uniformPrior>
 				<exponentialPrior mean="0.5" offset="0.0">
@@ -2281,12 +2281,9 @@
 				<exponentialPrior mean="0.3333333333333333" offset="0.0">
 					<parameter idref="ucld.stdev"/>
 				</exponentialPrior>
-				<!-- <logNormalPrior mean="0.014454398" stdev="0.0145" offset="0.0">
+				<logNormalPrior mean="0.00818" stdev="0.001" offset="0.0">
 					<parameter idref="ucld.mean"/>
-				</logNormalPrior> -->
-				<normalPrior mean="0.014454398" stdev="0.0068">
-					<parameter idref="ucld.mean"/>
-				</normalPrior>
+				</logNormalPrior>
 				<gammaPrior shape="0.001" scale="1000.0" offset="0.0">
 					<parameter idref="skygrid.precision"/>
 				</gammaPrior>
