@@ -1,4 +1,4 @@
-# vindels
+# Variable Loop Indels
 Project aimed at determining the rates of insertions and deletions in the five variable regions (V1-V5) of the HIV-1 gp120 surface envelope glycoprotein 
 
 Overview:
