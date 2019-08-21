@@ -324,6 +324,8 @@ write.csv(del.glycs2, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del.csv")
 write.csv(ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep.csv")
 write.csv(del, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-sep.csv")
 
+write.csv(all.ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-all.csv")
+write.csv(all.del, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-all.csv")
 
 
 

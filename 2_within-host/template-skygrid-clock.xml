@@ -2281,9 +2281,9 @@
 				<exponentialPrior mean="0.3333333333333333" offset="0.0">
 					<parameter idref="ucld.stdev"/>
 				</exponentialPrior>
-				<logNormalPrior mean="0.00818" stdev="0.001" offset="0.0">
+				<normalPrior mean="2.22E-5" stdev="5.43E-6">
 					<parameter idref="ucld.mean"/>
-				</logNormalPrior>
+				</normalPrior>
 				<gammaPrior shape="0.001" scale="1000.0" offset="0.0">
 					<parameter idref="skygrid.precision"/>
 				</gammaPrior>

@@ -22,13 +22,13 @@ for f in files:
     for rep in ['a','b']:
         name = str(os.path.basename(f)).split(".")[0]  + '-' + rep
         print(name)
-        xmlpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/pop5-skygrid-lognorm/'
+        xmlpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/pop5-skygrid-norm/'
         out = xmlpath + name + ".xml"
         #os.mkdir(xmlpath+name+'/')
         #stem = xmlpath+name+"/"
 
         #override stem to test output location
-        stem = '/home/jpalmer/10BEAST-gridclock/output/' + name
+        stem = '/home/jpalmer/12BEAST-gridclock/output/' + name
         print(stem)
         print(out)
         parse(template_file, f, stem, out, 'days', 1)

@@ -3,7 +3,7 @@
 require(ape)
 require(stringr)
 
-checkDiff <- functiWon(seq1, seq2){
+checkDiff <- function(seq1, seq2){
   if (seq1 == seq2){
     return(NULL)
   }
@@ -49,7 +49,7 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
     }
   }
   
-  if (bestIdx != -1 & lowest <= wobble){
+  if (bestIdx != -1 & lowest <= round(wobble*len)){
     beforeBool <- T
     beforeIdx <- bestIdx
     beforeDiff <- lowest
@@ -73,7 +73,7 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
     }
   }
   
-  if (bestIdx != -1 & lowest <= wobble){
+  if (bestIdx != -1 & lowest <= round(wobble*len)){
     afterBool <- T
     afterIdx <- bestIdx
     afterDiff <- lowest
@@ -88,7 +88,7 @@ ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, 
 
 # apply inscheck 
 # parameters can be changed here to get different results 
-flanking <- unname(mapply(insCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1, offset=3))
+flanking <- unname(mapply(insCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1/6, offset=0))
 
 # modify flanking data.frame 
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)
