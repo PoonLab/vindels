@@ -83,17 +83,17 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
   c(indel, vseq, as.logical(beforeBool),  as.numeric(beforeIdx),  as.numeric(beforeDiff), beforeSeq, as.logical(afterBool), as.numeric(afterIdx), as.numeric(afterDiff),afterSeq)
 }
 
-path <- '~/PycharmProjects/hiv-withinhost/'
+path <- '~/Lio/'
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
-
+total <- read.csv(paste0(path,"10_nucleotide/ins-all.csv"), stringsAsFactors = F, row.names=1)
 # apply inscheck 
 # parameters can be changed here to get different results 
 flanking <- unname(mapply(insCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1/6, offset=0))
 
 # modify flanking data.frame 
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)
-flanking <- cbind(ins[,c(1,7)], len=nchar(ins$Seq), flanking)
-colnames(flanking) <- c("header","pos", "len", "indel", "vseq","before.bool", "before.offset", "before.diff", "before.seq","after.bool", "after.offset", "after.diff",  "after.seq")
+flanking <- cbind(ins[,c(1,2,7)], len=nchar(ins$Seq), flanking)
+colnames(flanking) <- c("header","vloop","pos", "len", "indel", "vseq","before.bool", "before.offset", "before.diff", "before.seq","after.bool", "after.offset", "after.diff",  "after.seq")
 flanking[,"before.bool"] <- as.logical(flanking[,"before.bool"] )
 flanking[,"after.bool"] <- as.logical(flanking[,"after.bool"] )
 flanking[,"before.offset"] <- as.numeric(flanking[,"before.offset"] )
@@ -101,7 +101,29 @@ flanking[,"after.offset"] <- as.numeric(flanking[,"after.offset"] )
 flanking[,"before.diff"] <- as.numeric(flanking[,"before.diff"] )
 flanking[,"after.diff"] <- as.numeric(flanking[,"after.diff"] )
 
+# proportion of insertions that contain a match with 1/6 wobble directly 
+#   adjacent (EITHER 5' or 3', no offset) 
+nrow(flanking[flanking$before.bool | flanking$after.bool,]) / nrow(flanking)
 
+# split flanking into 5 different variable loops 
+sub.v <- split(flanking, flanking$vloop)
+
+# calculate the probability of slippage occurring in each of the V-loops 
+require(R.utils)
+p.slip <- c()
+for (i in 1:4){
+  p.slip <- c(p.slip, nrow(sub.v[[i]][sub.v[[i]]$before.bool | sub.v[[i]]$after.bool,]) / nrow(sub.v[[i]]))
+}
+p.slip <- insert(p.slip,3,0)
+
+
+# probability of a slippage event occurring per v-loop (flanking contains a single insertion event per row)
+nt.slip <- c()
+for (i in 1:4){
+  nt.slip <- c(nt.slip, nrow(sub.v[[i]][sub.v[[i]]$before.bool | sub.v[[i]]$after.bool,]) / sum(nchar(total[total$Vloop==i & total$Seq == "","Vseq"])))
+}
+
+nt.slip <- nrow(flanking[flanking$before.bool | flanking$after.bool,]) / sum(nchar(total[total$Seq=="",]))
 
 
 # 3 x 2 HISTOGRAM PLOT 
