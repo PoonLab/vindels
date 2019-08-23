@@ -6,13 +6,13 @@ from seqUtils import *
 
 p = re.compile('.+_([0-9]+)\..+')
 
-template_file = '/home/jpalmer/vindels/2_within-host/template-skygrid-clock.xml'
+template_file = '/home/jpalmer/vindels/2_within-host/template-skygrid-lognorm.xml'
 
 #parse(template_file=args.template, fasta_file=args.fasta, stem=args.stem, outfile=args.out, nreps=args.nreps)
 files = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/*.fasta')
 subtypes = {}
 for f in files:
-    with open(f, "r") as handle:
+    with open(f, "r") as handle: 
         data = parse_fasta(handle)
     
     #for header in data:
@@ -22,13 +22,13 @@ for f in files:
     for rep in ['a','b']:
         name = str(os.path.basename(f)).split(".")[0]  + '-' + rep
         print(name)
-        xmlpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/pop5-skygrid-norm/'
+        xmlpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/pop5-skygrid-lognorm-p10/'
         out = xmlpath + name + ".xml"
         #os.mkdir(xmlpath+name+'/')
         #stem = xmlpath+name+"/"
 
         #override stem to test output location
-        stem = '/home/jpalmer/12BEAST-gridclock/output/' + name
+        stem = '/home/jpalmer/12BEAST-test/output/p10/' + name
         print(stem)
         print(out)
         parse(template_file, f, stem, out, 'days', 1)

@@ -3,6 +3,25 @@
 require(ape)
 require(stringr)
 
+transitionCounts <- function(seq){
+  len <- nchar(seq)
+  nt <- c("A", "C", "G", "T", "X")
+  counts <- matrix(0, nrow=5, ncol=5)
+  
+  rownames(counts) <- nt
+  colnames(counts) <- nt
+  print(seq)
+  if (seq != ""){
+    for (i in 1:(len-1)){
+      x <- substr(seq, i, i)
+      y <- substr(seq, i+1 ,i+1)
+      counts[x,y] <- counts[x,y] + 1
+    }
+  }
+  counts
+}
+
+
 checkDiff <- function(seq1, seq2){
   if (seq1 == seq2){
     return(NULL)
@@ -22,11 +41,11 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
   beforeBool <- F
   afterBool <- F
   
-  beforeIdx <- NA
-  afterIdx <- NA
+  beforeIdx <- NaN
+  afterIdx <- NaN
   
-  beforeDiff <- NA
-  afterDiff <- NA
+  beforeDiff <- NaN
+  afterDiff <- NaN
   
   beforeSeq <- ""
   afterSeq <- ""
@@ -83,9 +102,19 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
   c(indel, vseq, as.logical(beforeBool),  as.numeric(beforeIdx),  as.numeric(beforeDiff), beforeSeq, as.logical(afterBool), as.numeric(afterIdx), as.numeric(afterDiff),afterSeq)
 }
 
-path <- '~/Lio/'
+# adds an "X" character to signify the location of an insertion 
+addX <- function(seq,pos){
+  if (!is.na(pos)){
+    paste0(substr(seq,1,pos),"X",substr(seq,pos+1,nchar(seq)))
+  }else{
+    seq
+  }
+}
+
+path <- '~/PycharmProjects/hiv-withinhost/'
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
-total <- read.csv(paste0(path,"10_nucleotide/ins-all.csv"), stringsAsFactors = F, row.names=1)
+all <- read.csv(paste0(path,"10_nucleotide/ins-all.csv"), stringsAsFactors = F, row.names=1)
+
 # apply inscheck 
 # parameters can be changed here to get different results 
 flanking <- unname(mapply(insCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1/6, offset=0))
@@ -101,29 +130,50 @@ flanking[,"after.offset"] <- as.numeric(flanking[,"after.offset"] )
 flanking[,"before.diff"] <- as.numeric(flanking[,"before.diff"] )
 flanking[,"after.diff"] <- as.numeric(flanking[,"after.diff"] )
 
-# proportion of insertions that contain a match with 1/6 wobble directly 
+# proportion of insertions ACROSS ALL VARIABLE LOOPS that contain a match with 1/6 wobble directly 
 #   adjacent (EITHER 5' or 3', no offset) 
 nrow(flanking[flanking$before.bool | flanking$after.bool,]) / nrow(flanking)
 
-# split flanking into 5 different variable loops 
+# split 'flanking' into 5 different variable loops 
 sub.v <- split(flanking, flanking$vloop)
 
 # calculate the probability of slippage occurring in each of the V-loops 
 require(R.utils)
 p.slip <- c()
 for (i in 1:4){
-  p.slip <- c(p.slip, nrow(sub.v[[i]][sub.v[[i]]$before.bool | sub.v[[i]]$after.bool,]) / nrow(sub.v[[i]]))
+  p.slip[i] <-  nrow(sub.v[[i]][sub.v[[i]]$before.bool | sub.v[[i]]$after.bool,]) / nrow(sub.v[[i]])
 }
 p.slip <- insert(p.slip,3,0)
 
 
-# probability of a slippage event occurring per v-loop (flanking contains a single insertion event per row)
+# probability of a slippage event occurring per nucleotide per v-loop (flanking contains a single insertion event per row)
 nt.slip <- c()
 for (i in 1:4){
-  nt.slip <- c(nt.slip, nrow(sub.v[[i]][sub.v[[i]]$before.bool | sub.v[[i]]$after.bool,]) / sum(nchar(total[total$Vloop==i & total$Seq == "","Vseq"])))
+  nt.slip[i] <-nrow(sub.v[[i]][sub.v[[i]]$before.bool | sub.v[[i]]$after.bool,]) / sum(nchar(all[all$Vloop==i & all$Seq == "","Vseq"]))
 }
 
-nt.slip <- nrow(flanking[flanking$before.bool | flanking$after.bool,]) / sum(nchar(total[total$Seq=="",]))
+# creates a transitional probability matrix for EACH V-LOOP (1,2,4,5 ; not V3) 
+all$Vseq <- mapply(addX, all$Vseq, all$Pos)
+all.v <- split(all, all$Vloop)
+
+p.trans <- list()
+nt <- c("A", "C", "G", "T", "X")
+for (i in c(1,2,4,5)){
+  p.trans[[i]] <- transitionCounts("")
+  total <- c(0,0,0,0,0)
+  for (j in 1:nrow(all.v[[i]])){
+    vseq <- all.v[[i]][j,"Vseq"]
+    p.trans[[i]] <- p.trans[[i]] + transitionCounts(vseq)
+    for (a in 1:5){
+      total[a] <- total[a] + str_count(substr(vseq,1,nchar(vseq)-1), nt[a])
+    }
+  }
+  p.trans[[i]] <- p.trans[[i]] / total
+}
+
+
+
+
 
 
 # 3 x 2 HISTOGRAM PLOT 

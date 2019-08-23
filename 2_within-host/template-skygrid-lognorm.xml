@@ -2110,24 +2110,26 @@
 		</nodeHeights>
 	</treeModel>
 
-	<!-- Generate a gmrfSkyrideLikelihood for GMRF Bayesian Skyride process      -->
-	<gmrfSkyrideLikelihood id="skyride" timeAwareSmoothing="true" randomizeTree="false">
+	<!-- Generate a gmrfSkyGridLikelihood for the Bayesian SkyGrid process       -->
+	<gmrfSkyGridLikelihood id="skygrid">
 		<populationSizes>
 
-			<!-- skyride.logPopSize is in log units unlike other popSize                 -->
-			<parameter id="skyride.logPopSize" dimension="272" value="1.0"/>
+			<!-- skygrid.logPopSize is in log units unlike other popSize                 -->
+			<parameter id="skygrid.logPopSize" dimension="10" value="1.0"/>
 		</populationSizes>
-		<groupSizes>
-			<parameter id="skyride.groupSize" dimension="272"/>
-		</groupSizes>
 		<precisionParameter>
-			<parameter id="skyride.precision" value="1.0" lower="0.0"/>
+			<parameter id="skygrid.precision" value="0.1" lower="0.0"/>
 		</precisionParameter>
+		<numGridPoints>
+			<parameter id="skygrid.numGridPoints" value="9.0"/>
+		</numGridPoints>
+		<cutOff>
+			<parameter id="skygrid.cutOff" value="30.0"/>
+		</cutOff>
 		<populationTree>
 			<treeModel idref="treeModel"/>
 		</populationTree>
-	</gmrfSkyrideLikelihood>
-
+	</gmrfSkyGridLikelihood>
 
 
 	<!-- The uncorrelated relaxed clock (Drummond, Ho, Phillips & Rambaut (2006) PLoS Biology 4, e88 )-->
@@ -2193,8 +2195,8 @@
 	<!-- Likelihood for tree given sequence data                                 -->
 	<treeLikelihood id="treeLikelihood" useAmbiguities="false">
 		<patterns idref="patterns"/>
-		<siteModel idref="siteModel"/>
 		<treeModel idref="treeModel"/>
+		<siteModel idref="siteModel"/>
 		<discretizedBranchRates idref="branchRates"/>
 	</treeLikelihood>
 
@@ -2230,12 +2232,7 @@
 		<wilsonBalding weight="3">
 			<treeModel idref="treeModel"/>
 		</wilsonBalding>
-		<scaleOperator scaleFactor="0.75" weight="3">
-			<parameter idref="treeModel.rootHeight"/>
-		</scaleOperator>
-		<uniformOperator weight="30">
-			<parameter idref="treeModel.internalNodeHeights"/>
-		</uniformOperator>
+		
 		<upDownOperator scaleFactor="0.75" weight="3">
 			<up>
 				<parameter idref="ucld.mean"/>
@@ -2250,40 +2247,46 @@
 		<uniformIntegerOperator weight="10">
 			<parameter idref="branchRates.categories"/>
 		</uniformIntegerOperator>
-        <gmrfBlockUpdateOperator scaleFactor="2.0" weight="2">
-			<gmrfSkyrideLikelihood idref="skyride"/>
-		</gmrfBlockUpdateOperator>
+        <scaleOperator scaleFactor="0.75" weight="3">
+			<parameter idref="treeModel.rootHeight"/>
+		</scaleOperator>
+		<uniformOperator weight="30">
+			<parameter idref="treeModel.internalNodeHeights"/>
+		</uniformOperator>
+		<gmrfGridBlockUpdateOperator scaleFactor="1.0" weight="2">
+			<gmrfSkyrideLikelihood idref="skygrid"/>
+		</gmrfGridBlockUpdateOperator>
+		<scaleOperator scaleFactor="0.75" weight="1">
+			<parameter idref="skygrid.precision"/>
+		</scaleOperator>
 	</operators>
 
 	<!-- Define MCMC                                                             -->
 	<mcmc id="mcmc" chainLength="100000000" autoOptimize="true" operatorAnalysis="step_0.ops">
 		<posterior id="posterior">
 			<prior id="prior">
-				<logNormalPrior mean="1.0" stdev="1.25" offset="0.0" >
+				<logNormalPrior mean="1.0" stdev="1.25" offset="0.0">
 					<parameter idref="kappa1"/>
 				</logNormalPrior>
-				<logNormalPrior mean="1.0" stdev="1.25" offset="0.0" >
+				<logNormalPrior mean="1.0" stdev="1.25" offset="0.0">
 					<parameter idref="kappa2"/>
 				</logNormalPrior>
-                <dirichletPrior alpha="1.0" sumsTo="1.0">
+                		<uniformPrior lower="0.0" upper="1.0">
 					<parameter idref="frequencies"/>
-				</dirichletPrior>
+				</uniformPrior>
 				<exponentialPrior mean="0.5" offset="0.0">
 					<parameter idref="alpha"/>
 				</exponentialPrior>
 				<exponentialPrior mean="0.3333333333333333" offset="0.0">
 					<parameter idref="ucld.stdev"/>
 				</exponentialPrior>
-				<ctmcScalePrior>
-					<ctmcScale>
-						<parameter idref="ucld.mean"/>
-					</ctmcScale>
-					<treeModel idref="treeModel"/>
-				</ctmcScalePrior>
+				<logNormalPrior mean="2.22E-5" stdev="5.43E-6" offset="0.0">
+					<parameter idref="ucld.mean"/>
+				</logNormalPrior>
 				<gammaPrior shape="0.001" scale="1000.0" offset="0.0">
-					<parameter idref="skyride.precision"/>
+					<parameter idref="skygrid.precision"/>
 				</gammaPrior>
-				<gmrfSkyrideLikelihood idref="skyride"/>
+				<gmrfSkyGridLikelihood idref="skygrid"/>
 				<discretizedBranchRates idref="branchRates"/>
 			</prior>
 			<likelihood id="likelihood">
@@ -2317,9 +2320,9 @@
 			<prior idref="prior"/>
 			<likelihood idref="likelihood"/>
 			<parameter idref="treeModel.rootHeight"/>
-            <parameter idref="skyride.precision"/>
-			<parameter idref="skyride.logPopSize"/>
-			<parameter idref="skyride.groupSize"/>
+			<parameter idref="skygrid.precision"/>
+			<parameter idref="skygrid.logPopSize"/>
+			<parameter idref="skygrid.cutOff"/>
 			<parameter idref="kappa1"/>
 			<parameter idref="kappa2"/>
 			<parameter idref="frequencies"/>
@@ -2331,7 +2334,7 @@
 			<rateCovarianceStatistic idref="covariance"/>
 			<treeLikelihood idref="treeLikelihood"/>
 			<discretizedBranchRates idref="branchRates"/>
-			<gmrfSkyrideLikelihood idref="skyride"/>
+			<gmrfSkyGridLikelihood idref="skygrid"/>
 		</log>
 
 		<!-- write tree log to file                                                  -->
