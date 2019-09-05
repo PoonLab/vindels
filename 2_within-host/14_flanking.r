@@ -10,7 +10,7 @@ transitionCounts <- function(seq){
   
   rownames(counts) <- nt
   colnames(counts) <- nt
-  print(seq)
+  #print(seq)
   if (seq != ""){
     for (i in 1:(len-1)){
       x <- substr(seq, i, i)
@@ -102,6 +102,7 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
   c(indel, vseq, as.logical(beforeBool),  as.numeric(beforeIdx),  as.numeric(beforeDiff), beforeSeq, as.logical(afterBool), as.numeric(afterIdx), as.numeric(afterDiff),afterSeq)
 }
 
+
 # adds an "X" character to signify the location of an insertion 
 addX <- function(seq,pos){
   if (!is.na(pos)){
@@ -111,9 +112,28 @@ addX <- function(seq,pos){
   }
 }
 
+
+labels <- function(header, patient, vloop){
+  letter <- strsplit(patient, "-")[[1]][2]
+  paste0(header,"_", letter, "_", vloop)
+}
+
+pll <- function(rate, count, len){
+  prob <- rate * len
+  sum(-(prob) + count*log(prob))
+}
+
+
+
+
 path <- '~/PycharmProjects/hiv-withinhost/'
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
 all <- read.csv(paste0(path,"10_nucleotide/ins-all.csv"), stringsAsFactors = F, row.names=1)
+
+
+ins$Accno <- unname(mapply(labels, ins$Accno, ins$Pat, ins$Vloop))
+all$Accno <- unname(mapply(labels, all$Accno, all$Pat, all$Vloop))
+
 
 # apply inscheck 
 # parameters can be changed here to get different results 
@@ -129,6 +149,14 @@ flanking[,"before.offset"] <- as.numeric(flanking[,"before.offset"] )
 flanking[,"after.offset"] <- as.numeric(flanking[,"after.offset"] )
 flanking[,"before.diff"] <- as.numeric(flanking[,"before.diff"] )
 flanking[,"after.diff"] <- as.numeric(flanking[,"after.diff"] )
+
+tab <- table(flanking[flanking$before.bool | flanking$after.bool, "header"])
+all$count.flanking <- 0
+all[all$Accno %in% names(tab),"count.flanking"] <- tab
+
+obj.f <- function(rate) -pll(rate, all$count.flanking, nchar(all$Vlength))
+mle.result <- bbmle::mle2(obj.f, start=list(rate=1), method = "Brent", lower=1e-16, upper = 1)
+
 
 # proportion of insertions ACROSS ALL VARIABLE LOOPS that contain a match with 1/6 wobble directly 
 #   adjacent (EITHER 5' or 3', no offset) 

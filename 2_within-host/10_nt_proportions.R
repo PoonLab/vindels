@@ -316,16 +316,16 @@ total.del <- total.del[total.del$len>1, ]
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
-write.csv(ins.glycs2, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins.csv")
-write.csv(del.glycs2, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del.csv")
+write.csv(ins.glycs2[,c(1,2,6,3,4,5,7)], "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins.csv")
+write.csv(del.glycs2[,c(1,2,6,3,4,5,7)], "~/PycharmProjects/hiv-withinhost/10_nucleotide/del.csv")
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
 write.csv(ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep.csv")
 write.csv(del, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-sep.csv")
 
-write.csv(all.ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-all.csv")
-write.csv(all.del, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-all.csv")
+write.csv(ins.glycs, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-all.csv")
+write.csv(del.glycs, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-all.csv")
 
 
 
