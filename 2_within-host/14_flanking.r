@@ -119,12 +119,29 @@ labels <- function(header, patient, vloop){
 }
 
 pll <- function(rate, count, len){
-  prob <- rate * len
-  sum(-(prob) + count*log(prob))
+  count*log(rate * len) - (rate * len) 
 }
 
+binomll <- function(prob, count, len){
+  N <- len
+  k <- count
+  p <- prob
+  
+  i <- sample(5000,1)
+  if (i ==1){
+    dist <- nchar(all[all$count.flanking>0,"Seq"])
+    
+  }
+  
+  chs <- factorial(N) / (factorial(k) * factorial(N - k))
+  log(chs) +  k*log(p) +  (N - k)*log(1-p)
+}
 
-
+z <- c()
+for (elem in y){
+  z <- c(z, obj.f2(elem))
+  
+}
 
 path <- '~/PycharmProjects/hiv-withinhost/'
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
@@ -154,8 +171,56 @@ tab <- table(flanking[flanking$before.bool | flanking$after.bool, "header"])
 all$count.flanking <- 0
 all[all$Accno %in% names(tab),"count.flanking"] <- tab
 
-obj.f <- function(rate) -pll(rate, all$count.flanking, nchar(all$Vlength))
-mle.result <- bbmle::mle2(obj.f, start=list(rate=1), method = "Brent", lower=1e-16, upper = 1)
+obj.f <- function(rate) -pll(rate, nchar(all$Seq), all$Vlength)
+mle.result <- bbmle::mle2(obj.f, start=list(rate=1), method = "Brent", lower=1e-12, upper = 1)
+
+
+obj.f2 <- function(prob) -binomll(prob, all$count.flanking, all$Vlength)
+mle.result2 <- bbmle::mle2(obj.f2, start=list(prob=1), method = "Brent", lower = 1e-12, upper=1)
+
+
+
+simulateData <- function(seq){
+  
+  slip <- F
+  
+  seq <- paste0("S",seq,"E")
+  # SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE"
+  char <- substr()
+  pos <- 1
+  
+  while (char!="E") {
+    char <- substr(s, pos,pos)
+    
+    i <- sample(100,1)
+    
+    case_when(
+      !slip & i != 1 ~ 
+    )
+    
+    #Slip event
+    if (!slip & i==1) {
+
+      
+    }else {
+      
+      if (slip&i<50) {
+        slip <- T
+        norm <- F
+        #slip()
+      } else ()
+      
+    }
+    
+    #To Be completed...
+    
+    
+  }
+}
+
+
+
+
 
 
 # proportion of insertions ACROSS ALL VARIABLE LOOPS that contain a match with 1/6 wobble directly 

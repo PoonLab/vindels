@@ -2115,13 +2115,13 @@
 		<populationSizes>
 
 			<!-- skygrid.logPopSize is in log units unlike other popSize                 -->
-			<parameter id="skygrid.logPopSize" dimension="10" value="1.0"/>
+			<parameter id="skygrid.logPopSize" dimension="20" value="1.0"/>
 		</populationSizes>
 		<precisionParameter>
 			<parameter id="skygrid.precision" value="0.1" lower="0.0"/>
 		</precisionParameter>
 		<numGridPoints>
-			<parameter id="skygrid.numGridPoints" value="9.0"/>
+			<parameter id="skygrid.numGridPoints" value="19.0"/>
 		</numGridPoints>
 		<cutOff>
 			<parameter id="skygrid.cutOff" value="30.0"/>
@@ -2262,7 +2262,7 @@
 	</operators>
 
 	<!-- Define MCMC                                                             -->
-	<mcmc id="mcmc" chainLength="100000000" autoOptimize="true" operatorAnalysis="step_0.ops">
+	<mcmc id="mcmc" chainLength="200000000" autoOptimize="true" operatorAnalysis="step_0.ops">
 		<posterior id="posterior">
 			<prior id="prior">
 				<logNormalPrior mean="1.0" stdev="1.25" offset="0.0">
@@ -2280,7 +2280,7 @@
 				<exponentialPrior mean="0.3333333333333333" offset="0.0">
 					<parameter idref="ucld.stdev"/>
 				</exponentialPrior>
-				<logNormalPrior mean="2.22E-5" stdev="5.43E-6" offset="0.0">
+				<logNormalPrior mean="0.00818" stdev="0.001" offset="0.0">
 					<parameter idref="ucld.mean"/>
 				</logNormalPrior>
 				<gammaPrior shape="0.001" scale="1000.0" offset="0.0">
@@ -2296,7 +2296,7 @@
 		<operators idref="operators"/>
 
 		<!-- write log to screen                                                     -->
-		<log id="screenLog" logEvery="100000">
+		<log id="screenLog" logEvery="200000">
 			<column label="Posterior" dp="4" width="12">
 				<posterior idref="posterior"/>
 			</column>
@@ -2315,7 +2315,7 @@
 		</log>
 
 		<!-- write log to file                                                       -->
-		<log id="fileLog" logEvery="10000" fileName="step_0.log" overwrite="true">
+		<log id="fileLog" logEvery="20000" fileName="step_0.log" overwrite="true">
 			<posterior idref="posterior"/>
 			<prior idref="prior"/>
 			<likelihood idref="likelihood"/>
@@ -2338,7 +2338,7 @@
 		</log>
 
 		<!-- write tree log to file                                                  -->
-		<logTree id="treeFileLog" logEvery="100000" nexusFormat="true" fileName="step_0.trees" sortTranslationTable="true">
+		<logTree id="treeFileLog" logEvery="200000" nexusFormat="true" fileName="step_0.trees" sortTranslationTable="true">
 			<treeModel idref="treeModel"/>
 			<trait name="rate" tag="rate">
 				<discretizedBranchRates idref="branchRates"/>
