@@ -2084,16 +2084,16 @@
 
 	<!-- This is a simple constant population size coalescent model              -->
 	<!-- that is used to generate an initial tree for the chain.                 -->
-	<constantSize id="initialDemo" units="years">
+	<constantSize id="constant" units="years">
 		<populationSize>
-			<parameter id="initialDemo.popSize" value="100.0"/>
+			<parameter id="constant.popSize" value="1.0" lower="0.0"/>
 		</populationSize>
 	</constantSize>
 
 	<!-- Generate a random starting tree under the coalescent process            -->
 	<coalescentSimulator id="startingTree">
 		<taxa idref="taxa"/>
-		<constantSize idref="initialDemo"/>
+		<constantSize idref="constant"/>
 	</coalescentSimulator>
 
 	<!-- Generate a tree model                                                   -->
@@ -2110,26 +2110,15 @@
 		</nodeHeights>
 	</treeModel>
 
-	<!-- Generate a gmrfSkyGridLikelihood for the Bayesian SkyGrid process       -->
-	<gmrfSkyGridLikelihood id="skygrid">
-		<populationSizes>
-
-			<!-- skygrid.logPopSize is in log units unlike other popSize                 -->
-			<parameter id="skygrid.logPopSize" dimension="20" value="1.0"/>
-		</populationSizes>
-		<precisionParameter>
-			<parameter id="skygrid.precision" value="0.1" lower="0.0"/>
-		</precisionParameter>
-		<numGridPoints>
-			<parameter id="skygrid.numGridPoints" value="19.0"/>
-		</numGridPoints>
-		<cutOff>
-			<parameter id="skygrid.cutOff" value="30.0"/>
-		</cutOff>
+	<!-- Generate a coalescent likelihood                                        -->
+	<coalescentLikelihood id="coalescent">
+		<model>
+			<constantSize idref="constant"/>
+		</model>
 		<populationTree>
 			<treeModel idref="treeModel"/>
 		</populationTree>
-	</gmrfSkyGridLikelihood>
+	</coalescentLikelihood>
 
 
 	<!-- The uncorrelated relaxed clock (Drummond, Ho, Phillips & Rambaut (2006) PLoS Biology 4, e88 )-->
@@ -2253,16 +2242,13 @@
 		<uniformOperator weight="30">
 			<parameter idref="treeModel.internalNodeHeights"/>
 		</uniformOperator>
-		<gmrfGridBlockUpdateOperator scaleFactor="1.0" weight="2">
-			<gmrfSkyrideLikelihood idref="skygrid"/>
-		</gmrfGridBlockUpdateOperator>
-		<scaleOperator scaleFactor="0.75" weight="1">
-			<parameter idref="skygrid.precision"/>
+		<scaleOperator scaleFactor="0.75" weight="3">
+			<parameter idref="constant.popSize"/>
 		</scaleOperator>
 	</operators>
 
 	<!-- Define MCMC                                                             -->
-	<mcmc id="mcmc" chainLength="1000000000" autoOptimize="true" operatorAnalysis="step_0.ops">
+	<mcmc id="mcmc" chainLength="100000000" autoOptimize="true" operatorAnalysis="step_0.ops">
 		<posterior id="posterior">
 			<prior id="prior">
 				<logNormalPrior mean="1.0" stdev="1.25" offset="0.0">
@@ -2283,10 +2269,10 @@
 				<logNormalPrior mean="0.00818" stdev="0.001" offset="0.0">
 					<parameter idref="ucld.mean"/>
 				</logNormalPrior>
-				<gammaPrior shape="0.001" scale="1000.0" offset="0.0">
-					<parameter idref="skygrid.precision"/>
-				</gammaPrior>
-				<gmrfSkyGridLikelihood idref="skygrid"/>
+				<oneOnXPrior>
+					<parameter idref="constant.popSize"/>
+				</oneOnXPrior>
+				<coalescentLikelihood idref="coalescent"/>
 				<discretizedBranchRates idref="branchRates"/>
 			</prior>
 			<likelihood id="likelihood">
@@ -2296,7 +2282,7 @@
 		<operators idref="operators"/>
 
 		<!-- write log to screen                                                     -->
-		<log id="screenLog" logEvery="1000000">
+		<log id="screenLog" logEvery="100000">
 			<column label="Posterior" dp="4" width="12">
 				<posterior idref="posterior"/>
 			</column>
@@ -2315,14 +2301,12 @@
 		</log>
 
 		<!-- write log to file                                                       -->
-		<log id="fileLog" logEvery="100000" fileName="step_0.log" overwrite="true">
+		<log id="fileLog" logEvery="10000" fileName="step_0.log" overwrite="true">
 			<posterior idref="posterior"/>
 			<prior idref="prior"/>
 			<likelihood idref="likelihood"/>
 			<parameter idref="treeModel.rootHeight"/>
-			<parameter idref="skygrid.precision"/>
-			<parameter idref="skygrid.logPopSize"/>
-			<parameter idref="skygrid.cutOff"/>
+			<parameter idref="constant.popSize"/>
 			<parameter idref="kappa1"/>
 			<parameter idref="kappa2"/>
 			<parameter idref="frequencies"/>
@@ -2334,11 +2318,11 @@
 			<rateCovarianceStatistic idref="covariance"/>
 			<treeLikelihood idref="treeLikelihood"/>
 			<discretizedBranchRates idref="branchRates"/>
-			<gmrfSkyGridLikelihood idref="skygrid"/>
+			<coalescentLikelihood idref="coalescent"/>
 		</log>
 
 		<!-- write tree log to file                                                  -->
-		<logTree id="treeFileLog" logEvery="1000000" nexusFormat="true" fileName="step_0.trees" sortTranslationTable="true">
+		<logTree id="treeFileLog" logEvery="100000" nexusFormat="true" fileName="step_0.trees" sortTranslationTable="true">
 			<treeModel idref="treeModel"/>
 			<trait name="rate" tag="rate">
 				<discretizedBranchRates idref="branchRates"/>

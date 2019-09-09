@@ -2,146 +2,8 @@
 # trying to develop a model for interstrand jumping of polymerase 
 require(ape)
 require(stringr)
+source("~/vindels/2_within-host/utils.r")
 
-transitionCounts <- function(seq){
-  len <- nchar(seq)
-  nt <- c("A", "C", "G", "T", "X")
-  counts <- matrix(0, nrow=5, ncol=5)
-  
-  rownames(counts) <- nt
-  colnames(counts) <- nt
-  #print(seq)
-  if (seq != ""){
-    for (i in 1:(len-1)){
-      x <- substr(seq, i, i)
-      y <- substr(seq, i+1 ,i+1)
-      counts[x,y] <- counts[x,y] + 1
-    }
-  }
-  counts
-}
-
-
-checkDiff <- function(seq1, seq2){
-  if (seq1 == seq2){
-    return(NULL)
-  }
-  
-  seq1 <- str_split(seq1, "")[[1]]
-  seq2 <- str_split(seq2, "")[[1]]
-  
-  chars <- rbind(seq1, seq2)
-  which(chars[1,]!=chars[2,])
-}
-
-insCheck <- function(indel,pos,vseq,wobble, offset=0){
-  len <- nchar(indel)
-  pos <- as.numeric(pos)
-  
-  beforeBool <- F
-  afterBool <- F
-  
-  beforeIdx <- NaN
-  afterIdx <- NaN
-  
-  beforeDiff <- NaN
-  afterDiff <- NaN
-  
-  beforeSeq <- ""
-  afterSeq <- ""
-  
-  # BEFORE (5')
-  # find the best matching position from 0 to offset 
-  lowest <- 1000
-  bestIdx <- -1
-
-  for (idx in 0:offset){
-    # subtract length to get the start of the sequence 
-    # needs to be enough nucleotides to check
-    if ((pos - len - idx) >= 0){
-      before <- substr(vseq, pos-len-idx+1, pos-idx)
-      diffs <- checkDiff(indel, before)
-      if (length(diffs) < lowest){
-        lowest <- length(diffs)
-        bestIdx <- idx
-      }
-    }
-  }
-  
-  if (bestIdx != -1 & lowest <= round(wobble*len)){
-    beforeBool <- T
-    beforeIdx <- bestIdx
-    beforeDiff <- lowest
-    beforeSeq <- substr(vseq,pos-len-bestIdx+1, pos-bestIdx)
-  }
-
-  # AFTER 
-  # find the best matching position from 0 to offset 
-  lowest <- 1000
-  bestIdx <- -1
-  for (idx in 0:offset){
-    if ((pos + len + idx) <= nchar(vseq)){
-      # then the PRECEDING position can be checked
-      after <- substr(vseq, pos+idx+1, pos+len+idx)
-      #print(after)
-      diffs <- checkDiff(indel, after)
-      if (length(diffs) < lowest){
-        lowest <- length(diffs)
-        bestIdx <- idx
-      }
-    }
-  }
-  
-  if (bestIdx != -1 & lowest <= round(wobble*len)){
-    afterBool <- T
-    afterIdx <- bestIdx
-    afterDiff <- lowest
-    afterSeq <- substr(vseq,pos+bestIdx+1, pos+len+bestIdx)
-  }
-
-  c(indel, vseq, as.logical(beforeBool),  as.numeric(beforeIdx),  as.numeric(beforeDiff), beforeSeq, as.logical(afterBool), as.numeric(afterIdx), as.numeric(afterDiff),afterSeq)
-}
-
-
-# adds an "X" character to signify the location of an insertion 
-addX <- function(seq,pos){
-  if (!is.na(pos)){
-    paste0(substr(seq,1,pos),"X",substr(seq,pos+1,nchar(seq)))
-  }else{
-    seq
-  }
-}
-
-
-labels <- function(header, patient, vloop){
-  letter <- strsplit(patient, "-")[[1]][2]
-  paste0(header,"_", letter, "_", vloop)
-}
-
-pll <- function(rate, count, len){
-  count*log(rate * len) - (rate * len) 
-}
-
-binomll <- function(prob, count, len){
-  N <- len
-  k <- count
-  p <- prob
-  
-  i <- sample(5000,1)
-  if (i ==1){
-    dist <- nchar(all[all$count.flanking>0,"Seq"])
-    
-  }
-  
-  chs <- factorial(N) / (factorial(k) * factorial(N - k))
-  log(chs) +  k*log(p) +  (N - k)*log(1-p)
-}
-
-z <- c()
-for (elem in y){
-  z <- c(z, obj.f2(elem))
-  
-}
 
 path <- '~/PycharmProjects/hiv-withinhost/'
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
@@ -171,57 +33,52 @@ tab <- table(flanking[flanking$before.bool | flanking$after.bool, "header"])
 all$count.flanking <- 0
 all[all$Accno %in% names(tab),"count.flanking"] <- tab
 
-obj.f <- function(rate) -pll(rate, nchar(all$Seq), all$Vlength)
-mle.result <- bbmle::mle2(obj.f, start=list(rate=1), method = "Brent", lower=1e-12, upper = 1)
+# MAXIMUM LIKELIHOOD ESTIMATION 
+# ------------------------------------------------------
 
+pll <- function(rate, count, len){
+  lam <- rate * len 
+  res <- -lam + count*log(lam) 
+  res <- res[!is.na(res)]
+  sum(res)
+}
 
-obj.f2 <- function(prob) -binomll(prob, all$count.flanking, all$Vlength)
-mle.result2 <- bbmle::mle2(obj.f2, start=list(prob=1), method = "Brent", lower = 1e-12, upper=1)
-
-
-
-simulateData <- function(seq){
+binomll <- function(prob, count, len){
+  N <- len
+  k <- count
+  p <- prob
   
-  slip <- F
-  
-  seq <- paste0("S",seq,"E")
-  # SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE"
-  char <- substr()
-  pos <- 1
-  
-  while (char!="E") {
-    char <- substr(s, pos,pos)
-    
-    i <- sample(100,1)
-    
-    case_when(
-      !slip & i != 1 ~ 
-    )
-    
-    #Slip event
-    if (!slip & i==1) {
-
-      
-    }else {
-      
-      if (slip&i<50) {
-        slip <- T
-        norm <- F
-        #slip()
-      } else ()
-      
-    }
-    
-    #To Be completed...
-    
+  i <- sample(5000,1)
+  if (i ==1){
+    dist <- nchar(all[all$count.flanking>0,"Seq"])
     
   }
+  
+  chs <- factorial(N) / (factorial(k) * factorial(N - k))
+  log(chs) +  k*log(p) +  (N - k)*log(1-p)
+}
+
+z <- c()
+for (elem in y){
+  z <- c(z, obj.f2(elem))
+  
 }
 
 
 
+obj.f <- function(rate) -pll(rate, all$new.count, all$Vlength)
+mle.result <- bbmle::mle2(obj.f, start=list(rate=1), method = "Brent", lower=1e-12, upper = 1)
+
+all$new.count <- 0
+all[all$count.flanking!=0, "new.count"] <- nchar(all[all$count.flanking!=0,"Seq"])
+obj.f2 <- function(prob) -binomll(prob, all$new.count, all$Vlength)
+mle.result2 <- bbmle::mle2(obj.f2, start=list(prob=1), method = "Brent", lower = 1e-12, upper=1)
 
 
+obs <- nchar(all[all$count.flanking!=0,"Seq"])
+expected <- unname(sapply(all$Vseq, simulateData))
+diff <- nchar(expected) - nchar(all$Vseq)
+sim <- diff[diff!=0]
 
 # proportion of insertions ACROSS ALL VARIABLE LOOPS that contain a match with 1/6 wobble directly 
 #   adjacent (EITHER 5' or 3', no offset) 

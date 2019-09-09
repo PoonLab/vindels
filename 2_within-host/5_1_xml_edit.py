@@ -11,7 +11,7 @@ for s in range(len(sys.argv)):
     if not sys.argv[s].endswith("/"):
         sys.argv[s] = sys.argv[s] + "/"'''
 
-xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/pop5-skygrid-lognorm/*.xml")
+xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/constant-lognorm/*.xml")
 
 #outpath = '/home/jpalmer/9BEAST-skygrid/output/'
 
@@ -147,7 +147,7 @@ for infile in xmlFolder:
     #        print(element.attrib)
     #        element.set("value", str(max(dates)))
     
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/pop5-skygrid-lognorm/"+xmlname)
+    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/constant-lognorm/"+xmlname)
     
     
 

@@ -44,7 +44,7 @@ for f in files:
 
         if len(trace) > 0:
 
-            if trace[0] != "100000000":
+            if trace[0] != "200000000":
                 os.rename(f, inFolder+"unfinished/"+base)
                 if os.path.isfile(inFolder+tree):
                     os.rename(inFolder+tree, inFolder+"unfinished/"+tree)
