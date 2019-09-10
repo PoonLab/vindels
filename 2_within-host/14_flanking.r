@@ -2,10 +2,10 @@
 # trying to develop a model for interstrand jumping of polymerase 
 require(ape)
 require(stringr)
-source("~/vindels/2_within-host/utils.r")
+source("~/GitHub/vindels/2_within-host/utils.r")
 
 
-path <- '~/PycharmProjects/hiv-withinhost/'
+path <- '~/Lio/'
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
 all <- read.csv(paste0(path,"10_nucleotide/ins-all.csv"), stringsAsFactors = F, row.names=1)
 
@@ -55,7 +55,7 @@ binomll <- function(prob, count, len){
   }
   
   chs <- factorial(N) / (factorial(k) * factorial(N - k))
-  log(chs) +  k*log(p) +  (N - k)*log(1-p)
+  sum(log(chs) +  k*log(p) +  (N - k)*log(1-p))
 }
 
 z <- c()
@@ -64,11 +64,13 @@ for (elem in y){
   
 }
 
+all$new.count <- 0
+all[all$count.flanking!=0, "new.count"] <- nchar(all[all$count.flanking!=0,"Seq"])
+
 obj.f <- function(rate) -pll(rate, all$new.count, all$Vlength)
 mle.result <- bbmle::mle2(obj.f, start=list(rate=1), method = "Brent", lower=1e-12, upper = 1)
 
-all$new.count <- 0
-all[all$count.flanking!=0, "new.count"] <- nchar(all[all$count.flanking!=0,"Seq"])
+
 obj.f2 <- function(prob) -binomll(prob, all$new.count, all$Vlength)
 mle.result2 <- bbmle::mle2(obj.f2, start=list(prob=1), method = "Brent", lower = 1e-12, upper=1)
 
