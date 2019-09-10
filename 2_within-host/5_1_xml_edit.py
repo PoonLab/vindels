@@ -11,9 +11,9 @@ for s in range(len(sys.argv)):
     if not sys.argv[s].endswith("/"):
         sys.argv[s] = sys.argv[s] + "/"'''
 
-xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/constant-lognorm/*.xml")
+xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/exponential-lognorm/*.xml")
 
-#outpath = '/home/jpalmer/9BEAST-skygrid/output/'
+#outpath = '/home/jpalmer/12BEAST/output/'
 
 for infile in xmlFolder:
     xml = ET.parse(infile)
@@ -60,8 +60,8 @@ for infile in xmlFolder:
             element.attrib = {'id':'startingTree'}
             element.text = "\n"+tree
         
-        '''
-        # for editing the output folder path  
+        
+        '''# for editing the output folder path  
         # ------------------------------------------------       
         if element.get('id') == "mcmc":
             old = element.get('operatorAnalysis')
@@ -147,7 +147,7 @@ for infile in xmlFolder:
     #        print(element.attrib)
     #        element.set("value", str(max(dates)))
     
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/constant-lognorm/"+xmlname)
+    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/exponential-lognorm/"+xmlname)
     
     
 

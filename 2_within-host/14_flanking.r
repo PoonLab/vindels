@@ -64,8 +64,6 @@ for (elem in y){
   
 }
 
-
-
 obj.f <- function(rate) -pll(rate, all$new.count, all$Vlength)
 mle.result <- bbmle::mle2(obj.f, start=list(rate=1), method = "Brent", lower=1e-12, upper = 1)
 
@@ -75,10 +73,19 @@ obj.f2 <- function(prob) -binomll(prob, all$new.count, all$Vlength)
 mle.result2 <- bbmle::mle2(obj.f2, start=list(prob=1), method = "Brent", lower = 1e-12, upper=1)
 
 
-obs <- nchar(all[all$count.flanking!=0,"Seq"])
-expected <- unname(sapply(all$Vseq, simulateData))
-diff <- nchar(expected) - nchar(all$Vseq)
-sim <- diff[diff!=0]
+obs <- all$new.count
+lens <- c()
+dists <- list()
+for (i in 1:25){
+  sim <- unname(sapply(all$Vseq, simulateData))
+  diff <- nchar(sim) - nchar(all$Vseq)
+  simdiff <- diff[diff!=0]
+  lens[i] <- length(simdiff)
+  dists[[i]] <- simdiff
+}
+
+
+
 
 # proportion of insertions ACROSS ALL VARIABLE LOOPS that contain a match with 1/6 wobble directly 
 #   adjacent (EITHER 5' or 3', no offset) 
