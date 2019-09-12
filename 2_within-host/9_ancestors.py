@@ -107,6 +107,7 @@ def extractIndels(anFile, vSeqFile):
     iDict = {}
     dDict = {}
     vSeq = {}
+    aSeq = {}
     for accno in terminals.keys():
         iTemp = ''
         dTemp = ''
@@ -116,7 +117,8 @@ def extractIndels(anFile, vSeqFile):
         deletions = [[],[],[],[],[]]
 
         #for compiling the variable regions to ensure they are properly examined
-        seqs = ['','','','','']
+        aseqs = ['','','','','']
+        vseqs = ['','','','','']
         
         # ai will count the number of nucleotides, skipping gaps 
         ai = 0
@@ -138,7 +140,8 @@ def extractIndels(anFile, vSeqFile):
             if vregion != -1:
                 
                 #sanity check to ensure the code is covering the variable regions 
-                seqs[vregion] += schar
+                aseqs[vregion] += achar
+                vseqs[vregion] += schar
 
                 #1 : ancestral gap, sequence gap  = nothing 
                 #2 : ancestral gap, sequence char = insertion 
@@ -184,12 +187,17 @@ def extractIndels(anFile, vSeqFile):
                         if dTemp:
                             deletions[vregion].append(dTemp+"-"+str(pos))
                             dTemp = ''
-
+        newvar = ['','','','','']
+        newanc = ['','','','','']
         for n in range(5):
-            seqs[n] = seqs[n].replace("-","")
+            for a,b in zip(vseqs[n], aseqs[n]):
+                if a != "-" or b != "-":
+                    newvar[n] += a
+                    newanc[n] += b
         iDict[accno] = insertions
         dDict[accno] = deletions
-        vSeq[accno] = seqs 
+        vSeq[accno] = newvar 
+        aSeq[accno] = newanc
         #print(vLen)
         '''
         #SANITY CHECK 
@@ -210,7 +218,7 @@ def extractIndels(anFile, vSeqFile):
                 print(csvSeq)
                 count +=1'''
 
-    return iDict, dDict, vSeq
+    return iDict, dDict, vSeq, aSeq
 
 def main():
     '''hFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/mcc/*.fasta")
@@ -220,48 +228,60 @@ def main():
         print(r)
         print(result[r][0][:250])
         print(result[r][1][:250])'''
+    for i in range(len(sys.argv)):
+        if not sys.argv[i].endswith("/"):
+            sys.argv[i] += "/"
 
-    if not sys.argv[1].endswith("/"):
-        sys.argv[1] += "/"
+    # folder of historian outputs 
     hFolder = glob(sys.argv[1]+"*.fasta")
+
+    # output path for indel csv files
+    outpath = sys.argv[2]
+    if not os.path.isdir(outpath+"ins/"):
+        os.mkdir(outpath+"ins/")
+    if not os.path.isdir(outpath+"del/"):
+        os.mkdir(outpath+"del/")
     
+    # path to the variable region sequences 
     vPath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
 
     totalseqs = 0
     for infile in hFolder:
-        print(infile)
+        
         filename = os.path.basename(infile)
-
+        replicate = filename.split("_")[0][-1]
         #create names for both the csv file and the output recon file 
         csvfile = filename.split('-')[0] + ".csv"     #101827.csv
         reconfile = filename.split("_recon")[0] + ".csv"   #101827-a_15.csv
 
         if os.path.isfile(vPath+csvfile):
-            ins_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/new-VN/ins/"+reconfile,'w')
-            del_out = open("/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/new-VN/del/"+reconfile,'w')
-            iDict, dDict, vSeq = extractIndels(infile, vPath+csvfile)
-
-            ins_out.write("Accno,Ins,Vloop,Vlen,Seq\n")
-            del_out.write("Accno,Del,Vloop,Vlen,Seq\n")
+            ins_out = open(outpath+"ins/"+reconfile,'w')
+            del_out = open(outpath+"del/"+reconfile,'w')
+            iDict, dDict, vSeq, aSeq = extractIndels(infile, vPath+csvfile)
+                
+            ins_out.write("header,ins,Vloop,Vlen,Vseq,anc\n")
+            del_out.write("header,del,Vloop,Vlen,Vseq,anc\n")
 
             for accno in iDict:      
                 insertions = iDict[accno] # [ [], [], [], [], [] ]
                 deletions = dDict[accno] # [ [], [], [], [], [] ]
                 vsequences = vSeq[accno]   # [ V1-len, V2-len, V3-len, V4-len, V5-len]
-                
-            # j/k count from 0 to 4 for each variable loop 
+                asequences = aSeq[accno]
+                # j/k count from 0 to 4 for each variable loop 
                 for j, ins in enumerate(insertions):
                     insList = ":".join(ins)
                     if insList == "":
                         insList = ""
-                    ins_out.write(",".join([accno,insList,str(j+1),str(len(vsequences[j])),vsequences[j]])+"\n")
+                    newaccno = accno + "_" + str(replicate) + "_" + str(j+1)
+                    ins_out.write(",".join([newaccno, insList, str(j+1), str(len(vsequences[j])), vsequences[j], asequences[j]])+"\n")
                 for k, dl in enumerate(deletions):
                     delList = ":".join(dl)
                     if delList == "":
                         delList = ""
-                    del_out.write(",".join([accno,delList,str(k+1), str(len(vsequences[k])), vsequences[k]])+"\n")
+                    newaccno = accno + "_" + str(replicate) + "_" + str(k+1)
+                    del_out.write(",".join([newaccno, delList, str(k+1), str(len(vsequences[k])), vsequences[k], asequences[k]])+"\n")
         
-
+        
     print(totalseqs)
 
 

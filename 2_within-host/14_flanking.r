@@ -9,9 +9,9 @@ path <- '~/PycharmProjects/hiv-withinhost/'
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
 all <- read.csv(paste0(path,"10_nucleotide/ins-all.csv"), stringsAsFactors = F, row.names=1)
 
-
-ins$Accno <- unname(mapply(labels, ins$Accno, ins$Pat, ins$Vloop))
-all$Accno <- unname(mapply(labels, all$Accno, all$Pat, all$Vloop))
+# FIXED AND NO LONGER NEEDED 
+#ins$Accno <- unname(mapply(labels, ins$Accno, ins$Pat, ins$Vloop))
+#all$Accno <- unname(mapply(labels, all$Accno, all$Pat, all$Vloop))
 
 
 # apply inscheck 
@@ -33,8 +33,16 @@ tab <- table(flanking[flanking$before.bool | flanking$after.bool, "header"])
 all$count.flanking <- 0
 all[all$Accno %in% names(tab),"count.flanking"] <- tab
 
+
+all$new.count <- 0
+all[all$count.flanking!=0, "new.count"] <- nchar(all[all$count.flanking!=0,"Seq"])
+
+
+
 # MAXIMUM LIKELIHOOD ESTIMATION 
 # ------------------------------------------------------
+
+# POISSON DISTRIBUTION
 
 pll <- function(rate, count, len){
   lam <- rate * len 
@@ -42,38 +50,40 @@ pll <- function(rate, count, len){
   res <- res[!is.na(res)]
   sum(res)
 }
-
-binomll <- function(prob, count, len){
-  N <- len
-  k <- count
-  p <- prob
-  
-  i <- sample(5000,1)
-  if (i ==1){
-    dist <- nchar(all[all$count.flanking>0,"Seq"])
-    
-  }
-  
-  chs <- factorial(N) / (factorial(k) * factorial(N - k))
-  sum(log(chs) +  k*log(p) +  (N - k)*log(1-p))
-}
-
-z <- c()
-for (elem in y){
-  z <- c(z, obj.f2(elem))
-  
-}
-
-all$new.count <- 0
-all[all$count.flanking!=0, "new.count"] <- nchar(all[all$count.flanking!=0,"Seq"])
-
 obj.f <- function(rate) -pll(rate, all$new.count, all$Vlength)
 mle.result <- bbmle::mle2(obj.f, start=list(rate=1), method = "Brent", lower=1e-12, upper = 1)
 
 
+# BINOMIAL DISTRIBUTION 
+binomll <- function(prob, count, len){
+  N <- len
+  k <- count
+  p <- prob
+  chs <- factorial(N) / (factorial(k) * factorial(N - k))
+  sum(log(chs) +  k*log(p) +  (N - k)*log(1-p))
+}
 obj.f2 <- function(prob) -binomll(prob, all$new.count, all$Vlength)
 mle.result2 <- bbmle::mle2(obj.f2, start=list(prob=1), method = "Brent", lower = 1e-12, upper=1)
 
+
+# GEOMETRIC LIKELIHOOD FUNCTION 
+
+geomll <- function(forward, count, N){
+  N * log(forward) + sum(count) * log(1-forward)
+}
+slips.nt <- c(all$new.count, rep(0,sum(nchar(all$Vseq))-nrow(all)))
+slips.nt2 <- slips.nt + 1
+objf3 <- function(forward) -geomll(forward, slips.nt, length(slips.nt2))
+mle3 <- bbmle::mle2(objf3, start=list(forward=1), method="Brent" , lower=0.9, upper=1)
+
+
+# NEGATIVE BINOMIAL LIKELIHOOD FUNCTION 
+negbinomll <- function(prob, scc, total)
+
+
+x <- runif(5000,min=1e-7, max=1)
+y <- unname(sapply(x, objf3))
+plot(x=x, y=y)
 
 obs <- all$new.count
 lens <- c()

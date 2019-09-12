@@ -54,26 +54,29 @@ getAccno <- function(input){
 
 
 # specifically handles fields containing a comma
+# and copies their data so they can be split into individual rows in a data frame
 splitRows <- function(row){
   row <- data.frame(t(row),stringsAsFactors = F)
   seqs <- str_split(row[1,6], ",")[[1]]
   pos <- str_split(row[1,7],",")[[1]]
   len <- length(seqs)
-  #print(seqs)
-  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:9])
-  
+  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:10])
 }
 
-add <- function(x, accno, vloop){
-  if (x == ""){
+# uses the start position of the given vloop (retrieved from var.pos; separate file)
+# to compute the indel position within gp120
+addPos <- function(pos, accno, vloop){
+  if (pos == ""){
     return(NA)
   }
-  x <- as.numeric(x)
+  pos <- as.numeric(pos)
   vloop <- as.character(vloop)
   arg2 <- as.numeric(var.pos[var.pos$header==accno, paste0('start.',vloop)])
-  x + arg2
+  pos + arg2
 }
 
+
+# used to compute the original 
 insOriginal <- function(indel, pos, vseq){
   if (indel == ""){
     return(vseq)
@@ -110,12 +113,12 @@ delOriginal <- function(indel, pos, vseq){
   }
   vseq
 }
-
+source("~/vindels/2_within-host/utils.r")
 # Lio
 path <- "~/PycharmProjects/hiv-withinhost/"
 
-ifolder <- Sys.glob(paste0(path,"9Indels/ins_mcc/*.csv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/del_mcc/*.csv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))
 
 # INSERTION PARSING ----------
 #ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/ins_mcc/*.csv")
@@ -125,7 +128,8 @@ all.del <- data.frame()
 iTotal <- list()
 dTotal <- list()
 count <- 0
-sequences <- list()
+ifull <- list()
+dfull <- list()
 
 ins.glycs <- data.frame(stringsAsFactors = F)
 del.glycs <- data.frame(stringsAsFactors = F)
@@ -138,81 +142,82 @@ for (file in 1:length(ifolder)){
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F)
   
   # used for handling cases where there are no indels
-  if (all(is.na(iCSV$Ins))){
-    iCSV$Ins <- ""
+  if (all(is.na(iCSV$ins))){
+    iCSV$ins <- ""
   }
-  if (all(is.na(dCSV$Del))){
-    dCSV$Del <- ""
+  if (all(is.na(dCSV$del))){
+    dCSV$del <- ""
   }
   
   # retrieving subtype field from the header
-  iCSV$Subtype <- unname(sapply(iCSV$Accno, getSubtype))
-  dCSV$Subtype <- unname(sapply(dCSV$Accno, getSubtype))
+  iCSV$Subtype <- unname(sapply(iCSV$header, getSubtype))
+  dCSV$Subtype <- unname(sapply(dCSV$header, getSubtype))
   
   # retrieving the accno from the header
-  iAccno <- unname(sapply(iCSV$Accno, getAccno))
-  dAccno <- unname(sapply(dCSV$Accno, getAccno))
-  
-  # 
-  #iCSV$Accno <- iAccno
-  #dCSV$Accno <- dAccno
+  iHeader <- unname(sapply(iCSV$header, getAccno))
+  dHeader <- unname(sapply(dCSV$header, getAccno))
   
   # store the sequences from these two data frames for nucleotide analysis
   # remove them as they arent needed for this analysis
-  sequences$ins <- as.character(iCSV$Seq)
-  sequences$del <- as.character(dCSV$Seq)
-  dCSV$Seq <- NULL
-  iCSV$Seq <- NULL
+  ifull$var <- as.character(iCSV$Vseq)
+  dfull$var <- as.character(dCSV$Vseq)
+  ifull$anc <- as.character(dCSV$anc)
+  dfull$anc <- as.character(dCSV$anc)
+  
+  dCSV$Vseq <- NULL
+  iCSV$Vseq <- NULL
+  dCSV$anc <- NULL
+  iCSV$anc <- NULL
   
   # creates the counts column
-  iCSV$Count <- sapply(iCSV$Ins, csvcount) 
-  dCSV$Count <- sapply(dCSV$Del, csvcount)
+  iCSV$Count <- sapply(iCSV$ins, csvcount) 
+  dCSV$Count <- sapply(dCSV$del, csvcount)
   
   # extracts info from the indel column and puts it into two separate columns
-  insInfo <- sapply(iCSV$Ins, extractInfo)
+  insInfo <- sapply(iCSV$ins, extractInfo)
   insInfo <- unname(insInfo)
   insInfo <- t(insInfo)
   insInfo <- as.data.frame(insInfo)
   insInfo$V1 <- as.character(insInfo$V1)
   insInfo$V2 <- as.character(insInfo$V2)
   iCSV <- cbind(iCSV, insInfo)
-  iCSV$Ins <- NULL
+  iCSV$ins <- NULL
   
-  delInfo <- sapply(dCSV$Del, extractInfo)
+  delInfo <- sapply(dCSV$del, extractInfo)
   delInfo <- unname(delInfo)
   delInfo <- t(delInfo)
   delInfo <- as.data.frame(delInfo)
   delInfo$V1 <- as.character(delInfo$V1)
   delInfo$V2 <- as.character(delInfo$V2)
   dCSV <- cbind(dCSV, delInfo)
-  dCSV$Del <- NULL
+  dCSV$del <- NULL
   
-  iCSV$Vseq <- sequences$ins
-  dCSV$Vseq <- sequences$del
+  iCSV$Vseq <- ifull$var
+  dCSV$Vseq <- dfull$var
+  iCSV$Anc <- ifull$anc
+  dCSV$Anc <- dfull$anc
   
   iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
   dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
   
-  colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Pat")
-  colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Pat")
+  colnames(iCSV) <- c("Header","Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Anc","Pat")
+  colnames(dCSV) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Anc","Pat")
   
   ins.unchanged <- iCSV$Vseq
   del.unchanged <- dCSV$Vseq
   
   # REMOVE INSERTIONS
-  iCSV$Vseq <- mapply(insOriginal, indel=iCSV$Seq, pos=iCSV$Pos, vseq=iCSV$Vseq)
+  #iCSV$Vseq <- mapply(insOriginal, indel=iCSV$Seq, pos=iCSV$Pos, vseq=iCSV$Vseq)
   
   # RESTORE DELETIONS 
-  dCSV$Vseq <- mapply(delOriginal, indel=dCSV$Seq, pos=dCSV$Pos, vseq=dCSV$Vseq)
+  #dCSV$Vseq <- mapply(delOriginal, indel=dCSV$Seq, pos=dCSV$Pos, vseq=dCSV$Vseq)
   
   # DELETIONS POSITIONS DO NOT NEED FIXING 
   
-  ins.glycs <- rbind(ins.glycs, cbind(iCSV,ins.unchanged))
-  del.glycs <- rbind(del.glycs, cbind(dCSV, del.unchanged))
+  ins.glycs <- rbind(ins.glycs, iCSV)
+  del.glycs <- rbind(del.glycs, dCSV)
   
   # COMMA SEPARATION FIX
-  new.ins <- data.frame()
-  new.del <- data.frame()
   # make a new data.frame for each CSV df
   # transport over all rows which do NOT contain a comma
   new.ins <- iCSV[!grepl(",",iCSV$Seq),]
@@ -221,7 +226,6 @@ for (file in 1:length(ifolder)){
   # handle comma rows separately with a function 
   iCommas <- iCSV[grepl(",",iCSV$Seq),]
   dCommas <- dCSV[grepl(",",dCSV$Seq),]
-
   # APPLY THE SPLIT ROWS TO GET ONE INDEL PER ROW
   if (nrow(iCommas) > 0){
     newrows <- apply(iCommas,1,splitRows)
@@ -229,7 +233,7 @@ for (file in 1:length(ifolder)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
       rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      colnames(newrows[[i]]) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Pat")
+      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc", "Pat")
       new.ins <- rbind(new.ins, newrows[[i]])
     }
   }
@@ -239,12 +243,13 @@ for (file in 1:length(ifolder)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
       rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      colnames(newrows[[i]]) <- c("Accno", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Pat")
-      new.del <- rbind(new.del, newrows[[i]])
+      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc","Pat")
+      newnew.del <- rbind(new.del, newrows[[i]])
+      
     }
   }
   
-  # RESTORE ORIGINAL VARIABLE LOOP SEQUENCES 
+  # Retrieve variable loop positions from file 
   var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
   var.pos <- var.pos[,-c(2,5,8,11,14)]
   
@@ -252,9 +257,8 @@ for (file in 1:length(ifolder)){
   new.del[is.na(new.del$Pos),"Pos"] <- ""
   
   # Add the V position column into the two final data frames 
-  new.ins$Vpos <- as.numeric(unname(mapply(add, x=new.ins$Pos, accno=new.ins$Accno, vloop=new.ins$Vloop)))
-  new.del$Vpos <- as.numeric(unname(mapply(add, x=new.del$Pos, accno=new.del$Accno, vloop=new.del$Vloop)))
-  
+  new.ins$Vpos <- as.numeric(unname(mapply(addPos, pos=new.ins$Pos, accno=new.ins$Header, vloop=new.ins$Vloop)))
+  new.del$Vpos <- as.numeric(unname(mapply(addPos, pos=new.del$Pos, accno=new.del$Header, vloop=new.del$Vloop)))
   
   # ADJUST POSITIONS TO MATCH THE PLACE WHERE THE INSERTION WAS
   new.ins$Pos <- as.numeric(new.ins$Pos) - nchar(new.ins$Seq)
