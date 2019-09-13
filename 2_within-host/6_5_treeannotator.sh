@@ -12,5 +12,5 @@ for filename in $folder*trees; do
     outfile="$(cut -d'.' -f1 <<< `basename $filename`).tree"
     echo $filename
     echo $outdir$outfile
-    treeannotator -heights median -burnin 10000000 $filename $outdir$outfile
+    treeannotator -heights median -burnin 20000000 $filename $outdir$outfile
 done 

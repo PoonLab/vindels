@@ -6,7 +6,7 @@ from seqUtils import *
 
 p = re.compile('.+_([0-9]+)\..+')
 
-template_file = '/home/jpalmer/vindels/2_within-host/template-exponential-lognorm.xml'
+template_file = '/home/jpalmer/vindels/2_within-host/template-skygrid-clock.xml'
 
 #parse(template_file=args.template, fasta_file=args.fasta, stem=args.stem, outfile=args.out, nreps=args.nreps)
 files = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/*.fasta')
@@ -22,7 +22,7 @@ for f in files:
     for rep in ['a','b']:
         name = str(os.path.basename(f)).split(".")[0]  + '-' + rep
         print(name)
-        xmlpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/exponential-lognorm/'
+        xmlpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/2e5-lognorm/'
         out = xmlpath + name + ".xml"
         #os.mkdir(xmlpath+name+'/')
         #stem = xmlpath+name+"/"

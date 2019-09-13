@@ -27,8 +27,10 @@ outpath <- args[2]
 #   
 #   dir.create(paste0(path,"rescaled_multi/",foldername), showWarnings = FALSE)
 #   
+count <- 0
+r.vec2 <- c()
 for (treefile in infolder){
-  
+  count <- count + 1
   print(treefile)
   
   intree <- read.nexus(treefile)
@@ -38,7 +40,7 @@ for (treefile in infolder){
   logname <- paste0(strsplit(filename, "\\.")[[1]][1], ".log")
 
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout-comb/",logname), sep="\t", skip=3)
+  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6_1_BEASTout-p5/",logname), sep="\t", skip=3)
 
   print(logname)
 
@@ -51,14 +53,18 @@ for (treefile in infolder){
   print(interval)
 
   # calculates the rescale factor using the median of the UCLD.MEAN column (can check that this matches UCLD.MEDIAN on tracer)
-  rescale.factor <- median(logfile$ucld.mean[interval[1]:interval[2]])
+  means <- logfile$ucld.mean[interval[1]:interval[2]]
+
+  rescale.factor <- median(means)
   print(rescale.factor)
+  
+  r.vec[count] <- rescale.factor
 
   # rescales all the edge lengths of the tree
   intree$edge.length <- (intree$edge.length * rescale.factor)
 
   # writes the rescaled tree to a new folder called "rescaled"
-  write.tree(intree,paste0(outpath, filename))
+  #write.tree(intree,paste0(outpath, filename))
 }
 #}
 
