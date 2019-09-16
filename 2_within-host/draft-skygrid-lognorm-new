@@ -969,7 +969,7 @@
 				<exponentialPrior mean="0.5" offset="0.0">
 					<parameter idref="alpha"/>
 				</exponentialPrior>
-				<logNormalPrior mean="2.8E-5" stdev="2.5E-5" offset="0.0">
+				<logNormalPrior mean="2.5E-5" stdev="0.001" offset="0.0">
 					<parameter idref="ucld.mean"/>
 				</logNormalPrior>
 				<exponentialPrior mean="0.3333333333333333" offset="0.0">

@@ -2281,16 +2281,15 @@
 				<exponentialPrior mean="0.3333333333333333" offset="0.0">
 					<parameter idref="ucld.stdev"/>
 				</exponentialPrior>
-				<!--<normalPrior mean="0.005" stdev="0.002551">
+                <gammaPrior shape="1.0" scale="1.0E-4" offset="0.0">
 					<parameter idref="ucld.mean"/>
-				</normalPrior>
-				-->
-				<logNormalPrior mean="2.5E-5" stdev="0.001" offset="0.0">
+				</gammaPrior>
+				<!--
+				<logNormalPrior mean="1.5E-4" stdev="0.001" offset="0.0">
 					<parameter idref="ucld.mean"/>
 				</logNormalPrior>
-				<!--<logNormalPrior mean="1.5E-4" stdev="0.001" offset="0.0">
-					<parameter idref="ucld.mean"/>
-				</logNormalPrior> -->
+                -->
+
 				<gammaPrior shape="0.001" scale="1000.0" offset="0.0">
 					<parameter idref="skygrid.precision"/>
 				</gammaPrior>

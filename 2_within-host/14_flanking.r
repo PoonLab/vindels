@@ -4,6 +4,16 @@ require(ape)
 require(stringr)
 source("~/vindels/2_within-host/utils.r")
 
+subs <- function(seq1, seq2){
+  if (nchar(seq1) != nchar(seq2)){
+    return(NA)
+  }
+  c1 <- str_split(seq1, "")[[1]]
+  c2 <- str_split(seq2, "")[[1]]
+  
+  paste(which(unname(mapply(function(x,y){x!=y}, x=c1, y=c2))),collapse=",")
+}
+
 
 path <- '~/PycharmProjects/hiv-withinhost/'
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
@@ -31,12 +41,13 @@ flanking[,"after.diff"] <- as.numeric(flanking[,"after.diff"] )
 
 tab <- table(flanking[flanking$before.bool | flanking$after.bool, "header"])
 all$count.flanking <- 0
-all[all$Accno %in% names(tab),"count.flanking"] <- tab
+all[all$Header %in% names(tab),"count.flanking"] <- tab
 
 
 all$new.count <- 0
 all[all$count.flanking!=0, "new.count"] <- nchar(all[all$count.flanking!=0,"Seq"])
 
+all$subs <- unname(mapply(subs, all$Vseq, all$Anc))
 
 
 # MAXIMUM LIKELIHOOD ESTIMATION 
@@ -69,11 +80,12 @@ mle.result2 <- bbmle::mle2(obj.f2, start=list(prob=1), method = "Brent", lower =
 # GEOMETRIC LIKELIHOOD FUNCTION 
 
 geomll <- function(forward, count, N){
-  N * log(forward) + sum(count) * log(1-forward)
+  N * log(forward) + (sum(count)-N) * log(1-forward)
 }
+slips.whole <- c(all$count.flanking, rep(0,sum(nchar(all$Vseq))-nrow(all)))
 slips.nt <- c(all$new.count, rep(0,sum(nchar(all$Vseq))-nrow(all)))
 slips.nt2 <- slips.nt + 1
-objf3 <- function(forward) -geomll(forward, slips.nt, length(slips.nt2))
+objf3 <- function(forward) -geomll(forward, slips.nt2, length(slips.nt2))
 mle3 <- bbmle::mle2(objf3, start=list(forward=1), method="Brent" , lower=0.9, upper=1)
 
 
