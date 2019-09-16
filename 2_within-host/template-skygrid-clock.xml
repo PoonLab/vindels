@@ -2281,7 +2281,11 @@
 				<exponentialPrior mean="0.3333333333333333" offset="0.0">
 					<parameter idref="ucld.stdev"/>
 				</exponentialPrior>
-				<logNormalPrior mean="2.8E-5" stdev="2.5E-5" offset="0.0">
+				<!--<normalPrior mean="0.005" stdev="0.002551">
+					<parameter idref="ucld.mean"/>
+				</normalPrior>
+				-->
+				<logNormalPrior mean="1.5E-4" stdev="0.001" offset="0.0">
 					<parameter idref="ucld.mean"/>
 				</logNormalPrior>
 				<gammaPrior shape="0.001" scale="1000.0" offset="0.0">
