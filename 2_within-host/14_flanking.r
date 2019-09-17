@@ -2,15 +2,15 @@
 # trying to develop a model for interstrand jumping of polymerase 
 require(ape)
 require(stringr)
-source("~/vindels/2_within-host/utils.r")
+source("~/Github/vindels/2_within-host/utils.r")
 
 subs <- function(seq1, seq2){
-  if (nchar(seq1) != nchar(seq2)){
-    return(NA)
-  }
+  # if (nchar(seq1) != nchar(seq2)){
+  #   return(NA)
+  # }
   c1 <- str_split(seq1, "")[[1]]
   c2 <- str_split(seq2, "")[[1]]
-  
+
   paste(which(unname(mapply(function(x,y){x!=y}, x=c1, y=c2))),collapse=",")
 }
 
@@ -39,9 +39,13 @@ flanking[,"after.offset"] <- as.numeric(flanking[,"after.offset"] )
 flanking[,"before.diff"] <- as.numeric(flanking[,"before.diff"] )
 flanking[,"after.diff"] <- as.numeric(flanking[,"after.diff"] )
 
-tab <- table(flanking[flanking$before.bool | flanking$after.bool, "header"])
+# used to remove 
+all <- all[-as.numeric(rownames(all[all$Vlength==0,])),]
+
+# retrieves insertions that have at least one instance of flanking sequence 
+tabs <- table(flanking[flanking$before.bool | flanking$after.bool, "header"])
 all$count.flanking <- 0
-all[all$Header %in% names(tab),"count.flanking"] <- tab
+all[all$Header %in% names(tab),"count.flanking"] <- tabs
 
 
 all$new.count <- 0
@@ -89,9 +93,13 @@ objf3 <- function(forward) -geomll(forward, slips.nt2, length(slips.nt2))
 mle3 <- bbmle::mle2(objf3, start=list(forward=1), method="Brent" , lower=0.9, upper=1)
 
 
-# NEGATIVE BINOMIAL LIKELIHOOD FUNCTION 
-negbinomll <- function(prob, scc, total)
+# CUSTOM GEOMETRIC LIKELIHOOD FUNCTION 
+custom1 <- function(slip, mut, count, N){
+  N * log(slip) + sum(count) * log(1-slip) + sum(count) * log(1-mut)
+}
 
+obj4 <- function(slip, mut) -custom1(slip, mut, slips.nt, length(slips.nt))
+mle4 <- bbmle::mle2(obj4, start=list(slip=1, mut=1), method="L-BFGS-B",lower=1e-12, upper=1)
 
 x <- runif(5000,min=1e-7, max=1)
 y <- unname(sapply(x, objf3))
