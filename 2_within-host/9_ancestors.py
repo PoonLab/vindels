@@ -8,26 +8,31 @@ from seqUtils import *
 
 def getTerminals(anFile):
     terminals = {}
-    
     with open(anFile) as handle:
         data = parse_fasta(handle)
 
     # pos1 and pos2 check for an ancestor that directly links to a tip 
-    pos1 = re.compile("^>\([^(:,)]*:[^(:,)]*,")
+    pos1 = re.compile("^\([^(:,)]*:[^(:,)]*,")
     pos2 = re.compile(",[^(:,)]*:[^(:,)]*\)$")
-    
+
     for entry in data.keys():
-        #print(entry)
-        #check = cherry.match(entry)
+        
         check1 = pos1.search(entry)
         check2 = pos2.search(entry)
-        #print("HELLO")
-        # FORMAT : terminals[header] = [sequence, ancestor]
+
+        # FORMAT : trm1[header] = [sequence, ancestor]
         if check1 != None:
+  
+            # header of the first sequence only 
             header = entry.split(",")[0].strip(">(,").split(":")[0]
-            #print(check1)
+
+            # retrieve the tip seq 
             tip = data[header]
+
+            # retrieve the anc seq and make it upper case 
             anc = data[entry].upper()
+
+            # retrieve just the relevant nts from the alignment
             new_tip = []
             new_anc = []
             for t, a in zip(tip,anc):
@@ -40,6 +45,7 @@ def getTerminals(anFile):
             terminals[header] = [new_tip, new_anc]
 
         if check2 != None:
+ 
             header = entry.split(",")[-1].strip(",)").split(":")[0]
             
             tip = data[header]
@@ -54,7 +60,7 @@ def getTerminals(anFile):
             new_anc = "".join(new_anc)
 
             terminals[header] = [new_tip, new_anc]
-
+    
     # RETURNS:
     # terminals[accession number] = [sequence, ancestral sequence]
     return terminals
@@ -101,9 +107,10 @@ def extractIndels(anFile, vSeqFile):
 
     # {"accno":[seq1,anseq]}
     terminals = getTerminals(anFile)
-
+    
     # returns a list of 1) vregion sequences and 2) boundaries for those sequences
     vregions, boundaries = getVRegions(vSeqFile)
+
     iDict = {}
     dDict = {}
     vSeq = {}
@@ -257,8 +264,12 @@ def main():
         if os.path.isfile(vPath+csvfile):
             ins_out = open(outpath+"ins/"+reconfile,'w')
             del_out = open(outpath+"del/"+reconfile,'w')
+            print(csvfile)
+            
             iDict, dDict, vSeq, aSeq = extractIndels(infile, vPath+csvfile)
-                
+            
+            print(len(iDict))
+            print(len(vSeq))
             ins_out.write("header,ins,Vloop,Vlen,Vseq,anc\n")
             del_out.write("header,del,Vloop,Vlen,Vseq,anc\n")
 
@@ -281,7 +292,7 @@ def main():
                     newaccno = accno + "_" + str(replicate) + "_" + str(k+1)
                     del_out.write(",".join([newaccno, delList, str(k+1), str(len(vsequences[k])), vsequences[k], asequences[k]])+"\n")
         
-        
+            
     print(totalseqs)
 
 

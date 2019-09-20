@@ -2,7 +2,7 @@
 # trying to develop a model for interstrand jumping of polymerase 
 require(ape)
 require(stringr)
-source("~/Github/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 
 subs <- function(seq1, seq2){
   # if (nchar(seq1) != nchar(seq2)){
@@ -45,7 +45,7 @@ all <- all[-as.numeric(rownames(all[all$Vlength==0,])),]
 # retrieves insertions that have at least one instance of flanking sequence 
 tabs <- table(flanking[flanking$before.bool | flanking$after.bool, "header"])
 all$count.flanking <- 0
-all[all$Header %in% names(tab),"count.flanking"] <- tabs
+all[all$Header %in% names(tabs),"count.flanking"] <- tabs
 
 
 all$new.count <- 0
@@ -93,9 +93,12 @@ objf3 <- function(forward) -geomll(forward, slips.nt2, length(slips.nt2))
 mle3 <- bbmle::mle2(objf3, start=list(forward=1), method="Brent" , lower=0.9, upper=1)
 
 
+count.subs <- function()
+
+
 # CUSTOM GEOMETRIC LIKELIHOOD FUNCTION 
-custom1 <- function(slip, mut, count, N){
-  N * log(slip) + sum(count) * log(1-slip) + sum(count) * log(1-mut)
+custom1 <- function(slip, mut, len, subs, N){
+  N * log(slip) + sum(count) * log(1-slip) + log(choose(count, subs)) + subs * log(mut) + (counts - subs) * log(1-mut)
 }
 
 obj4 <- function(slip, mut) -custom1(slip, mut, slips.nt, length(slips.nt))

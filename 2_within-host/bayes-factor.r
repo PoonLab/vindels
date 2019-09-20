@@ -4,7 +4,7 @@ rmeans <- c()
 files <- c()
 for (fullpath in logfiles){
   filename <- basename(fullpath)
-  strpath <- paste0("~/11BEAST-constant/output/", filename)
+  strpath <- paste0("~/11BEAST/output/", filename)
   #print(filename)
   if (file.exists(strpath)){
     print(filename)

@@ -21,6 +21,8 @@ transitionCounts <- function(seq){
 checkDiff <- function(seq1, seq2){
   if (seq1 == seq2){
     return(NULL)
+  }else if (nchar(seq1) != nchar(seq2)){
+    return(NA)
   }
   
   seq1 <- str_split(seq1, "")[[1]]
@@ -56,6 +58,7 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
     # needs to be enough nucleotides to check
     if ((pos - len - idx) >= 0){
       before <- substr(vseq, pos-len-idx+1, pos-idx)
+      #print(before)
       diffs <- checkDiff(indel, before)
       if (length(diffs) < lowest){
         lowest <- length(diffs)
@@ -78,7 +81,7 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
   for (idx in 0:offset){
     if ((pos + len + idx) <= nchar(vseq)){
       # then the PRECEDING position can be checked
-      after <- substr(vseq, pos+idx+1, pos+len+idx)
+      after <- substr(vseq, pos+len+idx+1, pos+2*len+idx)
       #print(after)
       diffs <- checkDiff(indel, after)
       if (length(diffs) < lowest){
