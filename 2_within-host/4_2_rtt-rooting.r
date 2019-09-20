@@ -35,7 +35,7 @@ for (file in rtdfolder){
   
   # create a figure and save it 
   png(file=paste("~/vindels/Figures/root-to-tip/",name,"-rtt.png",sep=""),width=800,height=600, res=120)
-  plot(jitter(lens) ~ jitter(tip.dates), main=name)
+  plot(jitter(lens) ~ jitter(tip.dates), main=name, xlab="Collection Date (Days since a start point)", ylab="Root to tip branch length (Expected subs/site)")
   abline(linear)
   dev.off()
   
