@@ -45,13 +45,13 @@ for (file in rtdfolder){
   
   subtype <- c(subtype, sapply(rtd$tip.label, function(x)strsplit(x,"\\.")[[1]][1]))
   # create a figure and save it 
-  png(file=paste("~/vindels/Figures/root-to-tip/",name,"-rtt.png",sep=""),width=800,height=600, res=120)
+  png(file=paste("~/vindels/Figures/root-to-tip/signal/",name,"-rtt.png",sep=""),width=800,height=600, res=120)
   plot(jitter(lens) ~ jitter(tip.dates), main=name, xlab="Collection Date (Days since a start point)", ylab="Root to tip branch length (Expected subs/site)")
   abline(linear)
   dev.off()
   
   
-  #write.tree(rtd, file=paste0("~/PycharmProjects/hiv-withinhost/4_5_Raxml/guide_trees/", filename))
+  write.tree(rtd, file=paste0("~/PycharmProjects/hiv-withinhost/4_5_Raxml/signal/guide_trees/", filename))
 }
 print(table(subtype))
 names(ranges) <- names
