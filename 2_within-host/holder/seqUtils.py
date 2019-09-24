@@ -1,5 +1,6 @@
 import sys
 import re
+
 import math
 import random
 
@@ -20,14 +21,23 @@ def convert_fasta (handle):
     result.append([h,sequence]) # handle last entry
     return result
 
-
-def parse_fasta (handle):
+def alignIndex(seq):
+    ai = 0
+    index = {}
+    for n, char in enumerate(seq):
+        if char != '-':
+            index.update({ai:n})
+            ai += 1
+    return index
+            
+def parse_fasta(handle):
     """
     Parse open file as FASTA, return dictionary of 
     headers and sequences as key-value pairs.
     """
     res = {}
     sequence = ''
+    h = ''
     for i in handle:
         if i[0] == '$': # skip h info
             continue
@@ -42,6 +52,53 @@ def parse_fasta (handle):
             sequence += i.strip('\n').upper()
     res.update({h: sequence})
     return res
+
+def parse_fasta2(handle):
+    # Modified parse fasta to return a dictionary of lists containing a tuple of the reference [0] and the query [1] sequences
+    res = {}
+    nt = ''
+    head = ''
+    for i in handle:
+        if i == "\n":
+            continue
+        elif i[0] == '>' or i[0] == '#':
+            if ">ref" in i:
+                continue
+            elif ">query" in i:                    #Append the reference sequence
+                res.update({head:[]})
+                res[head].append(nt)
+                nt = ''                             # reset containers
+            elif len(nt) > 0 and ">query" not in i:             #Append the query sequence // Occurs when reaching the header of a new sequence
+                res[head].append(nt)
+                nt = ''
+                #Parse the new header
+                head = i.strip('\n')[1:]
+
+            else:
+                head = i.strip('\n')[1:]         #Occurs on the first header
+        else:
+            nt += i.strip('\n').upper()
+
+    res[head].append(nt)
+    return res
+
+def get_boundaries (str):
+
+    gap_prefix = re.compile('^[-]+')
+    gap_suffix = re.compile('[-]+$')
+    # return a tuple giving indices of subsequence without gap prefix and suffix
+    res = [0,len(str)]
+    left = gap_prefix.findall(str)
+    right = gap_suffix.findall(str)
+    if left:
+        res[0] = len(left[0])
+
+    if right:
+        res[1] = len(str) - len(right[0])
+
+    return res
+
+
 
 def iter_fasta (handle):
     """
@@ -151,7 +208,7 @@ def translate_nuc (seq, offset, resolve=False, return_list=False):
 	aa_seq = ''	# use to align against reference, for resolving indels
 	
 	# loop over codon sites in nucleotide sequence
-	for codon_site in xrange(0, len(seq), 3):
+	for codon_site in range(0, len(seq), 3):
 		codon = seq[codon_site:codon_site+3]
 		
 		if len(codon) < 3:
@@ -433,7 +490,7 @@ def plurality_consensus(column, alphabet='ACGT', resolve=False):
     for char in column:
         if char in alphabet:
             freqs[char] += 1
-        elif char in mixture_dict:
+        elif mixture_dict.has_key(char):
             # handled ambiguous nucleotides with equal weighting
             resolutions = mixture_dict[char]
             for char2 in resolutions:
@@ -444,7 +501,7 @@ def plurality_consensus(column, alphabet='ACGT', resolve=False):
             
     base = max(freqs, key=lambda n: freqs[n])
     max_count = freqs[base]
-    possib = list(filter(lambda n: freqs[n] == max_count, freqs))
+    possib = filter(lambda n: freqs[n] == max_count, freqs)
     if len(possib) == 1:
         return possib[0]
     elif "-" in possib:
@@ -629,3 +686,4 @@ def bootstrap(fasta, reps=1):
         return res[0]
     else:
         return res
+

@@ -241,7 +241,6 @@ def main():
 
     # folder of historian outputs 
     hFolder = glob(sys.argv[1]+"*.fasta")
-
     # output path for indel csv files
     outpath = sys.argv[2]
     if not os.path.isdir(outpath+"ins/"):

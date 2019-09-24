@@ -5,7 +5,8 @@ files <- c()
 for (fullpath in logfiles){
   filename <- basename(fullpath)
   strpath <- paste0("~/11BEAST/output/", filename)
-  #print(filename)
+#~/PycharmProjects/hiv-withinhost/6_8_BEAST-constant/output/", filename)
+  print(filename)
   if (file.exists(strpath)){
     print(filename)
     print(strpath)
@@ -42,5 +43,5 @@ for (fullpath in logfiles){
 
 }
 
-bayes <- data.frame(filename=files, skygrid=rmeans, constant=smeans)
+bayes2 <- data.frame(filename=files, skygrid=rmeans, constant=smeans)
 

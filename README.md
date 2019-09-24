@@ -12,3 +12,9 @@ Overview:
 
 
 
+
+
+# kaitlyns idea
+- look at the flanking regions left and right of the indel event
+- see if +/- 5 nucleotides might contain higher proportions of A or T 
+- 
