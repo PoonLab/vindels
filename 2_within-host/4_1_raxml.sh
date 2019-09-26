@@ -1,17 +1,14 @@
 #!/bin/bash
 
+if [ $# -ne 2 ];
+then 
+	echo "USAGE: bash 4_1_raxml.sh [input directory] [output directory]"
+	exit 0
+fi
+
 # save the arguments as variables so they can be edited easily
 inDir=$1
 outDir=$2
-
-# verify that the provided arguments are valid directories 
-if [ ! -d $inDir ]; then
-	echo "Invalid first directory provided. Exiting."
-	exit 0
-elif [ ! -d $outDir ]; then 
-	echo "Invalid second directory provided. Exiting."
-	exit 0
-fi
 
 # check whether the input and output directories end with a slash 
 # add a slash if they do not 
@@ -26,10 +23,20 @@ then
 fi
 
 
+# verify that the provided arguments are valid directories 
+if [ ! -d $inDir ]; then
+	echo "Invalid first directory provided. Exiting."
+	exit 0
+elif [ ! -d $outDir ]; then 
+	echo "Invalid second directory provided. Exiting."
+	exit 0
+fi
+
+
+
 for fullname in $inDir*.fasta; do
 	echo $fullname
-	name="$(cut -d'.' -f1 <<< `basename $fullname`).tree"
-	echo $outDir$name
-	raxmlHPC -s $fullname -p 123 -n $name -m GTRGAMMA
+	treename="$(cut -d'.' -f1 <<< `basename $fullname`).tree"
+	raxmlHPC -s $fullname -p 123 -n $treename -m GTRGAMMA
 done
 
