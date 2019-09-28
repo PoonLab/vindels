@@ -16,7 +16,7 @@ def convert_fasta (handle):
                 sequence = ''   # reset
             h = line.strip('>#\n')
         else:
-            sequence += line.strip('\n')
+            sequence += line.strip('\n').upper()
             
     result.append([h,sequence]) # handle last entry
     return result

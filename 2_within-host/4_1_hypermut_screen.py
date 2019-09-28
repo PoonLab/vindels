@@ -18,7 +18,7 @@ for msafile in msafolder:
     with open(msafile, "rU") as handle:
         msa = parse_fasta(handle)
 
-    # remove preceding zeros in all dates 
+    # extract all dates 
     dates = []
     for header in msa:
         main, date = header.split("_")
@@ -26,43 +26,47 @@ for msafile in msafolder:
         dates.append(int(date))
     lowest = min(dates)
     
+    # creates a data frame with MSA headers, MSA seqs, and extracted dates
     df = pd.DataFrame({'headers':list(msa.keys()), 'date': dates, 'sequences':list(msa.values())})
     tp1 = df.where(df['date'] == lowest)
     tp1 = tp1.dropna()
-    #print(tp1)
+
+    # take the headers/seqs from TIME POINT 1 and load them into a list of [header,seq] lists
     fasta1 = [[a,b] for a,b in zip(tp1['headers'], tp1['sequences'])]
-    #print([x[0] for x in fasta1])
-    cnsus = consensus(fasta1).lower()
+
+    cnsus = consensus(fasta1).upper()
     
+    # creates a temp MSA file with the consensus sequence at the top
+    
+
     tpath = "/home/jpalmer/vindels/2_within-host/hm-temp.fasta"
+    if filename in ["111848-1.fasta", "111848-2.fasta"]:
+        tpath = "/home/jpalmer/vindels/2_within-host/"+filename
     tfile = open(tpath,"w")
     tfile.write(">REF\n"+cnsus+"\n")
     for header in msa:
         tfile.write(">"+header+"\n"+msa[header]+"\n")
     tfile.close()
 
-    #print(filename)
-    print(len(msa))
-
     # performs the hypermut screen on the prelim MSA 
     call = subprocess.check_output(["python","/home/jpalmer/Poplars/poplars/hypermut.py", tpath ])
     
     # extracts the hypermutated sequences
     total, hm = re.split("\n\n", call)
-    #print(total)
+
+    # parse the total list of sequences 
+    total = total.split("\n")[1:]
+    total = [x.split(" ")[0] for x in total]
+    
+    # parse the list of hypermutated sequences 
     hm = hm.split("\n")[1:-1]
     hm = [x.split(" ")[0] for x in hm]
 
-    total = total.split("\n")[1:]
-    total = [x.split(" ")[0] for x in total]
-    print(len(total))
-    print(len(hm))
-    #print(hm)
-    #print(len(hm))
-
+    # open the full length sequences for parsing  
     fullfile = open(full_path+filename, "rU")
     fulldata = parse_fasta(fullfile)
-    # writes only the non-hypermutated sequences to a screened folder
+
+    # write only the non-hypermutated sequences to a screened folder
     output = open(full_path+"hm-screen/"+filename, "w")
     count = 0
     for header in total:
