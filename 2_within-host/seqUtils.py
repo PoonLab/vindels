@@ -100,8 +100,8 @@ def get_boundaries (str):
 
     return res
 
-def write_fasta(data, filename):
-    outfile = open(filename, "w")
+def write_fasta(data, filename, mode="w"):
+    outfile = open(filename, mode)
 
     for header in data.keys():
         outfile.write(">"+header+"\n"+data[header]+"\n")
