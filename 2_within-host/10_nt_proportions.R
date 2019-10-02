@@ -113,9 +113,9 @@ delOriginal <- function(indel, pos, vseq){
   }
   vseq
 }
-source("~/vindels/2_within-host/utils.r")
+source("~/Github/vindels/2_within-host/utils.r")
 # Lio
-path <- "~/PycharmProjects/hiv-withinhost/"
+path <- "~/Lio/"
 
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))
@@ -288,8 +288,8 @@ write.table(del.glycs2[,c(1,2,6,3,4,5,7)],paste0(path, "13_nglycs/del.csv"), row
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
 
-write.csv(all.ins[,c(1,2,4,5,6)], "~/PycharmProjects/hiv-withinhost/12_lengths/ins-full.csv")
-write.csv(all.del[,c(1,2,4,5,6)], "~/PycharmProjects/hiv-withinhost/12_lengths/del-full.csv")
+write.csv(all.ins[,c(1,2,4,5,6)], "~/Lio/12_lengths/ins-full.csv")
+write.csv(all.del[,c(1,2,4,5,6)], "~/Lio/12_lengths/del-full.csv")
 
 
 nucleotides <- c("A","C","G","T")
@@ -320,10 +320,10 @@ total.del <- total.del[total.del$len>1, ]
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
-write.csv(ins.glycs2[,c(1,2,6,3,4,5,7)], "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins.csv")
-write.csv(del.glycs2[,c(1,2,6,3,4,5,7)], "~/PycharmProjects/hiv-withinhost/10_nucleotide/del.csv")
+write.csv(ins.glycs2[,c(1,2,6,3,4,5,7)], "~/Lio/10_nucleotide/total-ins.csv")
+write.csv(del.glycs2[,c(1,2,6,3,4,5,7)], "~/Lio/10_nucleotide/total-del.csv")
 
-# DINUCLEOTIDE PROPORTIONS OUTPUT 
+# FLANKING INSERTIONSPROPORTIONS OUTPUT 
 # ------------------------------------
 write.csv(ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep.csv")
 write.csv(del, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-sep.csv")
@@ -435,16 +435,16 @@ del.nt$sign <- dsign
 require(RColorBrewer)
 colors <- brewer.pal(4, "Set1")
 
-cex=2
+cex=1
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
 lim = c(0.1,0.45)
 plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=indel.nt$counts*1.8*10^(-2), main="Nucleotide Proportions")
-title(ylab="Proportion Inside Indels", line=3.5,cex.lab=1.75)
-title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.38,0.24,legend=nucleotides, pch=21,cex=1.9, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(22,23),cex=1.9, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=2.5, main="Nucleotide Proportions")
+title(ylab="Proportion Inside Indels", line=3,cex.lab=1.3)
+title(xlab="Proportion in Variable Loops", line=3,cex.lab=1.3)
+legend(0.38,0.24,legend=nucleotides, pch=21,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(22,23),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 par(xpd=F)
 abline(0,1)
 
@@ -506,8 +506,8 @@ plot(ins.props[,c(3,2)], pch=ins.props[,4]+20, bg=ins.props[,1],xlim=lim,ylim=li
 #text(0.245,0.452,labels="A", cex=1.5)
 title(ylab="Proportion Inside Insertions", line=3.5,cex.lab=1.75)
 title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.43,0.18,legend=nucleotides, pch=21,cex=1.9, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.33,0.18,legend=vloops2, pch=c(21,22,24,25),cex=1.9, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.43,0.18,legend=nucleotides, pch=21,cex=1.5, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.33,0.18,legend=vloops2, pch=c(21,22,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 par(xpd=F)
 abline(0,1)
 
@@ -522,15 +522,15 @@ colors <- brewer.pal(4, "Set1")
 cex=2
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
-lim = c(0.1,0.45)
+lim = c(0.1,0.50)
 plot(del.props[,c(3,2)], pch=del.props[,4]+20, bg=del.props[,1],xlim=lim,ylim=lim,
      cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.5, main="Deletions")
 #text(0.187,0.475,labels="a)", cex=1.5)
 #text(0.245,0.452,labels="A", cex=1.5)
 title(ylab="Proportion Inside Deletions", line=3.5,cex.lab=1.75)
 title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.43,0.18,legend=nucleotides, pch=21,cex=1.9, pt.bg=del.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.33,0.18,legend=vloops2, pch=c(21,22,24,25),cex=1.9, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.44,0.24,legend=nucleotides, pch=21,cex=1.5, pt.bg=del.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.35,0.24,legend=vloops2, pch=c(21,22,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 par(xpd=F)
 abline(0,1)
 

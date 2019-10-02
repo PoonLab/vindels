@@ -31,9 +31,9 @@ categorize <- function(seqList){
 getLength <- function(seq){
   
 }
-
-iLength <- read.csv("~/PycharmProjects/hiv-withinhost/12_lengths/ins-full.csv", row.names=1, stringsAsFactors = F)
-dLength <- read.csv("~/PycharmProjects/hiv-withinhost/12_lengths/del-full.csv", row.names=1, stringsAsFactors = F)
+path <- "~/Lio/"
+iLength <- read.csv("~/Lio/12_lengths/ins-full.csv", row.names=1, stringsAsFactors = F)
+dLength <- read.csv("~/Lio/12_lengths/del-full.csv", row.names=1, stringsAsFactors = F)
  
 iLength <- iLength[iLength$Count>0,]
 dLength <- dLength[dLength$Count>0,]
@@ -56,8 +56,8 @@ dLength$Bin <- factor(dLength$Bin,levels=c(">9","9","7-8", "6", "4-5","3", "1-2"
 itab <- table(iLength$Bin, iLength$Vloop)
 dtab <- table(dLength$Bin, dLength$Vloop)
 
-idf <- as.data.frame(tab)
-ddf <- as.data.frame(tab)
+idf <- as.data.frame(itab)
+ddf <- as.data.frame(dtab)
 
 colnames(idf) <- c("Bin", "Vloop", "Count")
 colnames(ddf) <- colnames(idf)

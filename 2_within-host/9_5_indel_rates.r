@@ -66,8 +66,8 @@ splitRows <- function(row){
 
 
 # INSERTION PARSING ----------
-ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/ins_20/*.csv")
-dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/del_20/*.csv")
+ifolder <- Sys.glob("~/Lio/9Indels/ins_20/*.csv")
+dfolder <- Sys.glob("~/Lio/9Indels/del_20/*.csv")
 all.ins <- data.frame()
 all.del <- data.frame()
 csv.ins <- data.frame()
@@ -120,7 +120,7 @@ for (file in 1:length(ifolder)){
   dCSV$Count <- sapply(dCSV$Del, csvcount)
   
   # reads in the tree
-  tre <- read.tree(paste0("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim_multi/",filename , ".tree.sample"))
+  tre <- read.tree(paste0("~/Lio/7SampleTrees/prelim_multi/",filename , ".tree.sample"))
   
   # adjusts the tre tip labels to match the accession numbers
   #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
