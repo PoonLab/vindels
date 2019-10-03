@@ -3,8 +3,8 @@
 nucleotides <- c("A","C","G","T")
 
 
-total.ins <- read.csv("~/PycharmProjects/hiv-withinhost/11_dinucleotide/total-ins.csv", stringsAsFactors = F)
-total.del <- read.csv("~/PycharmProjects/hiv-withinhost/11_dinucleotide/total-del.csv", stringsAsFactors = F)
+total.ins <- read.csv("~/Lio/10_nucleotide/total-ins.csv", stringsAsFactors = F, row.names=1)
+total.del <- read.csv("~/Lio/10_nucleotide/total-del.csv", stringsAsFactors = F, row.names = 1)
 
 
 dinucleotide <- function(seq){
