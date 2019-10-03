@@ -1,14 +1,13 @@
 #!/bin/bash
 
-if [ $# -ne 2 ];
+if [ $# -ne 1 ];
 then 
-	echo "USAGE: bash 4_1_raxml.sh [input directory] [output directory]"
+	echo "USAGE: bash 4_3_raxml.sh [input directory]"
 	exit 0
 fi
 
 # save the arguments as variables so they can be edited easily
 inDir=$1
-outDir=$2
 
 # check whether the input and output directories end with a slash 
 # add a slash if they do not 
@@ -17,22 +16,12 @@ then
 	inDir="$1/"	
 fi
 
-if [ ${outDir:(-1)} != "/" ];
-then
-	outDir="$2/"	
-fi
-
 
 # verify that the provided arguments are valid directories 
 if [ ! -d $inDir ]; then
 	echo "Invalid first directory provided. Exiting."
 	exit 0
-elif [ ! -d $outDir ]; then 
-	echo "Invalid second directory provided. Exiting."
-	exit 0
 fi
-
-
 
 for fullname in $inDir*.fasta; do
 	echo $fullname

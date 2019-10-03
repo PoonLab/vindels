@@ -100,11 +100,18 @@ def get_boundaries (str):
 
     return res
 
-def write_fasta(data, filename, mode="w"):
+def write_fasta_d(data, filename, mode="w"):
     outfile = open(filename, mode)
 
     for header in data.keys():
         outfile.write(">"+header+"\n"+data[header]+"\n")
+    outfile.close()
+def write_fasta_c(data, filename, mode="w"):
+    outfile = open(filename, mode)
+
+    for elem in data:
+        header, seq = elem
+        outfile.write(">"+header+"\n"+seq+"\n")
     outfile.close()
 def iter_fasta (handle):
     """
