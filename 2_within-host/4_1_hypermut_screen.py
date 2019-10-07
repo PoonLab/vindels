@@ -8,8 +8,16 @@ from seqUtils import *
 import pandas as pd
 import re
 
-msafolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/prelim/*.fasta")
+msa_path = "/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/prelim/"
+msafolder = glob(msa_path+"*.fasta")
 full_path = "/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/"
+
+print(msafolder)
+with open(msa_path+"111848/blacklist-848.txt","rU") as handle:
+    blacklist = handle.readlines()
+
+blacklist = [x.strip("\n") for x in blacklist]
+
 for msafile in msafolder:
     
     filename = os.path.basename(msafile)
@@ -21,8 +29,7 @@ for msafile in msafolder:
     # extract all dates 
     dates = []
     for header in msa:
-        main, date = header.split("_")
-        #print(date)
+        date = header.split("_")[1]
         dates.append(int(date))
     lowest = min(dates)
     
@@ -30,6 +37,8 @@ for msafile in msafolder:
     df = pd.DataFrame({'headers':list(msa.keys()), 'date': dates, 'sequences':list(msa.values())})
     tp1 = df.where(df['date'] == lowest)
     tp1 = tp1.dropna()
+    
+    #print(tp1)
 
     # take the headers/seqs from TIME POINT 1 and load them into a list of [header,seq] lists
     fasta1 = [[a,b] for a,b in zip(tp1['headers'], tp1['sequences'])]
@@ -37,11 +46,9 @@ for msafile in msafolder:
     cnsus = consensus(fasta1).upper()
     
     # creates a temp MSA file with the consensus sequence at the top
-    
-
     tpath = "/home/jpalmer/vindels/2_within-host/hm-temp.fasta"
-    if filename in ["111848-1.fasta", "111848-2.fasta"]:
-        tpath = "/home/jpalmer/vindels/2_within-host/"+filename
+    #if filename in ["111848-1.fasta", "111848-2.fasta"]:
+        #tpath = "/home/jpalmer/vindels/2_within-host/"+filename
     tfile = open(tpath,"w")
     tfile.write(">REF\n"+cnsus+"\n")
     for header in msa:
@@ -66,9 +73,24 @@ for msafile in msafolder:
     fullfile = open(full_path+filename, "rU")
     fulldata = parse_fasta(fullfile)
 
+    if filename in ["111848-1.fasta", "111848-2.fasta"]:
+        print(len(total) - len(hm))
+        for name in blacklist:
+            try:
+                total.remove(name)
+            except:
+                print".",
+        print(len(total) - len(hm))
+
     # write only the non-hypermutated sequences to a screened folder
-    output = open(full_path+"hm-screen/"+filename, "w")
+    output = open(full_path+"hm-screen/"+filename, "w+")
     count = 0
+    if filename=="OS.fasta":
+        print(total)
+        print(len(total))
+        print(hm)
+        print(fulldata.keys())
+        print(len(fulldata.keys()))
     for header in total:
         if header not in hm:
             count += 1

@@ -19,7 +19,8 @@ c_regions = [(0,390),  (588,885) , (993, 1152), (1254, 1377), (1410, 1532)]
 nov_regions = [(0,78),(78,198),(495,603),(762,864),(987,1020)]
 
 folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/2PairwiseAA/*.fasta")
-print(folder)
+print([os.path.basename(x) for x in folder])
+print(len(folder))
 vseqdict = {}
 studyno = 0
 full = {}
@@ -58,16 +59,18 @@ for infile in folder:
         else:
             header = header.strip("\r._")
             fields = header.split("_")
-            patid = header.split("_")[0]
+            patid = fields[0]
+            if patid == "0Ref":
+                continue
             # NEW HEADER FORMAT 
             # Subtype . Identifier . Identifier #2 . Date  
-            #header = "C.-.-."+fields[0]+"."+fields[2]+".-.-_"+fields[1]
+            header = "C.-.-."+fields[0]+"."+fields[2]+".-.-_"+fields[1]
             
 
         #extract the reference and query sequences 
         ref, query = seq
 
-        #query = query.strip("\r")
+        query = query.strip("\r")
 
 
         #creates an alignment index to locate the variable regions 
@@ -106,6 +109,9 @@ for infile in folder:
         if patid in full.keys():
             #only overwrite and replace the existing entry in FULL if the new entry is bigger
             if len(patdict[patid]) > len(full[patid]):
+                #print(patid)
+                #print("old: "+str(len(full[patid])))
+                #print("new: "+str(len(patdict[patid])))
                 full[patid] = patdict[patid]
         #if patient hasnt been loaded yet, make a new entry
         else:
@@ -115,11 +121,18 @@ for infile in folder:
 total = 0
 patcount = 0
 for pat in full.keys():
-    print(pat)
-    if not pat.isalpha():
-        dates = [[], [], [], [],[]]
+    #print(pat)
 
+
+    # FILTER OUT PATIENT DATA SETS 
+    # =========================================
+    if not pat.isalpha():
+
+        # dates = [tp1, tp2, tp3, tp4, NUMBER OF TIMEPOINTS]
+        dates = [[], [], [], [],[]]
+        print(pat)
         for header in full[pat].keys():
+            #print(header)
             fields = header.split(".")
 
             #these are the four date fields to check 
@@ -127,6 +140,7 @@ for pat in full.keys():
             dates[1].append(fields[6])
             dates[2].append(fields[7])
             dates[3].append(fields[8])
+
             #this one is just a count of how many timepoints
             dates[4].append(fields[9])
         
@@ -166,7 +180,7 @@ for pat in full.keys():
             date = fields[bestIdx]
             
             #simple filter to get rid of any 2222 values 
-            if date == "2222" or date == "-":
+            if date == "2222" or date == "8888" or date == "-":
                 del full[pat][header]
                 del vseqdict[pat][header]
 
@@ -215,18 +229,15 @@ for pat in full.keys():
     if len(vseqdict[pat]) == 0 or len(full[pat]) == 0:
         continue    
 
-    #outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta2","w")
-    #outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv2", "w")
-    #outputv.write("header,V1,start.1,stop.1,V2,start.2,stop.2,V3,start.3,stop.3,V4,start.4,stop.4,V5,start.5,stop.5\n")
-
     patcount += 1
-    
-    '''
-    for n, header in enumerate(full[pat].keys()):
-        #print(pat)
-        #total += 1
 
-        #final[pat][header] = full[pat][header]
+
+    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta","w")
+    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv3", "w")
+    outputv.write("header,V1,start.1,stop.1,V2,start.2,stop.2,V3,start.3,stop.3,V4,start.4,stop.4,V5,start.5,stop.5\n")
+    
+    for n, header in enumerate(full[pat].keys()):
+
         if not pat.isalpha():
             fields = header.split(".")
             date = fields[bestIdx]
@@ -245,35 +256,11 @@ for pat in full.keys():
             outputfull.write(">" + newheader + "\n" + full[pat][header] + "\n")
             outputv.write(newheader + "," + vseqdict[pat][header] + "\n")
         else:
+            #newheader = ".".join(["C","-","-",fields[0], fields[2], "-","-"]) + "_" + fields[1]
             outputfull.write(">"+ header + "\n" + full[pat][header] + "\n")
             outputv.write(header + "," + vseqdict[pat][header] + "\n")
-    '''
-'''
-final = {}
-for pat in full.keys():
-    for header in full[pat].keys():
-        total += 1
-        subtype = header.split(".")[0]
-        #print(subtype)
-        if subtype not in final.keys():
-            final[subtype] = {}
-        final[subtype][header] = full[pat][header]
-
-        
-
-
-print(total)
-sttotal = 0
-for st in final.keys():
-    if len(final[st]) > 1:
-        print(st)
-        print(str(len(final[st])))
-    sttotal += len(final[st])
-print(sttotal)
+    
 print(patcount)
-'''
-
-
 
 '''
 cseq = ""

@@ -3,9 +3,9 @@ from glob import glob
 import os
 from gotoh2 import *
 from seqUtils import *
+import time
 
-
-
+start_time = time.time()
 def get_boundaries(str):
     gap_prefix = re.compile('^[-]+')
     gap_suffix = re.compile('[-]+$')
@@ -35,7 +35,7 @@ vlad_aaref = translate_nuc(vlad_ntref, 0)
 
 print(vlad_aaref)
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/novitsky.fasta")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/*.fasta")
 
 pairwise = {}
 
@@ -50,11 +50,10 @@ for infile in folder:
         data = parse_fasta(handle)
     unequal = []
 
-    output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/2PairwiseAA/"+filename+"2", "w")
+    output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/2PairwiseAA/"+filename, "w")
     
     # appropriately handle the VN data set 
 
-    
     for header in data:
         if filename == "novitsky.fasta":
             ntqry = data[header].replace("\r","").replace("-","")      
@@ -161,4 +160,6 @@ for infile in folder:
             #output.write(">" + header + '\n')
             #output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
         #output.close()'''
-        
+
+
+print("--- %s Seconds ---" % (time.time() - start_time))

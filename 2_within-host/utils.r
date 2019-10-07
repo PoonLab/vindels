@@ -32,7 +32,7 @@ checkDiff <- function(seq1, seq2){
   which(chars[1,]!=chars[2,])
 }
 
-insCheck <- function(indel,pos,vseq,wobble, offset=0){
+flankCheck <- function(indel,pos,vseq,wobble, offset=0){
   len <- nchar(indel)
   pos <- as.numeric(pos)
   
@@ -101,6 +101,22 @@ insCheck <- function(indel,pos,vseq,wobble, offset=0){
   c(indel, vseq, as.logical(beforeBool),  as.numeric(beforeIdx),  as.numeric(beforeDiff), beforeSeq, as.logical(afterBool), as.numeric(afterIdx), as.numeric(afterDiff),afterSeq)
 }
 
+
+flankProps <- function(indel, pos, vseq){
+  len <- nchar(indel)
+  pos <- as.numeric(pos)
+  
+  if ((pos - len - idx) >= 0){
+    before <- substr(vseq, pos-len-idx+1, pos-idx)
+    #print(before)
+    diffs <- checkDiff(indel, before)
+    if (length(diffs) < lowest){
+      lowest <- length(diffs)
+      bestIdx <- idx
+    }
+  }
+  
+}
 
 # adds an "X" character to signify the location of an insertion 
 addX <- function(seq,pos){

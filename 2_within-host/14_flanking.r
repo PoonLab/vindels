@@ -24,9 +24,9 @@ all <- read.csv(paste0(path,"10_nucleotide/ins-all.csv"), stringsAsFactors = F, 
 #all$Accno <- unname(mapply(labels, all$Accno, all$Pat, all$Vloop))
 
 
-# apply inscheck 
+# apply flankCheck 
 # parameters can be changed here to get different results 
-flanking <- unname(mapply(insCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1/6, offset=0))
+flanking <- unname(mapply(flankCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1/6, offset=0))
 
 # modify flanking data.frame 
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)
