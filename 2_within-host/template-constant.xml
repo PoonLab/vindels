@@ -2267,9 +2267,12 @@
 				<exponentialPrior mean="0.3333333333333333" offset="0.0">
 					<parameter idref="ucld.stdev"/>
 				</exponentialPrior>
-     			<logNormalPrior mean="1.5E-4" stdev="0.001" offset="0.0">
-					<parameter idref="ucld.mean"/>
-				</logNormalPrior>
+	     			<ctmcScalePrior>
+                                        <ctmcScale>
+                                                <parameter idref="ucld.mean" />
+                                        </ctmcScale>
+                                        <treeModel idref="treeModel" />
+                                </ctmcScalePrior>
 
 				<oneOnXPrior>
 					<parameter idref="constant.popSize"/>

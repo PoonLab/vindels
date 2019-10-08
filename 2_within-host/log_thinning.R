@@ -1,5 +1,5 @@
-
-logfiles <- Sys.glob("~/PycharmProjects/hiv-withinhost/6_4_1_BEASTout-lognorm/*.log")
+path = "~/PycharmProjects/hiv-withinhost/6_hm_constant/unfinished/"
+logfiles <- Sys.glob(paste0(path,"*.log"))
 
 
 for (file in logfiles){
@@ -10,6 +10,8 @@ for (file in logfiles){
   interval <- c(((loglen-1)*0.1)+1,loglen)
   log2 <- log[seq(interval[1], interval[2], length.out=901), ]
   
-  #write.table(log2, file=paste0(name,'-thin.log'), sep='\t', quote=F, row.names=F)
+  print(name)
+  #print(head(log2))
+  write.table(log2, file=paste0(path, name,'-thin.log'), sep='\t', quote=F, row.names=F)
 
 }

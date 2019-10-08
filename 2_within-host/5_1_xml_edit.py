@@ -11,16 +11,20 @@ for s in range(len(sys.argv)):
     if not sys.argv[s].endswith("/"):
         sys.argv[s] = sys.argv[s] + "/"'''
 
-xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/constant-1e4/*.xml")
+xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/hm-skygrid/*.xml")
 
 #outpath = '/home/jpalmer/12BEAST/output/'
 
 for infile in xmlFolder:
     xml = ET.parse(infile)
     xmlname = os.path.basename(infile) 
-    treename = xmlname.split("-")[0] + ".tree"
+    treename = xmlname.split("-")
+    if len(treename) == 2: 
+        treename = treename[0] + ".tree"
+    else:
+        treename = treename[0] + "-" + treename[1] + ".tree"
 
-    treefile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/guide_trees/"+treename, "r")
+    treefile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/signal/guide_trees/"+treename, "rU")
 
     tree = treefile.readline()
     root = xml.getroot()
@@ -147,7 +151,7 @@ for infile in xmlFolder:
     #        print(element.attrib)
     #        element.set("value", str(max(dates)))
     
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/constant-1e4/"+xmlname)
+    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/hm-skygrid/"+xmlname)
     
     
 

@@ -53,9 +53,9 @@ for (file in rtdfolder){
   
   write.tree(rtd, file=paste0("~/PycharmProjects/hiv-withinhost/4_5_Raxml/signal/guide_trees/", filename))
 }
-print(table(subtype))
-names(ranges) <- names
-names(rsqr) <- names
+#print(table(subtype))
+#names(ranges) <- names
+#names(rsqr) <- names
 
-print(vn)
-print(count)
+#print(vn)
+#print(count)
