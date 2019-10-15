@@ -1,5 +1,4 @@
-
-infolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/6_3_BEASTout-p5skygrid/*.log")
+infolder <- Sys.glob("~/23_newclock_psample/output/*.log")
 
 all.median <- c()
 all.stdev <- c()
@@ -10,7 +9,7 @@ for (f in infolder){
   logname <- basename(f)
   
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(f, sep="\t", skip=3)
+  logfile <- read.csv(f, sep="\t", skip=4)
   
   print(logname)
   
@@ -20,15 +19,19 @@ for (f in infolder){
   print(loglen)
   
   # calculates the start and end interval of MCMC steps AFTER the burn in (assuming last 90%)
-  interval <- c(loglen*0.1+1,loglen+1)
+  interval <- c(as.integer(loglen*0.1+1),as.integer(loglen+1))
+  
   print(interval)
   
-  print(summary(logfile$ucld.mean[interval[1]:interval[2]]))
+  values <- logfile$ucld.mean[interval[1]:interval[2]]
+  print(summary(values))
+  print(quantile(values, c(0.025,0.975)))
   # calculates the rescale factor using the median of the UCLD.MEAN column (can check that this matches UCLD.MEDIAN on tracer)
-  um.median <- median(logfile$ucld.mean[interval[1]:interval[2]])
-  um.stdev <- sd(logfile$ucld.mean[interval[1]:interval[2]])
+  um.median <- median(values)
+  um.stdev <- sd(values)
 
   all.median <- c(all.median, um.median)
   all.stdev <- c(all.stdev, um.stdev)
 
 }
+

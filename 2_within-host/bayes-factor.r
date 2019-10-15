@@ -1,10 +1,10 @@
-logfiles <- Sys.glob("~/PycharmProjects/hiv-withinhost/6_4_2_BEASTout-lognorm/*.log")
+logfiles <- Sys.glob("~/PycharmProjects/hiv-withinhost/6_hm/constant-relaxed-prior/*.log")
 smeans <- c()
 rmeans <- c()
 files <- c()
 for (fullpath in logfiles){
   filename <- basename(fullpath)
-  strpath <- paste0("~/11BEAST/output/", filename)
+  strpath <- paste0("~/PycharmProjects/hiv-withinhost/6_hm/constant-relaxed-noprior/", filename)
 #~/PycharmProjects/hiv-withinhost/6_8_BEAST-constant/output/", filename)
   print(filename)
   if (file.exists(strpath)){
@@ -43,5 +43,5 @@ for (fullpath in logfiles){
 
 }
 
-bayes2 <- data.frame(filename=files, skygrid=rmeans, constant=smeans)
-
+bayes2 <- data.frame(filename=files, noprior=rmeans, prior=smeans)
+bayes2$better <- mapply(function(x,y){if (x > y){1} else 2}, bayes2$noprior, bayes2$prior)
