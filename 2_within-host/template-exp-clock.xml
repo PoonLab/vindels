@@ -2092,6 +2092,7 @@
 			<parameter id="exponential.growthRate" value="0.0"/>
 		</growthRate>
 	</exponentialGrowth>
+	
 
 	<!-- Generate a random starting tree under the coalescent process            -->
 	<coalescentSimulator id="startingTree">
@@ -2113,7 +2114,7 @@
 		</nodeHeights>
 	</treeModel>
 
-	<!-- Generate a coalescent likelihood                                        -->
+    <!-- Generate a coalescent likelihood                                        -->
 	<coalescentLikelihood id="coalescent">
 		<model>
 			<exponentialGrowth idref="exponential"/>
@@ -2122,7 +2123,6 @@
 			<treeModel idref="treeModel"/>
 		</populationTree>
 	</coalescentLikelihood>
-
 
 	<!-- The uncorrelated relaxed clock (Drummond, Ho, Phillips & Rambaut (2006) PLoS Biology 4, e88 )-->
 	<discretizedBranchRates id="branchRates">
@@ -2272,16 +2272,20 @@
 				<exponentialPrior mean="0.3333333333333333" offset="0.0">
 					<parameter idref="ucld.stdev"/>
 				</exponentialPrior>
+				<!--<normalPrior mean="0.005" stdev="0.002551">
+					<parameter idref="ucld.mean"/>
+				</normalPrior>
+				-->
 				<logNormalPrior mean="8.0E-5" stdev="2.0E-4" offset="0.0">
 					<parameter idref="ucld.mean"/>
 				</logNormalPrior>
-				<oneOnXPrior>
+								<oneOnXPrior>
 					<parameter idref="exponential.popSize"/>
 				</oneOnXPrior>
 				<laplacePrior mean="0.0" scale="1.0">
 					<parameter idref="exponential.growthRate"/>
 				</laplacePrior>
-				<coalescentLikelihood idref="coalescent"/>
+                <coalescentLikelihood idref="coalescent"/>
 				<discretizedBranchRates idref="branchRates"/>
 			</prior>
 			<likelihood id="likelihood">

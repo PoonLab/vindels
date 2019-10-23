@@ -6,11 +6,11 @@ if [ $# -ne 1 ]; then
     exit 0
 fi
 folder=$1
-outdir="/home/jpalmer/PycharmProjects/hiv-withinhost/7_5_MCC/prelim/"
+outdir="/home/jpalmer/PycharmProjects/hiv-withinhost/7_5_MCC/prelim/hm/"
 
 for filename in $folder*trees; do 
     outfile="$(cut -d'.' -f1 <<< `basename $filename`).tree"
     echo $filename
     echo $outdir$outfile
-    treeannotator -heights median -burnin 20000000 $filename $outdir$outfile
+    treeannotator -heights median -burnin 10000000 $filename $outdir$outfile
 done 

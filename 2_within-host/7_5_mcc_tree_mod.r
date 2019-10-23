@@ -3,23 +3,28 @@
 
 require(ape)
 
-#args <- commandArgs(trailingOnly = T)
-
-#for (i in 1:length(args)){
-#  if (!endsWith(args[i],"/")){
-#    args[i] <- args[i] + "/"
-#  }
-#}
+args <- commandArgs(trailingOnly = T)
 
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
-args <- c()
-args[1] <- "~/PycharmProjects/hiv-withinhost/7_5_MCC/prelim/"
-args[2] <- "~/PycharmProjects/hiv-withinhost/7_5_MCC/rescaled/"
+if (length(args) != 2){
+  quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log file directory]")
+}
+for (i in 1:length(args)){
+  if (!endsWith(args[i],"/")){
+    args[i] <- paste0(args[i],"/") 
+  }
+}
 
+path <- args[1]
+logpath <- args[2]
 
-infolder <- Sys.glob(paste0(args[1],"*.tree"))
-outpath <- args[2]
+if (!dir.exists(paste0(path,"prelim/"))){
+  quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log file directory]")
+}
+
+dir.create(paste0(path,"rescaled/"), showWarnings = FALSE)
+infolder <- Sys.glob(paste0(path,"prelim/*.tree"))
 
 # for (f in folders){
 #   trees <- Sys.glob(paste0(f, "/*.tree.sample"))
@@ -40,14 +45,19 @@ for (treefile in infolder){
   logname <- paste0(strsplit(filename, "\\.")[[1]][1], ".log")
 
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6_6_e5clock/",logname), sep="\t", skip=3)
+  logfile <- read.csv(paste0(logpath,logname), sep="\t", skip=3)
 
   print(logname)
 
   #counts the number of MCMC steps
   loglen <- nrow(logfile) -1
   print(loglen)
-
+  
+  if (loglen != 10000){
+    print(status="INCOMPLETE FILE")
+    next()
+  }
+  
   # calculates the start and end interval of MCMC steps AFTER the burn in (assuming last 90%)
   interval <- c(loglen*0.1+1,loglen+1)
   print(interval)

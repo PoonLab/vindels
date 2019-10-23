@@ -2128,7 +2128,7 @@
 		<distribution>
 			<logNormalDistributionModel meanInRealSpace="true">
 				<mean>
-					<parameter id="ucld.mean" value="1.0" lower="0.0"/>
+					<parameter id="ucld.mean" value="8.0E-5" lower="0.0"/>
 				</mean>
 				<stdev>
 					<parameter id="ucld.stdev" value="0.3333333333333333" lower="0.0"/>
@@ -2267,15 +2267,12 @@
 				<exponentialPrior mean="0.3333333333333333" offset="0.0">
 					<parameter idref="ucld.stdev"/>
 				</exponentialPrior>
-				<logNormalPrior mean="3.6E-4" stdev="0.006" offset="0.0">
+				<logNormalPrior mean="8.0E-5" stdev="2.0E-4" offset="0.0">
 					<parameter idref="ucld.mean"/>
 				</logNormalPrior>
-				<!--<ctmcScalePrior>
-									<ctmcScale>
-											<parameter idref="ucld.mean" />
-									</ctmcScale>
-									<treeModel idref="treeModel" />
-				</ctmcScalePrior>
+				<!--<logNormalPrior mean="3.6E-4" stdev="0.006" offset="0.0">
+					<parameter idref="ucld.mean"/>
+				</logNormalPrior>
 				-->
 				<oneOnXPrior>
 					<parameter idref="constant.popSize"/>

@@ -2133,35 +2133,18 @@
 
 
 
-	<!-- The uncorrelated relaxed clock (Drummond, Ho, Phillips & Rambaut (2006) PLoS Biology 4, e88 )-->
-	<discretizedBranchRates id="branchRates">
-		<treeModel idref="treeModel"/>
-		<distribution>
-			<logNormalDistributionModel meanInRealSpace="true">
-				<mean>
-					<parameter id="ucld.mean" value="1.0" lower="0.0"/>
-				</mean>
-				<stdev>
-					<parameter id="ucld.stdev" value="0.3333333333333333" lower="0.0"/>
-				</stdev>
-			</logNormalDistributionModel>
-		</distribution>
-		<rateCategories>
-			<parameter id="branchRates.categories"/>
-		</rateCategories>
-	</discretizedBranchRates>
+
+	<!-- The strict clock (Uniform rates across branches)                        -->
+	<strictClockBranchRates id="branchRates">
+		<rate>
+			<parameter id="clock.rate" value="1.0" lower="0.0"/>
+		</rate>
+	</strictClockBranchRates>
+	
 	<rateStatistic id="meanRate" name="meanRate" mode="mean" internal="true" external="true">
 		<treeModel idref="treeModel"/>
-		<discretizedBranchRates idref="branchRates"/>
+		<strictClockBranchRates idref="branchRates"/>
 	</rateStatistic>
-	<rateStatistic id="coefficientOfVariation" name="coefficientOfVariation" mode="coefficientOfVariation" internal="true" external="true">
-		<treeModel idref="treeModel"/>
-		<discretizedBranchRates idref="branchRates"/>
-	</rateStatistic>
-	<rateCovarianceStatistic id="covariance" name="covariance">
-		<treeModel idref="treeModel"/>
-		<discretizedBranchRates idref="branchRates"/>
-	</rateCovarianceStatistic>
 
 	<!-- The TN93 substitution model                                             -->
 	<TN93Model id="tn93">
@@ -2198,7 +2181,7 @@
 		<patterns idref="patterns"/>
 		<treeModel idref="treeModel"/>
 		<siteModel idref="siteModel"/>
-		<discretizedBranchRates idref="branchRates"/>
+		<strictClockBranchRates idref="branchRates"/>
 	</treeLikelihood>
 
 	<!-- Define operators                                                        -->
@@ -2216,10 +2199,7 @@
 			<parameter idref="alpha"/>
 		</scaleOperator>
 		<scaleOperator scaleFactor="0.75" weight="3">
-			<parameter idref="ucld.mean"/>
-		</scaleOperator>
-		<scaleOperator scaleFactor="0.75" weight="3">
-			<parameter idref="ucld.stdev"/>
+			<parameter idref="clock.rate"/>
 		</scaleOperator>
 		<subtreeSlide size="1.0" gaussian="true" weight="15">
 			<treeModel idref="treeModel"/>
@@ -2236,18 +2216,12 @@
 		
 		<upDownOperator scaleFactor="0.75" weight="3">
 			<up>
-				<parameter idref="ucld.mean"/>
+				<parameter idref="clock.rate"/>
 			</up>
 			<down>
 				<parameter idref="treeModel.allInternalNodeHeights"/>
 			</down>
 		</upDownOperator>
-		<swapOperator size="1" weight="10" autoOptimize="false">
-			<parameter idref="branchRates.categories"/>
-		</swapOperator>
-		<uniformIntegerOperator weight="10">
-			<parameter idref="branchRates.categories"/>
-		</uniformIntegerOperator>
         <scaleOperator scaleFactor="0.75" weight="3">
 			<parameter idref="treeModel.rootHeight"/>
 		</scaleOperator>
@@ -2278,12 +2252,9 @@
 				<exponentialPrior mean="0.5" offset="0.0">
 					<parameter idref="alpha"/>
 				</exponentialPrior>
-				<exponentialPrior mean="0.3333333333333333" offset="0.0">
-					<parameter idref="ucld.stdev"/>
-				</exponentialPrior>
 				<ctmcScalePrior>
 					<ctmcScale>
-						<parameter idref="ucld.mean"/>
+						<parameter idref="clock.rate"/>
 					</ctmcScale>
 					<treeModel idref="treeModel"/>
 				</ctmcScalePrior>
@@ -2291,7 +2262,7 @@
 					<parameter idref="skygrid.precision"/>
 				</gammaPrior>
 				<gmrfSkyGridLikelihood idref="skygrid"/>
-				<discretizedBranchRates idref="branchRates"/>
+				<strictClockBranchRates idref="branchRates"/>
 			</prior>
 			<likelihood id="likelihood">
 				<treeLikelihood idref="treeLikelihood"/>
@@ -2313,8 +2284,8 @@
 			<column label="rootHeight" sf="6" width="12">
 				<parameter idref="treeModel.rootHeight"/>
 			</column>
-			<column label="ucld.mean" sf="6" width="12">
-				<parameter idref="ucld.mean"/>
+			<column label="clock.rate" sf="6" width="12">
+				<parameter idref="clock.rate"/>
 			</column>
 		</log>
 
@@ -2331,13 +2302,10 @@
 			<parameter idref="kappa2"/>
 			<parameter idref="frequencies"/>
 			<parameter idref="alpha"/>
-			<parameter idref="ucld.mean"/>
-			<parameter idref="ucld.stdev"/>
+			<parameter idref="clock.rate"/>
 			<rateStatistic idref="meanRate"/>
-			<rateStatistic idref="coefficientOfVariation"/>
-			<rateCovarianceStatistic idref="covariance"/>
 			<treeLikelihood idref="treeLikelihood"/>
-			<discretizedBranchRates idref="branchRates"/>
+			<strictClockBranchRates idref="branchRates"/>
 			<gmrfSkyGridLikelihood idref="skygrid"/>
 		</log>
 
@@ -2345,7 +2313,7 @@
 		<logTree id="treeFileLog" logEvery="100000" nexusFormat="true" fileName="step_0.trees" sortTranslationTable="true">
 			<treeModel idref="treeModel"/>
 			<trait name="rate" tag="rate">
-				<discretizedBranchRates idref="branchRates"/>
+				<strictClockBranchRates idref="branchRates"/>
 			</trait>
 			<posterior idref="posterior"/>
 		</logTree>

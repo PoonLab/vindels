@@ -40,7 +40,7 @@ for infile in xmlFolder:
     else:
         treename = treename[0] + "-" + treename[1] + ".tree"
 
-    treefile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/signal/rooted_trees/"+treename, "rU")
+    treefile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/guide_trees/"+treename, "rU")
 
     tree = treefile.readline()
     root = xml.getroot()
@@ -50,10 +50,11 @@ for infile in xmlFolder:
     #tempremove = []
     dates = []
     for element in root.iter():
-    #print(element.tag)
-    # POP SIZE = 5 
-    # ---------------------
-    # changes the population size to 5 
+        #print(element.tag)
+        
+        # POP SIZE = 5 
+        # ---------------------
+        # changes the population size to 5 
         '''if element.tag == "populationSizes":
             if element != None:
                 elem = element.find("parameter")
@@ -76,7 +77,7 @@ for infile in xmlFolder:
                 
 
 
-        '''# FIXING THE GUIDE TREE 
+        # FIXING THE GUIDE TREE 
         # -----------------------------------------------
         # sets guide tree and removes all operators responsible for modifying the tree 
         if element.tag == "operators":
@@ -84,7 +85,7 @@ for infile in xmlFolder:
                 elem = element.find(toRemove)
                 if elem != None:
                     #print(elem.tag)
-                    element.remove(elem)'''
+                    element.remove(elem)
 
         # sets the guide tree 
         if element.tag == "coalescentSimulator":

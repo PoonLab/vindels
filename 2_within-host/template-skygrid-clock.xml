@@ -2139,7 +2139,7 @@
 		<distribution>
 			<logNormalDistributionModel meanInRealSpace="true">
 				<mean>
-					<parameter id="ucld.mean" value="1.0" lower="0.0"/>
+					<parameter id="ucld.mean" value="8.0E-5" lower="0.0"/>
 				</mean>
 				<stdev>
 					<parameter id="ucld.stdev" value="0.3333333333333333" lower="0.0"/>
@@ -2285,12 +2285,9 @@
 					<parameter idref="ucld.mean"/>
 				</normalPrior>
 				-->
-				<logNormalPrior mean="2.5E-5" stdev="0.001" offset="0.0">
+				<logNormalPrior mean="8.0E-5" stdev="2.0E-4" offset="0.0">
 					<parameter idref="ucld.mean"/>
 				</logNormalPrior>
-				<!--<logNormalPrior mean="1.5E-4" stdev="0.001" offset="0.0">
-					<parameter idref="ucld.mean"/>
-				</logNormalPrior> -->
 				<gammaPrior shape="0.001" scale="1000.0" offset="0.0">
 					<parameter idref="skygrid.precision"/>
 				</gammaPrior>
