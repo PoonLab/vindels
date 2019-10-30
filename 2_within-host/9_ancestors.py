@@ -1,5 +1,5 @@
 from glob import * 
-import sys 
+from sys import *
 import os 
 import csv
 from seqUtils import * 
@@ -235,6 +235,10 @@ def main():
         print(r)
         print(result[r][0][:250])
         print(result[r][1][:250])'''
+
+    if len(sys.argv) != 3:
+        print("USAGE: python 9_ancestors.py [input Historian folder] [output folder]")
+        quit()
     for i in range(len(sys.argv)):
         if not sys.argv[i].endswith("/"):
             sys.argv[i] += "/"

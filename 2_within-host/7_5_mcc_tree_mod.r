@@ -8,7 +8,8 @@ args <- commandArgs(trailingOnly = T)
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
 if (length(args) != 2){
-  quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log file directory]")
+  print("USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log file directory]")
+  quit()
 }
 for (i in 1:length(args)){
   if (!endsWith(args[i],"/")){
@@ -23,17 +24,17 @@ if (!dir.exists(paste0(path,"prelim/"))){
   quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log file directory]")
 }
 
-dir.create(paste0(path,"rescaled/"), showWarnings = FALSE)
+dir.create(paste0(path,"final/"), showWarnings = FALSE)
 infolder <- Sys.glob(paste0(path,"prelim/*.tree"))
 
 # for (f in folders){
 #   trees <- Sys.glob(paste0(f, "/*.tree.sample"))
 #   foldername <- paste0(basename(f),"/") 
 #   
-#   dir.create(paste0(path,"rescaled_multi/",foldername), showWarnings = FALSE)
+#   dir.create(paste0(path,"final_multi/",foldername), showWarnings = FALSE)
 #   
 count <- 0
-r.vec2 <- c()
+r.vec <- c()
 for (treefile in infolder){
   count <- count + 1
   print(treefile)
@@ -45,7 +46,7 @@ for (treefile in infolder){
   logname <- paste0(strsplit(filename, "\\.")[[1]][1], ".log")
 
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(paste0(logpath,logname), sep="\t", skip=3)
+  logfile <- read.csv(paste0(logpath,logname), sep="\t", skip=4)
 
   print(logname)
 
@@ -73,8 +74,8 @@ for (treefile in infolder){
   # rescales all the edge lengths of the tree
   intree$edge.length <- (intree$edge.length * rescale.factor)
 
-  # writes the rescaled tree to a new folder called "rescaled"
-  #write.tree(intree,paste0(outpath, filename))
+  # writes the rescaled tree to a new folder called "final"
+  write.tree(intree,paste0(path,"final/",filename))
 }
 #}
 

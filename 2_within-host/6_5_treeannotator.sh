@@ -6,7 +6,7 @@ if [ $# -ne 1 ]; then
     exit 0
 fi
 folder=$1
-outdir="/home/jpalmer/PycharmProjects/hiv-withinhost/7_5_MCC/prelim/hm/"
+outdir="/home/jpalmer/PycharmProjects/hiv-withinhost/7_5_MCC/hm2/prelim/"
 
 for filename in $folder*trees; do 
     outfile="$(cut -d'.' -f1 <<< `basename $filename`).tree"
