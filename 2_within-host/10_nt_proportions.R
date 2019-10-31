@@ -113,9 +113,9 @@ delOriginal <- function(indel, pos, vseq){
   }
   vseq
 }
-source("~/Github/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 # Lio
-path <- "~/Lio/"
+path <- "~/PycharmProjects/hiv-withinhost/"
 
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))

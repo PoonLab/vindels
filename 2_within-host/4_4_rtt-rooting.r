@@ -20,10 +20,10 @@ for (file in trefolder){
 
   rtd <- rtt(tre, as.numeric(tip.dates))
 
-  write.tree(rtd, file=paste0(path, "rooted_trees/", filename))
+  write.tree(rtd, file=paste0(path, "rooted_trees/", filename,"2"))
 }
 
-rtdfolder <- Sys.glob(paste0(path,"rooted_trees/*.tree"))
+rtdfolder <- Sys.glob(paste0(path,"rooted_trees/*.tree2"))
 
 rsqr <- c()
 names <- c()
@@ -48,20 +48,20 @@ for (file in rtdfolder){
     print(filename)
   }
   
-  # # create a linear model and save it 
-  # linear <- lm(lens ~ tip.dates)
-  # x <- summary(linear)
-  # rsqr <- c(rsqr, x$r.squared)
-  # count <- count + length(rtd$tip.label)
-  # 
-  # subtype <- c(subtype, sapply(rtd$tip.label, function(x)strsplit(x,"\\.")[[1]][1]))
-  # # create a figure and save it 
-  # png(file=paste("~/vindels/Figures/root-to-tip/recomb-filter/",name,"-rtt.png",sep=""),width=800,height=600, res=120)
-  # plot(jitter(lens) ~ jitter(tip.dates), main=name, xlab="Collection Date (Days since a start point)", ylab="Root to tip branch length (Expected subs/site)")
-  # abline(linear)
-  # dev.off()
+  # create a linear model and save it
+  linear <- lm(lens ~ tip.dates)
+  x <- summary(linear)
+  rsqr <- c(rsqr, x$r.squared)
+  count <- count + length(rtd$tip.label)
+
+  subtype <- c(subtype, sapply(rtd$tip.label, function(x)strsplit(x,"\\.")[[1]][1]))
+  # create a figure and save it
+  png(file=paste("~/vindels/Figures/root-to-tip/final/",name,"-rtt.png",sep=""),width=800,height=600, res=120)
+  plot(jitter(lens) ~ jitter(tip.dates), main=name, xlab="Collection Date (Days since a start point)", ylab="Root to tip branch length (Expected subs/site)")
+  abline(linear)
+  dev.off()
   
   
-  write.tree(rtd, file=paste0(path,"guide_trees/", filename))
+  write.tree(rtd, file=paste0(path,"guide_trees/", filename,"2"))
 }
 

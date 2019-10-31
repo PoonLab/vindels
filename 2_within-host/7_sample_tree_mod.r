@@ -13,13 +13,11 @@ for (i in 1:length(args)){
 
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
-args <- c()
-args[1] <- "~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim_multi/"
-args[2] <- "~/PycharmProjects/hiv-withinhost/7SampleTrees/rescaled_multi/"
+#outpath <- args[1]
+logpath <- args[1]
 
+infolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/*.tree.sample")
 
-infolder <- Sys.glob(paste0(args[1],"*.tree.sample"))
-outpath <- args[2]
 
 # for (f in folders){
 #   trees <- Sys.glob(paste0(f, "/*.tree.sample"))
@@ -33,32 +31,33 @@ for (treefile in infolder){
   
   intree <- read.tree(treefile)
   filename <- basename(treefile)
+  
+  state <- as.numeric(paste0(strsplit(strsplit(filename, "\\.")[[1]][1], "_")[[1]][3],"00000"))
 
   # edits the tree file name to get the BEAST log file name
   logname <- paste0(strsplit(filename, "_")[[1]][1], ".log")
 
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6BEASTout/",logname), sep="\t", skip=3)
+  logfile <- read.csv(paste0(logpath,logname), sep="\t", skip=4)
 
   print(logname)
-
+  
+  rescale.factor <- logfile[logfile$state == state,"ucld.mean"]
   #counts the number of MCMC steps
-  loglen <- nrow(logfile) -1
-  print(loglen)
-
+  #loglen <- nrow(logfile) -1
+  #print(loglen)
   # calculates the start and end interval of MCMC steps AFTER the burn in (assuming last 90%)
-  interval <- c(loglen*0.1+1,loglen+1)
-  print(interval)
-
+  #interval <- c(loglen*0.1+1,loglen+1)
+  #print(interval)
   # calculates the rescale factor using the median of the UCLD.MEAN column (can check that this matches UCLD.MEDIAN on tracer)
-  rescale.factor <- median(logfile$ucld.mean[interval[1]:interval[2]])
+  #rescale.factor <- median(logfile$ucld.mean[interval[1]:interval[2]])
   print(rescale.factor)
 
   # rescales all the edge lengths of the tree
   intree$edge.length <- (intree$edge.length * rescale.factor)
 
   # writes the rescaled tree to a new folder called "rescaled"
-  write.tree(intree,paste0(outpath, filename))
+  write.tree(intree,paste0("~/PycharmProjects/hiv-withinhost/7SampleTrees/final/", substr(filename, 0,nchar(filename)-7)))
 }
 #}
 

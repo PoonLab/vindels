@@ -8,7 +8,7 @@ import sys
 import shutil
 
 def sample_beast(infile, outdir, numsample=5):
-    states = []
+    
     
     if not os.path.isdir(outdir):
         os.makedirs(outdir)
@@ -19,6 +19,8 @@ def sample_beast(infile, outdir, numsample=5):
     name = os.path.basename(infile).split(".")[0]
     input = open(infile,'rU')
 
+    # load a list of state numbers 
+    states = []
     for line in input:
         data = line.split()
         if len(data) == 6:
@@ -85,7 +87,7 @@ def sample_beast(infile, outdir, numsample=5):
             for tip in tree.get_terminals():
                 tip.name = seqDict[tip.name]
                 
-            Phylo.write(tree, outdir+name+"_"+str(sample_count)+".tree.sample", 'newick')
+            Phylo.write(tree, outdir+name+"_"+str(sample_count)+"_"+str(state)+".tree.sample", 'newick')
             #print(tree)
 
 
@@ -100,26 +102,35 @@ def sample_beast(infile, outdir, numsample=5):
 if sys.argv[2][-1] != "/":
     sys.argv[2] += "/"
 '''
+def main():
+    
 
-infolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/6BEASTout/trees/*.time.trees")
-outfolder = "/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/prelim_multi/"
+    if len(sys.argv) != 3:
+        print("USAGE: python 6_sample-beast-trees.py [input trees folder] [output trees folder]")
+        quit()
+    for i in range(len(sys.argv)):
+        if not sys.argv[i].endswith("/"):
+            sys.argv[i] += "/"
+
+    infolder = glob(sys.argv[1]+"*.time.trees")
+    outfolder = sys.argv[2]
+    for infile in infolder:
+        #filename = os.path.basename(infile).split(".")[0]
+
+        '''
+        patfolder = outfolder + filename + "/"
+        if not os.path.isdir(patfolder):
+            os.makedirs(patfolder)
+        else:
+            shutil.rmtree(patfolder,ignore_errors=False)
+            os.makedirs(patfolder)
+        '''
+        sample_beast(infile,outfolder, 20)
 
 
-for infile in infolder:
-    filename = os.path.basename(infile).split(".")[0]
 
-    '''
-    patfolder = outfolder + filename + "/"
-    if not os.path.isdir(patfolder):
-        os.makedirs(patfolder)
-    else:
-        shutil.rmtree(patfolder,ignore_errors=False)
-        os.makedirs(patfolder)
-    '''
-    sample_beast(infile,outfolder, 20)
-
-
-
+if __name__ == '__main__': 
+    main()
 
 
 
@@ -133,20 +144,3 @@ for tip in tree.get_terminals():
     tip.name = dictionary[tip.name]
 
 Phylo.write(tree, infile="")'''
-
-
-# open infile stream to BEAST tree log
-
-# iterate through stream on a by-line basis - pass through TWICE
-
-# first pass through, count the number of trees (record states = MCMC step number)
-
-# determine random sample of trees given user-defined sample size and burn-in
-
-# second pass through
-
-# locate translate block (associates integer indices with sequence labels)
-
-# store index-label combinations in a dictionary
-
-# locate tree block (each Newick tree string is prefixed with "tree").
