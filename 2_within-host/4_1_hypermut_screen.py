@@ -35,21 +35,23 @@ for msafile in msafolder:
     
     # creates a data frame with MSA headers, MSA seqs, and extracted dates
     df = pd.DataFrame({'headers':list(msa.keys()), 'date': dates, 'sequences':list(msa.values())})
+    print(len(df))
     tp1 = df.where(df['date'] == lowest)
     tp1 = tp1.dropna()
     
+    print(len(tp1))
     #print(tp1)
 
     # take the headers/seqs from TIME POINT 1 and load them into a list of [header,seq] lists
     fasta1 = [[a,b] for a,b in zip(tp1['headers'], tp1['sequences'])]
-
+    print(fasta1)
     cnsus = consensus(fasta1).upper()
     
     # creates a temp MSA file with the consensus sequence at the top
     tpath = "/home/jpalmer/vindels/2_within-host/hm-temp.fasta"
     #if filename in ["111848-1.fasta", "111848-2.fasta"]:
         #tpath = "/home/jpalmer/vindels/2_within-host/"+filename
-    tfile = open(tpath,"w")
+    tfile = open(tpath,"w+")
     tfile.write(">REF\n"+cnsus+"\n")
     for header in msa:
         tfile.write(">"+header+"\n"+msa[header]+"\n")
@@ -83,7 +85,7 @@ for msafile in msafolder:
         print(len(total) - len(hm))
 
     # write only the non-hypermutated sequences to a screened folder
-    output = open(full_path+"hm-screen/"+filename, "w+")
+    #output = open(full_path+"hm-screen/"+filename, "w+")
     count = 0
     if filename=="OS.fasta":
         print(total)

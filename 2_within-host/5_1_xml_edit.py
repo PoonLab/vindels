@@ -6,10 +6,11 @@ import os
 import xml.etree.ElementTree as ET 
 import lxml
 import re 
-'''
+import pandas as pd
+
 for s in range(len(sys.argv)):
     if not sys.argv[s].endswith("/"):
-        sys.argv[s] = sys.argv[s] + "/"'''
+        sys.argv[s] = sys.argv[s] + "/"
 
 if len(sys.argv) != 2:
     print("USAGE: python 5_1_xml_edit.py [unique run id]")
@@ -17,6 +18,8 @@ if len(sys.argv) != 2:
 
 run_id = sys.argv[1]
 
+df = pd.read_csv("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/root-heights.csv", index_col="file")
+print(df)
 
 if not os.path.isdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/' + run_id + "/"):
     print("ERROR: Preliminary run folder not found.")
@@ -38,7 +41,7 @@ for infile in xmlFolder:
     if len(treename) == 2: 
         treename = treename[0] + ".tree"
     else:
-        treename = treename[0] + "-" + treename[1] + ".tree"
+        treename = treename[0] + "-" +treename[1] + ".tree"
 
     treefile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/guide_trees/"+treename, "rU")
 
@@ -51,7 +54,9 @@ for infile in xmlFolder:
     dates = []
     for element in root.iter():
         #print(element.tag)
-        
+                
+        #if element.tag == "date":
+        #   dates.append(float(element.get("value")))
         # POP SIZE = 5 
         # ---------------------
         # changes the population size to 5 
@@ -152,7 +157,17 @@ for infile in xmlFolder:
         #print(r)
         root.remove(r)'''
 
+    rheight = df.loc[treename.split(".")[0],'root_height']
+    print(rheight)
+    for element in root.iter():
+        if element.get("id") == "skygrid.cutOff":
+            #print(element.attrib)
+            element.set("value", str(rheight))
+            print(element.attrib)
     xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/"+run_id+"/"+xmlname)    
+
+
+# For editing the SkyGrid
 
 
 '''# for editing the output folder path  
@@ -165,75 +180,8 @@ if element.get('id') == "mcmc":
 
 # For Bayesian Skygrid Coalescent
 
-#if element.tag == "date":
-#    dates.append(float(element.get("value")))
 
 
-'''
-# STRICT CLOCK MODEL
-# ------------------------------------------    
-if element.get("id") in ["coefficientOfVariation", "covariance"]:
-    removelist.append(element)
-
-
-# remove the log elements 
-if element.get("id") == "fileLog":
-    tempremove = []
-    for elem in element.iter():
-        if elem.get("idref") in ["coefficientOfVariation", "covariance", "ucld.stdev"]:
-            tempremove.append(elem)
-    for i in tempremove:
-        element.remove(i)
-
-if element.get("id") == "operators":
-    tempremove = [element.find("swapOperator"), element.find("uniformIntegerOperator")]
-    for e in element.iter():
-        p = e.find("parameter")
-        if p != None:
-            if p.get("idref") == "ucld.stdev":
-                tempremove.append(e)
-    
-    for i in tempremove:
-        print(i.tag)
-        element.remove(i)
-
-if element.get("id") == "prior":
-    tempremove = []
-    for e in element.iter():
-        if e.get("mean") == "0.3333333333333333":
-            tempremove.append(e)
-    
-    for i in tempremove:
-        element.remove(i)
-
-if element.get("idref") == "branchRates":
-    element.tag = "strictClockBranchRates"
-
-if element.get("idref") == "ucld.mean":
-    element.set("idref", "clock.rate")
-if element.get("label") == "ucld.mean":
-    element.set("label", "clock.rate")
-
-if element.get("id") == "branchRates":
-    element.clear()
-    element.tag = "strictClockBranchRates"
-    element.attrib = {'id':'branchRates'}
-    element.append(ET.Element("rate"))
-    element.find("rate").append(ET.Element("parameter", attrib={'id':'clock.rate', 'value':'1.0', 'lower':'0.0'}))
-'''
-
-'''for r in removelist:
-#print(r)
-root.remove(r)'''
-
-# For editing the SkyGrid
-#for element in root.iter():
-#    if element.get("id") == "skygrid.cutOff":
-#        print(element.attrib)
-#        element.set("value", str(max(dates)))
-
-
-    
     
 
 

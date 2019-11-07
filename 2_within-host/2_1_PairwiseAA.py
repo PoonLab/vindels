@@ -38,7 +38,7 @@ print(vlad_aaref)
 folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/*.fasta")
 
 pairwise = {}
-
+total = 0 
 for infile in folder:
 
     filename = os.path.basename(infile)
@@ -50,12 +50,13 @@ for infile in folder:
         data = parse_fasta(handle)
     unequal = []
 
-    output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/2PairwiseAA/"+filename, "w")
+    #output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/2PairwiseAA/"+filename, "w")
     
     # appropriately handle the VN data set 
 
     for header in data:
-        if filename == "novitsky.fasta":
+        total += 1
+        '''if filename == "novitsky.fasta":
             ntqry = data[header].replace("\r","").replace("-","")      
             aaref = vlad_aaref
             ntref = vlad_ntref
@@ -103,11 +104,11 @@ for infile in folder:
             print(aaqry)
             print(finalRef)
             print(finalQry)
-            continue
+            continue'''
 
-        output.write(">" + header + '\n')
-        output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
-    output.close()
+        #output.write(">" + header + '\n')
+        #output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
+    #output.close()
     
     
 
@@ -163,3 +164,4 @@ for infile in folder:
 
 
 print("--- %s Seconds ---" % (time.time() - start_time))
+print(total)

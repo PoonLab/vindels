@@ -49,7 +49,7 @@ for f in files:
 
         #override stem to test output location
         stem = '/home/jpalmer/' + run_id + '/output/' + name
-        print(stem)
+        #print(stem)
         print(out)
         parse(template_file, f, stem, out, 'days', 1)
 

@@ -113,6 +113,8 @@ for infile in folder:
                 #print("old: "+str(len(full[patid])))
                 #print("new: "+str(len(patdict[patid])))
                 full[patid] = patdict[patid]
+                #print("OLD: "+str(len(full[patid])))
+                #print("NEW: "+str(len(patdict[patid])))
         #if patient hasnt been loaded yet, make a new entry
         else:
             full[patid] = patdict[patid]
@@ -120,34 +122,30 @@ for infile in folder:
 
 total = 0
 patcount = 0
+seqcount = 0
 for pat in full.keys():
     #print(pat)
-
+    delcount = 0
 
     # FILTER OUT PATIENT DATA SETS 
     # =========================================
     if not pat.isalpha():
 
-        # dates = [tp1, tp2, tp3, tp4, NUMBER OF TIMEPOINTS]
-        dates = [[], [], [], [],[]]
-        print(pat)
-        for header in full[pat].keys():
+        # dates = [tp1, tp2, tp3, tp4]
+        dates = [[], [], [], []]
+        
+        timepoints = None
+        for n, header in enumerate(full[pat].keys()):
             #print(header)
             fields = header.split(".")
 
             #these are the four date fields to check 
-            dates[0].append(fields[5])
-            dates[1].append(fields[6])
-            dates[2].append(fields[7])
-            dates[3].append(fields[8])
+            for i in range(4):
+                dates[i].append(fields[i+5])
 
             #this one is just a count of how many timepoints
-            dates[4].append(fields[9])
-        
-        #ensure that the patient has 5 time points or more 
-        if int(dates[4][0]) < 5:
-            print(pat + " has too few timepoints")
-            continue
+            if n == 0:
+                timepoints = int(fields[9])
         
         # unique = list of 4 elements
         # counts the number of unique dates in each date field    
@@ -169,6 +167,13 @@ for pat in full.keys():
             if x > 1 and x > bestIdx:
                 bestIdx = n
         bestIdx = bestIdx + 5
+
+        #ensure that the patient has 5 time points or more 
+        if timepoints < 5:
+            print(pat + " has too few timepoints")
+            continue
+
+
         
         # NEGATIVES --------------------------
         #used to detect and fix negative date values in the chosen date list (dates[bestIdx])
@@ -183,10 +188,11 @@ for pat in full.keys():
             if date == "2222" or date == "8888" or date == "-":
                 del full[pat][header]
                 del vseqdict[pat][header]
+                delcount += 1
 
 
             #this will check every non '-' value to see if its negative
-            #if its negative, record it in hasNeg and find the lowest negative value 
+            #if its negative, turn on hasNeg switch and find the lowest negative value 
             else:
                 chosenDates.append(date)
                 negative = re.search('-\d*',date)
@@ -204,6 +210,7 @@ for pat in full.keys():
                 try:
                     date = int(date)
                 except:
+                    print("PROBLEM WITH DATE: "+date)
                     continue
 
                 #modify the date field and reappend each element to the dictionary
@@ -211,26 +218,46 @@ for pat in full.keys():
                 newheader = ".".join(fields)
                 full[pat][newheader] = full[pat].pop(header)
                 vseqdict[pat][newheader] = vseqdict[pat].pop(header)
-            
+        
         #skips the entire patient if no valuable dates are found
-        if all(i in ("-", "2222", None) for i in chosenDates):
+        if all(i in ("-", "2222","8888", None) for i in chosenDates):
             print(pat + " had no valuable date information")
+            #print(chosenDates)
             continue
 
+        # skips the entire patient if the date range is less than 200 days 
+        chosenDates = [int(x) for x in chosenDates]
+        rng = max(chosenDates) - min(chosenDates)
+        if rng < 200:
+            print(pat +  " has too small of a date range: "+str(rng))
+            continue
     else:
         unique = set()
+        alldates = []
         for header in full[pat]:
             date = header.split("_")[1]
+            alldates.append(date)
             unique.add(date)
 
-        if len(unique) < 5:     
+        if len(unique) < 5: 
+            print(pat + " has too few timepoints")    
+            continue
+
+        # skips the entire patient if the date range is less than 200 days 
+        alldates = [int(x) for x in alldates]
+        rng = max(alldates) - min(alldates)
+        if rng < 200:
+            print(pat +  " has too small of a date range: "+str(rng))
             continue
 
     if len(vseqdict[pat]) == 0 or len(full[pat]) == 0:
         continue    
 
-    patcount += 1
 
+    # SUCCESS IF REACHED THIS POINT 
+    # ======================================
+    patcount += 1
+    print(pat)
 
     outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta","w")
     outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv", "w")
@@ -255,11 +282,16 @@ for pat in full.keys():
             #fields[4] +"_" + date
             outputfull.write(">" + newheader + "\n" + full[pat][header] + "\n")
             outputv.write(newheader + "," + vseqdict[pat][header] + "\n")
+            seqcount += 1
         else:
             #newheader = ".".join(["C","-","-",fields[0], fields[2], "-","-"]) + "_" + fields[1]
             outputfull.write(">"+ header + "\n" + full[pat][header] + "\n")
             outputv.write(header + "," + vseqdict[pat][header] + "\n")
-    
+            seqcount += 1
+
+    outputfull.close()
+    outputv.close()
+print(seqcount)
 print(patcount)
 
 '''

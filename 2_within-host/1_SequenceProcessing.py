@@ -16,13 +16,13 @@ for infile in folder:
 
     fasta = open(infile, 'r')
 
-    filename = infile.split("/")[-1]
+    filename = os.path.basename(infile)
 
     filter = {}
     byStudy = set()
     #output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/" + filename, "w")
     data = parse_fasta(fasta)
-    
+    if filename == "novitskys"
     # filter : screen for sequences missing subtype, collection year, and those without sampling collection info
     for x in data:
         header = x.split(".")
