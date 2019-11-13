@@ -1,6 +1,7 @@
-infolder <- Sys.glob("~/23_newclock_psample/output/*.log")
+infolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/6_hm/30BEAST-skygrid-narrow/*.log")
 
-all.median <- c()
+med.um <- c()
+med.usd <- c()
 all.stdev <- c()
 i <- 0
 names <- c()
@@ -28,10 +29,13 @@ for (f in infolder){
   print(quantile(values, c(0.025,0.975)))
   # calculates the rescale factor using the median of the UCLD.MEAN column (can check that this matches UCLD.MEDIAN on tracer)
   um.median <- median(values)
-  um.stdev <- sd(values)
-
-  all.median <- c(all.median, um.median)
-  all.stdev <- c(all.stdev, um.stdev)
+  
+  
+  usd.median <- median(logfile$ucld.stdev[interval[1]:interval[2]])
+  
+  med.usd[i] <- usd.median
+  med.um[i] <- um.median
 
 }
-
+print(summary(med.um))
+print(summary(med.usd))

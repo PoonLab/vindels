@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ $# -ne 2 ];
 then 
-	echo "USAGE: bash 4msa_withinhost.sh [input directory] [output directory]"
+	echo "USAGE: bash 4_0_msa.sh [input directory] [output directory]"
 	exit 0
 fi
 
@@ -37,4 +37,5 @@ for filename in $inDir*.fasta; do
 	echo $outDir$file
 	mafft --auto --reorder "$filename" > "$outDir$file"
 done
+q
 

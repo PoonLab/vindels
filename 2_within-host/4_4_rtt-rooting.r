@@ -20,10 +20,10 @@ for (file in trefolder){
 
   rtd <- rtt(tre, as.numeric(tip.dates))
 
-  #write.tree(rtd, file=paste0(path, "rooted_trees/", filename))
+  write.tree(rtd, file=paste0(path, "rooted_trees/", filename,"2"))
 }
 
-rtdfolder <- Sys.glob(paste0(path,"rooted_trees/*.tree"))
+rtdfolder <- Sys.glob(paste0(path,"rooted_trees/*.tree2"))
 
 rsqr <- c()
 names <- c()
@@ -33,6 +33,7 @@ subtype <- c()
 n <- 0
 vn <- 0
 treeroot <- c()
+daterange <- c()
 for (file in rtdfolder){
   n <- n + 1
   filename <- basename(file)
@@ -44,7 +45,7 @@ for (file in rtdfolder){
   tip.dates <- as.numeric(unname(sapply(rtd$tip.label, function(x) strsplit(x, "_")[[1]][2])))
 
   print(filename)
-
+  daterange[n] <- diff(range(tip.dates))
   
   # create a linear model and save it
   linear <- lm(lens ~ tip.dates)
@@ -58,16 +59,17 @@ for (file in rtdfolder){
   subtype <- c(subtype, sapply(rtd$tip.label, function(x)strsplit(x,"\\.")[[1]][1]))
   
   # create a figure and save it
-  png(file=paste("~/vindels/Figures/root-to-tip/final/",name,"-rtt.png",sep=""),width=800,height=600, res=120)
-  plot(lens ~ tip.dates, main=name, xlab="Collection Date (Days since a start point)", ylab="Root to tip branch length (Expected subs/site)")
-  abline(linear)
-  dev.off()
+  # png(file=paste("~/vindels/Figures/root-to-tip/final/",name,"-rtt.png",sep=""),width=800,height=600, res=120)
+  # plot(lens ~ tip.dates, main=name, xlab="Collection Date (Days since a start point)", ylab="Root to tip branch length (Expected subs/site)")
+  # abline(linear)
+  # dev.off()
   
   # calculate the tree root height for use in BEAST Skygrid
   xint <- -coef(linear)[[1]]/coef(linear)[[2]]
   treeroot[n] <- ceiling((max(tip.dates) - xint)* 1.25)
   
-  write.tree(rtd, file=paste0(path,"guide_trees/", filename))
+  #write.tree(rtd, file=paste0(path,"guide_trees/", filename))
 }
-write.csv(data.frame(file=names, root_height=treeroot), "~/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/root-heights.csv",quote=F,row.names = F)
+#write.csv(data.frame(file=names, root_height=treeroot), "~/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/root-heights.csv",quote=F,row.names = F)
 
+write.csv(data.frame(file=names,date_range=daterange),"~/PycharmProjects/hiv-withinhost/date-ranges.csv",quote=F,row.names = F)
