@@ -33,11 +33,12 @@ for (j in 1:length(args)){
   logfiles <- paste0(args[j],commonfiles)
   means <- c()
   
+  print(paste0("DIRECTORY ",j," STARTING..."))
 
   # ITERATOR: DIRECTORY NUMBER 1
   for (k in 1:length(logfiles)){
     filename <- basename(logfiles[k])
-
+    print(filename)
   
     # DIRECTORY NUMBER 1 PROCESSING
     data <- read.table(logfiles[k], sep="\t", skip=4, head=T)
@@ -58,7 +59,7 @@ for (j in 1:length(args)){
 
 bayes$best <- apply(bayes[,1:j+1], 1, function(x) which(x == max(x)))
 colnames(bayes) <- c("filename", runs, "best")
-write.csv(bayes, "~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison.csv")
+write.csv(bayes, "~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison2.csv")
 for (x in 1:j){
   print(paste0("DIR",x," Count: ", sum(bayes$best == x)))
 }

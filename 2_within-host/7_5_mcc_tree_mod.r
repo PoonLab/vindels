@@ -7,8 +7,8 @@ args <- commandArgs(trailingOnly = T)
 
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
-if (length(args) != 2){
-  print("USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log file directory]")
+if (length(args) != 1){
+  print("USAGE: Rscript 7_5_mcc_tree_mod.r [working directory]")
   quit()
 }
 for (i in 1:length(args)){
@@ -17,39 +17,47 @@ for (i in 1:length(args)){
   }
 }
 
-path <- args[1]
-logpath <- args[2]
+treefolder <- args[1]
 
-if (!dir.exists(paste0(path,"prelim/"))){
+if (!dir.exists(paste0(treefolder,"prelim/"))){
   quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log file directory]")
 }
 
-dir.create(paste0(path,"final/"), showWarnings = FALSE)
-infolder <- Sys.glob(paste0(path,"prelim/*.tree"))
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison.csv", row.names=1,stringsAsFactors = F)
+
+logfiles <- csv[,"filename"]
+treefiles <- unname(sapply(logfiles,function(x){paste0(strsplit(x,"\\.")[[1]][1],".tree")}))
+#treefiles <- unname(sapply(treefiles,function(x){sub("-original","",x)}))
+
+best <- csv[,"best"]
+choices <-  c("24BEAST-constant-final/","30BEAST-skygrid-narrow/","33BEAST-skygrid-10/","37BEAST-skygrid-30/")[best]
+basepath <- "~/PycharmProjects/hiv-withinhost/6_hm/"
+
+
+dir.create(paste0(treefolder,"final/"), showWarnings = FALSE)
+infolder <- Sys.glob(paste0(treefolder,"prelim/*.tree"))
 
 # for (f in folders){
 #   trees <- Sys.glob(paste0(f, "/*.tree.sample"))
 #   foldername <- paste0(basename(f),"/") 
 #   
-#   dir.create(paste0(path,"final_multi/",foldername), showWarnings = FALSE)
+#   dir.create(paste0(treefolder,"final_multi/",foldername), showWarnings = FALSE)
 #   
-count <- 0
 r.vec <- c()
-for (treefile in infolder){
-  count <- count + 1
-  print(treefile)
+for (i in 1:length(treefiles)){
+  intree <- paste0("~/PycharmProjects/hiv-withinhost/7_5_MCC/prelim/",choices[i],treefiles[i])
+  tre <- read.nexus(intree)
   
-  intree <- read.nexus(treefile)
-  filename <- basename(treefile)
-
-  # edits the tree file name to get the BEAST log file name
-  logname <- paste0(strsplit(filename, "\\.")[[1]][1], ".log")
-
+  print("INPUT")
+  print(intree)
+  
+  inlog <- paste0("~/PycharmProjects/hiv-withinhost/6_hm/",choices[i],logfiles[i])
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(paste0(logpath,logname), sep="\t", skip=4)
-
-  print(logname)
-
+  logfile <- read.csv(inlog, sep="\t", skip=4)
+  
+  print("LOGFILE")
+  print(inlog)
+  
   #counts the number of MCMC steps
   loglen <- nrow(logfile) -1
   print(loglen)
@@ -69,13 +77,13 @@ for (treefile in infolder){
   rescale.factor <- median(means)
   print(rescale.factor)
   
-  r.vec[count] <- rescale.factor
+  r.vec[i] <- rescale.factor
 
   # rescales all the edge lengths of the tree
-  intree$edge.length <- (intree$edge.length * rescale.factor)
+  tre$edge.length <- (tre$edge.length * rescale.factor)
 
   # writes the rescaled tree to a new folder called "final"
-  write.tree(intree,paste0(path,"final/",filename))
+  write.tree(tre,paste0(treefolder,"final/",treefiles[i]))
 }
 #}
 
