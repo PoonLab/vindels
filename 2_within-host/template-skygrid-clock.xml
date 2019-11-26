@@ -2139,7 +2139,7 @@
 		<distribution>
 			<logNormalDistributionModel meanInRealSpace="true">
 				<mean>
-					<parameter id="ucld.mean" value="1.2E-4" lower="0.0"/>
+					<parameter id="ucld.mean" value="1.2E-4" lower="0.0" upper="0.001"/>
 				</mean>
 				<stdev>
 					<parameter id="ucld.stdev" value="2E-4" lower="0.0"/>
@@ -2215,9 +2215,12 @@
 		<scaleOperator scaleFactor="0.75" weight="1">
 			<parameter idref="alpha"/>
 		</scaleOperator>
-		<scaleOperator scaleFactor="0.75" weight="3">
+		<randomWalkOperator windowSize="0.001" weight="3" autoOptimize="true">
 			<parameter idref="ucld.mean"/>
-		</scaleOperator>
+		</randomWalkOperator> 
+		<!--<uniformOperator scaleFactor="0.75" weight="3" autoOptimize="true">
+			<parameter idref="ucld.mean"/>
+		</uniformOperator>-->
 		<scaleOperator scaleFactor="0.75" weight="3">
 			<parameter idref="ucld.stdev"/>
 		</scaleOperator>

@@ -149,6 +149,7 @@ for (file in 1:length(ifolder)){
     dCSV$del <- ""
   }
   
+  print("10% complete")
   # retrieving subtype field from the header
   iCSV$Subtype <- unname(sapply(iCSV$header, getSubtype))
   dCSV$Subtype <- unname(sapply(dCSV$header, getSubtype))
@@ -196,7 +197,7 @@ for (file in 1:length(ifolder)){
   dCSV$Vseq <- dfull$var
   iCSV$Anc <- ifull$anc
   dCSV$Anc <- dfull$anc
-  
+  print("50% complete")
   iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
   dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
   
@@ -248,7 +249,7 @@ for (file in 1:length(ifolder)){
       
     }
   }
-  
+  print("80% complete")
   # Retrieve variable loop positions from file 
   var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
   var.pos <- var.pos[,-c(2,5,8,11,14)]

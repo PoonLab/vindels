@@ -20,10 +20,10 @@ for (i in 1:length(args)){
 treefolder <- args[1]
 
 if (!dir.exists(paste0(treefolder,"prelim/"))){
-  quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log file directory]")
+  quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory]")
 }
 
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison.csv", row.names=1,stringsAsFactors = F)
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison2.csv", row.names=1,stringsAsFactors = F)
 
 logfiles <- csv[,"filename"]
 treefiles <- unname(sapply(logfiles,function(x){paste0(strsplit(x,"\\.")[[1]][1],".tree")}))
@@ -32,6 +32,11 @@ treefiles <- unname(sapply(logfiles,function(x){paste0(strsplit(x,"\\.")[[1]][1]
 best <- csv[,"best"]
 choices <-  c("24BEAST-constant-final/","30BEAST-skygrid-narrow/","33BEAST-skygrid-10/","37BEAST-skygrid-30/")[best]
 basepath <- "~/PycharmProjects/hiv-withinhost/6_hm/"
+
+# for writing BEAST log files to a final folder 
+for (i in 1:length(logfiles) ){
+  file.copy(paste0(basepath,choices[i],logfiles[i]), paste0(basepath, "final/"), overwrite=T)
+}
 
 
 dir.create(paste0(treefolder,"final/"), showWarnings = FALSE)

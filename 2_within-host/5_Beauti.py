@@ -41,7 +41,7 @@ for f in files:
 
     for rep in ['a','b']:
         name = str(os.path.basename(f)).split(".")[0]  + '-' + rep
-        name = re.sub("-original","",name)
+        #name = re.sub("-original","",name)
         print(name)
         xmlpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/' + run_id + "/"
         out = xmlpath + name + ".xml"
@@ -52,5 +52,5 @@ for f in files:
         stem = '/home/jpalmer/' + run_id + '/output/' + name
         #print(stem)
         print(out)
-        #parse(template_file, f, stem, out, 'days', 1)
+        parse(template_file, f, stem, out, 'days', 1)
 

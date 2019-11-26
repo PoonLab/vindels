@@ -128,6 +128,20 @@ del.nt$sign <- dsign
 
 
 
+# HIDDEN MARKOV MODEL 
+# ---------------------------------
+
+HMM <- function(t.mat, emi.mat, p.init, seq)
+
+  
+slips <- function(vseq, pos, len){
+  pos <- as.numeric(pos)+1
+  len <- as.numeric(len)
+  
+  chars <- strsplit(vseq,"")[[1]]
+  
+}
+
 
 
 path <- '~/PycharmProjects/hiv-withinhost/'
