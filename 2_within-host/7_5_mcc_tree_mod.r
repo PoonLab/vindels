@@ -23,42 +23,23 @@ if (!dir.exists(paste0(treefolder,"prelim/"))){
   quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory]")
 }
 
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison2.csv", row.names=1,stringsAsFactors = F)
-
-logfiles <- csv[,"filename"]
-treefiles <- unname(sapply(logfiles,function(x){paste0(strsplit(x,"\\.")[[1]][1],".tree")}))
-#treefiles <- unname(sapply(treefiles,function(x){sub("-original","",x)}))
-
-best <- csv[,"best"]
-choices <-  c("24BEAST-constant-final/","30BEAST-skygrid-narrow/","33BEAST-skygrid-10/","37BEAST-skygrid-30/")[best]
-basepath <- "~/PycharmProjects/hiv-withinhost/6_hm/"
-
-# for writing BEAST log files to a final folder 
-for (i in 1:length(logfiles) ){
-  file.copy(paste0(basepath,choices[i],logfiles[i]), paste0(basepath, "final/"), overwrite=T)
-}
 
 
-dir.create(paste0(treefolder,"final/"), showWarnings = FALSE)
-infolder <- Sys.glob(paste0(treefolder,"prelim/*.tree"))
+dir.create(paste0(treefolder,"final/"), showWarnings = F)
+treefiles <- Sys.glob(paste0(treefolder,"prelim/*.tree"))
 
-# for (f in folders){
-#   trees <- Sys.glob(paste0(f, "/*.tree.sample"))
-#   foldername <- paste0(basename(f),"/") 
-#   
-#   dir.create(paste0(treefolder,"final_multi/",foldername), showWarnings = FALSE)
-#   
+
 r.vec <- c()
 for (i in 1:length(treefiles)){
-  intree <- paste0("~/PycharmProjects/hiv-withinhost/7_5_MCC/prelim/",choices[i],treefiles[i])
-  tre <- read.nexus(intree)
+  tre <- read.nexus(treefiles[i])
   
   print("INPUT")
-  print(intree)
+  print(treefiles[i])
   
-  inlog <- paste0("~/PycharmProjects/hiv-withinhost/6_hm/",choices[i],logfiles[i])
+  
+  inlog <- strsplit(basename(treefiles[i]),"\\.")[[1]][1]
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(inlog, sep="\t", skip=4)
+  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6_hm/final/",inlog,".log"), sep="\t", skip=4)
   
   print("LOGFILE")
   print(inlog)

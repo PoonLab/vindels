@@ -2,121 +2,10 @@ require(bbmle)
 require(stringr)
 require(ape)
 
-csvcount <- function(input){
-  commas <- str_count(input, ":")
-  if (commas > 0){
-    result <- commas + 1  
-  }else if(input == ""){
-    result <- 0
-  }else{
-    result <- 1
-  }
-  result
-}
-
-# used for extracting condensed CSV information 
-extractInfo <- function(input){
-  if (length(input)==1 && input == ""){
-    return(c("",""))
-  }else{
-    insertions <- strsplit(input, ":")
-  }
-  seq <- c()
-  pos <- c()
-  
-  for (ins in insertions[[1]]){
-    fields <- strsplit(ins, "-")
-    seq <- c(seq, fields[[1]][1])
-    pos <- c(pos, as.numeric(fields[[1]][2]) )
-  }
-  return(c(paste(seq,collapse=","), paste(pos,collapse=",")))
-}
-
-# for changing headers from ACCNO_DATE format to ACCNO
-getSubtype <- function(header){
-  newheader <- strsplit(as.character(header),"\\.")[[1]][1]
-  newheader
-}
-
-# used for handling entire columns of NA values
-removeNA <- function(input, repl=""){
-  if (is.na(input)){
-    input <- repl
-  }
-  input
-}
-
-# retrieves the accno field from the full scale header 
-getAccno <- function(input){
-  accno <- strsplit(input, "\\.")[[1]][5]
-  accno
-}
-
-
-# specifically handles fields containing a comma
-# and copies their data so they can be split into individual rows in a data frame
-splitRows <- function(row){
-  row <- data.frame(t(row),stringsAsFactors = F)
-  seqs <- str_split(row[1,6], ",")[[1]]
-  pos <- str_split(row[1,7],",")[[1]]
-  len <- length(seqs)
-  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:10])
-}
-
-# uses the start position of the given vloop (retrieved from var.pos; separate file)
-# to compute the indel position within gp120
-addPos <- function(pos, accno, vloop){
-  if (pos == ""){
-    return(NA)
-  }
-  pos <- as.numeric(pos)
-  vloop <- as.character(vloop)
-  arg2 <- as.numeric(var.pos[var.pos$header==accno, paste0('start.',vloop)])
-  pos + arg2
-}
-
-
-# used to compute the original 
-insOriginal <- function(indel, pos, vseq){
-  if (indel == ""){
-    return(vseq)
-  }
-  seqs <- strsplit(indel, ",")[[1]]
-  idxs <- as.numeric(strsplit(pos, ",")[[1]])
-  # iterate through the sequences and positions
-  for (i in 1:length(seqs)){
-    len <- nchar(seqs[i])
-    idx <- idxs[i]
-    
-    # cut out insertion : substring before and up to start of insertion, substring from end of insertion until the end 
-    vseq <- paste0(substr(vseq, 0, idx-len) , substr(vseq, idx+1, nchar(vseq)))
-    idxs[(i+1):length(idxs)] <- idxs[(i+1):length(idxs)] - len
-  }
-  vseq
-}
-
-delOriginal <- function(indel, pos, vseq){
-  if (indel == ""){
-    return(vseq)
-  }
-  
-  seqs <- strsplit(indel, ",")[[1]]
-  idxs <- as.numeric(strsplit(pos, ",")[[1]])
-  # iterate through the sequences and positions
-  for (i in 1:length(seqs)){
-    len <- nchar(seqs[i])
-    idx <- idxs[i]
-    
-    # add back deletion : substring before and up to the point of deletion, deletion sequence, substring after point of deletion until end 
-    vseq <- paste0(substr(vseq, 0, idx) , seqs[i], substr(vseq, idx+1, nchar(vseq)))
-    idxs[(i+1):length(idxs)] <- idxs[(i+1):length(idxs)] + len
-  }
-  vseq
-}
-source("~/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/10_nt_utils.r")
 # Lio
 path <- "~/PycharmProjects/hiv-withinhost/"
-
+ 
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))
 
@@ -324,7 +213,7 @@ total.del <- total.del[total.del$len>1, ]
 write.csv(ins.glycs2[,c(1,2,6,3,4,5,7)], "~/Lio/10_nucleotide/total-ins.csv")
 write.csv(del.glycs2[,c(1,2,6,3,4,5,7)], "~/Lio/10_nucleotide/total-del.csv")
 
-# FLANKING INSERTIONSPROPORTIONS OUTPUT 
+# FLANKING INSERTIONS PROPORTIONS OUTPUT 
 # ------------------------------------
 write.csv(ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep.csv")
 write.csv(del, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-sep.csv")

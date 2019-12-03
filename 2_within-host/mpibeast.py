@@ -27,7 +27,7 @@ for i in range(len(files)):
         p = Popen(['java', '-jar', '-Djava.library.path=/usr/local/lib', '/usr/local/lib/beast.jar', path_to_xml+files[i]], stdout=PIPE)
         #p = Popen(['java', '-jar', '/home/thuy/programs/BEAST/BEASTv1.8.2/lib/beast.jar', path_to_xml+files[i]], stdout=PIPE)
         result = p.communicate()[0].split('\n')
-        sys.stdout.write("%s Process %d of %d completed task %d of %d:\n%s\n"%(datetime.datetime.now(), my_rank, nprocs, i, len(files), result[-1]))
+        sys.stdout:.write("%s Process %d of %d completed task %d of %d:\n%s\n"%(datetime.datetime.now(), my_rank, nprocs, i, len(files), result[-1]))
 
 MPI.COMM_WORLD.Barrier()
 MPI.Finalize()
