@@ -1,5 +1,6 @@
 # Tree modifications 
-# used for modifying different attributes of a tree and returning the result
+# script intended to take TreeAnnotator trees (NEXUS format), convert them to Newick, and
+# rescale them using the mean clock rate of the BEAST analysis run (by accessing the .log file)
 
 require(ape)
 
@@ -7,8 +8,8 @@ args <- commandArgs(trailingOnly = T)
 
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
-if (length(args) != 1){
-  print("USAGE: Rscript 7_5_mcc_tree_mod.r [working directory]")
+if (length(args) != 2){
+  print("USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log directory]")
   quit()
 }
 for (i in 1:length(args)){
@@ -18,16 +19,14 @@ for (i in 1:length(args)){
 }
 
 treefolder <- args[1]
+logfolder <- args[2]
 
 if (!dir.exists(paste0(treefolder,"prelim/"))){
-  quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory]")
+  quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log directory]")
 }
-
-
 
 dir.create(paste0(treefolder,"final/"), showWarnings = F)
 treefiles <- Sys.glob(paste0(treefolder,"prelim/*.tree"))
-
 
 r.vec <- c()
 for (i in 1:length(treefiles)){
@@ -36,10 +35,10 @@ for (i in 1:length(treefiles)){
   print("INPUT")
   print(treefiles[i])
   
-  
-  inlog <- strsplit(basename(treefiles[i]),"\\.")[[1]][1]
+  name <- basename(treefiles[i])
+  inlog <- paste0(strsplit(name,"\\.")[[1]][1], ".log")
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(paste0("~/PycharmProjects/hiv-withinhost/6_hm/final/",inlog,".log"), sep="\t", skip=4)
+  logfile <- read.csv(paste0(logfolder,inlog), sep="\t", skip=4)
   
   print("LOGFILE")
   print(inlog)
@@ -69,7 +68,7 @@ for (i in 1:length(treefiles)){
   tre$edge.length <- (tre$edge.length * rescale.factor)
 
   # writes the rescaled tree to a new folder called "final"
-  write.tree(tre,paste0(treefolder,"final/",treefiles[i]))
+  write.tree(tre,paste0(treefolder,"final/",name))
 }
 #}
 

@@ -59,7 +59,7 @@ for (j in 1:length(args)){
 
 bayes$best <- apply(bayes[,1:j+1], 1, function(x) which(x == max(x)))
 colnames(bayes) <- c("filename", runs, "best")
-write.csv(bayes, "~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison4.csv")
+write.csv(bayes, "~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison5.csv")
 for (x in 1:j){
   print(paste0("DIR",x," Count: ", sum(bayes$best == x)))
 }

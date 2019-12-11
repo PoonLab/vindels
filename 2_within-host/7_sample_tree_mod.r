@@ -5,27 +5,26 @@ require(ape)
 
 args <- commandArgs(trailingOnly = T)
 
+if (length(args) != 2){
+  print("USAGE: Rscript 7_sample_tree_mod.r [working directory] [log directory]")
+  quit()
+}
+
 for (i in 1:length(args)){
   if (!endsWith(args[i],"/")){
-    args[i] <- args[i] + "/"
+    args[i] <- paste0(args[i],"/") 
   }
 }
 
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
-#outpath <- args[1]
-logpath <- args[1]
+infolder <- args[1]
+logpath <- args[2]
 
-infolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/*.tree.sample")
+dir.create(paste0(infolder,"final/"), showWarnings = F)
+treefolder <- Sys.glob(paste0(infolder,"prelim/*.tree.sample"))
 
-
-# for (f in folders){
-#   trees <- Sys.glob(paste0(f, "/*.tree.sample"))
-#   foldername <- paste0(basename(f),"/") 
-#   
-#   dir.create(paste0(path,"rescaled_multi/",foldername), showWarnings = FALSE)
-#   
-for (treefile in infolder){
+for (treefile in treefolder){
   
   print(treefile)
   
@@ -42,7 +41,7 @@ for (treefile in infolder){
 
   print(logname)
   
-  rescale.factor <- logfile[logfile$state == state,"ucld.mean"]
+  rescale.factor <- logfile[which(logfile$state == state),"ucld.mean"]
   #counts the number of MCMC steps
   #loglen <- nrow(logfile) -1
   #print(loglen)
@@ -57,7 +56,7 @@ for (treefile in infolder){
   intree$edge.length <- (intree$edge.length * rescale.factor)
 
   # writes the rescaled tree to a new folder called "rescaled"
-  write.tree(intree,paste0("~/PycharmProjects/hiv-withinhost/7SampleTrees/final/", substr(filename, 0,nchar(filename)-7)))
+  write.tree(intree,paste0("~/PycharmProjects/hiv-withinhost/7SampleTrees/final/", gsub(".sample","",filename)))
 }
 #}
 

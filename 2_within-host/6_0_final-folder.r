@@ -1,5 +1,5 @@
 
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison4.csv", row.names=1,stringsAsFactors = F)
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison5.csv", row.names=1,stringsAsFactors = F)
 
 logfiles <- csv[,"filename"]
 names <- unname(sapply(logfiles,function(x){strsplit(x,"\\.")[[1]][1]}))

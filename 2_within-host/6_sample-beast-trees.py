@@ -44,9 +44,7 @@ def sample_beast(infile, outdir, numsample=5):
     input2 = open(infile,'rU')
 
     seqDict = {}
-    
-    if not os.path.isdir(outdir+"dict/"):
-        os.makedirs(outdir+"dict/")
+
 
     #d = open(outdir+"dict/"+name+".dictionary", "w")
 
