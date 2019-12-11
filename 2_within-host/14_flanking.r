@@ -2,7 +2,7 @@
 # trying to develop a model for interstrand jumping of polymerase 
 require(ape)
 require(stringr)
-source("~/vindels/2_within-host/utils.r")
+source("~/GitHub/vindels/2_within-host/utils.r")
 
 subs <- function(seq1, seq2){
   # if (nchar(seq1) != nchar(seq2)){
@@ -131,7 +131,7 @@ del.nt$sign <- dsign
 # HIDDEN MARKOV MODEL 
 # ---------------------------------
 
-HMM <- function(t.mat, emi.mat, p.init, seq)
+HMM <- function(ancestor, emi.mat, p.init, seq)
 
   
 slips <- function(vseq, pos, len){
@@ -145,6 +145,7 @@ slips <- function(vseq, pos, len){
 
 
 path <- '~/PycharmProjects/hiv-withinhost/'
+path <- "~/Lio/"
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
 all <- read.csv(paste0(path,"10_nucleotide/ins-all.csv"), stringsAsFactors = F, row.names=1)
 
