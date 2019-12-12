@@ -259,8 +259,7 @@ def main():
     for infile in hFolder:
         
         filename = os.path.basename(infile)
-        filename = re.sub("-[12]-")
-        replicate = filename.split("_")[0][-1]
+        #replicate = filename.split("_")[0][-1]
         #create names for both the csv file and the output recon file 
         csvfile = filename.split('-')[0] + ".csv"     #101827.csv
         reconfile = filename.split("_recon")[0] + ".csv"   #101827-a_15.csv
@@ -287,13 +286,13 @@ def main():
                     insList = ":".join(ins)
                     if insList == "":
                         insList = ""
-                    newaccno = accno + "_" + str(replicate) + "_" + str(j+1)
+                    newaccno = accno + "_"  + str(j+1) #str(replicate)
                     ins_out.write(",".join([newaccno, insList, str(j+1), str(len(vsequences[j])), vsequences[j], asequences[j]])+"\n")
                 for k, dl in enumerate(deletions):
                     delList = ":".join(dl)
                     if delList == "":
                         delList = ""
-                    newaccno = accno + "_" + str(replicate) + "_" + str(k+1)
+                    newaccno = accno + "_" + str(k+1)
                     del_out.write(",".join([newaccno, delList, str(k+1), str(len(vsequences[k])), vsequences[k], asequences[k]])+"\n")
         
             

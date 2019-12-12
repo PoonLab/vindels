@@ -219,7 +219,7 @@ slips.whole <- c(all$count.flanking, rep(0,sum(nchar(all$Vseq))-nrow(all)))
 slips.nt <- c(all$new.count, rep(0,sum(nchar(all$Vseq))-nrow(all)))
 slips.nt2 <- slips.nt + 1
 objf3 <- function(forward) -geomll(forward, slips.nt2, length(slips.nt2))
-mle3 <- bbmle::mle2(objf3, start=list(forward=1), method="Brent" , lower=0.9, upper=1)
+mle3 <- bbmle::mle2(objf3, start=list(forward=1), method="Brent" , lower=1e-8, upper=1)
 
 
 count.subs <- function()
