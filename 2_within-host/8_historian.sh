@@ -11,6 +11,6 @@ for filename in $indir*.tree; do
     #echo $name
     #echo $msadir$guide
     #echo $outdir$outfile
-    ~/historian/bin/historian -vv -guide $msadir$guide -tree $filename -ancseq -output fasta > "$outdir$outfile"
+    ~/historian/bin/historian -v -guide $msadir$guide -tree $filename -ancseq -output fasta > "$outdir$outfile"
 
 done
