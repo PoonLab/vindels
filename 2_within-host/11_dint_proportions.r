@@ -14,13 +14,18 @@ dinucleotide <- function(seq){
   dinucl[is.na(dinucl)] <- 0
   colnames(dinucl) <- nucleotides
   rownames(dinucl) <- nucleotides
-  for (n in 1:ditotal){
-    di <- substr(seq,n,n+1)
-    pos1 <- substr(di,1,1)
-    pos2 <- substr(di,2,2)
-    dinucl[pos2,pos1] <- dinucl[pos2,pos1] + 1
+  if (nchar(seq) > 1){
+    for (n in 1:ditotal){
+      di <- substr(seq,n,n+1)
+      pos1 <- substr(di,1,1)
+      pos2 <- substr(di,2,2)
+      print(pos1)
+      print(pos2)
+      dinucl[pos1,pos2] <- dinucl[pos1,pos2] + 1
+    }
+    
   }
-  c(dinucl)
+  return(dinucl)
 }
 
 

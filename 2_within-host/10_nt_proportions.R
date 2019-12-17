@@ -2,9 +2,10 @@ require(bbmle)
 require(stringr)
 require(ape)
 
-source("~/vindels/2_within-host/10_nt_utils.r")
+source("~/GitHub/vindels/2_within-host/10_nt_utils.r")
 # Lio
 path <- "~/PycharmProjects/hiv-withinhost/"
+path <- "~/Lio/"
  
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))
@@ -102,31 +103,31 @@ for (file in 1:length(ifolder)){
   new.ins <- iCSV[!grepl(",",iCSV$Seq),]
   new.del <- dCSV[!grepl(",",dCSV$Seq),]
   
-  # # handle comma rows separately with a function 
-  # iCommas <- iCSV[grepl(",",iCSV$Seq),]
-  # dCommas <- dCSV[grepl(",",dCSV$Seq),]
-  # # APPLY THE SPLIT ROWS TO GET ONE INDEL PER ROW
-  # if (nrow(iCommas) > 0){
-  #   newrows <- apply(iCommas,1,splitRows)
-  #   for (i in 1:length(newrows)){
-  #     idx <- as.double(names(newrows)[i])
-  #     len <- nrow(newrows[[i]])
-  #     rownames(newrows[[i]]) <- seq(0,0.1*(len-1),length=len) + idx
-  #     colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc", "Pat")
-  #     new.ins <- rbind(new.ins, newrows[[i]])
-  #   }
-  # }
-  # if (nrow(dCommas) > 0){
-  #   newrows <- apply(dCommas,1,splitRows)
-  #   for (i in 1:length(newrows)){
-  #     idx <- as.double(names(newrows)[i])
-  #     len <- nrow(newrows[[i]])
-  #     rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-  #     colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc","Pat")
-  #     newnew.del <- rbind(new.del, newrows[[i]])
-  #     
-  #   }
-  # }
+  # handle comma rows separately with a function
+  iCommas <- iCSV[grepl(",",iCSV$Seq),]
+  dCommas <- dCSV[grepl(",",dCSV$Seq),]
+  # APPLY THE SPLIT ROWS TO GET ONE INDEL PER ROW
+  if (nrow(iCommas) > 0){
+    newrows <- apply(iCommas,1,splitRows)
+    for (i in 1:length(newrows)){
+      idx <- as.double(names(newrows)[i])
+      len <- nrow(newrows[[i]])
+      rownames(newrows[[i]]) <- seq(0,0.1*(len-1),length=len) + idx
+      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc", "Pat")
+      new.ins <- rbind(new.ins, newrows[[i]])
+    }
+  }
+  if (nrow(dCommas) > 0){
+    newrows <- apply(dCommas,1,splitRows)
+    for (i in 1:length(newrows)){
+      idx <- as.double(names(newrows)[i])
+      len <- nrow(newrows[[i]])
+      rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
+      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc","Pat")
+      newnew.del <- rbind(new.del, newrows[[i]])
+
+    }
+  }
   print("80% complete")
   # Retrieve variable loop positions from file 
   var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
@@ -139,12 +140,12 @@ for (file in 1:length(ifolder)){
   new.ins$Vpos <- as.numeric(unname(mapply(addPos, pos=new.ins$Pos, accno=new.ins$Header, vloop=new.ins$Vloop)))
   new.del$Vpos <- as.numeric(unname(mapply(addPos, pos=new.del$Pos, accno=new.del$Header, vloop=new.del$Vloop)))
   
-  # ADJUST POSITIONS TO MATCH THE PLACE WHERE THE INSERTION WAS
-  new.ins$Pos <- as.numeric(new.ins$Pos) - nchar(new.ins$Seq)
-  new.ins$Vpos <- new.ins$Vpos - nchar(new.ins$Seq)
+  # # ADJUST POSITIONS TO MATCH THE PLACE WHERE THE INSERTION WAS
+  # new.ins$Pos <- as.numeric(new.ins$Pos) - nchar(new.ins$Seq)
+  # new.ins$Vpos <- new.ins$Vpos - nchar(new.ins$Seq)
   
   # no adjustment needed for deletions
-  new.del$Pos <- as.numeric(new.del$Pos)
+  # new.del$Pos <- as.numeric(new.del$Pos)
   
   
   # OUTPUT 
@@ -193,14 +194,14 @@ for (n in c(1,2,4,5)){
 total.ins$len <- sapply(total.ins$Seq, nchar)
 total.del$len <- sapply(total.del$Seq, nchar)
 
-total.ins <- total.ins[total.ins$len>1, ]
-total.del <- total.del[total.del$len>1, ]
+total.ins2 <- total.ins[total.ins$len>1, ]
+total.del2 <- total.del[total.del$len>1, ]
 
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
-write.csv(ins.glycs2[,c(1,2,6,3,4,5,7)], "~/Lio/10_nucleotide/total-ins.csv")
-write.csv(del.glycs2[,c(1,2,6,3,4,5,7)], "~/Lio/10_nucleotide/total-del.csv")
+write.csv(total.ins2, "~/Lio/10_nucleotide/total-ins.csv")
+write.csv(total.del2, "~/Lio/10_nucleotide/total-del.csv")
 
 # FLANKING INSERTIONS PROPORTIONS OUTPUT 
 # ------------------------------------

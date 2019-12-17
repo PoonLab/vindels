@@ -66,8 +66,9 @@ splitRows <- function(row){
 
 
 # INSERTION PARSING ----------
-ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/rep/ins/*.csv")
-dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/rep/ins/*.csv")
+path <- "~/Lio/"
+ifolder <- Sys.glob(paste0(path,"9Indels/rep/ins/*.csv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/rep/del/*.csv"))
 all.ins <- data.frame()
 all.del <- data.frame()
 csv.ins <- data.frame()
@@ -113,7 +114,7 @@ for (file in 1:length(ifolder)){
   dCSV$Count <- sapply(dCSV$del, csvcount)
   
   # reads in the tree
-  tre <- read.tree(paste0("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/",filename , ".tree.sample"))
+  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename , ".tree.sample")))
   
   # adjusts the tre tip labels to match the accession numbers
   #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
@@ -251,6 +252,7 @@ for (run in 1:20){
     drates <- c(drates, drate)
     print(summary(dfit))
     
+    
     #print(1 - (fit$deviance/fit$null.deviance))
     #all.df <- rbind(all.df, iFinal)
     #EDA(residuals(fit))
@@ -308,24 +310,24 @@ g1 <- ggplot(insrates, aes(x=vloop, y=rate,width=0.8)) +
                 width = 0.25, size=1.1) +
   labs(x="Variable Loop", 
        y=expression(paste("       Insertion Rate \n(Events/Nt/Year x  ", 10^-3, ")", sep = "")))+
-  scale_y_continuous(expand = c(0, 0),limits = c(0, 5)) +
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 6), breaks=c(0:6)) +
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.spacing=unit(1, "mm"),
         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 42, r = 10, b = 8, l = 18, unit = "pt"),
+        plot.margin =margin(t = 42, r = 10, b = 4, l = 18, unit = "pt"),
         axis.line = element_line(colour = "black"), 
         axis.title.y=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
         axis.title.x=element_blank(),
         strip.text.x = element_blank(),
         axis.text.x = element_blank(),
         axis.text.y = element_text(size=14),
-        legend.position="none")+ geom_text(aes(y=0.3,x=3 ),
+        legend.position="none")+ geom_text(aes(y=0.4,x=3 ),
                                            label="N/A", 
                                            size=6)
-g1
+#g1
 
 
 g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) + 
@@ -335,23 +337,22 @@ g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) +
   labs(x="Variable Loop", 
        y="Deletion Rate")+
   #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
-  scale_y_reverse(lim=c(5,0))+
+  scale_y_reverse(lim=c(6,0), breaks=c(0:6))+
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.spacing=unit(1, "mm"),
         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = -10, r = 10, b = 8, l = 24, unit = "pt"),
+        plot.margin =margin(t = -2, r = 10, b = 8, l = 26, unit = "pt"),
         axis.line = element_line(colour = "black"), 
         axis.title.y=element_text(size=18,margin=margin(t = 0, r = 11, b = 0, l = 6)),
         axis.title.x=element_text(size=18,margin=margin(t = 5, r = 0, b = 0, l = 0)),
         strip.text.x = element_text(size=16),
         axis.text.x=element_text(size=18),
         axis.text.y=element_text(size=14),
-        legend.position="none") + geom_text(aes(y=0.3,x=3 ),
-                                            label="N/A", 
-                                            size=6)
+        legend.position="none") 
+#+ geom_text(aes(y=0.5,x=3 ),label="N/A", size=6)
   
 multiplot(g1,g2)
 
