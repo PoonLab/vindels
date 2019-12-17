@@ -259,6 +259,7 @@ def main():
     for infile in hFolder:
         
         filename = os.path.basename(infile)
+        #if len(sys.argv) == 4:
         #replicate = filename.split("_")[0][-1]
         #create names for both the csv file and the output recon file 
         csvfile = filename.split('-')[0] + ".csv"     #101827.csv

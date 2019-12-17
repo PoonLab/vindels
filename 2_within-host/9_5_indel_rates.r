@@ -66,8 +66,8 @@ splitRows <- function(row){
 
 
 # INSERTION PARSING ----------
-ifolder <- Sys.glob("~/Lio/9Indels/ins_20/*.csv")
-dfolder <- Sys.glob("~/Lio/9Indels/del_20/*.csv")
+ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/rep/ins/*.csv")
+dfolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/rep/ins/*.csv")
 all.ins <- data.frame()
 all.del <- data.frame()
 csv.ins <- data.frame()
@@ -88,16 +88,16 @@ for (file in 1:length(ifolder)){
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F)
   
   # used for handling cases where there are no indels
-  if (all(is.na(iCSV$Ins))){
-    iCSV$Ins <- ""
+  if (all(is.na(iCSV$ins))){
+    iCSV$ins <- ""
   }
-  if (all(is.na(dCSV$Del))){
-    dCSV$Del <- ""
+  if (all(is.na(dCSV$del))){
+    dCSV$del <- ""
   }
   
   # retrieving subtype field from the header
-  iCSV$Subtype <- unname(sapply(iCSV$Accno, getSubtype))
-  dCSV$Subtype <- unname(sapply(dCSV$Accno, getSubtype))
+  iCSV$Subtype <- unname(sapply(iCSV$header, getSubtype))
+  dCSV$Subtype <- unname(sapply(dCSV$header, getSubtype))
   
   # retrieving the accno from the header
   #iAccno <- unname(sapply(iCSV$Accno, getAccno))
@@ -106,21 +106,14 @@ for (file in 1:length(ifolder)){
   # 
   #iCSV$Accno <- iAccno
   #dCSV$Accno <- dAccno
-  
-  # store the sequences from these two data frames for nucleotide analysis
-  sequences$ins <- as.character(iCSV$Seq)
-  sequences$del <- as.character(dCSV$Seq)
-  
-  # remove them as they arent needed for this analysis
-  dCSV$Seq <- NULL
-  iCSV$Seq <- NULL
+
   
   # creates the counts column
-  iCSV$Count <- sapply(iCSV$Ins, csvcount) 
-  dCSV$Count <- sapply(dCSV$Del, csvcount)
+  iCSV$Count <- sapply(iCSV$ins, csvcount) 
+  dCSV$Count <- sapply(dCSV$del, csvcount)
   
   # reads in the tree
-  tre <- read.tree(paste0("~/Lio/7SampleTrees/prelim_multi/",filename , ".tree.sample"))
+  tre <- read.tree(paste0("~/PycharmProjects/hiv-withinhost/7SampleTrees/prelim/",filename , ".tree.sample"))
   
   # adjusts the tre tip labels to match the accession numbers
   #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
@@ -129,78 +122,78 @@ for (file in 1:length(ifolder)){
   branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   
   
   # matches the branch length to each of the sequences 
-  iCSV$Date <- branches[match(iCSV$Accno, tre$tip.label)]
-  dCSV$Date <- branches[match(dCSV$Accno, tre$tip.label)]
+  iCSV$Date <- branches[match(sub("_\\d*$","",iCSV$header), tre$tip.label)]
+  dCSV$Date <- branches[match(sub("_\\d*$","",dCSV$header), tre$tip.label)]
   
   # extracts info from the indel column and puts it into two separate columns
-  insInfo <- sapply(iCSV$Ins, extractInfo)
+  insInfo <- sapply(iCSV$ins, extractInfo)
   insInfo <- unname(insInfo)
   insInfo <- t(insInfo)
   insInfo <- as.data.frame(insInfo)
   insInfo$V1 <- as.character(insInfo$V1)
   insInfo$V2 <- as.character(insInfo$V2)
   iCSV <- cbind(iCSV, insInfo)
-  iCSV$Ins <- NULL
+  iCSV$ins <- NULL
   
-  delInfo <- sapply(dCSV$Del, extractInfo)
+  delInfo <- sapply(dCSV$del, extractInfo)
   delInfo <- unname(delInfo)
   delInfo <- t(delInfo)
   delInfo <- as.data.frame(delInfo)
   delInfo$V1 <- as.character(delInfo$V1)
   delInfo$V2 <- as.character(delInfo$V2)
   dCSV <- cbind(dCSV, delInfo)
-  dCSV$Del <- NULL
-  
-  iCSV$Vseq <- sequences$ins
-  dCSV$Vseq <- sequences$del
+  dCSV$del <- NULL
   
   iCSV$Run <- rep(runno, nrow(iCSV))
   dCSV$Run <- rep(runno, nrow(dCSV))
   
-  colnames(iCSV) <- c("Accno","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos", "Vseq", "Run")
-  colnames(dCSV) <- c("Accno", "Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos", "Vseq", "Run")
+  iCSV <- iCSV[c(1,2,3,6,7,8,9,10,4,5,11)]
+  dCSV <- dCSV[c(1,2,3,6,7,8,9,10,4,5,11)]
+  
+  colnames(iCSV) <- c("header","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos", "Vseq", "Anc", "Run")
+  colnames(dCSV) <- c("header", "Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos", "Vseq", "Anc", "Run")
   
   # COMMA SEPARATION FIX
   
-  new.ins <- data.frame()
-  new.del <- data.frame()
-  # make a new data.frame for each CSV df
-  # transport over all rows which do NOT contain a comma
-  new.ins <- iCSV[!grepl(",",iCSV$Seq),]
-  new.del <- dCSV[!grepl(",",dCSV$Seq),]
-  
-  # handle comma rows separately with a function 
-  iCommas <- iCSV[grepl(",",iCSV$Seq),]
-  dCommas <- dCSV[grepl(",",dCSV$Seq),]
-  #c()
-  if (nrow(iCommas) > 0){
-    newrows <- apply(iCommas,1,splitRows)
-    for (i in 1:length(newrows)){
-      idx <- as.double(names(newrows)[i])
-      len <- nrow(newrows[[i]])
-      rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      new.ins <- rbind(new.ins, newrows[[i]])
-    }
-    #new.ins <- new.ins[order(as.double(rownames(new.ins)))]
-  }
-  if (nrow(dCommas) > 0){
-    newrows <- apply(dCommas,1,splitRows)
-    for (i in 1:length(newrows)){
-      idx <- as.double(names(newrows)[i])
-      len <- nrow(newrows[[i]])
-      rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      new.del <- rbind(new.del, newrows[[i]])
-    }
-    #new.del <- new.del[order(as.double(rownames(new.del)))]
-  }
-  
-  # OUTPUT 
-  # for other analyses
-  # -----------------------------
-  
-  all.ins <- rbind(all.ins, new.ins)
-  all.del <- rbind(all.del, new.del)
-  
+  # new.ins <- data.frame()
+  # new.del <- data.frame()
+  # # make a new data.frame for each CSV df
+  # # transport over all rows which do NOT contain a comma
+  # new.ins <- iCSV[!grepl(",",iCSV$Seq),]
+  # new.del <- dCSV[!grepl(",",dCSV$Seq),]
+  # 
+  # # handle comma rows separately with a function 
+  # iCommas <- iCSV[grepl(",",iCSV$Seq),]
+  # dCommas <- dCSV[grepl(",",dCSV$Seq),]
+  # #c()
+  # if (nrow(iCommas) > 0){
+  #   newrows <- apply(iCommas,1,splitRows)
+  #   for (i in 1:length(newrows)){
+  #     idx <- as.double(names(newrows)[i])
+  #     len <- nrow(newrows[[i]])
+  #     rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
+  #     new.ins <- rbind(new.ins, newrows[[i]])
+  #   }
+  #   #new.ins <- new.ins[order(as.double(rownames(new.ins)))]
+  # }
+  # if (nrow(dCommas) > 0){
+  #   newrows <- apply(dCommas,1,splitRows)
+  #   for (i in 1:length(newrows)){
+  #     idx <- as.double(names(newrows)[i])
+  #     len <- nrow(newrows[[i]])
+  #     rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
+  #     new.del <- rbind(new.del, newrows[[i]])
+  #   }
+  #   #new.del <- new.del[order(as.double(rownames(new.del)))]
+  # }
+  # 
+  # # OUTPUT 
+  # # for other analyses
+  # # -----------------------------
+  # 
+  # all.ins <- rbind(all.ins, new.ins)
+  # all.del <- rbind(all.del, new.del)
+  # 
   
   # OUTPUT 2 
   # used for indel rates 

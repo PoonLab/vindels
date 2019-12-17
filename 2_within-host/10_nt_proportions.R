@@ -92,18 +92,7 @@ for (file in 1:length(ifolder)){
   
   colnames(iCSV) <- c("Header","Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Anc","Pat")
   colnames(dCSV) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Anc","Pat")
-  
-  ins.unchanged <- iCSV$Vseq
-  del.unchanged <- dCSV$Vseq
-  
-  # REMOVE INSERTIONS
-  #iCSV$Vseq <- mapply(insOriginal, indel=iCSV$Seq, pos=iCSV$Pos, vseq=iCSV$Vseq)
-  
-  # RESTORE DELETIONS 
-  #dCSV$Vseq <- mapply(delOriginal, indel=dCSV$Seq, pos=dCSV$Pos, vseq=dCSV$Vseq)
-  
-  # DELETIONS POSITIONS DO NOT NEED FIXING 
-  
+
   ins.glycs <- rbind(ins.glycs, iCSV)
   del.glycs <- rbind(del.glycs, dCSV)
   
@@ -113,31 +102,31 @@ for (file in 1:length(ifolder)){
   new.ins <- iCSV[!grepl(",",iCSV$Seq),]
   new.del <- dCSV[!grepl(",",dCSV$Seq),]
   
-  # handle comma rows separately with a function 
-  iCommas <- iCSV[grepl(",",iCSV$Seq),]
-  dCommas <- dCSV[grepl(",",dCSV$Seq),]
-  # APPLY THE SPLIT ROWS TO GET ONE INDEL PER ROW
-  if (nrow(iCommas) > 0){
-    newrows <- apply(iCommas,1,splitRows)
-    for (i in 1:length(newrows)){
-      idx <- as.double(names(newrows)[i])
-      len <- nrow(newrows[[i]])
-      rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc", "Pat")
-      new.ins <- rbind(new.ins, newrows[[i]])
-    }
-  }
-  if (nrow(dCommas) > 0){
-    newrows <- apply(dCommas,1,splitRows)
-    for (i in 1:length(newrows)){
-      idx <- as.double(names(newrows)[i])
-      len <- nrow(newrows[[i]])
-      rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc","Pat")
-      newnew.del <- rbind(new.del, newrows[[i]])
-      
-    }
-  }
+  # # handle comma rows separately with a function 
+  # iCommas <- iCSV[grepl(",",iCSV$Seq),]
+  # dCommas <- dCSV[grepl(",",dCSV$Seq),]
+  # # APPLY THE SPLIT ROWS TO GET ONE INDEL PER ROW
+  # if (nrow(iCommas) > 0){
+  #   newrows <- apply(iCommas,1,splitRows)
+  #   for (i in 1:length(newrows)){
+  #     idx <- as.double(names(newrows)[i])
+  #     len <- nrow(newrows[[i]])
+  #     rownames(newrows[[i]]) <- seq(0,0.1*(len-1),length=len) + idx
+  #     colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc", "Pat")
+  #     new.ins <- rbind(new.ins, newrows[[i]])
+  #   }
+  # }
+  # if (nrow(dCommas) > 0){
+  #   newrows <- apply(dCommas,1,splitRows)
+  #   for (i in 1:length(newrows)){
+  #     idx <- as.double(names(newrows)[i])
+  #     len <- nrow(newrows[[i]])
+  #     rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
+  #     colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc","Pat")
+  #     newnew.del <- rbind(new.del, newrows[[i]])
+  #     
+  #   }
+  # }
   print("80% complete")
   # Retrieve variable loop positions from file 
   var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
@@ -215,11 +204,14 @@ write.csv(del.glycs2[,c(1,2,6,3,4,5,7)], "~/Lio/10_nucleotide/total-del.csv")
 
 # FLANKING INSERTIONS PROPORTIONS OUTPUT 
 # ------------------------------------
-write.csv(ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep.csv")
-write.csv(del, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-sep.csv")
+write.csv(ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep-only.csv")
+write.csv(del, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-sep-only.csv")
 
-write.csv(ins.glycs, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-all.csv")
-write.csv(del.glycs, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-all.csv")
+write.csv(all.ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep-all.csv")
+write.csv(all.ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-sep-all.csv")
+
+write.csv(ins.glycs, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-nosep-all.csv")
+write.csv(del.glycs, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-nosep-all.csv")
 
 
 

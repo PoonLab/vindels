@@ -1,41 +1,42 @@
-require(bbmle)
 
-insertions <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-nosep-all.csv",row.names=1)
-
-#slips <- matrix(rep(rep(0,121),10), nrow=10,ncol=121)
-slips <- c(rep(0,121000))
-slips[sample(121000,100)] <- sample(3,100,replace = T) * 3
-
-
-objf <- function(p.slip, p.stay){
-  -affinell(p.slip, p.stay, slips)
-}
-
-result <- mle2(objf, start=list(p.slip=1,p.stay=1), method = "L-BFGS-B", lower=1e-12, upper = 1)
-
-
-geomll <- function(p.copy){
-  N <- length(counts)
-  # log likelihood of the geometric distribution
-  N * log(p.copy) + sum(counts) * log(1-p.copy)
-}
-
-
-# CUSTOM MCMC IN R
-
-
-likelihood <- function(slip){
-  if (slip <= 0){
-    return(0)
-  }else if (slip > 1){
-    return(0)
-  }
-  sum(dgeom(counts,prob=slip, log=T))
-}
-
-prior <- function(slip){
-  prior <- dunif(slip, log = T)
+# slip = data frame of slip events for EACH SEQUENCE 
+likelihood2 <- function(param){
+  slips <- param[1]
+  p.enter <- param[2]
+  p.stay  <- param[3]
   
+  llh <- c()
+  for (i in 1:length(slips)){
+    s <- slips[[i]]
+    x <- sum(s == 0)
+    y <- sum(s != 0)
+    z <- sum(s[which(s!=0)] - 1)
+    
+    # Log likelihood of each tip/anc pair
+    #(1 - p.slip)^x * p.slip^y * (1-p.stay)^y * p.stay^z
+    llh[i] <- 2 * y * x * z * log(1-p.slip) * log(p.slip) * log(1-p.stay) * log(p.stay)
+  }
+  sum(llh)
+  
+}
+
+
+prior <- function(param){
+  slips <- param[1]
+  p.enter <- param[2]
+  p.stay  <- param[3]
+  
+  sum.slips <- sum(slips)
+  
+  prior.pe <- dunif(p.enter, log = T)
+  prior.ps <- dunif(p.stay, log = T)
+  
+  if (sum.slips > 0){
+    prior.s <- slips
+  }else{
+    prior.s <- slips[sample(length(slips), sum.slips, replace=T)]
+  }
+    
   return(prior)
 }
 
@@ -45,7 +46,7 @@ posterior <- function(slip){
 }
 
 proposalFunction <- function(slip){
-  return(rnorm(1,mean=slip, sd=0.003))
+  return(rnorm(1,mean=slip, sd=0.0009))
 }
 
 
@@ -55,14 +56,14 @@ runMCMC <- function(startvalue, iterations){
   
   
   for (i in 1:iterations){
-
+    
     proposal <- proposalFunction(chain[i,])
     prop <- exp(posterior(proposal) - posterior(chain[i,]))
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
     if (runif(1) < prop) {
       chain[i+1,] <- proposal
       
-    # if the proportion is less than the random uniform sample, REJCECT the proposed value stick with current 
+      # if the proportion is less than the random uniform sample, REJCECT the proposed value stick with current 
     } else {
       chain[i+1,] <- chain[i,]
     }
