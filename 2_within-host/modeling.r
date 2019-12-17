@@ -68,7 +68,7 @@ runMCMC <- function(startvalue, iterations){
     } else {
       chain[i+1,] <- chain[i,]
     }
-    if (i %% 1000 == 0){
+    if (i %% 100 == 0){
       print(paste0("STATE ",i,": ", chain[i,1]))
     }
   }
