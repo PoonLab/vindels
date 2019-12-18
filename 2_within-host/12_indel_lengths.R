@@ -31,9 +31,9 @@ categorize <- function(seqList){
 getLength <- function(seq){
   
 }
-path <- "~/Lio/"
-iLength <- read.csv("~/Lio/12_lengths/ins-full.csv", row.names=1, stringsAsFactors = F)
-dLength <- read.csv("~/Lio/12_lengths/del-full.csv", row.names=1, stringsAsFactors = F)
+path <- "~/PycharmProjects/hiv-withinhost/"
+iLength <- read.csv(paste0(path,"12_lengths/ins-full.csv"), row.names=1, stringsAsFactors = F)
+dLength <- read.csv(paste0(path,"12_lengths/del-full.csv"), row.names=1, stringsAsFactors = F)
  
 iLength <- iLength[iLength$Count>0,]
 dLength <- dLength[dLength$Count>0,]
@@ -78,11 +78,14 @@ iplot <- ggplot() +
         panel.grid.minor.x = element_blank(),
         panel.spacing=unit(1, "mm"),
         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 42, r = 10, b = 20, l = 18, unit = "pt"),
+        plot.margin =margin(t = 1.3, r = 1, b = 0.7, l = 1.5, unit = "cm"),
         axis.line = element_line(colour = "black"), 
         axis.title=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
-        axis.text = element_text(size=14),
-        plot.title = element_text(size=22, hjust = 0.5))
+        axis.text = element_text(size=16, colour="black"),
+        plot.title = element_text(size=22, hjust = 0.5),
+        legend.text=element_text(size=16), 
+        legend.background=element_rect(colour="black"),
+        legend.title=element_text(size=18))
 iplot
 
 
@@ -97,11 +100,14 @@ dplot <- ggplot() +
         panel.grid.minor.x = element_blank(),
         panel.spacing=unit(1, "mm"),
         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 42, r = 10, b = 20, l = 18, unit = "pt"),
+        plot.margin =margin(t = 1.3, r = 1, b = 0.7, l = 1.5, unit = "cm"),
         axis.line = element_line(colour = "black"), 
         axis.title=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
-        axis.text = element_text(size=14),
-        plot.title = element_text(size=22, hjust = 0.5))
+        axis.text = element_text(size=16, colour="black"),
+        plot.title = element_text(size=22, hjust = 0.5),
+        legend.text=element_text(size=16), 
+        legend.background=element_rect(colour="black"),
+        legend.title=element_text(size=18))
 dplot
 
 # TEST : ALLUVIAL PLOT

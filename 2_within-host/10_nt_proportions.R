@@ -243,7 +243,7 @@ counts <- melt(counts)
 ins.nt <- data.frame(nt=nucleotides,props=iProps,vprops=iVProps)
 del.nt <- data.frame(nt=nucleotides,props=dProps,vprops=dVProps)
 indel.nt <- rbind(ins.nt, del.nt)
-indel.nt$indel <- c(rep(1,4),rep(2,4))
+indel.nt$indel <- c(rep(0,4),rep(3,4))
 indel.nt$counts <- counts$value
 
 # RANDOMIZATION TEST 
@@ -323,11 +323,11 @@ par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
 lim = c(0.1,0.45)
 plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=2.5, main="Nucleotide Proportions")
+     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=2.8, main="Nucleotide Proportions")
 title(ylab="Proportion Inside Indels", line=3,cex.lab=1.3)
 title(xlab="Proportion in Variable Loops", line=3,cex.lab=1.3)
-legend(0.38,0.24,legend=nucleotides, pch=21,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(22,23),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.38,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 par(xpd=F)
 abline(0,1)
 
