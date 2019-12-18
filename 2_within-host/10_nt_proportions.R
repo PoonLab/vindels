@@ -2,10 +2,10 @@ require(bbmle)
 require(stringr)
 require(ape)
 
-source("~/GitHub/vindels/2_within-host/10_nt_utils.r")
+source("~/vindels/2_within-host/10_nt_utils.r")
 # Lio
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
  
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))
@@ -168,8 +168,8 @@ write.table(del.glycs2[,c(1,2,6,3,4,5,7)],paste0(path, "13_nglycs/del.csv"), row
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
 
-write.csv(all.ins[,c(1,2,4,5,6)], "~/Lio/12_lengths/ins-full.csv")
-write.csv(all.del[,c(1,2,4,5,6)], "~/Lio/12_lengths/del-full.csv")
+write.csv(all.ins[,c(1,2,4,5,6)], paste0(path,"12_lengths/ins-full.csv"))
+write.csv(all.del[,c(1,2,4,5,6)], paste0(path,"12_lengths/del-full.csv"))
 
 
 nucleotides <- c("A","C","G","T")
@@ -200,8 +200,8 @@ total.del2 <- total.del[total.del$len>1, ]
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
-write.csv(total.ins2, "~/Lio/10_nucleotide/total-ins.csv")
-write.csv(total.del2, "~/Lio/10_nucleotide/total-del.csv")
+write.csv(total.ins2, paste0(path,"10_nucleotide/total-ins.csv"))
+write.csv(total.del2, paste0(path,"10_nucleotide/total-del.csv"))
 
 # FLANKING INSERTIONS PROPORTIONS OUTPUT 
 # ------------------------------------
