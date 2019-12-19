@@ -60,7 +60,7 @@ runMCMC <- function(startvalue, iterations){
     proposal <- proposalFunction(chain[i,])
     prop <- exp(posterior(proposal) - posterior(chain[i,]))
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
-    if (runif(1) < prop) {
+  *  if (runif(1) < prop) {
       chain[i+1,] <- proposal
       
       # if the proportion is less than the random uniform sample, REJCECT the proposed value stick with current 
