@@ -2,10 +2,10 @@ require(bbmle)
 require(stringr)
 require(ape)
 
-source("~/GitHub/vindels/2_within-host/10_nt_utils.r")
+source("~/vindels/2_within-host/10_nt_utils.r")
 # Lio
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
  
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))
@@ -130,15 +130,13 @@ for (file in 1:length(ifolder)){
   }
   print("80% complete")
   # Retrieve variable loop positions from file 
-  var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
-  var.pos <- var.pos[,-c(2,5,8,11,14)]
   
   new.ins[is.na(new.ins$Pos),"Pos"] <- ""
   new.del[is.na(new.del$Pos),"Pos"] <- ""
   
   # Add the V position column into the two final data frames 
-  new.ins$Vpos <- as.numeric(unname(mapply(addPos, pos=new.ins$Pos, accno=new.ins$Header, vloop=new.ins$Vloop)))
-  new.del$Vpos <- as.numeric(unname(mapply(addPos, pos=new.del$Pos, accno=new.del$Header, vloop=new.del$Vloop)))
+  new.ins$Vpos <- as.numeric(unname(mapply(addPos, pos=new.ins$Pos, header=new.ins$Header, vloop=new.ins$Vloop)))
+  new.del$Vpos <- as.numeric(unname(mapply(addPos, pos=new.del$Pos, header=new.del$Header, vloop=new.del$Vloop)))
   
   # # ADJUST POSITIONS TO MATCH THE PLACE WHERE THE INSERTION WAS
   # new.ins$Pos <- as.numeric(new.ins$Pos) - nchar(new.ins$Seq)
@@ -168,8 +166,8 @@ write.table(del.glycs2[,c(1,2,6,3,4,5,7)],paste0(path, "13_nglycs/del.csv"), row
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
 
-write.csv(all.ins[,c(1,2,4,5,6)], "~/Lio/12_lengths/ins-full.csv")
-write.csv(all.del[,c(1,2,4,5,6)], "~/Lio/12_lengths/del-full.csv")
+write.csv(all.ins[,c(1,2,4,5,6)], paste0(path,"12_lengths/ins-full.csv"))
+write.csv(all.del[,c(1,2,4,5,6)], paste0(path,"12_lengths/del-full.csv"))
 
 
 nucleotides <- c("A","C","G","T")
@@ -200,8 +198,8 @@ total.del2 <- total.del[total.del$len>1, ]
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
-write.csv(total.ins2, "~/Lio/10_nucleotide/total-ins.csv")
-write.csv(total.del2, "~/Lio/10_nucleotide/total-del.csv")
+write.csv(total.ins2, paste0(path,"10_nucleotide/total-ins.csv"))
+write.csv(total.del2, paste0(path,"10_nucleotide/total-del.csv"))
 
 # FLANKING INSERTIONS PROPORTIONS OUTPUT 
 # ------------------------------------
@@ -243,7 +241,7 @@ counts <- melt(counts)
 ins.nt <- data.frame(nt=nucleotides,props=iProps,vprops=iVProps)
 del.nt <- data.frame(nt=nucleotides,props=dProps,vprops=dVProps)
 indel.nt <- rbind(ins.nt, del.nt)
-indel.nt$indel <- c(rep(1,4),rep(2,4))
+indel.nt$indel <- c(rep(0,4),rep(3,4))
 indel.nt$counts <- counts$value
 
 # RANDOMIZATION TEST 
@@ -323,11 +321,11 @@ par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
 lim = c(0.1,0.45)
 plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=2.5, main="Nucleotide Proportions")
+     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=2.8, main="Nucleotide Proportions")
 title(ylab="Proportion Inside Indels", line=3,cex.lab=1.3)
 title(xlab="Proportion in Variable Loops", line=3,cex.lab=1.3)
-legend(0.38,0.24,legend=nucleotides, pch=21,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(22,23),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.38,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 par(xpd=F)
 abline(0,1)
 

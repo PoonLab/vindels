@@ -1,64 +1,92 @@
+require(bbmle)
 
+insertions <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-nosep-all.csv",row.names=1, stringsAsFactors = F)
+
+# #slips <- matrix(rep(rep(0,121),10), nrow=10,ncol=121)
+# slips <- c(rep(0,121000))
+# slips[sample(121000,100)] <- sample(3,100,replace = T) * 3
+slips <- nchar(insertions[insertions$Count!=0, "Seq"])
+slips <- slips[-167]
+slips <- c(slips, rep(0, sum(nchar(insertions$Vseq))))
+
+# randomly shuffle all the entries
+rnd <- sample(length(slips),length(slips))
+slips <- slips[rnd]
+
+# EXPERIMENTAL -------------------------------
 # slip = data frame of slip events for EACH SEQUENCE 
+
+llh.pair <- function(tip, anc, slips){
+  x <- sum(slips == 0)
+  y <- sum(slips != 0)
+  z <- sum(slips[which(slips!=0)] - 1)
+  
+  
+}
 likelihood2 <- function(param){
   slips <- param[1]
   p.enter <- param[2]
   p.stay  <- param[3]
   
   llh <- c()
-  for (i in 1:length(slips)){
-    s <- slips[[i]]
-    x <- sum(s == 0)
-    y <- sum(s != 0)
-    z <- sum(s[which(s!=0)] - 1)
-    
-    # Log likelihood of each tip/anc pair
-    #(1 - p.slip)^x * p.slip^y * (1-p.stay)^y * p.stay^z
-    llh[i] <- 2 * y * x * z * log(1-p.slip) * log(p.slip) * log(1-p.stay) * log(p.stay)
-  }
+  # Log likelihood of each tip/anc pair
+  #(1 - p.slip)^x * p.slip^y * (1-p.stay)^y * p.stay^z
+  llh[i] <- 2 * y * x * z * log(1-p.slip) * log(p.slip) * log(1-p.stay) * log(p.stay)
   sum(llh)
   
 }
+# --------------------------------------------------
+
+likelihood <- function(param){
+  p.enter <- param[1]
+  p.stay  <- param[2]
+  
+  x <- sum(slips == 0)
+  y <- sum(slips != 0)
+  z <- sum(slips[which(slips!=0)] - 1)
+  
+  (1-p.enter)^x*(p.enter)^y*(1-p.stay)^y*(p.stay)^z
+}
+
 
 
 prior <- function(param){
-  slips <- param[1]
-  p.enter <- param[2]
-  p.stay  <- param[3]
+  p.enter <- param[1]
+  p.stay  <- param[2]
   
-  sum.slips <- sum(slips)
+  prior.pe <- dlnorm(p.enter,meanlog=-40,sdlog=5)
+  prior.ps <- dlnorm(p.stay,meanlog=-0.3,sdlog=0.15)
   
-  prior.pe <- dunif(p.enter, log = T)
-  prior.ps <- dunif(p.stay, log = T)
-  
-  if (sum.slips > 0){
-    prior.s <- slips
-  }else{
-    prior.s <- slips[sample(length(slips), sum.slips, replace=T)]
-  }
-    
-  return(prior)
+  return(prior.pe + prior.ps)
 }
 
 
-posterior <- function(slip){
-  prior(slip) + likelihood(slip)
+posterior <- function(param){
+  print(prior(param))
+  print(likelihood(param))
+  prior(param) + likelihood(param)
 }
 
-proposalFunction <- function(slip){
-  return(rnorm(1,mean=slip, sd=0.0009))
+proposalFunction <- function(param){
+  p.enter <- rlnorm(1,meanlog=param[1],sdlog=0.1)
+  p.stay <- rlnorm(1,meanlog=param[2],sdlog=0.01)
+  return(c(p.enter,p.stay))
 }
 
 
 runMCMC <- function(startvalue, iterations){
-  chain <- array(dim = c(iterations+1,1))
+  chain <- array(dim = c(iterations+1,2))
   chain[1,] <- startvalue
   
   
   for (i in 1:iterations){
     
     proposal <- proposalFunction(chain[i,])
+    print(proposal)
+    print(posterior(proposal))
+    print(posterior(chain[i,]))
     prop <- exp(posterior(proposal) - posterior(chain[i,]))
+    print(prop)
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
   *  if (runif(1) < prop) {
       chain[i+1,] <- proposal
@@ -68,7 +96,7 @@ runMCMC <- function(startvalue, iterations){
       chain[i+1,] <- chain[i,]
     }
     if (i %% 100 == 0){
-      print(paste0("STATE ",i,": ", chain[i,1]))
+      print(paste0("STATE ",i,": ", chain[i,]))
     }
   }
   return(chain)
@@ -76,8 +104,8 @@ runMCMC <- function(startvalue, iterations){
 }
 
 # RUN MCMC
-startvalue <- 0.5
-chain2 <- runMCMC(startvalue, 3000)
+startvalue <- c(0.0000000000001,0.6)
+chain2 <- runMCMC(startvalue, 5000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 

@@ -1,7 +1,7 @@
 from glob import glob
 import sys
 from seqUtils import *
-
+import os
 
 
 
@@ -22,7 +22,7 @@ for infile in folder:
     byStudy = set()
     #output = open("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/" + filename, "w")
     data = parse_fasta(fasta)
-    if filename == "novitskys"
+    
     # filter : screen for sequences missing subtype, collection year, and those without sampling collection info
     for x in data:
         header = x.split(".")
@@ -42,11 +42,13 @@ for infile in folder:
     for x in byStudy:
         if x == "C":
             Cstudies.append(filename)
+    print(filter.keys())
 print(minlen)
 print(total)
 print(subtypes)
 print(location)
 print(sorted(Cstudies))
+
 
 
 

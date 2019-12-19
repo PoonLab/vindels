@@ -2,7 +2,7 @@
 # trying to develop a model for interstrand jumping of polymerase 
 require(ape)
 require(stringr)
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/10_nt_utils.r")
 
 subs <- function(seq1, seq2){
   # if (nchar(seq1) != nchar(seq2)){
@@ -14,126 +14,13 @@ subs <- function(seq1, seq2){
   paste(which(unname(mapply(function(x,y){x!=y}, x=c1, y=c2))),collapse=",")
 }
 
-ATcontent <- function(indel, pos, vseq, sample_length){
-  pos <- as.numeric(pos)
-  nucleotides <- c("A", "C","G","T")
-  
-  counts <- function(indel,pos,vseq){
-    len <- nchar(indel)
-    nucleotides <- c("A", "C","G","T")
-    
-    if (pos - sample_length >= 0){
-      upstream <- substr(vseq, pos-sample_length, pos)
-      #print(upstream)
-      ucounts <- c()
-      for (n in 1:4){
-        ucounts[n] <- str_count(upstream,nucleotides[n])
-      }
-    }else{
-      ucounts <- c(NA,NA,NA,NA)
-    }
-    
-    if ((pos + len + sample_length) <= nchar(vseq)){
-      downstream <- substr(vseq, pos+len+1, pos+len+sample_length)
-      dcounts <- c()
-      for (n in 1:4){
-        dcounts[n] <- str_count(downstream,nucleotides[n])
-      }
-      
-    }else{
-      dcounts <- c(NA,NA,NA,NA)
-    }
-    c(ucounts,dcounts)
-  }
-  nucl <- unname(mapply(counts, indel, pos, vseq))
-  up <- as.data.frame(t(nucl))[,1:4]
-  print(nrow(up[is.na(up[,1]),]))
-  print(nrow(up))
-  up <- up[!is.na(up[,1]),]
-  colnames(up) <- nucleotides
-  
-  down <- as.data.frame(t(nucl))[,5:8]
-  print(nrow(down[is.na(down[,1]),]))
-  print(nrow(down))
-  down <- down[!is.na(down[,1]),]
-  colnames(down) <- nucleotides
-  
-  data.frame(upstream=colSums(up)/(nrow(up)*sample_length),downstream=colSums(down)/(nrow(down)*sample_length))
-  
+fixHeader <- function(header, pat){
+  rep <- strsplit(pat, "-")[[1]][2]
+  paste0(header,"_",rep)
 }
 
-# RANDOMIZATION TEST 
-# -----------------------------------------
-sampleString <- function(vloop, pos){
-  idx <- sample(1:(nchar(vloop)-14),100, replace=TRUE)
-  strings <- sapply(idx, function(x){substr(vloop, x, x+14)})
-  props <- list()
-  nucl <- c("A","C","G","T")
-  for (n in 1:4){
-    props[[n]] <- unname(sapply(strings, function(x){str_count(x, nucl[n])/nchar(x)}))
-  }
-  props
-}
-
-iSample <- list(numeric(nrow(flanking)*100),numeric(nrow(flanking)*100),numeric(nrow(flanking)*100),numeric(nrow(flanking)*100))
-
-# generates the randomly sampled substrings for each indel
-for (row in 1:nrow(flanking)){
-  itemp <- sampleString(flanking[row,"vseq"])
-  for (i in 1:4){
-    iSample[[i]][((row-1)*100+1):(row*100)] <- itemp[[i]]
-  }
-}
-
-# compares the observed proportion to the overall distribution of each nucleotide 
-usign <- c()
-dsign <- c()
-u.pct <-c()
-d.pct <-c()
-for (i in 1:4){
-  idist <- iSample[[i]]
-  u.prop <- at.props[i,1]
-  d.prop <- at.props[i,2]
-  
-  # find the percentile of the upstream and downstream AT content
-  percentile <- ecdf(idist)
-  u.pct[i] <- percentile(u.prop)
-  d.pct[i] <- percentile(d.prop)
-  
-  # check for significance
-  iQT <- quantile(idist, probs=c(0.025,0.975))
-  
-  # highlight significant differences 
-  if (u.prop < iQT[[1]]){
-    usign[i] <- "lower"
-  }else if(u.prop > iQT[[2]]){
-    usign[i] <- "higher"
-  }else{
-    usign[i] <- ""
-  }
-  
-  # highlight significant differences 
-  if (d.prop < iQT[[1]]){
-    dsign[i] <- "lower"
-  }else if(d.prop > iQT[[2]]){
-    dsign[i] <- "higher"
-  }else{
-    dsign[i] <- ""
-  }
-  
-}
-print(u.pct)
-ins.nt$sign <- isign
-del.nt$sign <- dsign
 
 
-
-# HIDDEN MARKOV MODEL 
-# ---------------------------------
-
-HMM <- function(ancestor, emi.mat, p.init, seq)
-
-  
 slips <- function(vseq, pos, len){
   pos <- as.numeric(pos)+1
   len <- as.numeric(len)
@@ -142,12 +29,17 @@ slips <- function(vseq, pos, len){
   
 }
 
-
-
 path <- '~/PycharmProjects/hiv-withinhost/'
-path <- "~/Lio/"
-ins <- read.csv(paste0(path,"10_nucleotide/ins-sep.csv"), stringsAsFactors = F, row.names = 1)
-all <- read.csv(paste0(path,"10_nucleotide/ins-all.csv"), stringsAsFactors = F, row.names=1)
+#path <- "~/Lio/"
+ins <- read.csv(paste0(path,"10_nucleotide/ins-sep-only.csv"), stringsAsFactors = F, row.names = 1)
+all <- read.csv(paste0(path,"10_nucleotide/ins-nosep-all.csv"), stringsAsFactors = F, row.names=1)
+
+ins$Vseq <- gsub("-","",ins$Vseq)
+all$Vseq <- gsub("-","",all$Vseq)
+
+
+ins$Header <- mapply(fixHeader, header=ins$Header, pat=ins$Pat)
+all$Header <- mapply(fixHeader, header=all$Header, pat=all$Pat)
 
 # FIXED AND NO LONGER NEEDED 
 #ins$Accno <- unname(mapply(labels, ins$Accno, ins$Pat, ins$Vloop))
@@ -156,7 +48,7 @@ all <- read.csv(paste0(path,"10_nucleotide/ins-all.csv"), stringsAsFactors = F, 
 
 # apply flankCheck 
 # parameters can be changed here to get different results 
-flanking <- unname(mapply(flankCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1/6, offset=0))
+flanking <- unname(mapply(flankCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=0, offset=100))
 
 # modify flanking data.frame 
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)
@@ -169,87 +61,26 @@ flanking[,"after.offset"] <- as.numeric(flanking[,"after.offset"] )
 flanking[,"before.diff"] <- as.numeric(flanking[,"before.diff"] )
 flanking[,"after.diff"] <- as.numeric(flanking[,"after.diff"] )
 
-# used to remove 
+
+# used to remove problematic cases 
 all <- all[-as.numeric(rownames(all[all$Vlength==0,])),]
+flanking <- flanking[-171,]
+all <- all[-13514, ]
 
 # retrieves insertions that have at least one instance of flanking sequence 
 tabs <- table(flanking[flanking$before.bool | flanking$after.bool, "header"])
 all$count.flanking <- 0
 all[all$Header %in% names(tabs),"count.flanking"] <- tabs
 
-
+# creation of the new.count column 
 all$new.count <- 0
 all[all$count.flanking!=0, "new.count"] <- nchar(all[all$count.flanking!=0,"Seq"])
 
-all$subs <- unname(mapply(subs, all$Vseq, all$Anc))
+# creation of a substitution list column
+#all$subs <- unname(mapply(subs, all$Vseq, all$Anc))
 
-
-# MAXIMUM LIKELIHOOD ESTIMATION 
-# ------------------------------------------------------
-
-# POISSON DISTRIBUTION
-
-pll <- function(rate, count, len){
-  lam <- rate * len 
-  res <- -lam + count*log(lam) 
-  res <- res[!is.na(res)]
-  sum(res)
-}
-obj.f <- function(rate) -pll(rate, all$new.count, all$Vlength)
-mle.result <- bbmle::mle2(obj.f, start=list(rate=1), method = "Brent", lower=1e-12, upper = 1)
-
-
-# BINOMIAL DISTRIBUTION 
-binomll <- function(prob, count, len){
-  N <- len
-  k <- count
-  p <- prob
-  chs <- factorial(N) / (factorial(k) * factorial(N - k))
-  sum(log(chs) +  k*log(p) +  (N - k)*log(1-p))
-}
-obj.f2 <- function(prob) -binomll(prob, all$new.count, all$Vlength)
-mle.result2 <- bbmle::mle2(obj.f2, start=list(prob=1), method = "Brent", lower = 1e-12, upper=1)
-
-
-# GEOMETRIC LIKELIHOOD FUNCTION 
-
-geomll <- function(forward, count, N){
-  N * log(forward) + (sum(count)-N) * log(1-forward)
-}
-slips.whole <- c(all$count.flanking, rep(0,sum(nchar(all$Vseq))-nrow(all)))
-slips.nt <- c(all$new.count, rep(0,sum(nchar(all$Vseq))-nrow(all)))
-slips.nt2 <- slips.nt + 1
-objf3 <- function(forward) -geomll(forward, slips.nt2, length(slips.nt2))
-mle3 <- bbmle::mle2(objf3, start=list(forward=1), method="Brent" , lower=1e-8, upper=1)
-
-
-count.subs <- function()
-
-
-# CUSTOM GEOMETRIC LIKELIHOOD FUNCTION 
-custom1 <- function(slip, mut, len, subs, N){
-  N * log(slip) + sum(count) * log(1-slip) + log(choose(count, subs)) + subs * log(mut) + (counts - subs) * log(1-mut)
-}
-
-obj4 <- function(slip, mut) -custom1(slip, mut, slips.nt, length(slips.nt))
-mle4 <- bbmle::mle2(obj4, start=list(slip=1, mut=1), method="L-BFGS-B",lower=1e-12, upper=1)
-
-x <- runif(5000,min=1e-7, max=1)
-y <- unname(sapply(x, objf3))
-plot(x=x, y=y)
-
-obs <- all$new.count
-lens <- c()
-dists <- list()
-for (i in 1:25){
-  sim <- unname(sapply(all$Vseq, simulateData))
-  diff <- nchar(sim) - nchar(all$Vseq)
-  simdiff <- diff[diff!=0]
-  lens[i] <- length(simdiff)
-  dists[[i]] <- simdiff
-}
-
-
+write.csv(flanking, "~/PycharmProjects/hiv-withinhost/14_flanking/flanking.csv")
+write.csv(all, "~/PycharmProjects/hiv-withinhost/14_flanking/flanking-all.csv")
 
 
 # proportion of insertions ACROSS ALL VARIABLE LOOPS that contain a match with 1/6 wobble directly 
@@ -262,11 +93,10 @@ sub.v <- split(flanking, flanking$vloop)
 # calculate the probability of slippage occurring in each of the V-loops 
 require(R.utils)
 p.slip <- c()
-for (i in 1:4){
+for (i in c(1,2,4,5)){
   p.slip[i] <-  nrow(sub.v[[i]][sub.v[[i]]$before.bool | sub.v[[i]]$after.bool,]) / nrow(sub.v[[i]])
 }
-p.slip <- insert(p.slip,3,0)
-
+p.slip[3] <- 0
 
 # probability of a slippage event occurring per nucleotide per v-loop (flanking contains a single insertion event per row)
 nt.slip <- c()
@@ -327,8 +157,13 @@ hist(b.dist1, breaks=seq(-0.5,max(b.dist1)+0.5), col='red',cex.lab=clab, main="D
 hist(a.dist2, breaks=seq(-0.5,max(a.dist2)+0.5), col='red',cex.lab=clab, main="Distances to next match (2 nt) - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
 hist(b.dist2, breaks=seq(-0.5,max(b.dist2)+0.5), col='red',cex.lab=clab, main="Distances to next match (2 nt) - 5'",cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
 
+lens <- nchar(flanking$indel)
 
-
+par(mar=c(6,6,6,2))
+caxis=1.3
+clab=1.5
+cmain=1.8
+hist(lens, breaks=seq(-0.5,max(lens)+0.5), col='red',cex.lab=clab, main="Insertion Lengths", cex.axis=caxis, cex.main=cmain, xlab="Length (Nucleotides)")
 # Calculations: (used with wobble = 0, offset = 10000)
 # proportion of duplicates in 5' and 3' positions
 sum(flanking$before.bool) / nrow(flanking)

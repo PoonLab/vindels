@@ -32,7 +32,7 @@ checkDiff <- function(seq1, seq2){
   which(chars[1,]!=chars[2,])
 }
 
-flankCheck <- function(indel,pos,vseq,wobble, offset=0){
+flankCheck <- function(indel,pos,vseq,wobble=1/6, offset=0){
   len <- nchar(indel)
   pos <- as.numeric(pos)
   
@@ -57,7 +57,7 @@ flankCheck <- function(indel,pos,vseq,wobble, offset=0){
     # subtract length to get the start of the sequence 
     # needs to be enough nucleotides to check
     if ((pos - len - idx) >= 0){
-      before <- substr(vseq, pos-len-idx+1, pos-idx)
+      before <- substr(vseq, pos-2*len-idx+1, pos-idx-len)
       #print(before)
       diffs <- checkDiff(indel, before)
       if (length(diffs) < lowest){
@@ -81,7 +81,7 @@ flankCheck <- function(indel,pos,vseq,wobble, offset=0){
   for (idx in 0:offset){
     if ((pos + len + idx) <= nchar(vseq)){
       # then the PRECEDING position can be checked
-      after <- substr(vseq, pos+len+idx+1, pos+2*len+idx)
+      after <- substr(vseq, pos+idx+1, pos+len+idx)
       #print(after)
       diffs <- checkDiff(indel, after)
       if (length(diffs) < lowest){
@@ -239,13 +239,16 @@ splitRows <- function(row){
 
 # uses the start position of the given vloop (retrieved from var.pos; separate file)
 # to compute the indel position within gp120
-addPos <- function(pos, accno, vloop){
+addPos <- function(pos, header, vloop){
   if (pos == ""){
     return(NA)
   }
+  var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
+  var.pos <- var.pos[,-c(2,5,8,11,14)]
+  
   pos <- as.numeric(pos)
   vloop <- as.character(vloop)
-  arg2 <- as.numeric(var.pos[var.pos$header==accno, paste0('start.',vloop)])
+  arg2 <- as.numeric(var.pos[var.pos$header==gsub("_\\d*$","",header), paste0('start.',vloop)])
   pos + arg2
 }
 
@@ -255,6 +258,7 @@ insOriginal <- function(indel, pos, vseq){
   if (indel == ""){
     return(vseq)
   }
+  pos <- as.character(pos)
   seqs <- strsplit(indel, ",")[[1]]
   idxs <- as.numeric(strsplit(pos, ",")[[1]])
   # iterate through the sequences and positions
