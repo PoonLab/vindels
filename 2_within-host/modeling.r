@@ -52,7 +52,7 @@ posterior <- function(slip){
 }
 
 proposalFunction <- function(slip){
-  return(rnorm(1,mean=slip, sd=0.003))
+  return(rnorm(1,mean=slip, sd=0.01))
 }
 
 
@@ -83,24 +83,24 @@ runMCMC <- function(startvalue, iterations){
 
 # RUN MCMC
 startvalue <- 0.5
-chain <- runMCMC(startvalue, 10000)
+chain <- runMCMC(startvalue, 2000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
-burnin <- 1000
+burnin <- 200
 acceptance <- 1 - mean(duplicated(chain[-(1:burnin),]))
 print(paste0("Acceptance: ", acceptance))
 
-png(file="~/vindels/Figures/within-host/mcmc-posterior.png",width=800,height=600, res=120)
-hist(chain[-(1:burnin),1],nclass=30, main="Posterior of x", xlab="Probability of Copy (1 - slip)" )
-abline(v = median(chain[-(1:burnin),1]), col="red")
-dev.off()
+#png(file="~/vindels/Figures/within-host/mcmc-posterior.png",width=800,height=600, res=120)
+#hist(chain[-(1:burnin),1],nclass=30, main="Posterior of x", xlab="Probability of Copy (1 - slip)" )
+#abline(v = median(chain[-(1:burnin),1]), col="red")
+#dev.off()
 
 # PLOTTING 
 #hist(chain[-(1:burnin),1],nclass=30, main="Posterior of x", xlab="True value = red line" )
 #abline(v = median(chain[-(1:burnin),1]), col="red")
 
-png(file="~/vindels/Figures/within-host/mcmc-trace.png",width=800,height=600, res=120)
-plot(chain[-(1:burnin),1], type = "l", xlab="MCMC Steps" , main = "Chain values of x")
-abline(h = median(chain[-(1:burnin),1]), col="red")
-dev.off()
+#png(file="~/vindels/Figures/within-host/mcmc-trace.png",width=800,height=600, res=120)
+#plot(chain[-(1:burnin),1], type = "l", xlab="MCMC Steps" , main = "Chain values of x")
+#abline(h = median(chain[-(1:burnin),1]), col="red")
+#dev.off()

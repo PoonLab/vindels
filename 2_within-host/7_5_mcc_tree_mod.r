@@ -27,7 +27,8 @@ if (!dir.exists(paste0(treefolder,"prelim/"))){
 
 dir.create(paste0(treefolder,"final/"), showWarnings = F)
 treefiles <- Sys.glob(paste0(treefolder,"prelim/*.tree"))
-
+st <- c()
+seqcount <- 0
 r.vec <- c()
 for (i in 1:length(treefiles)){
   tre <- read.nexus(treefiles[i])
@@ -66,9 +67,14 @@ for (i in 1:length(treefiles)){
 
   # rescales all the edge lengths of the tree
   tre$edge.length <- (tre$edge.length * rescale.factor)
+  seqcount <- seqcount + Ntip(tre)
+  print(Ntip(tre))
 
+  st <- c(st, sapply(tre$tip.label, function(x){strsplit(x,"\\.")[[1]][1]}))
+  
   # writes the rescaled tree to a new folder called "final"
-  write.tree(tre,paste0(treefolder,"final/",name))
+  #write.tree(tre,paste0(treefolder,"final/",name))
 }
-#}
+print(seqcount)
+print(table(st))
 

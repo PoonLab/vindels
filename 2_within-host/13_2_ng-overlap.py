@@ -1,7 +1,7 @@
 import sys 
 import os 
 import glob 
-from seqUtils import *
+from seqUtils2 import *
 import csv 
 
 infile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/13_nglycs/ins-edit.csv", "rU")
