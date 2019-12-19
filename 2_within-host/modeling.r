@@ -8,6 +8,11 @@ insertions <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-nosep
 counts <- nchar(insertions[insertions$Count!=0, "Seq"])
 counts <- counts[-167]
 counts <- c(counts, rep(0, sum(nchar(insertions$Vseq))))
+
+# randomly shuffle all the entries
+rnd <- sample(length(counts),length(counts))
+counts <- counts[rnd]
+
 # 
 # objf <- function(p.slip, p.stay){
 #   -affinell(p.slip, p.stay, slips)
@@ -78,11 +83,11 @@ runMCMC <- function(startvalue, iterations){
 
 # RUN MCMC
 startvalue <- 0.5
-chain <- runMCMC(startvalue, 100000)
+chain <- runMCMC(startvalue, 10000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
-burnin <- 10000
+burnin <- 1000
 acceptance <- 1 - mean(duplicated(chain[-(1:burnin),]))
 print(paste0("Acceptance: ", acceptance))
 

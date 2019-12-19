@@ -39,6 +39,8 @@ folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/1FilteredSeqs/*.fast
 
 pairwise = {}
 total = 0 
+vtotal = 0
+subtypes = {}
 for infile in folder:
 
     filename = os.path.basename(infile)
@@ -55,7 +57,14 @@ for infile in folder:
     # appropriately handle the VN data set 
 
     for header in data:
-        total += 1
+        
+        if "_" in header:
+            st = "C"
+            vtotal += 1
+        else:
+            st = header.split(".")[0]
+            total += 1
+        subtypes[st] = subtypes.get(st,0) + 1
         '''if filename == "novitsky.fasta":
             ntqry = data[header].replace("\r","").replace("-","")      
             aaref = vlad_aaref
@@ -165,3 +174,6 @@ for infile in folder:
 
 print("--- %s Seconds ---" % (time.time() - start_time))
 print(total)
+print(vtotal)
+print(total+vtotal)
+print(subtypes)

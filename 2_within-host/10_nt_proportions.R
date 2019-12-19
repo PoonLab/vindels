@@ -130,15 +130,13 @@ for (file in 1:length(ifolder)){
   }
   print("80% complete")
   # Retrieve variable loop positions from file 
-  var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
-  var.pos <- var.pos[,-c(2,5,8,11,14)]
   
   new.ins[is.na(new.ins$Pos),"Pos"] <- ""
   new.del[is.na(new.del$Pos),"Pos"] <- ""
   
   # Add the V position column into the two final data frames 
-  new.ins$Vpos <- as.numeric(unname(mapply(addPos, pos=new.ins$Pos, accno=new.ins$Header, vloop=new.ins$Vloop)))
-  new.del$Vpos <- as.numeric(unname(mapply(addPos, pos=new.del$Pos, accno=new.del$Header, vloop=new.del$Vloop)))
+  new.ins$Vpos <- as.numeric(unname(mapply(addPos, pos=new.ins$Pos, header=new.ins$Header, vloop=new.ins$Vloop)))
+  new.del$Vpos <- as.numeric(unname(mapply(addPos, pos=new.del$Pos, header=new.del$Header, vloop=new.del$Vloop)))
   
   # # ADJUST POSITIONS TO MATCH THE PLACE WHERE THE INSERTION WAS
   # new.ins$Pos <- as.numeric(new.ins$Pos) - nchar(new.ins$Seq)
