@@ -2,7 +2,7 @@
 # trying to develop a model for interstrand jumping of polymerase 
 require(ape)
 require(stringr)
-source("~/vindels/2_within-host/10_nt_utils.r")
+source("~/GitHub/vindels/2_within-host/10_nt_utils.r")
 
 subs <- function(seq1, seq2){
   # if (nchar(seq1) != nchar(seq2)){
@@ -30,7 +30,7 @@ slips <- function(vseq, pos, len){
 }
 
 path <- '~/PycharmProjects/hiv-withinhost/'
-#path <- "~/Lio/"
+path <- "~/Lio/"
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep-only.csv"), stringsAsFactors = F, row.names = 1)
 all <- read.csv(paste0(path,"10_nucleotide/ins-nosep-all.csv"), stringsAsFactors = F, row.names=1)
 
@@ -48,7 +48,7 @@ all$Header <- mapply(fixHeader, header=all$Header, pat=all$Pat)
 
 # apply flankCheck 
 # parameters can be changed here to get different results 
-flanking <- unname(mapply(flankCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=0, offset=100))
+flanking <- unname(mapply(flankCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1/6, offset=100))
 
 # modify flanking data.frame 
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)
@@ -132,8 +132,8 @@ for (i in c(1,2,4,5)){
 # -------------------------------------
 # set flanking to infinite offset, 0 wobble
 # determine how far you need to go to find a match
-a.dist <- flanking[!is.na(flanking$after.offset), "after.offset"]
-b.dist <- flanking[!is.na(flanking$before.offset), "before.offset"]
+a.dist <- flanking[flanking$after.bool, "after.offset"]
+b.dist <- flanking[flanking$before.bool, "before.offset"]
 a.dist1 <- flanking[!is.na(flanking$after.offset), "after.offset"]
 b.dist1 <- flanking[!is.na(flanking$before.offset), "before.offset"]
 a.dist2 <- flanking[!is.na(flanking$after.offset), "after.offset"]
@@ -141,21 +141,24 @@ b.dist2 <- flanking[!is.na(flanking$before.offset), "before.offset"]
 
 par(mar=c(5,5,5,2))
 caxis=1.3
-clab=1.5
-cmain=1.8
+clab=1.4
+cmain=1.5
 
-par(mfrow=c(3,2), xpd=NA, mar=c(4,6,4,5),las=0)
+par(mfrow=c(1,2), xpd=NA, mar=c(6,6,4,2),las=1)
 # distribution of how far you need to travel to find an EXACT MATCH (wobble = 0, offset=10000)
-hist(a.dist, breaks=seq(-0.5,max(a.dist)+0.5), col='red',cex.lab=clab, main="Distances to next exact match - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
 hist(b.dist, breaks=seq(-0.5,max(b.dist)+0.5), col='red',cex.lab=clab, main="Distances to next exact match - 5'",cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+hist(a.dist, breaks=seq(-0.5,max(a.dist)+0.5), col='red',cex.lab=clab, main="Distances to next exact match - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+
 
 # distribution of how far you need to travel to find a MATCH WITHIN 1 NT (wobble = 1, offset=10000)
-hist(a.dist1, breaks=seq(-0.5,max(a.dist1)+0.5), col='red',cex.lab=clab, main="Distances to next match (1 nt) - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
-hist(b.dist1, breaks=seq(-0.5,max(b.dist1)+0.5), col='red',cex.lab=clab, main="Distances to next match (1 nt) - 5'",cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+hist(b.dist1, breaks=seq(-0.5,max(b.dist1)+0.5), col='red',cex.lab=clab, main="Distances to next match \n(1/12 mismatch) - 5'",cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+hist(a.dist1, breaks=seq(-0.5,max(a.dist1)+0.5), col='red',cex.lab=clab, main="Distances to next match \n(1/12 mismatch) - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+
 
 # distribution of how far you need to travel to find a MATCH WITHIN 2 NT (wobble = 2, offset=10000)
-hist(a.dist2, breaks=seq(-0.5,max(a.dist2)+0.5), col='red',cex.lab=clab, main="Distances to next match (2 nt) - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
-hist(b.dist2, breaks=seq(-0.5,max(b.dist2)+0.5), col='red',cex.lab=clab, main="Distances to next match (2 nt) - 5'",cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+hist(b.dist2, breaks=seq(-0.5,max(b.dist2)+0.5), col='red',cex.lab=clab, main="Distances to next match \n(1/6 mismatch) - 5'",cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+hist(a.dist2, breaks=seq(-0.5,max(a.dist2)+0.5), col='red',cex.lab=clab, main="Distances to next match \n(1/6 mismatch) - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+
 
 lens <- nchar(flanking$indel)
 

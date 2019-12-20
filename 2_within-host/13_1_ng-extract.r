@@ -70,16 +70,17 @@ delAlign <- function(indels, pos, ancestor, seq){
 
 labels <- function(header, patient, vloop){
   letter <- strsplit(patient, "-")[[1]][2]
-  paste0(header,"_", letter, "_", vloop)
+  # paste0(header,"_", letter)
 }
 
 #CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"
+path <- "~/Lio/"
 ins <- read.csv(paste0(path, "13_nglycs/ins.csv"),  sep="\t", stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/del.csv"), sep="\t", stringsAsFactors = F)
 
-headers <- c("accno", "vloop", "patient", "seq", "pos", "ancestor", "tipseq")
+headers <- c("accno", "vloop", "ancestor", "seq", "pos", "tipseq", "patient")
 colnames(ins) <- headers
 colnames(del) <- headers
 
@@ -105,8 +106,8 @@ new.ins$tip.glycs <- unlist(sapply(sapply(sapply(ins$tipseq, translate), extract
 new.del$tip.glycs <- unlist(sapply(sapply(sapply(del$tipseq, translate), extractGlycs), function(x) paste(x, collapse=",")))
 
 
-write.table(new.ins, "~/PycharmProjects/hiv-withinhost/13_nglycs/ins-edit.csv", sep="\t", quote=F, row.names=F)
-write.table(new.del, "~/PycharmProjects/hiv-withinhost/13_nglycs/del-edit.csv", sep="\t", quote=F, row.names=F)
+write.table(new.ins, paste0(path,"13_nglycs/ins-edit.csv"), sep="\t", quote=F, row.names=F)
+write.table(new.del, paste0(path,"13_nglycs/del-edit.csv"), sep="\t", quote=F, row.names=F)
 
 
 
