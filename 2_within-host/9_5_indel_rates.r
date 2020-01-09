@@ -289,19 +289,20 @@ print(del.df)
 # 
 # 
 # 
-# #insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
-# #delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
-# 
-# insrates <- data.frame(vloop=vloops,
-#                        rate=apply(ins.df, 1, median), 
-#                        lower=apply(ins.df,1,function(x){quantile(x, c(0.025,0.975))[1]}), 
-#                        upper=apply(ins.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
-# delrates <- data.frame(vloop=vloops,
-#                        rate=apply(del.df, 1, median), 
-#                        lower=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[1]}), 
-#                        upper=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
-# 
-# #indels <- cbind(insrates, delrates[,c(2,3)])
+#insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
+#delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
+
+insrates <- data.frame(vloop=vloops,
+                       rate=apply(ins.df, 2, median),
+                       lower=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[1]}),
+                       upper=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
+delrates <- data.frame(vloop=vloops,
+                       rate=apply(del.df, 2, median),
+                       lower=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[1]}),
+                       upper=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
+print(insrates)
+print(delrates)
+indels <- cbind(insrates, delrates[,c(2,3)])
 # 
 # # INDEL ABOVE/BELOW MULTIPLOTS 
 # # -------------------------------------
