@@ -32,6 +32,8 @@ checkDiff <- function(seq1, seq2){
   which(chars[1,]!=chars[2,])
 }
 
+
+# used to detect similar/identical sequences found adjacent to insertions 
 flankCheck <- function(indel,pos,vseq,wobble, offset=0){
   len <- nchar(indel)
   pos <- as.numeric(pos)

@@ -13,8 +13,46 @@ slips <- c(slips, rep(0, sum(nchar(insertions$Vseq))))
 rnd <- sample(length(slips),length(slips))
 slips <- slips[rnd]
 
+
+removeDeletions <- function(vseq, anc){
+  if(!grepl("-",vseq)){
+    return(vseq)
+  }else{
+    tip.chars <- strsplit(vseq, "")[[1]]
+    anc.chars <- strsplit(anc, "")[[1]]
+    idx <- which(tip.chars=="-")
+    
+    for (c in idx){
+      tip.chars[c] <- anc.chars[c]
+    }
+    test <- paste0(tip.chars,collapse="")
+    test
+  }
+}
+
+insertions$Vseq <- unname(mapply(removeDeletions,insertions$Vseq, insertions$Anc))
+
+checkDiff <- function(tip, anc, slips){
+  if (tip == seq2){
+    return(NULL)
+  }else if (nchar(seq1) != nchar(seq2)){
+    return(NA)
+  }
+  
+  seq1 <- str_split(seq1, "")[[1]]
+  seq2 <- str_split(seq2, "")[[1]]
+  
+  chars <- rbind(seq1, seq2)
+  which(chars[1,]!=chars[2,])
+}
+
 # EXPERIMENTAL -------------------------------
 # slip = data frame of slip events for EACH SEQUENCE 
+
+# GOAL: 
+# make a likelihood function that will compute the probability of a tip/anc pair 
+# it will do the following: 
+# a) count the number of substitution differences 
 
 llh.pair <- function(tip, anc, slips){
   x <- sum(slips == 0)
@@ -23,15 +61,20 @@ llh.pair <- function(tip, anc, slips){
   
   
 }
-likelihood2 <- function(param){
-  slips <- param[1]
-  p.enter <- param[2]
-  p.stay  <- param[3]
+
+# attempted to find the log - likelihood of an affine model 
+likelihood2 <- function(slip, param){
+  p.enter <- param[1]
+  p.stay  <- param[2]
+  
+  x <- sum(slip == 0)
+  y <- sum(slip != 0)
+  z <- sum(slip[which(slip!=0)] - 1)
   
   llh <- c()
   # Log likelihood of each tip/anc pair
   #(1 - p.slip)^x * p.slip^y * (1-p.stay)^y * p.stay^z
-  llh[i] <- 2 * y * x * z * log(1-p.slip) * log(p.slip) * log(1-p.stay) * log(p.stay)
+  llh <- 2 * y * x * z * log(1-p.enter) * log(p.enter) * log(1-p.stay) * log(p.stay)
   sum(llh)
   
 }
