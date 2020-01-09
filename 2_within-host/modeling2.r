@@ -46,6 +46,14 @@ checkDiff <- function(tip, anc, slips){
   which(chars[1,]!=chars[2,])
 }
 
+createSlips <- function(vseq, seq, pos){
+  if (seq == ""){
+    return (rep(0,nchar(vseq)+1))
+  }else{
+    
+  }
+}
+
 # EXPERIMENTAL -------------------------------
 # slip = data frame of slip events for EACH SEQUENCE 
 
