@@ -67,6 +67,7 @@ splitRows <- function(row){
 
 # INSERTION PARSING ----------
 path <- "~/Lio/"
+path <- "~/PycharmProjects/hiv-withinhost/"
 ifolder <- Sys.glob(paste0(path,"9Indels/rep/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/rep/del/*.csv"))
 all.ins <- data.frame()
@@ -271,13 +272,35 @@ for (run in 1:20){
   del.df <- rbind(del.df, data.frame(V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5]))
 }
 
+
+# Wilcoxon statistical test comparing insertion and deletion rates to each other 
+
+ir <- c(ins.df[,1],ins.df[,2],ins.df[,3],ins.df[,4],ins.df[,5])
+dr <- c(del.df[,1],del.df[,2],del.df[,3],del.df[,4],del.df[,5])
+wilcox.test(ir,dr,paired=T)
+
+
+# wilcoxon statistical test comparing combined within host indel rates to between host indel rates 
+indel.df <- ins.df + del.df
+within <- c()
+
+for (row in sample(20, 7)){
+  within <- c(within, as.double(indel.df[row,]))
+}
+wilcox.test(within, max.llh$adj.rate, paired=T)
+
+# wilcoxon statistical test comparing median indel rates 
+indel.df <- ins.df + del.df
+btw.rates <- c()
+for (i in 1:5){
+  btw.rates <- c(btw.rates, median(max.llh[max.llh$vloop==i,"adj.rate"]))
+}
+wth.rates <- as.double(apply(indel.df, 2, median))
+wilcox.test(btw.rates,wth.rates, paired=T)
+
+
+
 vloops <- c("V1","V2","V3","V4","V5")
-
-print("Insertions")
-print(ins.df)
-print("Deletions")
-print(del.df)
-
 
 # # BOXPLOTS 
 # # --------------------------
@@ -289,18 +312,21 @@ print(del.df)
 # 
 # 
 # 
-# #insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
-# #delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
+insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
+delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
 # 
-# insrates <- data.frame(vloop=vloops,
-#                        rate=apply(ins.df, 1, median), 
-#                        lower=apply(ins.df,1,function(x){quantile(x, c(0.025,0.975))[1]}), 
-#                        upper=apply(ins.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
-# delrates <- data.frame(vloop=vloops,
-#                        rate=apply(del.df, 1, median), 
-#                        lower=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[1]}), 
-#                        upper=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
-# 
+insrates <- data.frame(vloop=vloops,
+                        rate=apply(ins.df, 1, median), 
+                        lower=apply(ins.df,1,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                        upper=apply(ins.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
+delrates <- data.frame(vloop=vloops,
+                        rate=apply(del.df, 1, median), 
+                        lower=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                        upper=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
+
+
+print(insrates)
+print(delrates)
 # #indels <- cbind(insrates, delrates[,c(2,3)])
 # 
 # # INDEL ABOVE/BELOW MULTIPLOTS 
@@ -337,6 +363,8 @@ print(del.df)
 # 
 # g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) + 
 #   geom_bar(colour="black", stat="identity",fill="firebrick1",position="dodge",show.legend=F) + 
+#   geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower), 
+#                 width = 0.25, size=1.1) +
 #   geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower), 
 #                 width = 0.25, size=1.1) +
 #   labs(x="Variable Loop", 
@@ -466,5 +494,3 @@ print(del.df)
 #         legend.position="right", legend.text=element_text(size=18), legend.title=element_text(size=20)) + geom_text(aes(y=0.1,x=3 ),
 #                                                                                                                     label="N/A", 
 #                                                                                                                     size=6)
-# g2
-# 
