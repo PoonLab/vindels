@@ -170,6 +170,7 @@ write.csv(all.ins[,c(1,2,4,5,6)], paste0(path,"12_lengths/ins-full.csv"))
 write.csv(all.del[,c(1,2,4,5,6)], paste0(path,"12_lengths/del-full.csv"))
 
 
+
 nucleotides <- c("A","C","G","T")
 ntcount <- c()
 total.ins <- data.frame()
@@ -191,15 +192,18 @@ for (n in c(1,2,4,5)){
 }
 total.ins$len <- sapply(total.ins$Seq, nchar)
 total.del$len <- sapply(total.del$Seq, nchar)
+write.csv(total.ins, paste0(path,"10_nucleotide/total-ins.csv"))
+write.csv(total.del, paste0(path,"10_nucleotide/total-del.csv"))
 
-total.ins2 <- total.ins[total.ins$len>1, ]
-total.del2 <- total.del[total.del$len>1, ]
+
 
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
-write.csv(total.ins2, paste0(path,"10_nucleotide/total-ins.csv"))
-write.csv(total.del2, paste0(path,"10_nucleotide/total-del.csv"))
+total.ins2 <- total.ins[total.ins$len>1, ]
+total.del2 <- total.del[total.del$len>1, ]
+write.csv(total.ins2, paste0(path,"10_nucleotide/total-ins2.csv"))
+write.csv(total.del2, paste0(path,"10_nucleotide/total-del2.csv"))
 
 # FLANKING INSERTIONS PROPORTIONS OUTPUT 
 # ------------------------------------
@@ -253,11 +257,34 @@ delnon3 <- total.del[nchar(total.del$Seq) %% 3 !=0,]
 
 
 ins.3.t <- c(sum(unname(sapply(ins3[,'Seq'], nchar))), sum(unname(sapply(ins3[,"Vseq"], nchar))))
-ins.non3.t <- c(sum(unname(sapply(non[,'Seq'], nchar))), sum(unname(sapply(insnon3[,"Vseq"], nchar))))
+ins.non3.t <- c(sum(unname(sapply(insnon3[,'Seq'], nchar))), sum(unname(sapply(insnon3[,"Vseq"], nchar))))
 del.3.t <- c(sum(unname(sapply(del3[,"Seq"], nchar))), sum(unname(sapply(del3[,"Vseq"], nchar))))
 del.non3.t <- c(sum(unname(sapply(delnon3[,"Seq"], nchar))), sum(unname(sapply(delnon3[,"Vseq"], nchar))))
 
+iProps <- c()
+dProps <- c()
+iVProps <- c()
+dVProps <- c()
+counts <- data.frame()
+for (nuc in nucleotides){
+  icount <- sum(str_count(ins3$Seq, nuc))
+  dcount <- sum(str_count(insnon3$Seq, nuc))
+  counts <- rbind(counts, data.frame(nucl=nuc, ins=icount, del=dcount))
+  
+  iProps <- c(iProps, icount / ins.3.t[1])
+  dProps <- c(dProps, dcount / ins.non3.t[1])
+  
+  iVProps <- c(iVProps, sum(str_count(ins3$Vseq, nuc)) / ins.3.t[2])
+  dVProps <- c(dVProps, sum(str_count(insnon3$Vseq, nuc)) / ins.non3.t[2])
+}
+require(reshape)
+counts <- melt(counts)
 
+ins.nt <- data.frame(nt=nucleotides,props=iProps,vprops=iVProps)
+del.nt <- data.frame(nt=nucleotides,props=dProps,vprops=dVProps)
+indel.nt <- rbind(ins.nt, del.nt)
+indel.nt$indel <- c(rep(0,4),rep(3,4))
+indel.nt$counts <- counts$value
 
 # RANDOMIZATION TEST 
 # -----------------------------------------
@@ -272,16 +299,20 @@ sampleString <- function(len, vloop){
   list(a,c,g,t)
 }
 
+
+
 iSample <- list(c(),c(),c(),c())
 dSample <- list(c(),c(),c(),c())
-
-
 # generates the randomly sampled substrings for each indel
 for (row in 1:nrow(total.ins)){
   itemp <- sampleString(total.ins[row,"len"], total.ins[row,"Vseq"])
-  dtemp <- sampleString(total.del[row,"len"], total.del[row,"Vseq"])
   for (i in 1:4){
     iSample[[i]] <- c(iSample[[i]], itemp[[i]])
+  }
+}
+for (row in 1:nrow(total.del)){
+  dtemp <- sampleString(total.del[row,"len"], total.del[row,"Vseq"])
+  for (i in 1:4){
     dSample[[i]] <- c(dSample[[i]], dtemp[[i]])
   }
 }

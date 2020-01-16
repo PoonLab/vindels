@@ -1,6 +1,14 @@
-ins <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/interfered/insertions.csv", sep="\t",stringsAsFactors = F)
-del <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/interfered/deletions.csv",sep="\t", stringsAsFactors = F)
-ngprops <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/interfered/ngprops.csv", row.names=1)
+
+path <- "~/Lio/"
+ins <- read.csv(paste0(path,"13_nglycs/interfered/insertions.csv"), sep="\t",stringsAsFactors = F)
+del <- read.csv(paste0(path,"13_nglycs/interfered/deletions.csv"),sep="\t", stringsAsFactors = F)
+
+t.ins <- read.csv(paste0(path,"10_nucleotide/ins-sep-only.csv"),row.names=1, stringsAsFactors = F)
+t.del <- read.csv(paste0(path,"10_nucleotide/del-sep-only.csv"),row.names=1, stringsAsFactors = F)
+
+
+
+ngprops <- read.csv(paste0(path,"13_nglycs/interfered/ngprops.csv"), row.names=1)
 require(stringr)
 require(RColorBrewer)
 splitcsv <- function(str){
@@ -18,7 +26,13 @@ count <- function(str){
 
 
 # total insertion counts 
-itotals <- c(44,23,1,15,29)      # retrieved from the nrow totals of 10_nt_proportions
+itotals <- c()
+dtotals <- c()
+for (i in 1:5){
+  itotals[i] <- nrow(t.ins[t.ins$Vloop==i,])
+  dtotals[i] <- nrow(t.del[t.del$Vloop==i,])
+}
+# retrieved from the nrow totals of 10_nt_proportions
 ins$vloop <- sapply(ins$header, function(x){as.numeric(strsplit(x, "_")[[1]][4])})
 ins$count <- sapply(ins$pos,count)
 ins_overlap <- sapply(c(1:5),function(x){sum(ins[ins$vloop==x,"count"])} )
@@ -26,13 +40,29 @@ ins_overlap <- sapply(c(1:5),function(x){sum(ins[ins$vloop==x,"count"])} )
 ins_props <- ins_overlap / itotals
 
 # total deletion counts
-dtotals <- c(84,45,6,56,50)
 del$vloop <- sapply(del$header, function(x){as.numeric(strsplit(x, "_")[[1]][4])})
 del$count <- sapply(del$pos,count)
 
 del_overlap <- sapply(c(1:5),function(x){sum(del[del$vloop==x,"count"])} )
 
 del_props <- del_overlap / dtotals
+
+
+
+
+# RANDOMIZATION TEST 
+# -----------------------------------------
+sampleString <- function(len, vloop){
+  len <- len-1
+  idx <- sample(1:(nchar(vloop)-len),100, replace=TRUE)
+  strings <- sapply(idx, function(x){substr(vloop, x, x+len)})
+  a <- unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)}))
+  c <- unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)}))
+  g <- unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)}))
+  t <- unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)}))
+  list(a,c,g,t)
+}
+
 
 
 cols <- brewer.pal(5,"Set1")
