@@ -8,6 +8,7 @@ removeNA <- function(input, repl=""){
   input
 }
 
+
 translate <- function(dna) {
   require(ape)
   
@@ -20,6 +21,7 @@ translate <- function(dna) {
   aaseq
 }
 
+# takes in an amino acid sequence and returns the locations of all Nglycs
 extractGlycs <- function(aaseq){
   result <- gregexpr("N[^P][ST][^P]", aaseq)[[1]]  # used for 0 indexing these position values for analysis in python 
   c(result)

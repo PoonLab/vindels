@@ -244,6 +244,21 @@ indel.nt <- rbind(ins.nt, del.nt)
 indel.nt$indel <- c(rep(0,4),rep(3,4))
 indel.nt$counts <- counts$value
 
+# STRATIFICATION BY MULTIPLES OF 3 and NON 3 
+#--------------------------------------------------
+ins3 <- total.ins[nchar(total.ins$Seq) %% 3 ==0,]
+insnon3 <- total.ins[nchar(total.ins$Seq) %% 3 !=0,]
+del3 <- total.del[nchar(total.del$Seq) %% 3 ==0,]
+delnon3 <- total.del[nchar(total.del$Seq) %% 3 !=0,]
+
+
+ins.3.t <- c(sum(unname(sapply(ins3[,'Seq'], nchar))), sum(unname(sapply(ins3[,"Vseq"], nchar))))
+ins.non3.t <- c(sum(unname(sapply(non[,'Seq'], nchar))), sum(unname(sapply(insnon3[,"Vseq"], nchar))))
+del.3.t <- c(sum(unname(sapply(del3[,"Seq"], nchar))), sum(unname(sapply(del3[,"Vseq"], nchar))))
+del.non3.t <- c(sum(unname(sapply(delnon3[,"Seq"], nchar))), sum(unname(sapply(delnon3[,"Vseq"], nchar))))
+
+
+
 # RANDOMIZATION TEST 
 # -----------------------------------------
 sampleString <- function(len, vloop){
