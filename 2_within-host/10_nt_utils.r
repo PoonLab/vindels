@@ -1,4 +1,67 @@
 
+# for changing headers from ACCNO_DATE format to ACCNO
+getSubtype <- function(header){
+  newheader <- strsplit(as.character(header),"\\.")[[1]][1]
+  newheader
+}
+
+# used for handling entire columns of NA values
+removeNA <- function(input, repl=""){
+  if (is.na(input)){
+    input <- repl
+  }
+  input
+}
+
+# retrieves the accno field from the full scale header 
+getAccno <- function(input){
+  accno <- strsplit(input, "\\.")[[1]][5]
+  accno
+}
+
+
+# specifically handles fields containing a comma
+# and copies their data so they can be split into individual rows in a data frame
+splitRows <- function(row){
+  row <- data.frame(t(row),stringsAsFactors = F)
+  seqs <- str_split(row[1,6], ",")[[1]]
+  pos <- str_split(row[1,7],",")[[1]]
+  len <- length(seqs)
+  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:10])
+}
+
+
+# adds an "X" character to signify the location of an insertion 
+addX <- function(seq,pos){
+  if (!is.na(pos)){
+    paste0(substr(seq,1,pos),"X",substr(seq,pos+1,nchar(seq)))
+  }else{
+    seq
+  }
+}
+
+
+labels <- function(header, patient, vloop){
+  letter <- strsplit(patient, "-")[[1]][2]
+  paste0(header,"_", letter, "_", vloop)
+}
+
+
+# uses the start position of the given vloop (retrieved from var.pos; separate file)
+# to compute the indel position within gp120
+addPos <- function(pos, header, vloop){
+  if (pos == ""){
+    return(NA)
+  }
+  var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
+  var.pos <- var.pos[,-c(2,5,8,11,14)]
+  
+  pos <- as.numeric(pos)
+  vloop <- as.character(vloop)
+  arg2 <- as.numeric(var.pos[var.pos$header==gsub("_\\d*$","",header), paste0('start.',vloop)])
+  pos + arg2
+}
+
 transitionCounts <- function(seq){
   len <- nchar(seq)
   nt <- c("A", "C", "G", "T", "X")
@@ -118,21 +181,6 @@ flankProps <- function(indel, pos, vseq){
   
 }
 
-# adds an "X" character to signify the location of an insertion 
-addX <- function(seq,pos){
-  if (!is.na(pos)){
-    paste0(substr(seq,1,pos),"X",substr(seq,pos+1,nchar(seq)))
-  }else{
-    seq
-  }
-}
-
-
-labels <- function(header, patient, vloop){
-  letter <- strsplit(patient, "-")[[1]][2]
-  paste0(header,"_", letter, "_", vloop)
-}
-
 
 require(stringi)
 simulateData <- function(seq){
@@ -204,52 +252,6 @@ extractInfo <- function(input){
     pos <- c(pos, as.numeric(fields[[1]][2]) )
   }
   return(c(paste(seq,collapse=","), paste(pos,collapse=",")))
-}
-
-# for changing headers from ACCNO_DATE format to ACCNO
-getSubtype <- function(header){
-  newheader <- strsplit(as.character(header),"\\.")[[1]][1]
-  newheader
-}
-
-# used for handling entire columns of NA values
-removeNA <- function(input, repl=""){
-  if (is.na(input)){
-    input <- repl
-  }
-  input
-}
-
-# retrieves the accno field from the full scale header 
-getAccno <- function(input){
-  accno <- strsplit(input, "\\.")[[1]][5]
-  accno
-}
-
-
-# specifically handles fields containing a comma
-# and copies their data so they can be split into individual rows in a data frame
-splitRows <- function(row){
-  row <- data.frame(t(row),stringsAsFactors = F)
-  seqs <- str_split(row[1,6], ",")[[1]]
-  pos <- str_split(row[1,7],",")[[1]]
-  len <- length(seqs)
-  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:10])
-}
-
-# uses the start position of the given vloop (retrieved from var.pos; separate file)
-# to compute the indel position within gp120
-addPos <- function(pos, header, vloop){
-  if (pos == ""){
-    return(NA)
-  }
-  var.pos <- read.csv(paste0(path,"3RegionSequences/variable/", strsplit(filename, "-")[[1]][1], ".csv"), stringsAsFactors = F)
-  var.pos <- var.pos[,-c(2,5,8,11,14)]
-  
-  pos <- as.numeric(pos)
-  vloop <- as.character(vloop)
-  arg2 <- as.numeric(var.pos[var.pos$header==gsub("_\\d*$","",header), paste0('start.',vloop)])
-  pos + arg2
 }
 
 

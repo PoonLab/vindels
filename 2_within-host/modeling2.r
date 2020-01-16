@@ -1,18 +1,7 @@
 require(bbmle)
+# used to fill in deletion gaps found in the tip sequences 
 
-insertions <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-nosep-all.csv",row.names=1, stringsAsFactors = F)
-
-# #slips <- matrix(rep(rep(0,121),10), nrow=10,ncol=121)
-# slips <- c(rep(0,121000))
-# slips[sample(121000,100)] <- sample(3,100,replace = T) * 3
-slips <- nchar(insertions[insertions$Count!=0, "Seq"])
-slips <- slips[-167]
-slips <- c(slips, rep(0, sum(nchar(insertions$Vseq))))
-
-# randomly shuffle all the entries
-rnd <- sample(length(slips),length(slips))
-slips <- slips[rnd]
-
+source("~/vindels/2_within-host/utils.r")
 
 removeDeletions <- function(vseq, anc){
   if(!grepl("-",vseq)){
@@ -29,12 +18,70 @@ removeDeletions <- function(vseq, anc){
     test
   }
 }
+createSlips <- function(anc, ins, pos){
+  # start out with a base vector containing nchar number of zeros 
+  # remove the gap characters from the ancestral sequence 
+  anc <- gsub("-","",anc)
+  base <- rep(0,nchar(anc)+1)
+  # if there is no insertion, simply add a zero to complete the vector 
+  if (ins == ""){
+    return (base)
+    
+    # if there is an insertion, add the slip count  at the appropriate position
+  }else{
+    len <- nchar(ins)
+    pos <- as.numeric(pos) - len + 1
+    base[pos] <- len
+    return(base)
+  }
+}
 
-insertions$Vseq <- unname(mapply(removeDeletions,insertions$Vseq, insertions$Anc))
+insert <- function(vect, pos, ins){
+  if (pos == 1){
+    return (c(ins, vect[2:length(vect)]))
+    
+    # adds insert after the vector (at the end )
+  }else if (pos == length(vect)){
+    return (c(vect[1:length(vect)-1], ins))
+    # involves slicing the before and after parts of the vector around the insert
+    # used when pos = 2 : nchar-1 
+  }else{
+    return (c(vect[1:pos-1], ins, vect[pos:length(vect)]))
+  }
+  
+}
 
-checkDiff <- function(tip, anc, slips){
-  if (tip == seq2){
-    return(NULL)
+newtip <- function(oldtip, slip){
+  nonzeros <- which(slip != 0)
+  
+  if (length(nonzeros) == 0){
+    return(oldtip)
+  }else{
+    
+    newtip <- c()
+    tip.chars <- strsplit(oldtip, "")[[1]]
+    new.chars <- c()
+    n <- 0
+    pos <- 0
+    while (pos < nchar(oldtip)){
+      pos <- pos + 1
+      n <- n+1
+      #print(pos)
+      count <- slip[n]
+      #print(count)
+      if (count != 0){
+        pos <- pos + (count-1)
+      }else{
+        new.chars <- c(new.chars, tip.chars[pos])
+      }
+    }
+    return(paste0(new.chars,collapse=""))
+  }
+}
+
+checkDiff <- function(seq1, seq2){
+  if (seq1 == seq2){
+    return(integer(0))
   }else if (nchar(seq1) != nchar(seq2)){
     return(NA)
   }
@@ -46,13 +93,37 @@ checkDiff <- function(tip, anc, slips){
   which(chars[1,]!=chars[2,])
 }
 
-createSlips <- function(vseq, seq, pos){
-  if (seq == ""){
-    return (rep(0,nchar(vseq)+1))
-  }else{
-    
+
+insertions <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep-all.csv",row.names=1, stringsAsFactors = F)
+insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq=="")),]
+insertions$Vseq <- unname(mapply(removeDeletions,insertions$Vseq, insertions$Anc))
+
+slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Seq, insertions$Pos))
+insertions$Header <- unname(mapply(patLabel, insertions$Header, insertions$Pat))
+names(slip.list) <- insertions$Header
+
+for (elem in 1:length(slip.list)){
+  if(sum(slip.list[[elem]]) > 0){
+    print(slip.list[elem])
   }
 }
+
+insertions <- insertions[-c(which(insertions$Pos==0)),]
+
+# #slips <- matrix(rep(rep(0,121),10), nrow=10,ncol=121)
+# slips <- c(rep(0,121000))
+# slips[sample(121000,100)] <- sample(3,100,replace = T) * 3
+slips <- nchar(insertions[insertions$Count!=0, "Seq"])
+slips <- slips[-167]
+slips <- c(slips, rep(0, sum(nchar(insertions$Vseq))))
+
+# randomly shuffle all the entries
+rnd <- sample(length(slips),length(slips))
+slips <- slips[rnd]
+
+
+
+
 
 # EXPERIMENTAL -------------------------------
 # slip = data frame of slip events for EACH SEQUENCE 

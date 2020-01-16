@@ -2,7 +2,7 @@
 # trying to develop a model for interstrand jumping of polymerase 
 require(ape)
 require(stringr)
-source("~/GitHub/vindels/2_within-host/10_nt_utils.r")
+source("~/vindels/2_within-host/utils.r")
 
 subs <- function(seq1, seq2){
   # if (nchar(seq1) != nchar(seq2)){

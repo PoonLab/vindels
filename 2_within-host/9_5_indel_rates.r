@@ -1,7 +1,9 @@
 require(bbmle)
 require(stringr)
 require(ape)
+source("~/vindels/2_within-host/utils.r")
 
+vloops <- c("V1","V2","V3","V4","V5")
 csvcount <- function(input){
   commas <- str_count(input, ",")
   if (commas > 0){
@@ -31,27 +33,6 @@ extractInfo <- function(input){
   }
   return(c(paste(seq,collapse=","), paste(pos,collapse=",")))
 }
-
-# for changing headers from ACCNO_DATE format to ACCNO
-getSubtype <- function(header){
-  newheader <- str_split(as.character(header),"\\.")[[1]][1]
-  newheader
-}
-
-# used for handling entire columns of NA values
-removeNA <- function(input){
-  if (is.na(input)){
-    input <- ""
-  }
-  input
-}
-
-# retrieves the accno field from the full scale header 
-getAccno <- function(input){
-  accno <- strsplit(input, "\\.")[[1]][5]
-  accno
-}
-
 
 # specifically handles fields containing a comma
 splitRows <- function(row){
@@ -273,6 +254,10 @@ for (run in 1:20){
 }
 
 
+
+
+
+
 # Comparing insertion and deletion rates to each other 
 
 ir <- c(ins.df[,1],ins.df[,2],ins.df[,3],ins.df[,4],ins.df[,5])
@@ -280,14 +265,75 @@ dr <- c(del.df[,1],del.df[,2],del.df[,3],del.df[,4],del.df[,5])
 wilcox.test(ir,dr,paired=T)
 
 
+
+# MODIFIED FOR BETWEEN HOST COMPARISON 
 # Comparing combined within host indel rates to between host indel rates 
-indel.df <- ins.df + del.df
+subtypes <- c("A1", "B", "C")
+ins.sub <- list()
+del.sub <- list()
+
+all.df <- data.frame()
+for (run in 1:20){
+  iData <- iTotal[[run]]
+  dData <- dTotal[[run]]
+  
+  for (sub in subtypes){
+    ins.sub[[sub]] <- rbind(ins.sub[[sub]], iData[iData$Subtype==sub,])
+    del.sub[[sub]] <- rbind(del.sub[[sub]], dData[dData$Subtype==sub,])
+  }
+}
+
+isub <- data.frame()
+dsub <- data.frame()
+
+for (sub in subtypes){
+  iData <- ins.sub[[sub]]
+  dData <- del.sub[[sub]]
+  
+  irates <- c()
+  drates <- c()
+  
+  for (vloop in 1:5){
+    itemp <- iData[iData$Vloop==vloop,]
+    dtemp <- dData[dData$Vloop==vloop,]
+    
+    iFinal <- itemp[itemp$Date < 325 & itemp$Count < 2,]
+    dFinal <- dtemp[dtemp$Date < 325 & dtemp$Count < 2,]
+    #print(nrow(current) - nrow(iFinal))
+    
+    ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
+    irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
+    irates <- c(irates, irate)
+    print(summary(ifit))
+    
+    dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
+    drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
+    drates <- c(drates, drate)
+    print(summary(dfit))
+  }
+  
+  irates <- irates*10^3
+  drates <- drates*10^3
+  isub <- rbind(isub, data.frame(t(irates)))
+  dsub <- rbind(dsub, data.frame(t(drates)))
+}
+
+rownames(isub) <- subtypes
+rownames(dsub) <- subtypes
+colnames(isub) <- vloops
+colnames(dsub) <- vloops
+
+indel.df <- isub + dsub
 within <- c()
 
-for (row in sample(20, 7)){
+for (row in 1:3){
   within <- c(within, as.double(indel.df[row,]))
 }
-wilcox.test(within, max.llh$adj.rate, paired=T)
+btwrates <- max.llh[-c(6:15,26:35),]
+
+wilcox.test(within, btwrates$adj.rate, paired=T)
+
+
 
 # wilcoxon statistical test comparing median indel rates 
 indel.df <- ins.df + del.df
@@ -300,7 +346,6 @@ wilcox.test(btw.rates,wth.rates, paired=T)
 
 
 
-vloops <- c("V1","V2","V3","V4","V5")
 
 # # BOXPLOTS 
 # # --------------------------
