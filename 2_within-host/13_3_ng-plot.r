@@ -1,5 +1,6 @@
 
 path <- "~/Lio/"
+path <- "~/PycharmProjects/hiv-withinhost/"
 ins <- read.csv(paste0(path,"13_nglycs/interfered/insertions.csv"), sep="\t",stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/interfered/deletions.csv"),sep="\t", stringsAsFactors = F)
 
@@ -56,13 +57,67 @@ sampleString <- function(len, vloop){
   len <- len-1
   idx <- sample(1:(nchar(vloop)-len),100, replace=TRUE)
   strings <- sapply(idx, function(x){substr(vloop, x, x+len)})
-  a <- unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)}))
-  c <- unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)}))
-  g <- unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)}))
-  t <- unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)}))
-  list(a,c,g,t)
+  #a <- unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)}))
+  #c <- unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)}))
+  #g <- unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)}))
+  #t <- unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)}))
+  return(strings)
 }
 
+
+
+
+iSample <- list(c(),c(),c(),c())
+dSample <- list(c(),c(),c(),c())
+# generates the randomly sampled substrings for each indel
+for (row in 1:nrow(total.ins)){
+  itemp <- sampleString(total.ins[row,"len"], total.ins[row,"Vseq"])
+  for (i in 1:4){
+    iSample[[i]] <- c(iSample[[i]], itemp[[i]])
+  }
+}
+for (row in 1:nrow(total.del)){
+  dtemp <- sampleString(total.del[row,"len"], total.del[row,"Vseq"])
+  for (i in 1:4){
+    dSample[[i]] <- c(dSample[[i]], dtemp[[i]])
+  }
+}
+
+# compares the observed proportion to the overall distribution of each nucleotide 
+isign <- c()
+dsign <- c()
+for (i in 1:4){
+  idist <- iSample[[i]]
+  ddist <- dSample[[i]]
+  
+  iQT <- quantile(idist, probs=c(0.025,0.975))
+  dQT <- quantile(ddist, probs=c(0.025,0.975))
+  
+  ins.p <- ins.nt[i,2]
+  del.p <- del.nt[i,2]
+  
+  # highlight significant differences 
+  if (ins.p < iQT[[1]]){
+    isign <- c(isign, "lower")
+  }else if(ins.p > iQT[[2]]){
+    isign <- c(isign, "higher")
+  }else{
+    isign <- c(isign, "")
+  }
+  
+  # highlight significant differences 
+  if (del.p < dQT[[1]]){
+    dsign <- c(dsign, "lower")
+  }else if(del.p > dQT[[2]]){
+    dsign <- c(dsign, "higher")
+  }else{
+    dsign <- c(dsign, "")
+  }
+  
+}
+
+ins.nt$sign <- isign
+del.nt$sign <- dsign
 
 
 cols <- brewer.pal(5,"Set1")
