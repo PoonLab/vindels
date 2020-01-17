@@ -52,7 +52,21 @@ insAlign <- function(indels, pos, ancestor, seq){
   
   ancestor
 }
-
+removeDeletions <- function(vseq, anc){
+  if(!grepl("-",vseq)){
+    return(vseq)
+  }else{
+    tip.chars <- strsplit(vseq, "")[[1]]
+    anc.chars <- strsplit(anc, "")[[1]]
+    idx <- which(tip.chars=="-")
+    
+    for (c in idx){
+      tip.chars[c] <- anc.chars[c]
+    }
+    test <- paste0(tip.chars,collapse="")
+    test
+  }
+}
 delAlign <- function(indels, pos, ancestor, seq){
   i.list <- str_split(indels, ",")[[1]]
   p.list <- str_split(pos, ",")[[1]]
@@ -70,12 +84,15 @@ delAlign <- function(indels, pos, ancestor, seq){
   seq
 }
 
-
+labels <- function(header, patient, vloop){
+  letter <- strsplit(patient, "-")[[1]][2]
+  # paste0(header,"_", letter)
+}
 
 #CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
 ins <- read.csv(paste0(path, "13_nglycs/ins.csv"),  sep="\t", stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/del.csv"), sep="\t", stringsAsFactors = F)
 
@@ -83,8 +100,8 @@ headers <- c("accno", "vloop", "ancestor", "seq", "pos", "tipseq", "patient")
 colnames(ins) <- headers
 colnames(del) <- headers
 
-ins$Header <- unname(mapply(labels, ins$Header, ins$patient, ins$vloop))
-del$Header <- unname(mapply(labels, del$Header, del$patient, del$vloop))
+ins$accno <- unname(mapply(labels, ins$accno, ins$patient, ins$vloop))
+del$accno <- unname(mapply(labels, del$accno, del$patient, del$vloop))
 
 #ins$Seq <- sapply(ins$Seq, translate)
 #del$Seq <- sapply(del$Seq, translate)

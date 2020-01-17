@@ -1,6 +1,7 @@
 #
 nucleotides <- c("A","C","G","T")
 path <- "~/Lio/"
+path <- "~/PycharmProjects/hiv-withinhost/"
 total.ins <- read.csv(paste0(path,"10_nucleotide/total-ins.csv"), row.names = 1, stringsAsFactors = F)
 total.del <- read.csv(paste0(path,"10_nucleotide/total-del.csv"), row.names = 1, stringsAsFactors = F)
 
@@ -183,13 +184,13 @@ par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
 lim = c(0.1,0.5)
 plot(ins.props[,c(3,2)], pch=ins.props[,4]+20, bg=ins.props[,1],xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.5, main="Deletions")
+     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.8, main="Deletions")
 #text(0.187,0.475,labels="a)", cex=1.5)
 #text(0.245,0.452,labels="A", cex=1.5)
 title(ylab="Proportion Inside Deletions", line=3.5,cex.lab=1.75)
 title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.43,0.18,legend=nucleotides, pch=21,cex=1.5, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.33,0.18,legend=vloops2, pch=c(21,22,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.43,0.22,legend=nucleotides, pch=21,cex=1.5, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.33,0.22,legend=vloops2, pch=c(21,22,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 par(xpd=F)
 abline(0,1)
 
