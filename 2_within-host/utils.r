@@ -4,6 +4,10 @@ getSubtype <- function(header){
   newheader <- strsplit(as.character(header),"\\.")[[1]][1]
   newheader
 }
+labels <- function(header, patient, vloop){
+  letter <- strsplit(patient, "-")[[1]][2]
+  paste0(header,"_", letter)
+}
 
 patLabel <- function(header, pat){
   label <- strsplit(pat, "-")[[1]][2]

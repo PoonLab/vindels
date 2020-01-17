@@ -70,10 +70,7 @@ delAlign <- function(indels, pos, ancestor, seq){
   seq
 }
 
-labels <- function(header, patient, vloop){
-  letter <- strsplit(patient, "-")[[1]][2]
-  # paste0(header,"_", letter)
-}
+
 
 #CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
 #PycharmProjects/hiv-withinhost/
@@ -86,8 +83,8 @@ headers <- c("accno", "vloop", "ancestor", "seq", "pos", "tipseq", "patient")
 colnames(ins) <- headers
 colnames(del) <- headers
 
-ins$accno <- unname(mapply(labels, ins$accno, ins$patient, ins$vloop))
-del$accno <- unname(mapply(labels, del$accno, del$patient, del$vloop))
+ins$Header <- unname(mapply(labels, ins$Header, ins$patient, ins$vloop))
+del$Header <- unname(mapply(labels, del$Header, del$patient, del$vloop))
 
 #ins$Seq <- sapply(ins$Seq, translate)
 #del$Seq <- sapply(del$Seq, translate)

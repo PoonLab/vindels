@@ -44,6 +44,8 @@ for (file in 1:length(ifolder)){
   iCSV$Subtype <- unname(sapply(iCSV$header, getSubtype))
   dCSV$Subtype <- unname(sapply(dCSV$header, getSubtype))
   
+  
+  
   # retrieving the accno from the header
   iHeader <- unname(sapply(iCSV$header, getAccno))
   dHeader <- unname(sapply(dCSV$header, getAccno))
@@ -94,6 +96,9 @@ for (file in 1:length(ifolder)){
   colnames(iCSV) <- c("Header","Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Anc","Pat")
   colnames(dCSV) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Anc","Pat")
 
+  # ************************
+  iCSV$Header <- unname(mapply(labels, iCSV$Header, iCSV$Pat, iCSV$Vloop))
+  
   ins.glycs <- rbind(ins.glycs, iCSV)
   del.glycs <- rbind(del.glycs, dCSV)
   

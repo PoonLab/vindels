@@ -7,6 +7,8 @@ del <- read.csv(paste0(path,"13_nglycs/interfered/deletions.csv"),sep="\t", stri
 t.ins <- read.csv(paste0(path,"10_nucleotide/ins-sep-only.csv"),row.names=1, stringsAsFactors = F)
 t.del <- read.csv(paste0(path,"10_nucleotide/del-sep-only.csv"),row.names=1, stringsAsFactors = F)
 
+iseqs <- read.csv(paste0(path,"13_nglycs/ins-edit.csv"),row.names=1,stringsAsFactors = F)
+dseqs <- read.csv(paste0(path,"13_nglycs/del-edit.csv"),row.names=1,stringsAsFactors = F)
 
 
 ngprops <- read.csv(paste0(path,"13_nglycs/interfered/ngprops.csv"), row.names=1)
