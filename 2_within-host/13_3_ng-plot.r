@@ -70,7 +70,7 @@ sampleString <- function(len, vloop){
 iSample <- list(c(),c(),c(),c())
 dSample <- list(c(),c(),c(),c())
 # generates the randomly sampled substrings for each indel
-for (row in 1:nrow(total.ins)){
+for (row in 1:nrow(ins)){
   itemp <- sampleString(total.ins[row,"len"], total.ins[row,"Vseq"])
   for (i in 1:4){
     iSample[[i]] <- c(iSample[[i]], itemp[[i]])
