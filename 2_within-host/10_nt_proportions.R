@@ -2,10 +2,10 @@ require(bbmle)
 require(stringr)
 require(ape)
 
-source("~/GitHub/vindels/2_within-host/10_nt_utils.r")
+source("~/vindels/2_within-host/utils.r")
 # Lio
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
  
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))
@@ -44,11 +44,6 @@ for (file in 1:length(ifolder)){
   iCSV$Subtype <- unname(sapply(iCSV$header, getSubtype))
   dCSV$Subtype <- unname(sapply(dCSV$header, getSubtype))
   
-  
-  
-  # retrieving the accno from the header
-  iHeader <- unname(sapply(iCSV$header, getAccno))
-  dHeader <- unname(sapply(dCSV$header, getAccno))
   
   # store the sequences from these two data frames for nucleotide analysis
   # remove them as they arent needed for this analysis
@@ -98,6 +93,7 @@ for (file in 1:length(ifolder)){
 
   # ************************
   iCSV$Header <- unname(mapply(labels, iCSV$Header, iCSV$Pat, iCSV$Vloop))
+  dCSV$Header <- unname(mapply(labels, dCSV$Header, dCSV$Pat, dCSV$Vloop))
   
   ins.glycs <- rbind(ins.glycs, iCSV)
   del.glycs <- rbind(del.glycs, dCSV)
