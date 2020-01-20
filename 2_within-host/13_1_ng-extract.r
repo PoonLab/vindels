@@ -2,7 +2,7 @@ require(ape)
 require(stringr)
 require(Biostrings)
 
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 
 insAlign <- function(indels, pos, anc, seq){
   i.list <- str_split(indels, ",")[[1]]
@@ -60,16 +60,18 @@ removeOtherGaps <- function(anc, tip, indel, pos){
 
 restoreGaps <- function(vseq, anc){
   if(!grepl("-",vseq)){
-    return(vseq)
+    return(c(vseq,0))
   }else{
     tip.chars <- strsplit(vseq, "")[[1]]
     anc.chars <- strsplit(anc, "")[[1]]
     idx <- which(tip.chars=="-")
+    
+    no.chars <- length(idx)
   
     tip.chars[idx] <- anc.chars[idx]
     
     res <- paste0(tip.chars,collapse="")
-    res
+    return(c(res, no.chars))
   }
 }
 
@@ -111,14 +113,17 @@ randomizationTest <- function(indel, seq){
 
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
 ins <- read.csv(paste0(path, "13_nglycs/ins-sep.csv"),  sep="\t", stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/del-sep.csv"), sep="\t", stringsAsFactors = F)
 
 ins$Vpos <- NULL
 del$Vpos <- NULL
 
-ins$Vseq <- unname(mapply(restoreGaps,ins$Vseq, ins$Anc))
+res <- as.data.frame(t(unname(mapply(restoreGaps,ins$Vseq, ins$Anc, ins$Pos))))
+ins$Vseq <- res[,1]
+ins$Pos <- ins$Pos + as.numeric(res[,2])
+
 del$Anc <- unname(mapply(restoreGaps, del$Anc, del$Vseq))
 
 ins$Anc <- unname(mapply(removeOtherGaps, ins$Anc,ins$Vseq, ins$Seq, ins$Pos))
