@@ -16,7 +16,7 @@ patLabel <- function(header, pat){
 
 # used for handling entire columns of NA values
 removeNA <- function(input, repl=""){
-  if (is.na(input)){
+  if (all(is.na(input))){
     input <- repl
   }
   input
@@ -264,7 +264,8 @@ extractInfo <- function(input){
 }
 
 
-# used to compute the original 
+# OLD ----------------
+# used to compute ancestor sequences using the tip sequence  
 insOriginal <- function(indel, pos, vseq){
   if (indel == ""){
     return(vseq)
@@ -301,4 +302,54 @@ delOriginal <- function(indel, pos, vseq){
     idxs[(i+1):length(idxs)] <- idxs[(i+1):length(idxs)] + len
   }
   vseq
+}
+
+
+# 13 -- glycosylation analysis 
+
+
+delAlign <- function(indels, pos, anc, seq){
+  i.list <- str_split(indels, ",")[[1]]
+  p.list <- str_split(pos, ",")[[1]]
+  p.list <- as.numeric(p.list)
+  
+  for (idx in 1:length(i.list)){
+    len <- nchar(i.list[idx])
+    ix <- i.list[idx]
+    px <- p.list[idx]
+    
+    seq <- paste0(substr(seq, 0, px), paste(rep("-", len),collapse=""), substr(seq,px+1, nchar(seq)))
+    p.list[(idx+1):length(p.list)] <- p.list[(idx+1):length(p.list)] + len
+  }
+  
+  seq
+}
+
+
+translate <- function(dna) {
+  require(ape)
+  
+  if (nchar(dna) %% 3 != 0) {
+    return(NA)
+  }
+  dnabin <- as.DNAbin(DNAString(dna))
+  aabin <- trans(dnabin)[[1]]
+  aaseq <- paste(as.character(aabin),collapse="")
+  aaseq
+}
+
+# takes in an amino acid sequence and returns the locations of all Nglycs
+extractGlycs <- function(aaseq){
+  result <- gregexpr("N[^P][ST][^P]", aaseq)[[1]]  # used for 0 indexing these position values for analysis in python 
+  paste(result, collapse=",")
+}
+
+countGlycs <- function(field){
+  if ("," %in% field){
+    return(str_count(field, ",") + 1)
+  }else if (field == ""){
+    return(0)
+  }else{
+    return(1)
+  }
 }
