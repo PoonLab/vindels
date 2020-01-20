@@ -1,43 +1,10 @@
 require(ape)
 require(stringr)
 require(Biostrings)
-removeNA <- function(input, repl=""){
-  if (is.na(input)){
-    input <- repl
-  }
-  input
-}
 
+source("~/GitHub/vindels/2_within-host/utils.r")
 
-translate <- function(dna) {
-  require(ape)
-  
-  if (nchar(dna) %% 3 != 0) {
-    return(NA)
-  }
-  dnabin <- as.DNAbin(DNAString(dna))
-  aabin <- trans(dnabin)[[1]]
-  aaseq <- paste(as.character(aabin),collapse="")
-  aaseq
-}
-
-# takes in an amino acid sequence and returns the locations of all Nglycs
-extractGlycs <- function(aaseq){
-  result <- gregexpr("N[^P][ST][^P]", aaseq)[[1]]  # used for 0 indexing these position values for analysis in python 
-  c(result)
-}
-
-countGlycs <- function(field){
-  if ("," %in% field){
-    return(str_count(field, ",") + 1)
-  }else if (field == ""){
-    return(0)
-  }else{
-    return(1)
-  }
-}
-
-insAlign <- function(indels, pos, ancestor, seq){
+insAlign <- function(indels, pos, anc, seq){
   i.list <- str_split(indels, ",")[[1]]
   p.list <- str_split(pos, ",")[[1]]
   
@@ -47,12 +14,12 @@ insAlign <- function(indels, pos, ancestor, seq){
     ix <- i.list[idx]
     px <- as.numeric(p.list[idx])
     
-    ancestor <- paste0(substr(ancestor, 0, px-len), paste(rep("-", len),collapse=""), substr(ancestor,px-len+1, nchar(ancestor)))
+    anc <- paste0(substr(anc, 0, px-len), paste(rep("-", len),collapse=""), substr(anc,px-len+1, nchar(anc)))
   }
   
-  ancestor
+  anc
 }
-removeDeletions <- function(vseq, anc){
+removeDeletionsTip <- function(vseq, anc){
   if(!grepl("-",vseq)){
     return(vseq)
   }else{
@@ -63,63 +30,117 @@ removeDeletions <- function(vseq, anc){
     for (c in idx){
       tip.chars[c] <- anc.chars[c]
     }
-    test <- paste0(tip.chars,collapse="")
-    test
+    res <- paste0(tip.chars,collapse="")
+    res
   }
 }
-delAlign <- function(indels, pos, ancestor, seq){
-  i.list <- str_split(indels, ",")[[1]]
-  p.list <- str_split(pos, ",")[[1]]
-  p.list <- as.numeric(p.list)
+
+removeOtherGaps <- function(anc, tip, indel, pos){
+  # find the location of all gap characters in tip/anc
+  gaps <- gregexpr("-",anc)[[1]]
   
-  for (idx in 1:length(i.list)){
-    len <- nchar(i.list[idx])
-    ix <- i.list[idx]
-    px <- p.list[idx]
+  # create a vector of positions to be copied over
+  idx <- rep(T, nchar(tip))
+  idx[gaps] <- F
+  
+  # retrieve the boundaries of the indel
+  end <- as.numeric(pos)
+  start <- as.numeric(pos) - nchar(indel) + 1
+  
+  # make sure it ignores the indel sequence
+  toIgnore <- start:end
+  idx[toIgnore] <- T
+
+  anc.chars <- strsplit(anc, "")[[1]]
+  anc <- paste0(anc.chars[idx], collapse="")
+  
+  return (anc)
+}
+
+
+restoreGaps <- function(vseq, anc){
+  if(!grepl("-",vseq)){
+    return(vseq)
+  }else{
+    tip.chars <- strsplit(vseq, "")[[1]]
+    anc.chars <- strsplit(anc, "")[[1]]
+    idx <- which(tip.chars=="-")
+  
+    tip.chars[idx] <- anc.chars[idx]
     
-    seq <- paste0(substr(seq, 0, px), paste(rep("-", len),collapse=""), substr(seq,px+1, nchar(seq)))
-    p.list[(idx+1):length(p.list)] <- p.list[(idx+1):length(p.list)] + len
+    res <- paste0(tip.chars,collapse="")
+    res
   }
+}
+
+
+
+randomizationTest <- function(indel, seq){
   
-  seq
+  # PREPARATION 
+  
+  # remove all deletions in the tip sequences 
+  # generate the ancestor sequence ONLY containing a single insertion
+    # remove the dashes from the proper insertion
+    # restore all other insertions in the sequence using 
+  
+  
+  
+  # INSERTIONS 
+  
+  
+  # calc the size of the insertion 
+  len <-  nchar(indel)
+  # determine the locations of all N-glyc sites in the ancestral sequence 
+  
+  # create 100x random numbers (sample) between 1 and nchar(anc) - len(insertion) 
+  # this will be the start point of the test insertion 
+  
+  # for every number in this random sample 
+  
+    # generate the result sequence ; use substring to add the insertion sequence into the ancestor 
+  
+    # recalculate the number of N-glyc sites 
+    # adjust the location of all N-glyc locations falling AFTER the random position to check their similarity 
+  
+    # report this as a positive or a negative result zzzz
+  
+  
+  
 }
 
-labels <- function(header, patient, vloop){
-  letter <- strsplit(patient, "-")[[1]][2]
-  # paste0(header,"_", letter)
-}
-
-#CAAGGGATGGAGGAAAAAACAATACGGAGACATTCAGACCT
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"
-#path <- "~/Lio/"
-ins <- read.csv(paste0(path, "13_nglycs/ins.csv"),  sep="\t", stringsAsFactors = F)
-del <- read.csv(paste0(path,"13_nglycs/del.csv"), sep="\t", stringsAsFactors = F)
+path <- "~/Lio/"
+ins <- read.csv(paste0(path, "13_nglycs/ins-sep.csv"),  sep="\t", stringsAsFactors = F)
+del <- read.csv(paste0(path,"13_nglycs/del-sep.csv"), sep="\t", stringsAsFactors = F)
 
-headers <- c("accno", "vloop", "ancestor", "seq", "pos", "tipseq", "patient")
-colnames(ins) <- headers
-colnames(del) <- headers
+ins$Vpos <- NULL
+del$Vpos <- NULL
 
-ins$accno <- unname(mapply(labels, ins$accno, ins$patient, ins$vloop))
-del$accno <- unname(mapply(labels, del$accno, del$patient, del$vloop))
+ins$Vseq <- unname(mapply(restoreGaps,ins$Vseq, ins$Anc))
+del$Anc <- unname(mapply(restoreGaps, del$Anc, del$Vseq))
 
-#ins$Seq <- sapply(ins$Seq, translate)
-#del$Seq <- sapply(del$Seq, translate)
+ins$Anc <- unname(mapply(removeOtherGaps, ins$Anc,ins$Vseq, ins$Seq, ins$Pos))
 
-new.ins <- ins[,c(1:5)]
-new.del <- del[,c(1:5)]
+#headers <- c("accno", "vloop", "indel", "pos", "tip","anc", "patient")
+#colnames(ins) <- headers
+#colnames(del) <- headers
 
-new.ins$ancestor <- unname(mapply(insAlign, ins$seq, ins$pos, ins$ancestor, ins$tipseq))
-new.ins$tipseq <- ins$tipseq
+new.ins <- ins
+new.del <- del
 
-new.del$ancestor <- del$ancestor
-new.del$tipseq <- unname(mapply(delAlign, del$seq, del$pos, del$ancestor, del$tipseq))
+# new.ins$anc <- unname(mapply(insAlign, ins$seq, ins$pos, ins$anc, ins$tip))
+# new.ins$tip <- ins$tip
+# 
+# new.del$anc <- del$anc
+# new.del$tip <- unname(mapply(delAlign, del$seq, del$pos, del$anc, del$tip))
 
-new.ins$anc.glycs <- unlist(sapply(sapply(sapply(ins$ancestor, translate), extractGlycs), function(x) paste(x, collapse=",")))
-new.del$anc.glycs <- unlist(sapply(sapply(sapply(del$ancestor, translate), extractGlycs), function(x) paste(x, collapse=",")))
+new.ins$anc.glycs <- unlist(sapply(sapply(ins$Anc, translate), extractGlycs))
+new.del$anc.glycs <- unlist(sapply(sapply(del$Anc, translate), extractGlycs))
 
-new.ins$tip.glycs <- unlist(sapply(sapply(sapply(ins$tipseq, translate), extractGlycs), function(x) paste(x, collapse=",")))
-new.del$tip.glycs <- unlist(sapply(sapply(sapply(del$tipseq, translate), extractGlycs), function(x) paste(x, collapse=",")))
+new.ins$tip.glycs <- unlist(sapply(sapply(ins$Tip, translate), extractGlycs))
+new.del$tip.glycs <- unlist(sapply(sapply(del$Tip, translate), extractGlycs))
 
 
 write.table(new.ins, paste0(path,"13_nglycs/ins-edit.csv"), sep="\t", quote=F, row.names=F)
