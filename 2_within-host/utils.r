@@ -304,22 +304,6 @@ delOriginal <- function(indel, pos, vseq){
 # 13 -- glycosylation analysis 
 
 
-delAlign <- function(indels, pos, anc, seq){
-  i.list <- str_split(indels, ",")[[1]]
-  p.list <- str_split(pos, ",")[[1]]
-  p.list <- as.numeric(p.list)
-  
-  for (idx in 1:length(i.list)){
-    len <- nchar(i.list[idx])
-    ix <- i.list[idx]
-    px <- p.list[idx]
-    
-    seq <- paste0(substr(seq, 0, px), paste(rep("-", len),collapse=""), substr(seq,px+1, nchar(seq)))
-    p.list[(idx+1):length(p.list)] <- p.list[(idx+1):length(p.list)] + len
-  }
-  
-  seq
-}
 
 
 translate <- function(dna) {

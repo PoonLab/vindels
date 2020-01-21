@@ -2,7 +2,7 @@ require(ape)
 require(stringr)
 require(Biostrings)
 
-source("~/vindels/2_within-host/utils.r")
+source("~/GitHub/vindels/2_within-host/utils.r")
 
 insAlign <- function(indels, pos, anc, seq){
   i.list <- str_split(indels, ",")[[1]]
@@ -35,7 +35,7 @@ removeDeletionsTip <- function(vseq, anc){
   }
 }
 
-removeOtherGaps <- function(anc, tip, indel, pos){
+removeOtherGaps <- function(anc, tip, indel){
   # find the location of all gap characters in tip/anc
   gaps <- gregexpr("-",anc)[[1]]
   
@@ -58,20 +58,25 @@ removeOtherGaps <- function(anc, tip, indel, pos){
 }
 
 
-restoreGaps <- function(vseq, anc){
+restoreGaps <- function(vseq, anc, indel, pos){
   if(!grepl("-",vseq)){
-    return(c(vseq,0))
+    return(c(vseq,pos))
   }else{
     tip.chars <- strsplit(vseq, "")[[1]]
     anc.chars <- strsplit(anc, "")[[1]]
     idx <- which(tip.chars=="-")
     
-    no.chars <- length(idx)
-  
-    tip.chars[idx] <- anc.chars[idx]
     
-    res <- paste0(tip.chars,collapse="")
-    return(c(res, no.chars))
+    # perform a readjustment of the position
+    if (any(idx < pos)){
+      pos <- as.character(pos + sum(idx < pos))
+    }else{
+      pos <- as.character(pos)
+    }
+    
+    tip.chars[idx] <- anc.chars[idx]
+    tip <- paste0(tip.chars,collapse="")
+    return(c(tip, adjust))
   }
 }
 
@@ -111,18 +116,42 @@ randomizationTest <- function(indel, seq){
   
 }
 
+
+
+delAlign <- function(indels, pos, anc, seq){
+  i.list <- str_split(indels, ",")[[1]]
+  p.list <- str_split(pos, ",")[[1]]
+  p.list <- as.numeric(p.list)
+  
+  for (idx in 1:length(i.list)){
+    len <- nchar(i.list[idx])
+    ix <- i.list[idx]
+    px <- p.list[idx]
+    
+    seq <- paste0(substr(seq, 0, px), paste(rep("-", len),collapse=""), substr(seq,px+1, nchar(seq)))
+    p.list[(idx+1):length(p.list)] <- p.list[(idx+1):length(p.list)] + len
+  }
+  
+  seq
+}
+
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"
-#path <- "~/Lio/"
+path <- "~/Lio/"
 ins <- read.csv(paste0(path, "13_nglycs/ins-sep.csv"),  sep="\t", stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/del-sep.csv"), sep="\t", stringsAsFactors = F)
+
+
+# apply an adjust to the deletion locations to make them the same as insertions 
+del$Pos <- as.numeric(del$Pos) + nchar(del$Seq)
+
 
 ins$Vpos <- NULL
 del$Vpos <- NULL
 
-res <- as.data.frame(t(unname(mapply(restoreGaps,ins$Vseq, ins$Anc, ins$Pos))))
+res <- as.data.frame(t(unname(mapply(restoreGaps,ins$Vseq, ins$Anc, ins$Seq,ins$Pos))))
 ins$Vseq <- res[,1]
-ins$Pos <- ins$Pos + as.numeric(res[,2])
+ins$Pos <- as.numeric(res[,2])
 
 del$Anc <- unname(mapply(restoreGaps, del$Anc, del$Vseq))
 
