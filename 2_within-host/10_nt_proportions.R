@@ -2,10 +2,10 @@ require(bbmle)
 require(stringr)
 require(ape)
 
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 # Lio
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
  
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))
@@ -161,8 +161,8 @@ del <- all.del[all.del$Seq!="",]
 # ---------------------------------------------
 ins.glycs2 <- ins.glycs[ins.glycs$Seq!="",-c(3,4,5)]
 del.glycs2 <- del.glycs[del.glycs$Seq!="",-c(3,4,5)]
-write.table(ins[,-c(3,4,5)],paste0(path, "13_nglycs/ins-sep.csv"), row.names=F, sep="\t", quote=F)
-write.table(del[,-c(3,4,5)],paste0(path, "13_nglycs/del-sep.csv"), row.names=F, sep="\t", quote=F)
+write.table(ins,paste0(path, "13_nglycs/ins-sep.csv"), row.names=F, sep="\t", quote=F)
+write.table(del,paste0(path, "13_nglycs/del-sep.csv"), row.names=F, sep="\t", quote=F)
 
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------

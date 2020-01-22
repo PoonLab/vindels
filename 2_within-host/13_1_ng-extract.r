@@ -2,23 +2,8 @@ require(ape)
 require(stringr)
 require(Biostrings)
 
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 
-insAlign <- function(indels, pos, anc, seq){
-  i.list <- str_split(indels, ",")[[1]]
-  p.list <- str_split(pos, ",")[[1]]
-  
-  for (idx in 1:length(i.list)){
-    
-    len <- nchar(i.list[idx])
-    ix <- i.list[idx]
-    px <- as.numeric(p.list[idx])
-    
-    anc <- paste0(substr(anc, 0, px-len), paste(rep("-", len),collapse=""), substr(anc,px-len+1, nchar(anc)))
-  }
-  
-  anc
-}
 removeDeletionsTip <- function(vseq, anc){
   if(!grepl("-",vseq)){
     return(vseq)
@@ -35,7 +20,7 @@ removeDeletionsTip <- function(vseq, anc){
   }
 }
 
-removeOtherGaps <- function(anc, tip, indel){
+removeOtherGaps <- function(anc, tip, indel, pos){
   # find the location of all gap characters in tip/anc
   gaps <- gregexpr("-",anc)[[1]]
   
@@ -58,7 +43,7 @@ removeOtherGaps <- function(anc, tip, indel){
 }
 
 
-restoreGaps <- function(vseq, anc, indel, pos){
+restoreInsGaps <- function(vseq, anc, indel, pos){
   if(!grepl("-",vseq)){
     return(c(vseq,pos))
   }else{
@@ -67,16 +52,28 @@ restoreGaps <- function(vseq, anc, indel, pos){
     idx <- which(tip.chars=="-")
     
     
-    # perform a readjustment of the position
+    # perform a readjustment of the position (for insertions only )
     if (any(idx < pos)){
       pos <- as.character(pos + sum(idx < pos))
-    }else{
-      pos <- as.character(pos)
     }
     
     tip.chars[idx] <- anc.chars[idx]
     tip <- paste0(tip.chars,collapse="")
-    return(c(tip, adjust))
+    return(c(tip, pos))
+  }
+}
+
+restoreDelGaps <- function(vseq, anc, indel){
+  if(!grepl("-",anc)){
+    return(anc)
+  }else{
+    tip.chars <- strsplit(vseq, "")[[1]]
+    anc.chars <- strsplit(anc, "")[[1]]
+    idx <- which(anc.chars=="-")
+    
+    anc.chars[idx] <- tip.chars[idx]
+    anc <- paste0(anc.chars,collapse="")
+    return(anc)
   }
 }
 
@@ -117,46 +114,31 @@ randomizationTest <- function(indel, seq){
 }
 
 
-
-delAlign <- function(indels, pos, anc, seq){
-  i.list <- str_split(indels, ",")[[1]]
-  p.list <- str_split(pos, ",")[[1]]
-  p.list <- as.numeric(p.list)
-  
-  for (idx in 1:length(i.list)){
-    len <- nchar(i.list[idx])
-    ix <- i.list[idx]
-    px <- p.list[idx]
-    
-    seq <- paste0(substr(seq, 0, px), paste(rep("-", len),collapse=""), substr(seq,px+1, nchar(seq)))
-    p.list[(idx+1):length(p.list)] <- p.list[(idx+1):length(p.list)] + len
-  }
-  
-  seq
-}
-
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
 ins <- read.csv(paste0(path, "13_nglycs/ins-sep.csv"),  sep="\t", stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/del-sep.csv"), sep="\t", stringsAsFactors = F)
-
-
-# apply an adjust to the deletion locations to make them the same as insertions 
-del$Pos <- as.numeric(del$Pos) + nchar(del$Seq)
-
+ins <- ins[,-c(3,4)]
+del <- del[,-c(3,4)]
 
 ins$Vpos <- NULL
 del$Vpos <- NULL
 
-res <- as.data.frame(t(unname(mapply(restoreGaps,ins$Vseq, ins$Anc, ins$Seq,ins$Pos))))
+# apply an adjust to the deletion locations to make them the same as insertions 
+del$Pos <- as.numeric(del$Pos) + nchar(del$Seq)
+
+# Insertions : fill in gaps found in the tip sequences 
+res <- as.data.frame(t(unname(mapply(restoreInsGaps,ins$Vseq, ins$Anc, ins$Seq,ins$Pos))))
 ins$Vseq <- res[,1]
-ins$Pos <- as.numeric(res[,2])
+ins$Pos <- res[,2]
 
-del$Anc <- unname(mapply(restoreGaps, del$Anc, del$Vseq))
+# Deletions : fill in gaps found in the ancestral sequences 
+del$Anc <- unname(mapply(restoreDelGaps, del$Anc, del$Vseq))
 
+# Insertions : 
 ins$Anc <- unname(mapply(removeOtherGaps, ins$Anc,ins$Vseq, ins$Seq, ins$Pos))
-
+del$Vseq <- 
 #headers <- c("accno", "vloop", "indel", "pos", "tip","anc", "patient")
 #colnames(ins) <- headers
 #colnames(del) <- headers
@@ -207,3 +189,41 @@ del$original <- mapply(delOriginal, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq)
 
 # original seq: deletion added back in 
 # original <- paste0(substring(vloop,0,start), del, substring(vloop,end,nchar(vloop)))
+
+# --------------- OUTDATED
+
+# insAlign <- function(indels, pos, anc, seq){
+#   i.list <- str_split(indels, ",")[[1]]
+#   p.list <- str_split(pos, ",")[[1]]
+#   
+#   for (idx in 1:length(i.list)){
+#     
+#     len <- nchar(i.list[idx])
+#     ix <- i.list[idx]
+#     px <- as.numeric(p.list[idx])
+#     
+#     anc <- paste0(substr(anc, 0, px-len), paste(rep("-", len),collapse=""), substr(anc,px-len+1, nchar(anc)))
+#   }
+#   
+#   anc
+# }
+
+
+# 
+# delAlign <- function(indels, pos, anc, seq){
+#   i.list <- str_split(indels, ",")[[1]]
+#   p.list <- str_split(pos, ",")[[1]]
+#   p.list <- as.numeric(p.list)
+#   
+#   for (idx in 1:length(i.list)){
+#     len <- nchar(i.list[idx])
+#     ix <- i.list[idx]
+#     px <- p.list[idx]
+#     
+#     seq <- paste0(substr(seq, 0, px), paste(rep("-", len),collapse=""), substr(seq,px+1, nchar(seq)))
+#     p.list[(idx+1):length(p.list)] <- p.list[(idx+1):length(p.list)] + len
+#   }
+#   
+#   seq
+# }
+
