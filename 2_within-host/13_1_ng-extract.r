@@ -2,7 +2,7 @@ require(ape)
 require(stringr)
 require(Biostrings)
 
-source("~/vindels/2_within-host/utils.r")
+source("~/GitHub/vindels/2_within-host/utils.r")
 
 removeDeletionsTip <- function(vseq, anc){
   if(!grepl("-",vseq)){
@@ -116,7 +116,7 @@ randomizationTest <- function(indel, seq){
 
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"
-#path <- "~/Lio/"
+path <- "~/Lio/"
 ins <- read.csv(paste0(path, "13_nglycs/ins-sep.csv"),  sep="\t", stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/del-sep.csv"), sep="\t", stringsAsFactors = F)
 ins <- ins[,-c(3,4)]
@@ -130,11 +130,12 @@ del$Pos <- as.numeric(del$Pos) + nchar(del$Seq)
 
 # Insertions : fill in gaps found in the tip sequences 
 res <- as.data.frame(t(unname(mapply(restoreInsGaps,ins$Vseq, ins$Anc, ins$Seq,ins$Pos))))
-ins$Vseq <- res[,1]
-ins$Pos <- res[,2]
+ins$Vseq <- as.character(res[,1])
+ins$Pos <- as.numeric(as.character(res[,2]))
+
 
 # Deletions : fill in gaps found in the ancestral sequences 
-del$Anc <- unname(mapply(restoreDelGaps, del$Anc, del$Vseq))
+del$Anc <- unname(mapply(restoreDelGaps, del$Anc, del$Vseq, del$Seq))
 
 # Insertions : 
 ins$Anc <- unname(mapply(removeOtherGaps, ins$Anc,ins$Vseq, ins$Seq, ins$Pos))
