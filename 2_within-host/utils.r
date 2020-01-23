@@ -344,7 +344,7 @@ extractGlycs <- function(aaseq){
 countGlycs <- function(field){
   if ("," %in% field){
     return(str_count(field, ",") + 1)
-  }else if (field == ""){
+  }else if (field == -1){
     return(0)
   }else{
     return(1)

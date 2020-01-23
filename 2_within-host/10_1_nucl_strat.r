@@ -1,7 +1,7 @@
 #
 nucleotides <- c("A","C","G","T")
 path <- "~/Lio/"
-path <- "~/PycharmProjects/hiv-withinhost/"
+#path <- "~/PycharmProjects/hiv-withinhost/"
 total.ins <- read.csv(paste0(path,"10_nucleotide/total-ins.csv"), row.names = 1, stringsAsFactors = F)
 total.del <- read.csv(paste0(path,"10_nucleotide/total-del.csv"), row.names = 1, stringsAsFactors = F)
 
@@ -34,10 +34,10 @@ iVProps <- c()
 dVProps <- c()
 counts <- data.frame()
 
-df1 <- del3
-df2 <- delnon3
-total1 <- del.3.t
-total2 <- del.non3.t
+df1 <- ins3
+df2 <- insnon3
+total1 <- ins.3.t
+total2 <- ins.non3.t
 
 for (nuc in nucleotides){
   icount <- sum(str_count(df1$Seq, nuc))
@@ -91,7 +91,7 @@ for (n in 1:1000){
     
     return(c(iProps, dProps, iVProps, dVProps))
   })
-  letter <- "d"
+  letter <- "i"
   for (n in nucleotides){
     bs.props[[paste0(letter,"3-",n)]] <- c(bs.props[[paste0(letter,"3-",n)]], unname(props[1,n]))
     bs.props[[paste0(letter,"n3-",n)]] <- c(bs.props[[paste0(letter,"n3-",n)]], unname(props[2,n]))
@@ -99,8 +99,16 @@ for (n in 1:1000){
     bs.props[[paste0(letter,"vn3-",n)]] <- c(bs.props[[paste0(letter,"vn3-",n)]], unname(props[4,n]))
   }
 }
+medians <- unlist(lapply(bs.props,median))
+med.x <- medians[which(grepl("v",names(medians)))]
+med.y <- medians[which(!grepl("v",names(medians)))]
 
-con.int <- lapply(bs.props, function(x){quantile(x, c(0.025,0.975))})
+con.int <- unlist(lapply(bs.props, function(x){quantile(x, c(0.025,0.975))}))
+lower.x <- con.int[which(grepl("v",names(con.int)) & grepl("2.5",names(con.int)))]
+upper.x <- con.int[which(grepl("v",names(con.int)) & grepl("97.5",names(con.int)))]
+lower.y <- con.int[which(!grepl("v",names(con.int)) & grepl("2.5",names(con.int)))]
+upper.y <- con.int[which(!grepl("v",names(con.int)) & grepl("97.5",names(con.int)))]
+
 
 
 #RANDOMIZATION TEST 
@@ -168,9 +176,11 @@ par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
 lim = c(0.1,0.60)
 plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=3, main="Deletions - Nt Proportions")
+     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=3, main="Insertions - Nt Proportions")
 title(ylab="Proportion Inside Indels", line=3,cex.lab=1.3)
 title(xlab="Proportion in Variable Loops", line=3,cex.lab=1.3)
+arrows(indel.nt[1:8,3], lower.y[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,3], upper.y[c(seq(1,8,2),seq(1,8,2)+1)], length=0.05, angle=90, code=3)
+arrows(lower.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], upper.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], length=0.05, angle=90, code=3)
 legend(0.53,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 legend(0.10,0.58,legend=c("3", "Non-3"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 par(xpd=F)

@@ -1,7 +1,7 @@
 require(bbmle)
 # used to fill in deletion gaps found in the tip sequences 
 
-source("~/vindels/2_within-host/utils.r")
+source("~/GitHub/vindels/2_within-host/utils.r")
 
 removeDeletions <- function(vseq, anc){
   if(!grepl("-",vseq)){
@@ -79,7 +79,7 @@ checkDiff <- function(seq1, seq2){
 }
 
 path <- "~/PycharmProjects/hiv-withinhost/"
-#path <- "~/Lio/"
+path <- "~/Lio/"
 insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
 insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq=="")),]
 insertions <- insertions[-c(which(insertions$Pos==0)),]

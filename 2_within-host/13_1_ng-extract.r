@@ -2,7 +2,7 @@ require(ape)
 require(stringr)
 require(Biostrings)
 
-source("~/vindels/2_within-host/utils.r")
+source("~/GitHub/vindels/2_within-host/utils.r")
 
 removeDeletionsTip <- function(vseq, anc){
   if(!grepl("-",vseq)){
@@ -113,13 +113,16 @@ randomizationTest <- function(seq, indel){
 glycCount <- function(seq){
   # determine the locations of all N-glyc sites in the ancestral sequence 
   aa.seq <- translate(seq)
+  if (is.na(aa.seq)){
+    return(0)
+  }
   seq.glycs <- extractGlycs(aa.seq)
   csvcount(seq.glycs)
 }
 
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"
-#path <- "~/Lio/"
+path <- "~/Lio/"
 ins <- read.csv(paste0(path, "13_nglycs/ins-sep.csv"),  sep="\t", stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/del-sep.csv"), sep="\t", stringsAsFactors = F)
 ins <- ins[,-c(3,4)]
@@ -153,18 +156,18 @@ ires <- t(unname(mapply(randomizationTest, ins$Anc,ins$Seq)))
 ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
 
 iobs <- unname(sapply(ins$Anc, glycCount))
+adjust <- list()
+for (i in 1:length(ires)){
+  adjust[[i]] <- ires[[i]] - iobs[i]
+}
 
 isign <- c()
 for (n in 1:length(iobs)){
-  idist <- res[[n]]
-  ins.p <- observed[n]
-  
-  
+  idist <- ires[[n]]
+  ins.p <- iobs[n]
   
   iQT <- quantile(idist, probs=c(0.025,0.975))
   
-  
-
   # highlight significant differences 
   if (ins.p < iQT[[1]]){
     isign <- c(isign, "lower")
@@ -173,8 +176,44 @@ for (n in 1:length(iobs)){
   }else{
     isign <- c(isign, "")
   }
-  
 }
+
+vloops <- vector(mode = "list", length = 5)
+for (v in 1:5){
+  idx <- which(ins$Vloop==v)
+  for (i in idx){
+    vloops[[v]] <- c(vloops[[v]], adjust[[i]])
+  }
+}
+
+
+# PLOTTING 
+
+par(mar=c(3,5,2,0))
+caxis=1.3
+clab=1.4
+cmain=1.5
+
+par(mfrow=c(5,1),las=1)
+hist(vloops[[1]], col="red", prob=T, xaxt="n",breaks=seq(min(vloops[[4]])-0.5,max(vloops[[4]])+0.5),main="V1")
+lines(density(vloops[[1]],bw=0.6),lwd=2)
+
+hist(vloops[[2]], col="red", prob=T, xaxt="n", breaks=seq(min(vloops[[4]])-0.5,max(vloops[[4]])+0.5),main="V2")
+lines(density(vloops[[2]],bw=0.6),lwd=2)
+
+hist(vloops[[3]], col="red", prob=T,xaxt="n", breaks=seq(min(vloops[[4]])-0.5,max(vloops[[4]])+0.5),main="V3")
+lines(density(vloops[[3]],bw=0.6),lwd=2)
+
+hist(vloops[[4]], col="red", prob=T,xaxt="n",breaks=seq(min(vloops[[4]])-0.5,max(vloops[[4]])+0.5),main= "V4")
+lines(density(vloops[[4]],bw=0.6),lwd=2)
+
+hist(vloops[[5]], col="red", prob=T, breaks=seq(min(vloops[[4]])-0.5,max(vloops[[4]])+0.5),main="V5")
+lines(density(vloops[[5]],bw=0.6),lwd=2)
+
+
+
+
+ins[which(isign=="higher"),]
 
 
 dres <- t(unname(mapply(randomizationTest, del$Tip,del$Seq)))
