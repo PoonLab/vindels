@@ -4,17 +4,17 @@ require(ape)
 source("~/vindels/2_within-host/utils.r")
 
 vloops <- c("V1","V2","V3","V4","V5")
-csvcount <- function(input){
-  commas <- str_count(input, ",")
-  if (commas > 0){
-    result <- commas + 1  
-  }else if(input == ""){
-    result <- 0
-  }else{
-    result <- 1
-  }
-  result
-}
+# csvcount <- function(input){
+#   commas <- str_count(input, ",")
+#   if (commas > 0){
+#     result <- commas + 1  
+#   }else if(input == ""){
+#     result <- 0
+#   }else{
+#     result <- 1
+#   }
+#   result
+# }
 
 # used for extracting condensed CSV information 
 extractInfo <- function(input){
@@ -91,16 +91,27 @@ for (file in 1:length(ifolder)){
   #dCSV$Accno <- dAccno
   
   
-  # creates the counts column
-  iCSV$Count <- sapply(iCSV$ins, csvcount) 
-  dCSV$Count <- sapply(dCSV$del, csvcount)
-  
   # reads in the tree
   tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename , ".tree.sample")))
   
+  tip.rtt <- node.depth.edgelength(tre)[1:Ntip(tre)]
+  names(tip.rtt) <- tre$tip.label
+  
+  tip.rows <- which(tre$edge[,2] <= Ntip(tre))
+  tip.nodes <- tre$edge[tip.rows,1]
+  anc.rtt <- node.depth.edgelength(tre)[tip.nodes]
+  names(anc.rtt) <- tre$tip.label
+  
+  iheaders <- unname(sapply(iCSV$header, function(x){gsub("_\\d+$","",x)[[1]]}))
+  dheaders <- unname(sapply(dCSV$header, function(x){gsub("_\\d+$","",x)[[1]]}))
+  
+  iCSV$mid.rtt <- (tip.rtt[iheaders] + anc.rtt[iheaders]) / 2
+  dCSV$mid.rtt <- (tip.rtt[dheaders] + anc.rtt[dheaders]) / 2
+
+  
   # adjusts the tre tip labels to match the accession numbers
   #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
-  
+  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename , ".tree.sample")))
   # retrieves branch lengths from the tree
   branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   
   
@@ -109,8 +120,7 @@ for (file in 1:length(ifolder)){
   dCSV$Date <- branches[match(sub("_\\d*$","",dCSV$header), tre$tip.label)]
   
   # extracts info from the indel column and puts it into two separate columns
-  insInfo <- sapply(iCSV$ins, extractInfo)
-  insInfo <- unname(insInfo)
+  insInfo <- unname(sapply(iCSV$ins, extractInfo))
   insInfo <- t(insInfo)
   insInfo <- as.data.frame(insInfo)
   insInfo$V1 <- as.character(insInfo$V1)
@@ -118,8 +128,7 @@ for (file in 1:length(ifolder)){
   iCSV <- cbind(iCSV, insInfo)
   iCSV$ins <- NULL
   
-  delInfo <- sapply(dCSV$del, extractInfo)
-  delInfo <- unname(delInfo)
+  delInfo <- unname(sapply(dCSV$del, extractInfo))
   delInfo <- t(delInfo)
   delInfo <- as.data.frame(delInfo)
   delInfo$V1 <- as.character(delInfo$V1)
@@ -130,11 +139,17 @@ for (file in 1:length(ifolder)){
   iCSV$Run <- rep(runno, nrow(iCSV))
   dCSV$Run <- rep(runno, nrow(dCSV))
   
-  iCSV <- iCSV[c(1,2,3,6,7,8,9,10,4,5,11)]
-  dCSV <- dCSV[c(1,2,3,6,7,8,9,10,4,5,11)]
+  # creates the counts column
+  iCSV$Count <- sapply(iCSV$V1, csvcount) 
+  dCSV$Count <- sapply(dCSV$V1, csvcount)
   
-  colnames(iCSV) <- c("header","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos", "Vseq", "Anc", "Run")
-  colnames(dCSV) <- c("header", "Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos", "Vseq", "Anc", "Run")
+  iCSV <- iCSV[c(1,2,3,6,12,8,9,10,7,4,5,11)]
+  dCSV <- dCSV[c(1,2,3,6,12,8,9,10,7,4,5,11)]
+  
+  colnames(iCSV) <- c("header","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos","mid.rtt","Vseq", "Anc", "Run")
+  colnames(dCSV) <- c("header", "Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos","mid.rtt", "Vseq", "Anc", "Run")
+  
+
   
   # COMMA SEPARATION FIX
   
@@ -209,6 +224,9 @@ del.df <- data.frame()
 #median(as.numeric(all.ins[all.ins$Vloop==2,3])) # used to determine the median lengths of the variable loops
 vlengths <- c(72,126,105,87,33)
 all.df <- data.frame()
+
+irtt <- list()
+drtt <- list()
 for (run in 1:20){
   iData <- iTotal[[run]]
   dData <- dTotal[[run]]
@@ -216,15 +234,20 @@ for (run in 1:20){
   irates <- c()
   drates <- c()
   
+  
+  
   for (vloop in 1:5){
     itemp <- iData[iData$Vloop==vloop,]
     dtemp <- dData[dData$Vloop==vloop,]
     
     iFinal <- itemp[itemp$Date < 325 & itemp$Count < 2,]
     dFinal <- dtemp[dtemp$Date < 325 & dtemp$Count < 2,]
+    
+    irtt[[as.character(vloop)]] <- c(irtt[[as.character(vloop)]],iFinal[iFinal$Count>0,'mid.rtt'])
+    drtt[[as.character(vloop)]] <- c(drtt[[as.character(vloop)]], dFinal[dFinal$Count>0,'mid.rtt'])
     #print(nrow(current) - nrow(iFinal))
     
-    ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
+    ifit <- glm(iFinal$Count~ 1, offset=log(iFinal$Date), family="poisson")
     irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
     irates <- c(irates, irate)
     print(summary(ifit))
@@ -254,6 +277,14 @@ for (run in 1:20){
 }
 
 
+
+# looking at rtt branch lengths and when indels tend to occur
+ires <- c()
+dres <- c()
+for (i in 1:length(irtt)){
+  ires <- c(ires, median(irtt[[i]]))
+  dres <- c(dres, median(drtt[[i]]))
+}
 
 
 
@@ -370,69 +401,82 @@ delrates <- data.frame(vloop=vloops,
                        upper=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
 
 
+
+
+
+insrates <- data.frame(vloop=vloops,
+                       rate=unname(unlist(lapply(irtt, median))), 
+                       lower=unname(unlist(lapply(irtt,function(x){quantile(x, c(0.25,0.75))[1]}))), 
+                       upper=unname(unlist(lapply(irtt,function(x){quantile(x, c(0.25,0.75))[2]}))))
+delrates <- data.frame(vloop=vloops,
+                       rate=unname(unlist(lapply(drtt, median))), 
+                       lower=unname(unlist(lapply(drtt,function(x){quantile(x, c(0.25,0.75))[1]}))), 
+                       upper=unname(unlist(lapply(drtt,function(x){quantile(x, c(0.25,0.75))[2]}))))
+
+
 print(insrates)
 print(delrates)
-# #indels <- cbind(insrates, delrates[,c(2,3)])
-# 
-# # INDEL ABOVE/BELOW MULTIPLOTS 
-# # -------------------------------------
-# 
-# require(Rmisc)
-# require(ggplot2)
-# 
-# g1 <- ggplot(insrates, aes(x=vloop, y=rate,width=0.8)) + 
-#   geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) +
-#   geom_errorbar(aes(ymax = insrates$upper, ymin = insrates$lower), 
-#                 width = 0.25, size=1.1) +
-#   labs(x="Variable Loop", 
-#        y=expression(paste("       Insertion Rate \n(Events/Nt/Year x  ", 10^-3, ")", sep = "")))+
-#   scale_y_continuous(expand = c(0, 0),limits = c(0, 6), breaks=c(0:6)) +
-#   theme(panel.grid.major.y = element_line(color="black",size=0.3),
-#         panel.grid.major.x = element_blank(),
-#         panel.grid.minor.y = element_blank(),
-#         panel.grid.minor.x = element_blank(),
-#         panel.spacing=unit(1, "mm"),
-#         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-#         plot.margin =margin(t = 42, r = 10, b = 4, l = 18, unit = "pt"),
-#         axis.line = element_line(colour = "black"), 
-#         axis.title.y=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
-#         axis.title.x=element_blank(),
-#         strip.text.x = element_blank(),
-#         axis.text.x = element_blank(),
-#         axis.text.y = element_text(size=14),
-#         legend.position="none")+ geom_text(aes(y=0.4,x=3 ),
-#                                            label="N/A", 
-#                                            size=6)
-# #g1
-# 
-# 
-# g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) + 
-#   geom_bar(colour="black", stat="identity",fill="firebrick1",position="dodge",show.legend=F) + 
-#   geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower), 
-#                 width = 0.25, size=1.1) +
-#   geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower), 
-#                 width = 0.25, size=1.1) +
-#   labs(x="Variable Loop", 
-#        y="Deletion Rate")+
-#   #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
-#   scale_y_reverse(lim=c(6,0), breaks=c(0:6))+
-#   theme(panel.grid.major.y = element_line(color="black",size=0.3),
-#         panel.grid.major.x = element_blank(),
-#         panel.grid.minor.y = element_blank(),
-#         panel.grid.minor.x = element_blank(),
-#         panel.spacing=unit(1, "mm"),
-#         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-#         plot.margin =margin(t = -2, r = 10, b = 8, l = 26, unit = "pt"),
-#         axis.line = element_line(colour = "black"), 
-#         axis.title.y=element_text(size=18,margin=margin(t = 0, r = 11, b = 0, l = 6)),
-#         axis.title.x=element_text(size=18,margin=margin(t = 5, r = 0, b = 0, l = 0)),
-#         strip.text.x = element_text(size=16),
-#         axis.text.x=element_text(size=18),
-#         axis.text.y=element_text(size=14),
-#         legend.position="none") 
-# #+ geom_text(aes(y=0.5,x=3 ),label="N/A", size=6)
-#   
-# multiplot(g1,g2)
+#indels <- cbind(insrates, delrates[,c(2,3)])
+
+# INDEL ABOVE/BELOW MULTIPLOTS
+# -------------------------------------
+
+require(Rmisc)
+require(ggplot2)
+
+g1 <- ggplot(insrates, aes(x=vloop, y=rate,width=0.8)) +
+  geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) +
+  geom_errorbar(aes(ymax = insrates$upper, ymin = insrates$lower),
+                width = 0.25, size=1.1) +
+  labs(x="Variable Loop",
+       y=expression(paste("Insertion RTT Midpoint \n           (Days)", sep = "")))+
+  scale_y_continuous(expand = c(0, 0),limits = c(0, 1500), breaks=c(300,600,900,1200,1500)) +
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 42, r = 10, b = 4, l = 24, unit = "pt"),
+        axis.line = element_line(colour = "black"),
+        axis.title.y=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
+        axis.title.x=element_blank(),
+        strip.text.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size=14),
+        legend.position="none")#+ geom_text(aes(y=0.4,x=3 ),
+                                           label="N/A",
+                                           size=6)
+#g1
+
+
+g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) +
+  geom_bar(colour="black", stat="identity",fill="firebrick1",position="dodge",show.legend=F) +
+  geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower),
+                width = 0.25, size=1.1) +
+  geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower),
+                width = 0.25, size=1.1) +
+  labs(x="Variable Loop",
+       y="Deletion RTT")+
+  #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
+  scale_y_reverse(lim=c(1500,0), breaks=c(300,600,900,1200,1500))+
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = -2, r = 10, b = 8, l = 26, unit = "pt"),
+        axis.line = element_line(colour = "black"),
+        axis.title.y=element_text(size=18,margin=margin(t = 0, r = 11, b = 0, l = 6)),
+        axis.title.x=element_text(size=18,margin=margin(t = 5, r = 0, b = 0, l = 0)),
+        strip.text.x = element_text(size=16),
+        axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=14),
+        legend.position="none")
+#+ geom_text(aes(y=0.5,x=3 ),label="N/A", size=6)
+
+multiplot(g1,g2)
 # 
 # 
 # 

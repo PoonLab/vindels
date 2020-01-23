@@ -59,6 +59,52 @@ indel.nt <- rbind(ins.nt, del.nt)
 indel.nt$indel <- c(rep(0,4),rep(3,4))
 indel.nt$counts <- counts$value
 
+
+
+# BOOTSTRAP SUPPORT  
+# ------------------------------------
+# involves taking random samples WITH replacement 100s or 1000s of times 
+
+bs.props <- list()
+
+for (n in 1:1000){
+  
+  # create the bootstrap sample 
+  sam1 <- sample(nrow(df1), nrow(df1), replace=T)
+  sam2 <- sample(nrow(df2), nrow(df2), replace=T)
+  
+  df1.bs <- df1[sam1,c('Seq','Vseq')]
+  df2.bs <- df2[sam2,c('Seq','Vseq')]
+  
+  total1 <- c(sum(unname(sapply(df1.bs[,"Seq"], nchar))), sum(unname(sapply(df1.bs[,"Vseq"], nchar))))
+  total2 <- c(sum(unname(sapply(df2.bs[,"Seq"], nchar))), sum(unname(sapply(df2.bs[,"Vseq"], nchar))))
+  
+  props <- sapply(nucleotides, function(nuc){
+    icount <- sum(str_count(df1.bs$Seq, nuc))
+    dcount <- sum(str_count(df2.bs$Seq, nuc))
+    
+    iProps <-  icount / total1[1]
+    dProps <-  dcount / total2[1]
+    
+    iVProps <-  sum(str_count(df1$Vseq, nuc)) / total1[2]
+    dVProps <-  sum(str_count(df2$Vseq, nuc)) / total2[2]
+    
+    return(c(iProps, dProps, iVProps, dVProps))
+  })
+  letter <- "d"
+  for (n in nucleotides){
+    bs.props[[paste0(letter,"3-",n)]] <- c(bs.props[[paste0(letter,"3-",n)]], unname(props[1,n]))
+    bs.props[[paste0(letter,"n3-",n)]] <- c(bs.props[[paste0(letter,"n3-",n)]], unname(props[2,n]))
+    bs.props[[paste0(letter,"v3-",n)]] <- c(bs.props[[paste0(letter,"v3-",n)]], unname(props[3,n]))
+    bs.props[[paste0(letter,"vn3-",n)]] <- c(bs.props[[paste0(letter,"vn3-",n)]], unname(props[4,n]))
+  }
+}
+
+con.int <- lapply(bs.props, function(x){quantile(x, c(0.025,0.975))})
+
+
+#RANDOMIZATION TEST 
+# ---------------------------------
 iSample <- list(c(),c(),c(),c())
 dSample <- list(c(),c(),c(),c())
 # generates the randomly sampled substrings for each indel

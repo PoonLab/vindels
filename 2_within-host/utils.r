@@ -9,6 +9,9 @@ patLabel <- function(header, pat){
   label <- strsplit(pat, "-")[[1]][2]
   paste0(header,"_",label)
 }
+getLoop <- function(header, vloop){
+  paste0(header,"_",vloop)
+}
 
 # used for handling entire columns of NA values
 removeNA <- function(input, repl=""){
@@ -85,6 +88,20 @@ transitionCounts <- function(seq){
   counts
 }
 
+insert <- function(str, ins,pos ){
+  vect <- strsplit(str,"")[[1]]
+  if (pos == 1){
+    return (paste(c(ins, vect[1:length(vect)]),collapse=""))
+
+    # adds insert after the vector (at the end )
+  }else if (pos == length(vect)+1){
+    return (paste(c(vect[1:length(vect)], ins),collapse=""))
+    # involves slicing the before and after parts of the vector around the insert
+    # used when pos = 2 : nchar-1
+  }else{
+    return (paste(c(vect[1:pos-1], ins, vect[pos:length(vect)]),collapse=""))
+  }
+}
 
 checkDiff <- function(seq1, seq2){
   if (seq1 == seq2){
@@ -229,11 +246,11 @@ slip <- function(seq, pos, p.exit){
   result <- stri_reverse(result)
   result
 }
-csvcount <- function(input){
-  commas <- str_count(input, ":")
+csvcount <- function(input,delim=","){
+  commas <- str_count(input, delim)
   if (commas > 0){
     result <- commas + 1  
-  }else if(input == ""){
+  }else if(is.na(input) || input == ""){
     result <- 0
   }else{
     result <- 1

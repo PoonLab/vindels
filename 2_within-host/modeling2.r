@@ -1,7 +1,7 @@
 require(bbmle)
 # used to fill in deletion gaps found in the tip sequences 
 
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 
 removeDeletions <- function(vseq, anc){
   if(!grepl("-",vseq)){
@@ -78,7 +78,8 @@ checkDiff <- function(seq1, seq2){
   which(chars[1,]!=chars[2,])
 }
 
-path <- "~/Lio/"
+path <- "~/PycharmProjects/hiv-withinhost/"
+#path <- "~/Lio/"
 insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
 insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq=="")),]
 insertions <- insertions[-c(which(insertions$Pos==0)),]
@@ -94,31 +95,29 @@ for (elem in 1:length(slip.list)){
   }
 }
 
-
-# insert <- function(vect, pos, ins){
-#   if (pos == 1){
-#     return (c(ins, vect[2:length(vect)]))
-#     
-#     # adds insert after the vector (at the end )
-#   }else if (pos == length(vect)){
-#     return (c(vect[1:length(vect)-1], ins))
-#     # involves slicing the before and after parts of the vector around the insert
-#     # used when pos = 2 : nchar-1 
-#   }else{
-#     return (c(vect[1:pos-1], ins, vect[pos:length(vect)]))
-#   }
-#   
-# }
 getSlipLocations <- function(slips){
   if (sum(slips)== 0){
-    return (integer(0))
+    return (c(integer(0),length(slips)))
   }else{
     nonzeros <- which(slips!=0)
     locations <- c()
     for (n in nonzeros){
       locations <- c(locations, rep(n, slips[n]))
     }
-    return (locations)
+    return (c(locations,length(slips)))
+  }
+}
+
+getSlipVector <- function(locs, length){
+  vect <- rep(0,length)
+  if (length(locs) == 0){
+    return (vect)
+  }else{
+    tab <- table(locs)
+    for (n in 1:length(tab)){
+      vect[as.numeric(names(tab)[n])] <- unname(tab[n])
+    }
+    return(vect)
   }
 }
 ceiling(rnorm(1,mean=0,sd=2))
