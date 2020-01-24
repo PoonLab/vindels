@@ -1,7 +1,7 @@
 require(bbmle)
 require(stringr)
 require(ape)
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 
 vloops <- c("V1","V2","V3","V4","V5")
 # csvcount <- function(input){
@@ -48,7 +48,7 @@ splitRows <- function(row){
 
 # INSERTION PARSING ----------
 path <- "~/Lio/"
-#path <- "~/PycharmProjects/hiv-withinhost/"
+path <- "~/PycharmProjects/hiv-withinhost/"
 ifolder <- Sys.glob(paste0(path,"9Indels/rep/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/rep/del/*.csv"))
 all.ins <- data.frame()
@@ -240,19 +240,20 @@ for (run in 1:20){
     itemp <- iData[iData$Vloop==vloop,]
     dtemp <- dData[dData$Vloop==vloop,]
     
-    iFinal <- itemp[itemp$Date < 325 & itemp$Count < 2,]
-    dFinal <- dtemp[dtemp$Date < 325 & dtemp$Count < 2,]
+    iFinal <- itemp[itemp$Date < 325 & itemp$Count < 3,]
+    dFinal <- dtemp[dtemp$Date < 325 & dtemp$Count < 3,]
     
+    # ADDED THIS FOR RTT ANALYSIS
     irtt[[as.character(vloop)]] <- c(irtt[[as.character(vloop)]],iFinal[iFinal$Count>0,'mid.rtt'])
     drtt[[as.character(vloop)]] <- c(drtt[[as.character(vloop)]], dFinal[dFinal$Count>0,'mid.rtt'])
     #print(nrow(current) - nrow(iFinal))
     
-    ifit <- glm(iFinal$Count~ 1, offset=log(iFinal$Date), family="poisson")
+    ifit <- glm(nchar(gsub(",","",iFinal$Seq))*iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
     irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
     irates <- c(irates, irate)
     print(summary(ifit))
     
-    dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
+    dfit <- glm(nchar(gsub(",","",dFinal$Seq))*dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
     drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
     drates <- c(drates, drate)
     print(summary(dfit))
@@ -402,6 +403,7 @@ delrates <- data.frame(vloop=vloops,
 
 
 
+# Used for looking at RTT midpoints (time when indels occur)
 
 
 insrates <- data.frame(vloop=vloops,
