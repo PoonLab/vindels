@@ -1,7 +1,7 @@
 require(bbmle)
 require(stringr)
 require(ape)
-source("~/vindels/2_within-host/utils.r")
+source("~/GitHub/vindels/2_within-host/utils.r")
 
 vloops <- c("V1","V2","V3","V4","V5")
 # csvcount <- function(input){
@@ -48,7 +48,7 @@ splitRows <- function(row){
 
 # INSERTION PARSING ----------
 path <- "~/Lio/"
-path <- "~/PycharmProjects/hiv-withinhost/"
+#path <- "~/PycharmProjects/hiv-withinhost/"
 ifolder <- Sys.glob(paste0(path,"9Indels/rep/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/rep/del/*.csv"))
 all.ins <- data.frame()
@@ -447,8 +447,8 @@ g1 <- ggplot(insrates, aes(x=vloop, y=rate,width=0.8)) +
         axis.text.x = element_blank(),
         axis.text.y = element_text(size=14),
         legend.position="none")#+ geom_text(aes(y=0.4,x=3 ),
-                                           label="N/A",
-                                           size=6)
+                                           #label="N/A",
+                                           #size=6)
 #g1
 
 

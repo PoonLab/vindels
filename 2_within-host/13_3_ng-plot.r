@@ -1,6 +1,6 @@
 
 path <- "~/Lio/"
-path <- "~/PycharmProjects/hiv-withinhost/"
+#path <- "~/PycharmProjects/hiv-withinhost/"
 ins <- read.csv(paste0(path,"13_nglycs/interfered/insertions.csv"), sep="\t",stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/interfered/deletions.csv"),sep="\t", stringsAsFactors = F)
 

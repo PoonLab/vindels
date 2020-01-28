@@ -32,14 +32,25 @@ slips <- function(vseq, pos, len){
 path <- '~/PycharmProjects/hiv-withinhost/'
 path <- "~/Lio/"
 ins <- read.csv(paste0(path,"10_nucleotide/ins-sep-only.csv"), stringsAsFactors = F, row.names = 1)
+del <- read.csv(paste0(path,"10_nucleotide/del-sep-only.csv"), stringsAsFactors = F, row.names = 1)
+del <- del[-c(which(nchar(del$Seq) > 50)),]
+ins <- ins[-c(which(nchar(ins$Seq) > 50)),]
+lens <- nchar(ins$Seq)
+
+par(mar=c(6,6,6,2))
+caxis=1.3
+clab=1.5
+cmain=1.8
+hist(lens, breaks=seq(-0.5,max(lens)+0.5), col='red',cex.lab=clab, main="Insertion Lengths", cex.axis=caxis, cex.main=cmain, xlab="Length (Nucleotides)")
+
 all <- read.csv(paste0(path,"10_nucleotide/ins-nosep-all.csv"), stringsAsFactors = F, row.names=1)
 
 ins$Vseq <- gsub("-","",ins$Vseq)
 all$Vseq <- gsub("-","",all$Vseq)
 
 
-ins$Header <- mapply(fixHeader, header=ins$Header, pat=ins$Pat)
-all$Header <- mapply(fixHeader, header=all$Header, pat=all$Pat)
+#ins$Header <- mapply(fixHeader, header=ins$Header, pat=ins$Pat)
+#all$Header <- mapply(fixHeader, header=all$Header, pat=all$Pat)
 
 # FIXED AND NO LONGER NEEDED 
 #ins$Accno <- unname(mapply(labels, ins$Accno, ins$Pat, ins$Vloop))
@@ -48,7 +59,7 @@ all$Header <- mapply(fixHeader, header=all$Header, pat=all$Pat)
 
 # apply flankCheck 
 # parameters can be changed here to get different results 
-flanking <- unname(mapply(flankCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1/6, offset=100))
+flanking <- unname(mapply(flankCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1/9, offset=0))
 
 # modify flanking data.frame 
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)
@@ -67,6 +78,11 @@ all <- all[-as.numeric(rownames(all[all$Vlength==0,])),]
 flanking <- flanking[-171,]
 all <- all[-13514, ]
 
+# proportion of insertions ACROSS ALL VARIABLE LOOPS that contain a match with 1/6 wobble directly 
+#   adjacent (EITHER 5' or 3', no offset) 
+nrow(flanking[flanking$before.bool | flanking$after.bool,]) / nrow(flanking)
+
+
 # retrieves insertions that have at least one instance of flanking sequence 
 tabs <- table(flanking[flanking$before.bool | flanking$after.bool, "header"])
 all$count.flanking <- 0
@@ -83,9 +99,6 @@ write.csv(flanking, "~/PycharmProjects/hiv-withinhost/14_flanking/flanking.csv")
 write.csv(all, "~/PycharmProjects/hiv-withinhost/14_flanking/flanking-all.csv")
 
 
-# proportion of insertions ACROSS ALL VARIABLE LOOPS that contain a match with 1/6 wobble directly 
-#   adjacent (EITHER 5' or 3', no offset) 
-nrow(flanking[flanking$before.bool | flanking$after.bool,]) / nrow(flanking)
 
 # split 'flanking' into 5 different variable loops 
 sub.v <- split(flanking, flanking$vloop)
@@ -156,8 +169,8 @@ hist(a.dist1, breaks=seq(-0.5,max(a.dist1)+0.5), col='red',cex.lab=clab, main="D
 
 
 # distribution of how far you need to travel to find a MATCH WITHIN 2 NT (wobble = 2, offset=10000)
-hist(b.dist2, breaks=seq(-0.5,max(b.dist2)+0.5), col='red',cex.lab=clab, main="Distances to next match \n(1/6 mismatch) - 5'",cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
-hist(a.dist2, breaks=seq(-0.5,max(a.dist2)+0.5), col='red',cex.lab=clab, main="Distances to next match \n(1/6 mismatch) - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+hist(b.dist2, breaks=seq(-0.5,max(b.dist2)+0.5), col='red',cex.lab=clab, main="Distances to next match \n(1/9 mismatch) - 5'",cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+hist(a.dist2, breaks=seq(-0.5,max(a.dist2)+0.5), col='red',cex.lab=clab, main="Distances to next match \n(1/9 mismatch) - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
 
 
 lens <- nchar(flanking$indel)

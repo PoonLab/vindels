@@ -208,14 +208,14 @@ write.csv(total.del2, paste0(path,"10_nucleotide/total-del2.csv"))
 
 # FLANKING INSERTIONS PROPORTIONS OUTPUT 
 # ------------------------------------
-write.csv(ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep-only.csv")
-write.csv(del, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-sep-only.csv")
+write.csv(ins, paste0(path,"/10_nucleotide/ins-sep-only.csv"))
+write.csv(del, paste0(path,"/10_nucleotide/del-sep-only.csv"))
 
-write.csv(all.ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-sep-all.csv")
-write.csv(all.ins, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-sep-all.csv")
+write.csv(all.ins, paste0(path,"/10_nucleotide/ins-sep-all.csv"))
+write.csv(all.ins, paste0(path,"/10_nucleotide/del-sep-all.csv"))
 
-write.csv(ins.glycs, "~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-nosep-all.csv")
-write.csv(del.glycs, "~/PycharmProjects/hiv-withinhost/10_nucleotide/del-nosep-all.csv")
+write.csv(ins.glycs, paste0(path,"/10_nucleotide/ins-nosep-all.csv"))
+write.csv(del.glycs, paste0(path,"/10_nucleotide/del-nosep-all.csv"))
 
 
 
