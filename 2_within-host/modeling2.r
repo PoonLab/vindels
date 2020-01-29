@@ -97,14 +97,14 @@ for (elem in 1:length(slip.list)){
 
 getSlipLocations <- function(slips){
   if (sum(slips)== 0){
-    return (c(integer(0),length(slips)))
+    return (list(loc=integer(0),len=length(slips)))
   }else{
     nonzeros <- which(slips!=0)
     locations <- c()
-    for (n in nonzeros){
-      locations <- c(locations, rep(n, slips[n]))
+    for (pos in nonzeros){
+      locations <- c(locations, rep(pos, slips[n]))
     }
-    return (c(locations,length(slips)))
+    return (list(loc=locations,len=length(slips)))
   }
 }
 
@@ -120,7 +120,49 @@ getSlipVector <- function(locs, length){
     return(vect)
   }
 }
-ceiling(rnorm(1,mean=0,sd=2))
+delta <- function(rep=1,mean=0,sd=1){
+    x <- rnorm(rep,mean=mean,sd=sd)
+    if (x < 0){
+      x <- abs(x)
+      x <- ceiling(x)
+      x <- -x
+    }else{
+      x <- ceiling(x)
+    }
+    x
+}
+position <- function(len){
+  sample(len, 1)
+}
+nucleotides <- c("A","C","G","T")
+llh <- mapply(function(tip, anc){
+  t.mat <- matrix(ncol=4, nrow=4, dimnames=list(nucleotides,nucleotides))
+})
+
+
+# get slip locations 
+
+# randomly sample a location on the slip locations 
+
+# change that value by a rnorm derived number
+
+# get slip vector again 
+
+# generate the newtip sequence from this slip vector
+
+# calculate the likelihood of the newtip sequence given the ancestor
+  # this requres the transition probability matrix 
+  # remember: matrix exponentiation 
+
+# transition matrix 
+  
+  # receive the newtip and the ancestor for input 
+  # first check that they are a) the same length, b) contain no gaps 
+  # modify the checkDiff function or the transition function to generate a matrix of transition probs
+  # start by getting counts at each location 
+  
+
+
 
 likelihood <- function(slip){
   if (slip <= 0){
