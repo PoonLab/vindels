@@ -72,11 +72,9 @@ addPos <- function(pos, header, vloop){
 
 transitionCounts <- function(seq){
   len <- nchar(seq)
-  nt <- c("A", "C", "G", "T", "X")
-  counts <- matrix(0, nrow=5, ncol=5)
+  nt <- c("A", "C", "G", "T")
+  counts <- matrix(0, nrow=5, ncol=5,dimnames=list(nt,nt))
   
-  rownames(counts) <- nt
-  colnames(counts) <- nt
   #print(seq)
   if (seq != ""){
     for (i in 1:(len-1)){

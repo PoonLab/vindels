@@ -140,6 +140,9 @@ llh <- mapply(function(tip, anc){
 })
 
 
+
+
+
 # get slip locations 
 
 # randomly sample a location on the slip locations 
@@ -161,6 +164,33 @@ llh <- mapply(function(tip, anc){
   # modify the checkDiff function or the transition function to generate a matrix of transition probs
   # start by getting counts at each location 
   
+
+transitionCounts <- function(seq1, seq2){
+  len <- nchar(seq1)
+  nt <- c("A", "C", "G", "T")
+  counts <- matrix(0, nrow=4, ncol=4,dimnames=list(nt,nt))
+  
+  #chars1 <- strsplit(seq1, "")[[1]]
+  #chars2 <- strsplit(seq2, "")[[1]]
+  if (seq1 != ""){
+    for (i in 1:(len-1)){
+      x <- substr(seq1, i, i)
+      y <- substr(seq2, i ,i)
+      counts[x,y] <- counts[x,y] + 1
+    }
+  }
+  counts
+}
+
+gtrmodel <- function(pA, pC, pG, rate){
+  pT <- 1 - (pA+pC+pG)
+  
+  mew <- 2 * sum(pA*pC*rate, pA*pG*rate, pA*pT*rate, pC*pG*rate, pC*pT*rate, pG*pT*rate)
+  
+  mat <- matrix(0, nrow=4, ncol=4,dimnames=list(nt,nt))
+}
+
+
 
 
 
