@@ -152,10 +152,34 @@ ins$Anc <- unname(mapply(removeGaps, ins$Anc,ins$Vseq, ins$Seq, ins$Pos))
 
 # GLYC SITE RANDOMIZATION TEST 
 
+observedGlycChange <- function(anc, indel, pos){
+  aa.seq <- unname(sapply(anc, translate))
+  glycs <- unname(sapply(aa.seq,extractGlycs))
+  before <- unname(sapply(glycs,csvcount))
+  
+  newanc <- insert(anc,indel,pos)
+  
+  # generate the result sequence ; use substring to add the insertion sequence into the seqestor 
+  
+  new.aa <- unname(sapply(newanc, translate))
+  glycs <- unname(sapply(new.aa,extractGlycs))
+  after <- unname(sapply(glycs,csvcount))
+  # recalculate the number of N-glyc sites 
+  # adjust the location of all N-glyc locations falling AFTER the random position to check their similarity 
+  
+  # report this as a positive or a negative result zzzz
+  return(after - before)
+}
+
+
+
+
+
 ires <- t(unname(mapply(randomizationTest, ins$Anc,ins$Seq)))
 ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
 
 iobs <- unname(sapply(ins$Anc, glycCount))
+iobs.fixed <- unname(mapply(observedGlycChange, ins$Anc, ins$Seq, ins$Pos))
 adjust <- list()
 for (i in 1:length(ires)){
   adjust[[i]] <- ires[[i]] - iobs[i]
@@ -177,6 +201,15 @@ for (n in 1:length(iobs)){
     isign <- c(isign, "")
   }
 }
+
+cols <- brewer.pal(5,"Set1")
+cex=2
+par(pty="s", mar=c(6,5,4,1),las=0)
+
+lim = c(0,0.8)
+
+plot(x=i)
+
 
 vloops <- vector(mode = "list", length = 5)
 for (v in 1:5){

@@ -87,6 +87,7 @@ transitionCounts <- function(seq){
 }
 
 insert <- function(str, ins,pos ){
+  pos <- pos+1
   vect <- strsplit(str,"")[[1]]
   if (pos == 1){
     return (paste(c(ins, vect[1:length(vect)]),collapse=""))
