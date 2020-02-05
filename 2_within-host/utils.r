@@ -86,21 +86,43 @@ transitionCounts <- function(seq){
   counts
 }
 
-insert <- function(str, ins,pos ){
-  pos <- pos+1
+# this function uses the START positions of insertions, not the end positions
+insert <- function(str, indel,pos ){
+  #pos <- pos+1
   vect <- strsplit(str,"")[[1]]
+  if (pos < 1){
+    return (NA)
+  }
+  
   if (pos == 1){
-    return (paste(c(ins, vect[1:length(vect)]),collapse=""))
+    return (paste(c(indel, vect[1:length(vect)]),collapse=""))
 
     # adds insert after the vector (at the end )
   }else if (pos == length(vect)+1){
-    return (paste(c(vect[1:length(vect)], ins),collapse=""))
+    return (paste(c(vect[1:length(vect)], indel),collapse=""))
     # involves slicing the before and after parts of the vector around the insert
     # used when pos = 2 : nchar-1
   }else{
-    return (paste(c(vect[1:pos-1], ins, vect[pos:length(vect)]),collapse=""))
+    return (paste(c(vect[1:pos-1], indel, vect[pos:length(vect)]),collapse=""))
   }
 }
+delete <- function(str, indel, pos){
+  vect <- rep(T, nchar(str))
+  
+  if (pos > (nchar(str) - nchar(indel) + 1)){
+    return (NA)
+  }
+  
+  start <- pos
+  end <- pos + nchar(indel) - 1
+  
+  vect[start:end] <- F
+  
+  chars <- strsplit(str, "")[[1]]
+  
+  return(paste(chars[which(vect)],collapse=""))
+}
+
 
 checkDiff <- function(seq1, seq2){
   if (seq1 == seq2){

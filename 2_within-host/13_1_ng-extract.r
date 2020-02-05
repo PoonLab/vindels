@@ -2,7 +2,7 @@ require(ape)
 require(stringr)
 require(Biostrings)
 
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 
 removeDeletionsTip <- function(vseq, anc){
   if(!grepl("-",vseq)){
@@ -35,7 +35,8 @@ removeGaps <- function(anc, tip, indel, pos){
   # make sure it ignores the indel sequence
   toIgnore <- start:end
   idx[toIgnore] <- F
-
+  
+  # fill in all other insertions / deletions that are not the one of interest ***
   anc.chars <- strsplit(anc, "")[[1]]
   tip.chars <- strsplit(tip, "")[[1]]
   anc.chars[idx] <- tip.chars[idx]
@@ -45,11 +46,18 @@ removeGaps <- function(anc, tip, indel, pos){
 }
 
 
-restoreInsGaps <- function(vseq, anc, indel, pos){
-  if(!grepl("-",vseq)){
-    return(c(vseq,pos))
+restoreDel <- function(tip, anc, indel, pos){
+  # this is used to restore any gaps in tip sequences containing insertions 
+  # Reasoning:
+    # I need to restore the tip sequence to its ORIGINAL STATE
+    # where no deletions have occurred
+    # Any and all gaps in the tip sequence are deletions and need to be restored
+    # This is done by iterating over the tipseq and ancestor simultaneously
+  
+  if(!grepl("-",tip)){
+    return(c(tip,pos))
   }else{
-    tip.chars <- strsplit(vseq, "")[[1]]
+    tip.chars <- strsplit(tip, "")[[1]]
     anc.chars <- strsplit(anc, "")[[1]]
     idx <- which(tip.chars=="-")
     
@@ -65,11 +73,18 @@ restoreInsGaps <- function(vseq, anc, indel, pos){
   }
 }
 
-restoreDelGaps <- function(vseq, anc, indel){
+restoreIns <- function(tip, anc, indel){
+  # this is used to restore any gaps in ancestor sequences containing deletions 
+  # Reasoning:
+    # I need to restore the ancestor sequence to its ORIGINAL STATE
+    # where no deletions have occurred
+    # Any and all gaps in the tip sequence are deletions and need to be restored
+    # This is done by iterating over the tipseq and ancestor simultaneously
+  
   if(!grepl("-",anc)){
     return(anc)
   }else{
-    tip.chars <- strsplit(vseq, "")[[1]]
+    tip.chars <- strsplit(tip, "")[[1]]
     anc.chars <- strsplit(anc, "")[[1]]
     idx <- which(anc.chars=="-")
     
@@ -81,21 +96,11 @@ restoreDelGaps <- function(vseq, anc, indel){
 
 
 
-randomizationTest <- function(seq, indel){
-  
-  # PREPARATION 
-  
-  # remove all deletions in the tip sequences 
-  # generate the ancestor sequence ONLY containing a single insertion
-    # remove the dashes from the proper insertion
-    # restore all other insertions in the sequence using 
-  
-  # create 100x random numbers (sample) between 1 and nchar(anc) - len(insertion) 
+insRandTest <- function(seq, indel, start){
   # this will be the start point of the test insertion 
   smpl <- sample(nchar(seq)+1,300, replace=T)
+  
   # for every number in this random sample 
-  
-  
   seq <- sapply(smpl, function(x){insert(seq,indel,x)})
   
     # generate the result sequence ; use substring to add the insertion sequence into the seqestor 
@@ -103,12 +108,24 @@ randomizationTest <- function(seq, indel){
   seq.glycs <- unname(sapply(aa.seq,extractGlycs))
   
   png.count <- unname(sapply(seq.glycs,csvcount))
-    # recalculate the number of N-glyc sites 
-    # adjust the location of all N-glyc locations falling AFTER the random position to check their similarity 
-  
-    # report this as a positive or a negative result zzzz
-  return(png.count)
+  return(png.count - start)
 }
+
+delRandTest <- function(seq, indel, start){
+  # this will be the start point of the test insertion 
+  smpl <- sample((nchar(seq) - nchar(indel) + 1),300, replace=T)
+  
+  # for every number in this random sample 
+  seq <- sapply(smpl, function(x){delete(seq,indel,x)})
+  
+  # generate the result sequence ; use substring to add the insertion sequence into the seqestor 
+  aa.seq <- unname(sapply(seq, translate))
+  seq.glycs <- unname(sapply(aa.seq,extractGlycs))
+  
+  png.count <- unname(sapply(seq.glycs,csvcount))
+  return(png.count - start)
+}
+
 
 glycCount <- function(seq){
   # determine the locations of all N-glyc sites in the ancestral sequence 
@@ -122,9 +139,12 @@ glycCount <- function(seq){
 
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
 ins <- read.csv(paste0(path, "13_nglycs/ins-sep.csv"),  sep="\t", stringsAsFactors = F)
 del <- read.csv(paste0(path,"13_nglycs/del-sep.csv"), sep="\t", stringsAsFactors = F)
+
+ins <- ins[-c(which(ins$Pos ==0)),]
+
 ins <- ins[,-c(3,4)]
 del <- del[,-c(3,4)]
 
@@ -135,13 +155,13 @@ del$Vpos <- NULL
 del$Pos <- as.numeric(del$Pos) + nchar(del$Seq)
 
 # Insertions : fill in gaps found in the tip sequences 
-res <- as.data.frame(t(unname(mapply(restoreInsGaps,ins$Vseq, ins$Anc, ins$Seq,ins$Pos))))
+res <- as.data.frame(t(unname(mapply(restoreDel,ins$Vseq, ins$Anc, ins$Seq,ins$Pos))))
 ins$Vseq <- as.character(res[,1])
 ins$Pos <- as.numeric(as.character(res[,2]))
 
 
 # Deletions : fill in gaps found in the ancestral sequences 
-del$Anc <- unname(mapply(restoreDelGaps, del$Anc, del$Vseq, del$Seq))
+del$Anc <- unname(mapply(restoreIns, del$Anc, del$Vseq, del$Seq))
 
 # Insertions : 
 ins$Anc <- unname(mapply(removeGaps, ins$Anc,ins$Vseq, ins$Seq, ins$Pos))
@@ -150,15 +170,25 @@ ins$Anc <- unname(mapply(removeGaps, ins$Anc,ins$Vseq, ins$Seq, ins$Pos))
 #ins$Anc <- unname(mapply(removeGaps, del$Vseq,del$Anc, del$Seq, del$Pos))
 
 
+ins.v <- split(ins, ins$Vloop)
+del.v <- split(del, del$Vloop)
+
+
 # GLYC SITE RANDOMIZATION TEST 
 
-observedGlycChange <- function(anc, indel, pos){
+observedGlycChange <- function(anc, indel, pos, option="i"){
+  anc <- gsub("-","",anc)
   aa.seq <- unname(sapply(anc, translate))
   glycs <- unname(sapply(aa.seq,extractGlycs))
   before <- unname(sapply(glycs,csvcount))
   
-  newanc <- insert(anc,indel,pos)
+  if (option == "i"){
+    newanc <- insert(anc, indel, (pos - nchar(indel) + 1))
+  }else{
+    newanc <- delete(anc, indel, (pos - nchar(indel) + 1))
+  }
   
+  #print(newanc)
   # generate the result sequence ; use substring to add the insertion sequence into the seqestor 
   
   new.aa <- unname(sapply(newanc, translate))
@@ -169,17 +199,107 @@ observedGlycChange <- function(anc, indel, pos){
   
   # report this as a positive or a negative result zzzz
   return(after - before)
+} 
+
+ins.data <- data.frame()
+del.data <- data.frame()
+
+for (n in 1:5){
+  iTemp <- ins.v[[n]]
+  dTemp <- del.v[[n]]
+  
+  iTemp$glycs <- unname(sapply(iTemp$Anc, glycCount))
+  dTemp$glycs <- unname(sapply(dTemp$Anc, glycCount))
+  
+  ires <- t(unname(mapply(randomizationTest, iTemp$Anc,iTemp$Seq, iTemp$glycs)))
+  ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
+  
+  iedist <- unname(unlist(lapply(ires, mean)))
+  
+  iemean <- mean(iedist)
+  bs.means <- c()
+  for (i in 1:100){
+    sam <- sample(length(iedist), length(iedist), replace=T)
+    iexp.bs <- iedist[sam]
+    bs.means[i] <- mean(iexp.bs)
+  }
+  iequantiles <- quantile(bs.means, c(0.025,0.975))
+  
+  dres <- t(unname(mapply(randomizationTest, dTemp$Anc,dTemp$Seq, dTemp$glycs)))
+  dres <- split(dres, rep(1:nrow(dres), each=ncol(dres)))
+
+  dedist <- unname(unlist(lapply(dres, mean)))
+  
+  demean <- mean(dedist)
+  bs.means <- c()
+  for (i in 1:100){
+    sam <- sample(length(dedist), length(dedist), replace=T)
+    dexp.bs <- dedist[sam]
+    bs.means[i] <- mean(dexp.bs)
+  }
+  dequantiles <- quantile(bs.means, c(0.025,0.975))
+  
+  iobs <- unname(mapply(observedGlycChange, iTemp$Anc, iTemp$Seq, iTemp$Pos, "i"))
+  
+  iomean <- mean(iobs)
+  bs.means <- c()
+  for (i in 1:100){
+    sam <- sample(length(iobs), length(iobs), replace=T)
+    iobs.bs <- iobs[sam]
+    bs.means[i] <- mean(iobs.bs)
+  }
+  ioquantiles <- quantile(bs.means, c(0.025,0.975))
+  
+  dobs <- unname(mapply(observedGlycChange, dTemp$Anc, dTemp$Seq, dTemp$Pos, "d"))
+  
+  domean <- mean(dobs)
+  bs.means <- c()
+  for (i in 1:100){
+    sam <- sample(length(dobs), length(dobs), replace=T)
+    dobs.bs <- dobs[sam]
+    bs.means[i] <- mean(dobs.bs)
+  }
+  doquantiles <- quantile(bs.means, c(0.025,0.975))
+  
+  ins.data <- rbind(ins.data, data.frame(exp=iemean, 
+                                         elower=iequantiles[[1]],
+                                         eupper=iequantiles[[2]],
+                                         obs=iomean, 
+                                         olower=ioquantiles[[1]],
+                                         oupper=ioquantiles[[2]]))
+  del.data <- rbind(del.data, data.frame(exp=demean, 
+                                         elower=dequantiles[[1]],
+                                         eupper=dequantiles[[2]],
+                                         obs=domean, 
+                                         olower=doquantiles[[1]],
+                                         oupper=doquantiles[[2]]))
 }
 
 
+require(RColorBrewer)
+colors <- brewer.pal(5, "Set1")
+vloops <- c("V1","V2","V3","V4","V5")
+cex=1
+par(pty="s", xpd=F, mar=c(6,8,4,1),las=0)
+
+# this take in data either as ins.data or del.data
+data <- ins.data
+lim = c(-1,1)
+plot(data[,c(1,4)], pch=as.numeric(row.names(data))+20, bg=colors,xlim=lim,ylim=lim,
+     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=3, main="Insertions - PNLGS")
+abline(0,1)
+title(ylab="Observed Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
+title(xlab="Expected Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
+arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
+arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
+legend(1.1,-0.5,legend=vloops, pch=22,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+#legend(0.10,0.58,legend=c("3", "Non-3"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 
 
 
-ires <- t(unname(mapply(randomizationTest, ins$Anc,ins$Seq)))
-ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
 
-iobs <- unname(sapply(ins$Anc, glycCount))
-iobs.fixed <- unname(mapply(observedGlycChange, ins$Anc, ins$Seq, ins$Pos))
+
+
 adjust <- list()
 for (i in 1:length(ires)){
   adjust[[i]] <- ires[[i]] - iobs[i]
