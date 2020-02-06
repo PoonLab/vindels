@@ -87,8 +87,8 @@ def getVRegions(vSeqFile):
             positions[fields[0]].append([fields[(vr*3)+2], fields[(vr*3)+3]])
 
     # RETURNS
-    # vregions[accession number] = list(V1seq, V2seq, V3seq, V4seq, V5seq)
-    # positions[accesion number] = list([start, stop],[start, stop],[start,stop],[start,stop],[start,stop])
+    # vregions[accession number] = list(list(V1seq, V2seq, V3seq, V4seq, V5seq)...)
+    # positions[accesion number] = list([[start, stop],[start, stop],[start,stop],[start,stop],[start,stop]]...)
     return vregions, positions
         
 def vrSwitch(position, boundaries):
