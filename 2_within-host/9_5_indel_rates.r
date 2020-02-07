@@ -16,6 +16,13 @@ vloops <- c("V1","V2","V3","V4","V5")
 #   result
 # }
 
+# -------------------------
+# tree manipulation 
+x <- read.tree("~/PycharmProjects/hiv-withinhost/7SampleTrees/final/QJ-b_7_497.tree")
+nodes <- node.depth.edgelength(x)[(length(x$tip.label)+1):(length(x$edge.length)+1)]
+names(nodes) <- (Ntip(x)+1):(length(x$edge.length)+1)
+nodes <- nodes[order(nodes,decreasing=T)]
+
 # used for extracting condensed CSV information 
 extractInfo <- function(input){
   if (length(input)==1 && input == ""){

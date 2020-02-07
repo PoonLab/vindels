@@ -23,6 +23,86 @@ def get_boundaries(str):
     return res
 
 
+'''def pairwiseAlign(ntqry, ntref=""):
+    if ntref == "":
+        ntref = ATGAGAGTGAAGGAGAAATATCAGCACTTGTGGAGATGGGGGTGGAGATGGGGCACCATGCTCCTTGGGATGTTGATGAT\
+CTGTAGTGCTACAGAAAAATTGTGGGTCACAGTCTATTATGGGGTACCTGTGTGGAAGGAAGCAACCACCACTCTATTTT\
+GTGCATCAGATGCTAAAGCATATGATACAGAGGTACATAATGTTTGGGCCACACATGCCTGTGTACCCACAGACCCCAAC\
+CCACAAGAAGTAGTATTGGTAAATGTGACAGAAAATTTTAACATGTGGAAAAATGACATGGTAGAACAGATGCATGAGGA\
+TATAATCAGTTTATGGGATCAAAGCCTAAAGCCATGTGTAAAATTAACCCCACTCTGTGTTAGTTTAAAGTGCACTGATT\
+TGAAGAATGATACTAATACCAATAGTAGTAGCGGGAGAATGATAATGGAGAAAGGAGAGATAAAAAACTGCTCTTTCAAT\
+ATCAGCACAAGCATAAGAGGTAAGGTGCAGAAAGAATATGCATTTTTTTATAAACTTGATATAATACCAATAGATAATGA\
+TACTACCAGCTATAAGTTGACAAGTTGTAACACCTCAGTCATTACACAGGCCTGTCCAAAGGTATCCTTTGAGCCAATTC\
+CCATACATTATTGTGCCCCGGCTGGTTTTGCGATTCTAAAATGTAATAATAAGACGTTCAATGGAACAGGACCATGTACA\
+AATGTCAGCACAGTACAATGTACACATGGAATTAGGCCAGTAGTATCAACTCAACTGCTGTTAAATGGCAGTCTAGCAGA\
+AGAAGAGGTAGTAATTAGATCTGTCAATTTCACGGACAATGCTAAAACCATAATAGTACAGCTGAACACATCTGTAGAAA\
+TTAATTGTACAAGACCCAACAACAATACAAGAAAAAGAATCCGTATCCAGAGAGGACCAGGGAGAGCATTTGTTACAATA\
+GGAAAAATAGGAAATATGAGACAAGCACATTGTAACATTAGTAGAGCAAAATGGAATAACACTTTAAAACAGATAGCTAG\
+CAAATTAAGAGAACAATTTGGAAATAATAAAACAATAATCTTTAAGCAATCCTCAGGAGGGGACCCAGAAATTGTAACGC\
+ACAGTTTTAATTGTGGAGGGGAATTTTTCTACTGTAATTCAACACAACTGTTTAATAGTACTTGGTTTAATAGTACTTGG\
+AGTACTGAAGGGTCAAATAACACTGAAGGAAGTGACACAATCACCCTCCCATGCAGAATAAAACAAATTATAAACATGTG\
+GCAGAAAGTAGGAAAAGCAATGTATGCCCCTCCCATCAGTGGACAAATTAGATGTTCATCAAATATTACAGGGCTGCTAT\
+TAACAAGAGATGGTGGTAATAGCAACAATGAGTCCGAGATCTTCAGACCTGGAGGAGGAGATATGAGGGACAATTGGAGA\
+AGTGAATTATATAAATATAAAGTAGTAAAAATTGAACCATTAGGAGTAGCACCCACCAAGGCAAAGAGAAGAGTGGTGCA\
+GAGAGAAAAAAGA # this is gp120
+
+    ntqry = re.sub("-","",ntqry)
+
+    nt_pair = Aligner()
+    nt_pair.set_model('HYPHY_NUC')
+    nt_pair.is_global = False
+    nt_pair.gap_open_penalty = 30
+    nt_pair.gap_extend_penalty = 10
+
+    result = nt_pair.align(ntref, ntqry)
+
+    left, right = get_boundaries(result[0])
+
+    ntqry = result[1][left:right].replace("-","")
+
+    aaqry = translate_nuc(ntqry,0)
+
+    aa_pair = Aligner()
+    aa_pair.set_model('EmpHIV25')
+    aa_pair.gap_extend_penalty = 10
+    aa_pair.gap_open_penalty = 30
+    aa_pair.is_global = True
+
+    result2 = aa_pair.align(aaref,aaqry)
+
+    newref = list(ntref)
+    newqry = list(ntqry)
+
+    # reads through the amino acid alignment and adds codon gaps to the proper locations
+    for i in range(len(result2[0])):
+        if result2[0][i] == '-':
+            newref[i * 3:i * 3] = ['-', '-', '-']
+
+        if result2[1][i] == '-':
+            newqry[i * 3:i * 3] = ['-', '-', '-']
+
+    finalRef = "".join(newref)
+    finalQry = "".join(newqry)
+
+    if len(finalRef) != len(finalQry):
+        unequal.append(header)
+        print(header)
+        print(aaref)
+        print(aaqry)
+        print(finalRef)
+        print(finalQry)
+        continue'''
+
+
+d = {}
+print(d)
+e = {"stuff":[1,2,3], "other":['a','b','c']}
+d.update(e)
+print(d)
+
+
+
+pairwiseAlign("")
 gp120 = open("/home/jpalmer/PycharmProjects/hiv-withinhost/gp120.txt",'r')
 gp120 = ""
 with open("/home/jpalmer/PycharmProjects/hiv-withinhost/gp120.txt",'r') as handle:
@@ -65,7 +145,7 @@ for infile in folder:
             st = header.split(".")[0]
             total += 1
         subtypes[st] = subtypes.get(st,0) + 1
-        '''if filename == "novitsky.fasta":
+        if filename == "novitsky.fasta":
             ntqry = data[header].replace("\r","").replace("-","")      
             aaref = vlad_aaref
             ntref = vlad_ntref
@@ -113,7 +193,7 @@ for infile in folder:
             print(aaqry)
             print(finalRef)
             print(finalQry)
-            continue'''
+            continue
 
         #output.write(">" + header + '\n')
         #output.write(">ref\n" + finalRef + "\n>query\n" + finalQry + '\n')
