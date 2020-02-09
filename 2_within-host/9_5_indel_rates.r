@@ -1,7 +1,7 @@
 require(bbmle)
 require(stringr)
 require(ape)
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 
 vloops <- c("V1","V2","V3","V4","V5")
 # csvcount <- function(input){
@@ -16,41 +16,11 @@ vloops <- c("V1","V2","V3","V4","V5")
 #   result
 # }
 
-# -------------------------
-# tree manipulation 
-x <- read.tree("~/PycharmProjects/hiv-withinhost/7SampleTrees/final/QJ-b_7_497.tree")
-nodes <- node.depth.edgelength(x)[(length(x$tip.label)+1):(length(x$edge.length)+1)]
-names(nodes) <- (Ntip(x)+1):(length(x$edge.length)+1)
-nodes <- nodes[order(nodes,decreasing=T)]
+
 
 # used for extracting condensed CSV information 
-extractInfo <- function(input){
-  if (length(input)==1 && input == ""){
-    return(c("",""))
-  }else{
-    insertions <- strsplit(input, ":")
-  }
-  seq <- c()
-  pos <- c()
-  
-  for (ins in insertions[[1]]){
-    fields <- strsplit(ins, "-")
-    seq <- c(seq, fields[[1]][1])
-    pos <- c(pos, as.numeric(fields[[1]][2]))
-  }
-  return(c(paste(seq,collapse=","), paste(pos,collapse=",")))
-}
-
 # specifically handles fields containing a comma
-splitRows <- function(row){
-  row <- data.frame(t(row),stringsAsFactors = F)
-  seqs <- str_split(row[1,7], ",")[[1]]
-  pos <- str_split(row[1,8],",")[[1]]
-  len <- length(seqs)
-  #print(seqs)
-  data.frame(row[rep(1,len),1:6], Seq=seqs, Pos=pos, row[rep(1,len),9:10])
-  
-}
+
 
 
 # INSERTION PARSING ----------

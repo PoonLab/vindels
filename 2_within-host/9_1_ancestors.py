@@ -204,7 +204,7 @@ def isLeaf(header):
     res = re.search('^[^\(^\),\n]+$',header)
     return res != None
 
-def treeIndelExtract(node, root, vregion, data):
+def treeIndelExtract(node, vregion, data):
     
     insertions = {}
     deletions = {}
@@ -222,7 +222,7 @@ def treeIndelExtract(node, root, vregion, data):
         insertions.update(output[0])
         deletions.update(output[1])
     else:       
-        below = treeIndelExtract(child1, root, vregion, data)
+        below = treeIndelExtract(child1, vregion, data)
         insertions.update(below[0])
         deletions.update(below[1])
 
@@ -235,7 +235,7 @@ def treeIndelExtract(node, root, vregion, data):
         insertions.update(output[0])
         deletions.update(output[1])
     else:
-        below = treeIndelExtract(child2, root, vregion, data)
+        below = treeIndelExtract(child2, vregion, data)
         insertions.update(below[0])
         deletions.update(below[1])
 
@@ -250,19 +250,25 @@ def treeIndelExtract(node, root, vregion, data):
 
 #print(folder)
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/rep/30660-a_10_542_recon.fasta")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/rep/*.fasta")
 vpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
 tpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/final/'
+opath = '/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/rep/wholetree/'
+
+if not os.path.isdir(opath+"ins"):
+    os.mkdir(opath+'ins')
+if not os.path.isdir (opath+"del"):
+    os.mkdir(opath+'del')
+
 for f in folder:
     infile = open(f, "rU")
     filename = os.path.basename(f)
-    
+    print(filename)
     cdata = convert_fasta(infile)
 
     trefile = filename.split("_recon")[0] + ".tree"
     tree = Tree(tpath+trefile)
     csvfile = filename.split('-')[0] + ".csv"
-    
     #root = t.get_tree_root()
     root = cdata[len(cdata)-1][0]
     #print(root)
@@ -277,6 +283,7 @@ for f in folder:
     vregion = []
     pos = []
     #previous = []  # sanity check to ensure that all vregion and pos lists are identical 
+
     header, seq = cdata[0]
     ai = 0
     for n, char in enumerate(seq):
@@ -287,32 +294,35 @@ for f in folder:
         pos.append(p)
         if char != '-':
             ai += 1
+    previous = vregion
     #print(root)
     
     infile = open(f, "rU")
     pdata = parse_fasta(infile)
-    #print(pdata)
-    result = treeIndelExtract(root, root, vregion, pdata)
-    #print(result)
+
+    result = treeIndelExtract(root, vregion, pdata)
+    #print(result[0])
+    tsvout = filename.split("_recon")[0] + ".tsv"
+    ioutput = open(opath+'ins/'+tsvout, 'w+')
+    doutput = open(opath+'del/'+tsvout,'w+') 
+    header = "header\tV1\tV2\tV3\tV4\tV5\n"
+    ioutput.write(header)
+    doutput.write(header)
     for n, node in enumerate(result[0]):
-        print(n)
-        print(result[0][node])
+        data = [":".join(vloop) for vloop in result[0][node]]
+        #print(",".join([node, data, "\n"]))
+        ioutput.write(node+"\t".join(data)+"\n")
 
+    for n, node in enumerate(result[1]):
+        data = [":".join(vloop) for vloop in result[1][node]]
+        #print(",".join([node, data, "\n"]))
+        doutput.write(node+"\t".join(data)+"\n")
+    ioutput.close()
+    doutput.close()
 
-    
-    #print(root[0])
-    #child1 , child2 = findChildren(root[0])
-    #print(child1)
-    #result = findChildren(child1)
-    #print(result)
     #tips = [ x for x in data.keys() if re.search('^[^\(\):\n]+$',x) != None]
 
-    #print(tips)
-
-    #for t in tips:
         
-    
-    break
 
 
 
