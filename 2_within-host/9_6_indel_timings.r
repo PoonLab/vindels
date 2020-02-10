@@ -1,19 +1,11 @@
-source("~/vindels/2_within-host/utils.r")
+source("~/GitHub/vindels/2_within-host/utils.r")
 
 # INSERTION PARSING ----------
 path <- "~/Lio/"
-path <- "~/PycharmProjects/hiv-withinhost/"
+#path <- "~/PycharmProjects/hiv-withinhost/"
 ifolder <- Sys.glob(paste0(path,"9Indels/rep/wholetree/ins/*.tsv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/rep/wholetree/del/*.tsv"))
-all.ins <- data.frame()
-all.del <- data.frame()
-csv.ins <- data.frame()
-csv.del <- data.frame()
 
-iTotal <- list()
-dTotal <- list()
-count <- 0
-sequences <- list()
 
 
 for (file in 1:length(ifolder)){
@@ -26,11 +18,11 @@ for (file in 1:length(ifolder)){
   
 
   # reads in the tree
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/108869-a_10_368.tree.sample")))#,filename , ".tree.sample")))
+  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/16362-b_15_779.tree.sample")))#,filename , ".tree.sample")))
   lens <- node.depth.edgelength(tre)    # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
   
-  names(lens) <- 1:(length(tre$edge.length)+1)
-  nodes <- nodes[order(nodes,decreasing=T)]
+  names(lens) <- 1:(Ntip(tre) + Nnode(tre))
+  lens <- les[order(lens,decreasing=T)]
   
   # names are in the order of the sequences as they appear in the Historian file 
   
