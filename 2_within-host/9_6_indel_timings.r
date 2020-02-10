@@ -1,8 +1,8 @@
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 
 # INSERTION PARSING ----------
 path <- "~/Lio/"
-#path <- "~/PycharmProjects/hiv-withinhost/"
+path <- "~/PycharmProjects/hiv-withinhost/"
 ifolder <- Sys.glob(paste0(path,"9Indels/rep/wholetree/ins/*.tsv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/rep/wholetree/del/*.tsv"))
 
@@ -16,13 +16,42 @@ for (file in 1:length(ifolder)){
   iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep='\t')
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep='\t')
   
-
-  # reads in the tree
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/16362-b_15_779.tree.sample")))#,filename , ".tree.sample")))
-  lens <- node.depth.edgelength(tre)    # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
+  for (i in 2:6){
+    res <- unname(sapply(iCSV[,i], function(x){csvcount(x,":")}))
+    iCSV[,i] <- res
+    res <- unname(sapply(dCSV[,i], function(x){csvcount(x,":")}))
+    dCSV[,i] <- res
+  }
   
-  names(lens) <- 1:(Ntip(tre) + Nnode(tre))
-  lens <- les[order(lens,decreasing=T)]
+  # reads in the tree
+  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/108869-a_10_368.tree.sample")))#,filename , ".tree.sample")))
+  lens <- node.depth.edgelength(tre)    # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
+
+  # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction
+  #lens <- lens[-(Ntip(tre)+1)]
+  res <- unname(sapply(iCSV$header, function(x){
+    tips <- str_match_all(x,"([^\\)\\(,\n:]+):")[[1]][,2]
+    if (length(tips) == 0){
+      # the index in the tre$tip.label vector is the final result
+      index <- match(x, tre$tip.label)
+    }else{
+      desc <- Descendants(tre)
+
+      # find the numeric labels of all extracted tips 
+      matches <- match(tips, tre$tip.label)
+      
+      # find the SINGLE node in the descendants list that contains the exact same subset of tips
+      index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
+    }
+    if (length(index)!=1){
+      return(NaN)
+    }
+    return(lens[index])
+  }))
+  
+  iCSV$length <- res
+  dCSV$length <- res
+  
   
   # names are in the order of the sequences as they appear in the Historian file 
   

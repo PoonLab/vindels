@@ -272,10 +272,13 @@ slip <- function(seq, pos, p.exit){
   result
 }
 csvcount <- function(input,delim=","){
+  if (is.na(input)){
+    return(0)
+  }
   commas <- str_count(input, delim)
   if (commas > 0){
     result <- commas + 1  
-  }else if(is.na(input) || input == ""){
+  }else if(is.nan(input) || input == ""){
     result <- 0
   }else{
     result <- 1

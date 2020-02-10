@@ -311,12 +311,12 @@ for f in folder:
     for n, node in enumerate(result[0]):
         data = [":".join(vloop) for vloop in result[0][node]]
         #print(",".join([node, data, "\n"]))
-        ioutput.write(node+"\t".join(data)+"\n")
+        ioutput.write(node+"\t"+"\t".join(data)+"\n")
 
     for n, node in enumerate(result[1]):
         data = [":".join(vloop) for vloop in result[1][node]]
         #print(",".join([node, data, "\n"]))
-        doutput.write(node+"\t".join(data)+"\n")
+        doutput.write(node+"\t"+"\t".join(data)+"\n")
     ioutput.close()
     doutput.close()
 
