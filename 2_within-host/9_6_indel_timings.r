@@ -6,8 +6,17 @@ path <- "~/PycharmProjects/hiv-withinhost/"
 ifolder <- Sys.glob(paste0(path,"9Indels/rep/wholetree/ins/*.tsv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/rep/wholetree/del/*.tsv"))
 
+require(stringr)
+require(phangorn)
 
-
+vlist <- list(V1=numeric(),V2=numeric(),V3=numeric(),V4=numeric(),V5=numeric())
+all.ins <- c()
+all.del <- c()
+count <- 0
+iseqcount <- 1
+dseqcount <- 1
+imaxes <- c()
+dmaxes <- c()
 for (file in 1:length(ifolder)){
   print(file)
   filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
@@ -24,7 +33,7 @@ for (file in 1:length(ifolder)){
   }
   
   # reads in the tree
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/108869-a_10_368.tree.sample")))#,filename , ".tree.sample")))
+  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename,".tree.sample")))
   lens <- node.depth.edgelength(tre)    # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
 
   # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction
@@ -44,7 +53,7 @@ for (file in 1:length(ifolder)){
       index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
     }
     if (length(index)!=1){
-      return(NaN)
+      return(paste0("PROBLEM:",as.character(index)))
     }
     return(lens[index])
   }))
@@ -52,33 +61,95 @@ for (file in 1:length(ifolder)){
   iCSV$length <- res
   dCSV$length <- res
   
+  icounts <- rowSums(iCSV[,2:6])
+  dcounts <- rowSums(dCSV[,2:6])
   
-  # names are in the order of the sequences as they appear in the Historian file 
+  if (sum(icounts)==0){
+    next
+  }
+  if (sum(dcounts)==0){
+    next
+  }
   
-  tip.rtt <- node.depth.edgelength(tre)[1:Ntip(tre)]
-  names(tip.rtt) <- tre$tip.label
+  idates <- rep(iCSV$length, icounts)
+  ddates <- rep(dCSV$length, dcounts)
   
-  tip.rows <- which(tre$edge[,2] <= Ntip(tre))
-  tip.nodes <- tre$edge[tip.rows,1]
-  anc.rtt <- node.depth.edgelength(tre)[tip.nodes]
-  names(anc.rtt) <- tre$tip.label
+  if (is.na(max(idates))){
+    print(idates)
+  }
+  if (is.na(max(ddates))){
+    print(ddates)
+  }
   
-  iheaders <- unname(sapply(iCSV$header, function(x){gsub("_\\d+$","",x)[[1]]}))
-  dheaders <- unname(sapply(dCSV$header, function(x){gsub("_\\d+$","",x)[[1]]}))
+  iprop <- idates / max(iCSV$length)
+  dprop <- ddates / max(dCSV$length)
   
-  iCSV$mid.rtt <- (tip.rtt[iheaders] + anc.rtt[iheaders]) / 2
-  dCSV$mid.rtt <- (tip.rtt[dheaders] + anc.rtt[dheaders]) / 2
+  imaxes[count] <- max(iCSV$length)
+  dmaxes[count] <- max(dCSV$length)
   
+  # load the all.ins and all.del vectors (more efficient algorithm)
+  all.ins[iseqcount:(iseqcount+sum(icounts)-1)] <- iprop
+  all.del[dseqcount:(dseqcount+sum(dcounts)-1)] <- dprop
+  # used to maintain the vector loading algorithm above 
+  iseqcount <- iseqcount + sum(icounts)
+  dseqcount <- dseqcount + sum(dcounts)
   
-  # adjusts the tre tip labels to match the accession numbers
-  #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename , ".tree.sample")))
-  # retrieves branch lengths from the tree
-
-  
-  # matches the branch length to each of the sequences 
-  iCSV$Date <- tre$edge.length[match(sub("_\\d*$","",iCSV$header), tre$tip.label)]
-  dCSV$Date <- tre$edge.length[match(sub("_\\d*$","",dCSV$header), tre$tip.label)]
 }
-iTotal <- split(csv.ins, csv.ins$Run)
-dTotal <- split(csv.del, csv.del$Run)
+
+# HISTOGRAMS (used for counts)
+# ----------------------
+
+par(mar=c(5,5,5,2))
+caxis=1.3
+clab=1.4
+cmain=1.5
+
+hist(all.ins[all.ins<3000], 
+     col='red',cex.lab=clab,
+     main="Timing of Insertions",
+     cex.axis=caxis, 
+     cex.main=cmain, 
+     xlab="Days Since Start of Infection")
+#hist(imaxes[imaxes<3000], 
+     #col='blue',add=T,breaks=seq(0,3000,200))
+
+arrows(imaxes, 0, imaxes, -90, length=0)
+
+hist(all.del[all.del<3000], 
+     col='red',cex.lab=clab,
+     main="Timing of Deletions",
+     cex.axis=caxis, 
+     cex.main=cmain, 
+     xlab="Days Since Start of Infection")
+#hist(imaxes[imaxes<3000], 
+#col='blue',add=T,breaks=seq(0,3000,200))
+
+arrows(dmaxes, 0, dmaxes, -300, length=0)
+
+# LINE PLOTS 
+# ----------------------------
+par(mar=c(5,5,5,2))
+caxis=1.3
+clab=1.4
+cmain=1.5
+
+hist(all.ins,
+     breaks=40,
+     col='red',cex.lab=clab,
+     main="Timing of Insertions",
+     cex.axis=caxis, 
+     cex.main=cmain, 
+     xlab="Normalized Time")
+
+hist(all.del, 
+     breaks=20,
+     col='red',cex.lab=clab,
+     main="Timing of Deletions",
+     cex.axis=caxis, 
+     cex.main=cmain, 
+     xlab="Days Since Start of Infection")
+
+
+
+
+

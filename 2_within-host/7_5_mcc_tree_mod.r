@@ -9,7 +9,7 @@ args <- commandArgs(trailingOnly = T)
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
 if (length(args) != 2){
-  print("USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log directory]")
+  print("USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [BEAST directory]")
   quit()
 }
 for (i in 1:length(args)){
@@ -22,7 +22,7 @@ treefolder <- args[1]
 logfolder <- args[2]
 
 if (!dir.exists(paste0(treefolder,"prelim/"))){
-  quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [log directory]")
+  quit(status="USAGE: Rscript 7_5_mcc_tree_mod.r [working directory] [BEAST directory]")
 }
 
 dir.create(paste0(treefolder,"final/"), showWarnings = F)
