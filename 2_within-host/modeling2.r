@@ -3,21 +3,6 @@ require(bbmle)
 
 source("~/vindels/2_within-host/utils.r")
 
-removeDeletions <- function(vseq, anc){
-  if(!grepl("-",vseq)){
-    return(vseq)
-  }else{
-    tip.chars <- strsplit(vseq, "")[[1]]
-    anc.chars <- strsplit(anc, "")[[1]]
-    idx <- which(tip.chars=="-")
-    
-    for (c in idx){
-      tip.chars[c] <- anc.chars[c]
-    }
-    test <- paste0(tip.chars,collapse="")
-    test
-  }
-}
 createSlips <- function(anc, ins, pos){
   # start out with a base vector containing nchar number of zeros 
   # remove the gap characters from the ancestral sequence 
@@ -87,7 +72,9 @@ insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq==""
 
 # CASE: remove instances with insertion position 0
 insertions <- insertions[-c(which(insertions$Pos==0)),]
-insertions$Vseq <- unname(mapply(removeDeletions,insertions$Vseq, insertions$Anc))
+res <- as.data.frame(t(unname(mapply(restoreDel,insertions$Vseq, insertions$Anc, insertions$Seq, insertions$Pos))))
+insertions$Vseq <- as.character(res[,1])
+insertions$Pos <- as.numeric(as.character(res[,2]))
 
 # generate slip list 
 slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Seq, insertions$Pos))

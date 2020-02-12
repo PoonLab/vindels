@@ -1,3 +1,16 @@
+source("~/vindels/2_within-host/utils.r")
+path <- "~/PycharmProjects/hiv-withinhost/"
+#path <- "~/Lio/"
+insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
+
+# PROBLEMATIC CASE: remove instances with gaps in the ancestor but NO INSERTION
+insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq=="")),]
+
+# CASE: remove instances with insertion position 0
+insertions <- insertions[-c(which(insertions$Pos==0)),]
+res <- as.data.frame(t(unname(mapply(restoreDel,insertions$Vseq, insertions$Anc, insertions$Seq, insertions$Pos))))
+insertions$Vseq <- as.character(res[,1])
+insertions$Pos <- as.numeric(as.character(res[,2]))
 
 # #slips <- matrix(rep(rep(0,121),10), nrow=10,ncol=121)
 # slips <- c(rep(0,121000))
@@ -58,8 +71,8 @@ prior <- function(param){
 }
 
 posterior <- function(param){
-  print(prior(param))
-  print(likelihood(param))
+  #print(prior(param))
+  #print(likelihood(param))
   prior(param) + likelihood(param)
 }
 
@@ -73,15 +86,14 @@ proposalFunction <- function(param){
 runMCMC <- function(startvalue, iterations){
   chain <- array(dim = c(iterations+1,2))
   chain[1,] <- startvalue
-  
   for (i in 1:iterations){
     
     proposal <- proposalFunction(chain[i,])
-    print(proposal)
-    print(posterior(proposal))
-    print(posterior(chain[i,]))
+    #print(proposal)
+    #print(posterior(proposal))
+    #print(posterior(chain[i,]))
     prop <- exp(posterior(proposal) - posterior(chain[i,]))
-    print(prop)
+    #print(prop)
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
     if (runif(1) < prop) {
       chain[i+1,] <- proposal
@@ -95,21 +107,29 @@ runMCMC <- function(startvalue, iterations){
     }
   }
   return(chain)
-  
 }
 
 # RUN MCMC
 startvalue <- c(1e-5,0.7)
-chain2 <- runMCMC(startvalue, 5000)
+chain <- runMCMC(startvalue, 100000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
-burnin <- 10000
-acceptance <- 1 - mean(duplicated(chain2[-(1:burnin),]))
+burnin <- 500
+acceptance <- round(1 - mean(duplicated(chain[-(1:burnin),])),2)
 
+par(mfrow=c(1,2), mar=c(5,5,4,1))
 # PLOTTING 
-hist(chain[-(1:burnin),1],nclass=30, main="Posterior of x", xlab="True value = red line" )
-abline(v = median(chain[-(1:burnin),1]))
+hist(chain[-(1:burnin),1],nclass=30, main="Posterior of Enter", xlab="Prob(Enter)",ylab="Frequency" )
+abline(v = median(chain[-(1:burnin),1]), col='red')
+text(0.000168, 400, paste0("Acceptance = ",as.character(acceptance)))
+hist(chain[-(1:burnin),2],nclass=30, main="Posterior of Exit", xlab="Prob(Exit)", ylab="Frequency",xlim=c(0.87,0.91))
+abline(v = median(chain[-(1:burnin),2]), col='red')
+#text(0.00017, 400, paste0("Acceptance = ",as.character(acceptance)))
+dev.off()
 
-plot(chain[-(1:burnin),1], type = "l", xlab="MCMC Steps" , main = "Chain values of x")
+par(mfrow=c(1,2), mar=c(5,5,4,1))
+plot(chain[-(1:burnin),1], type = "l", xlab="MCMC Steps" , ylab="Prob(Enter)",main = "Chain values of Enter")
 abline(h = median(chain[-(1:burnin),1]), col="red")
+plot(chain[-(1:burnin),2], type = "l", xlab="MCMC Steps" , ylab="Prob(Exit)",main = "Chain values of Exit")
+abline(h = median(chain[-(1:burnin),2]), col="red")
