@@ -142,6 +142,7 @@ checkDiff <- function(seq1, seq2){
   which(chars[1,]!=chars[2,])
 }
 
+# 14_flanking 
 flankCheck <- function(indel,pos,vseq,wobble=1/6, offset=0){
   len <- nchar(indel)
   pos <- as.numeric(pos)
@@ -211,7 +212,7 @@ flankCheck <- function(indel,pos,vseq,wobble=1/6, offset=0){
   c(indel, vseq, as.logical(beforeBool),  as.numeric(beforeIdx),  as.numeric(beforeDiff), beforeSeq, as.logical(afterBool), as.numeric(afterIdx), as.numeric(afterDiff),afterSeq)
 }
 
-
+# 14_flanking
 flankProps <- function(indel, pos, vseq){
   len <- nchar(indel)
   pos <- as.numeric(pos)
@@ -231,11 +232,8 @@ flankProps <- function(indel, pos, vseq){
 
 require(stringi)
 simulateData <- function(seq){
-  
   newseq <- seq
-  
   pos <- 1
-  
   while (pos <= nchar(seq)) {
     char <- substr(seq, pos,pos)
     p.slip <- sample(20000,1)
@@ -246,18 +244,15 @@ simulateData <- function(seq){
       newseq <- paste0(substr(seq,0,pos), slip(seq,pos,0.09), substr(seq,pos+1,nchar(seq)))
     }
     pos <- pos + 1
-    
   }
   newseq
 }
 
+# modeling 
 slip <- function(seq, pos, p.exit){
   exit <- F 
   result <- ""
-  
   count <- 0
-  
-  
   while (!exit & count < pos){
     result <- paste0(result, substr(seq, pos-count, pos-count))
     count <- count + 1
@@ -267,10 +262,61 @@ slip <- function(seq, pos, p.exit){
       exit <- T
     }
   }
-  
   result <- stri_reverse(result)
   result
 }
+
+# 13_1 nglycs and modeling
+restoreDel <- function(tip, anc, indel, pos){
+  # this is used to restore any gaps in tip sequences containing insertions 
+  # Reasoning:
+  # I need to restore the tip sequence to its ORIGINAL STATE where no deletions have occurred
+  # want to focus on investigating specific insertions at one time 
+  # Any and all gaps in the tip sequence are deletions and need to be restored
+  
+  if(!grepl("-",tip) || indel == "" || is.na(pos)){
+    return(c(tip,pos))
+  }else{
+    tip.chars <- strsplit(tip, "")[[1]]
+    anc.chars <- strsplit(anc, "")[[1]]
+    idx <- which(tip.chars=="-")
+    
+    # perform a readjustment of the position (for insertions only 
+    if (any(idx < pos)){
+      pos <- as.character(pos + sum(idx < pos))
+    }
+    
+    tip.chars[idx] <- anc.chars[idx]
+    tip <- paste0(tip.chars,collapse="")
+    return(c(tip, pos))
+  }
+}
+
+# 13_1 nglycs and modeling
+restoreIns <- function(tip, anc, indel){
+  # this is used to restore any gaps in ancestor sequences containing deletions 
+  # Reasoning:
+  # I need to restore the ancestor sequence to its ORIGINAL STATE where no insertions have occurred
+  # want to focus on investigating specific insertions at one time
+  # Any and all gaps in the tip sequence are deletions and need to be restored
+  
+  if(!grepl("-",anc)){
+    return(anc)
+  }else{
+    tip.chars <- strsplit(tip, "")[[1]]
+    anc.chars <- strsplit(anc, "")[[1]]
+    idx <- which(anc.chars=="-")
+    
+    anc.chars[idx] <- tip.chars[idx]
+    anc <- paste0(anc.chars,collapse="")
+    return(anc)
+  }
+}
+
+
+
+
+# general
 csvcount <- function(input,delim=","){
   if (is.na(input)){
     return(0)
@@ -286,6 +332,7 @@ csvcount <- function(input,delim=","){
   result
 }
 
+# general
 # used for extracting condensed CSV information 
 extractInfo <- function(input){
   if (length(input)==1 && input == ""){
@@ -347,10 +394,6 @@ delOriginal <- function(indel, pos, vseq){
 
 
 # 13 -- glycosylation analysis 
-
-
-
-
 translate <- function(dna) {
   require(ape)
   

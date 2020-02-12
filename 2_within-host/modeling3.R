@@ -31,23 +31,6 @@ llh.pair <- function(tip, anc, slips){
 }
 
 # attempted to find the log - likelihood of an affine model 
-likelihood2 <- function(slip, param){
-  p.enter <- param[1]
-  p.stay  <- param[2]
-  
-  x <- sum(slip == 0)
-  y <- sum(slip != 0)
-  z <- sum(slip[which(slip!=0)] - 1)
-  
-  llh <- c()
-  # Log likelihood of each tip/anc pair
-  #(1 - p.slip)^x * p.slip^y * (1-p.stay)^y * p.stay^z
-  llh <- 2 * y * x * z * log(1-p.enter) * log(p.enter) * log(1-p.stay) * log(p.stay)
-  sum(llh)
-  
-}
-# --------------------------------------------------
-
 likelihood <- function(param){
   p.enter <- param[1]
   p.stay  <- param[2]
@@ -56,21 +39,23 @@ likelihood <- function(param){
   y <- sum(slips != 0)
   z <- sum(slips[which(slips!=0)] - 1)
   
-  (1-p.enter)^x*(p.enter)^y*(1-p.stay)^y*(p.stay)^z
+  # Log likelihood of each tip/anc pair
+  #(1 - p.slip)^x * p.slip^y * (1-p.stay)^y * p.stay^z
+  llh <-  x*log(1-p.enter) + y*log(p.enter) + y*log(1-p.stay) + z*log(p.stay)
+  llh
+  
 }
-
-
+# --------------------------------------------------
 
 prior <- function(param){
   p.enter <- param[1]
   p.stay  <- param[2]
   
-  prior.pe <- dlnorm(p.enter,meanlog=-40,sdlog=5)
-  prior.ps <- dlnorm(p.stay,meanlog=-0.3,sdlog=0.15)
+  prior.pe <- dlnorm(p.enter,meanlog=-10,sdlog=2, log=T)
+  prior.ps <- dlnorm(p.stay,meanlog=-0.15,sdlog=0.05,log=T)
   
   return(prior.pe + prior.ps)
 }
-
 
 posterior <- function(param){
   print(prior(param))
@@ -79,8 +64,8 @@ posterior <- function(param){
 }
 
 proposalFunction <- function(param){
-  p.enter <- rlnorm(1,meanlog=param[1],sdlog=0.1)
-  p.stay <- rlnorm(1,meanlog=param[2],sdlog=0.01)
+  p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
+  p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
   return(c(p.enter,p.stay))
 }
 
@@ -88,7 +73,6 @@ proposalFunction <- function(param){
 runMCMC <- function(startvalue, iterations){
   chain <- array(dim = c(iterations+1,2))
   chain[1,] <- startvalue
-  
   
   for (i in 1:iterations){
     
@@ -99,7 +83,7 @@ runMCMC <- function(startvalue, iterations){
     prop <- exp(posterior(proposal) - posterior(chain[i,]))
     print(prop)
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
-    *  if (runif(1) < prop) {
+    if (runif(1) < prop) {
       chain[i+1,] <- proposal
       
       # if the proportion is less than the random uniform sample, REJCECT the proposed value stick with current 
@@ -115,7 +99,7 @@ runMCMC <- function(startvalue, iterations){
 }
 
 # RUN MCMC
-startvalue <- c(0.0000000000001,0.6)
+startvalue <- c(1e-5,0.7)
 chain2 <- runMCMC(startvalue, 5000)
 
 

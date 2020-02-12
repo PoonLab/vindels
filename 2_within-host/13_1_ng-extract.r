@@ -4,22 +4,6 @@ require(Biostrings)
 
 source("~/vindels/2_within-host/utils.r")
 
-removeDeletionsTip <- function(vseq, anc){
-  if(!grepl("-",vseq)){
-    return(vseq)
-  }else{
-    tip.chars <- strsplit(vseq, "")[[1]]
-    anc.chars <- strsplit(anc, "")[[1]]
-    idx <- which(tip.chars=="-")
-    
-    for (c in idx){
-      tip.chars[c] <- anc.chars[c]
-    }
-    res <- paste0(tip.chars,collapse="")
-    res
-  }
-}
-
 removeGaps <- function(anc, tip, indel, pos){
   # find the location of all gap characters in tip/anc
   gaps <- gregexpr("-",anc)[[1]]
@@ -44,57 +28,6 @@ removeGaps <- function(anc, tip, indel, pos){
   
   return (gsub("-","",anc))
 }
-
-
-restoreDel <- function(tip, anc, indel, pos){
-  # this is used to restore any gaps in tip sequences containing insertions 
-  # Reasoning:
-    # I need to restore the tip sequence to its ORIGINAL STATE
-    # where no deletions have occurred
-    # Any and all gaps in the tip sequence are deletions and need to be restored
-    # This is done by iterating over the tipseq and ancestor simultaneously
-  
-  if(!grepl("-",tip)){
-    return(c(tip,pos))
-  }else{
-    tip.chars <- strsplit(tip, "")[[1]]
-    anc.chars <- strsplit(anc, "")[[1]]
-    idx <- which(tip.chars=="-")
-    
-    
-    # perform a readjustment of the position (for insertions only )
-    if (any(idx < pos)){
-      pos <- as.character(pos + sum(idx < pos))
-    }
-    
-    tip.chars[idx] <- anc.chars[idx]
-    tip <- paste0(tip.chars,collapse="")
-    return(c(tip, pos))
-  }
-}
-
-restoreIns <- function(tip, anc, indel){
-  # this is used to restore any gaps in ancestor sequences containing deletions 
-  # Reasoning:
-    # I need to restore the ancestor sequence to its ORIGINAL STATE
-    # where no deletions have occurred
-    # Any and all gaps in the tip sequence are deletions and need to be restored
-    # This is done by iterating over the tipseq and ancestor simultaneously
-  
-  if(!grepl("-",anc)){
-    return(anc)
-  }else{
-    tip.chars <- strsplit(tip, "")[[1]]
-    anc.chars <- strsplit(anc, "")[[1]]
-    idx <- which(anc.chars=="-")
-    
-    anc.chars[idx] <- tip.chars[idx]
-    anc <- paste0(anc.chars,collapse="")
-    return(anc)
-  }
-}
-
-
 
 insRandTest <- function(seq, indel, start){
   # this will be the start point of the test insertion 

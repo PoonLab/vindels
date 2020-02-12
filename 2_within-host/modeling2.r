@@ -1,7 +1,7 @@
 require(bbmle)
 # used to fill in deletion gaps found in the tip sequences 
 
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 
 removeDeletions <- function(vseq, anc){
   if(!grepl("-",vseq)){
@@ -79,13 +79,20 @@ checkDiff <- function(seq1, seq2){
 }
 
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
 insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
+
+# PROBLEMATIC CASE: remove instances with gaps in the ancestor but NO INSERTION
 insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq=="")),]
+
+# CASE: remove instances with insertion position 0
 insertions <- insertions[-c(which(insertions$Pos==0)),]
 insertions$Vseq <- unname(mapply(removeDeletions,insertions$Vseq, insertions$Anc))
 
+# generate slip list 
 slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Seq, insertions$Pos))
+
+# add the a/b replicate label to the headers
 insertions$Header <- unname(mapply(patLabel, insertions$Header, insertions$Pat))
 names(slip.list) <- insertions$Header
 
@@ -94,18 +101,24 @@ for (elem in 1:length(slip.list)){
     print(slip.list[elem])
   }
 }
+# C.-.-.QT.10R.-.-_289_1_b
 
-getSlipLocations <- function(slips){
-  if (sum(slips)== 0){
-    return (list(loc=integer(0),len=length(slips)))
-  }else{
-    nonzeros <- which(slips!=0)
-    locations <- c()
-    for (pos in nonzeros){
-      locations <- c(locations, rep(pos, slips[n]))
-    }
-    return (list(loc=locations,len=length(slips)))
+
+# randomly shuffle the slip locations around 
+new.slip <- lapply(slip.list, function(x){
+  total <- sum(x)
+  locs <- sample(length(x), total, replace=T)
+  getSlipVector(locs, length(x))
+})
+
+getSlipLocations <- function(slip){
+  nonzeros <- which(slip!=0)
+  locations <- c()
+  for (pos in nonzeros){
+    locations <- c(locations, rep(pos, slip[pos]))
   }
+  return (list(loc=locations,len=length(slip)))
+  
 }
 
 getSlipVector <- function(locs, length){
@@ -120,7 +133,7 @@ getSlipVector <- function(locs, length){
     return(vect)
   }
 }
-delta <- function(rep=1,mean=0,sd=1){
+delta <- function(rep=1,mean=0,sd=1.5){
     x <- rnorm(rep,mean=mean,sd=sd)
     if (x < 0){
       x <- abs(x)
@@ -134,6 +147,18 @@ delta <- function(rep=1,mean=0,sd=1){
 position <- function(len){
   sample(len, 1)
 }
+
+masterIdx <- which(unname(lapply(slip.list,sum))>0)
+changeSlip <- function(slip.list){
+  seq <- sample(length(masterIdx),1)
+  slip <- slip.list[masterIdx[seq]]
+  s.idx <- getSlipLocations(slip)
+  toEdit <- position(length(s.idx[[1]]))
+  s.idx[[1]][toEdit] <- s.idx[[1]][toEdit] + delta()
+  getSlipVector(s.idx[[1]],s.idx[[2]])
+}
+
+
 nucleotides <- c("A","C","G","T")
 llh <- mapply(function(tip, anc){
   t.mat <- matrix(ncol=4, nrow=4, dimnames=list(nucleotides,nucleotides))
@@ -163,7 +188,16 @@ llh <- mapply(function(tip, anc){
   # first check that they are a) the same length, b) contain no gaps 
   # modify the checkDiff function or the transition function to generate a matrix of transition probs
   # start by getting counts at each location 
-  
+
+estimateFreq <- function(seqs){
+  nucl <- c("A", "C", "G", "T")
+  output <- c()
+  for (n in 1:length(nucl)){
+    counts <- sum(unname(sapply(seqs,function(x) str_count(x, nucl[n]))))
+    output[n] <- counts / sum(unname(sapply(seqs, nchar)))
+  }
+  output
+}
 
 transitionCounts <- function(seq1, seq2){
   len <- nchar(seq1)
@@ -193,29 +227,54 @@ gtrmodel <- function(pA, pC, pG, rate){
 
 
 
-
-likelihood <- function(slip){
-  if (slip <= 0){
-    return(0)
-  }else if (slip > 1){
-    return(0)
-  }
-  sum(dgeom(counts,prob=slip, log=T))
-}
-
-prior <- function(slip){
-  prior <- dunif(slip, log = T)
+# attempted to find the log - likelihood of an affine model 
+likelihood2 <- function(param){
+  p.enter <- param[1]
+  p.stay  <- param[2]
   
-  return(prior)
+  x <- sum(slip == 0)
+  y <- sum(slip != 0)
+  z <- sum(slip[which(slip!=0)] - 1)
+  
+  llh <- c()
+  # Log likelihood of each tip/anc pair
+  #(1 - p.slip)^x * p.slip^y * (1-p.stay)^y * p.stay^z
+  llh <-  x*log(1-p.enter) + y*log(p.enter) + y*log(1-p.stay) + z*log(p.stay)
+  sum(llh)
+  
+}
+
+prior <- function(param){
+  p.enter <- param[1]
+  p.stay  <- param[2]
+  
+  prior.pe <- dlnorm(p.enter,meanlog=-40,sdlog=5,log=T)
+  prior.ps <- dlnorm(p.stay,meanlog=-0.3,sdlog=0.15,log=T)
+  
+  return(prior.pe + prior.ps)
 }
 
 
-posterior <- function(slip){
-  prior(slip) + likelihood(slip)
+posterior <- function(param){
+  print(prior(param))
+  print(likelihood(param))
+  prior(param) + likelihood(param)
 }
 
-proposalFunction <- function(slip){
-  return(rnorm(1,mean=slip, sd=0.01))
+proposalFunction <- function(param){
+  p.enter <- param[1]
+  p.stay <- param[2]
+  
+  num <- runif(1)
+  if (num > 0.9){
+    p.enter <- rlnorm(1,meanlog=param[1],sdlog=0.1)
+    p.stay <- rlnorm(1,meanlog=param[2],sdlog=0.01)
+  }else{
+    # perform a change on the sliplist 
+    # this will NOT change your two parameters, but WILL change the likelihood
+  }
+  
+  return(c(p.enter,p.stay))
 }
 
 
