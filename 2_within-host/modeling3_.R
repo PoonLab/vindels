@@ -111,25 +111,33 @@ runMCMC <- function(startvalue, iterations){
 
 # RUN MCMC
 startvalue <- c(1e-5,0.7)
-chain <- runMCMC(startvalue, 100000)
+chain <- runMCMC(startvalue, 1000000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
-burnin <- 500
+burnin <- 100000
 acceptance <- round(1 - mean(duplicated(chain[-(1:burnin),])),2)
+
+med1 <- round(median(chain[-(1:burnin),1]),6)
+med2 <- round(median(chain[-(1:burnin),2]),3)
 
 par(mfrow=c(1,2), mar=c(5,5,4,1))
 # PLOTTING 
-hist(chain[-(1:burnin),1],nclass=30, main="Posterior of Enter", xlab="Prob(Enter)",ylab="Frequency" )
-abline(v = median(chain[-(1:burnin),1]), col='red')
-text(0.000168, 400, paste0("Acceptance = ",as.character(acceptance)))
-hist(chain[-(1:burnin),2],nclass=30, main="Posterior of Exit", xlab="Prob(Exit)", ylab="Frequency",xlim=c(0.87,0.91))
-abline(v = median(chain[-(1:burnin),2]), col='red')
+hist(chain[-(1:burnin),1],nclass=30, main="Posterior of Enter", xlab="Prob(Enter)",ylab="Frequency",col="lightskyblue")
+abline(v = med1, col='red',lwd=2)
+text(0.000168, 70000, paste0("Median = ", med1))
+text(0.000168, 60000, paste0("Acceptance = ", as.character(acceptance)))
+hist(chain[-(1:burnin),2],nclass=30, main="Posterior of Stay", xlab="Prob(Stay)", ylab="Frequency",col="lightskyblue",xlim=c(0.87,0.91))
+text(0.905, 70000, paste0("Median = ", med2))
+abline(v = med2, col='red',lwd=2)
 #text(0.00017, 400, paste0("Acceptance = ",as.character(acceptance)))
 dev.off()
 
+len <- length(chain[,1])
+thinned <- seq(burnin, len, 100)
+
 par(mfrow=c(1,2), mar=c(5,5,4,1))
-plot(chain[-(1:burnin),1], type = "l", xlab="MCMC Steps" , ylab="Prob(Enter)",main = "Chain values of Enter")
-abline(h = median(chain[-(1:burnin),1]), col="red")
-plot(chain[-(1:burnin),2], type = "l", xlab="MCMC Steps" , ylab="Prob(Exit)",main = "Chain values of Exit")
-abline(h = median(chain[-(1:burnin),2]), col="red")
+plot(chain[thinned,1], type = "l", xlab="MCMC Steps" , ylab="Prob(Enter)",main = "Chain values of Enter")
+abline(h = med1, col="red")
+plot(chain[thinned,2], type = "l", xlab="MCMC Steps" , ylab="Prob(Stay)",main = "Chain values of Stay")
+abline(h = med2, col="red")
