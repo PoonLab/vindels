@@ -63,6 +63,58 @@ checkDiff <- function(seq1, seq2){
   which(chars[1,]!=chars[2,])
 }
 
+
+# used to go from c(0,0,0,3,0,0,0) to c(4,4,4)
+getSlipLocations <- function(slip){
+  nonzeros <- which(slip!=0)
+  locations <- c()
+  for (pos in nonzeros){
+    locations <- c(locations, rep(pos, slip[pos]))
+  }
+  return (list(loc=locations,len=length(slip)))
+}
+
+# used to go from c(4,4,4) to c(0,0,0,3,0,0,0) 
+getSlipVector <- function(locs, length){
+  vect <- rep(0,length)
+  if (length(locs) == 0){
+    return (vect)
+  }else{
+    tab <- table(locs)
+    for (n in 1:length(tab)){
+      vect[as.numeric(names(tab)[n])] <- unname(tab[n])
+    }
+    return(vect)
+  }
+}
+delta <- function(rep=1,mean=0,sd=1.5){
+  x <- rnorm(rep,mean=mean,sd=sd)
+  if (x < 0){
+    x <- abs(x)
+    x <- ceiling(x)
+    x <- -x
+  }else{
+    x <- ceiling(x)
+  }
+  x
+}
+position <- function(len){
+  sample(len, 1)
+}
+
+
+changeSlip <- function(slip.list=slip.list){
+  idx <- which(unname(lapply(slip.list,sum))>0)
+  seq <- sample(length(idx),1)
+  slip <- slip.list[[idx[seq]]]
+  slip.idx <- getSlipLocations(slip)
+  
+  # choose a slip event to change
+  toEdit <- position(length(slip.idx[[1]]))
+  slip.idx[[1]][toEdit] <- slip.idx[[1]][toEdit] + delta()
+  slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
+}
+
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
 insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
@@ -90,66 +142,12 @@ for (elem in 1:length(slip.list)){
   }
 }
 # C.-.-.QT.10R.-.-_289_1_b
-
-
 # randomly shuffle the slip locations around 
 slip.list <- lapply(slip.list, function(x){
   total <- sum(x)
   locs <- sample(length(x), total, replace=T)
   getSlipVector(locs, length(x))
 })
-
-# used to go from c(0,0,0,3,0,0,0) to c(4,4,4)
-getSlipLocations <- function(slip){
-  nonzeros <- which(slip!=0)
-  locations <- c()
-  for (pos in nonzeros){
-    locations <- c(locations, rep(pos, slip[pos]))
-  }
-  return (list(loc=locations,len=length(slip)))
-}
-
-# used to go from c(4,4,4) to c(0,0,0,3,0,0,0) 
-getSlipVector <- function(locs, length){
-  vect <- rep(0,length)
-  if (length(locs) == 0){
-    return (vect)
-  }else{
-    tab <- table(locs)
-    for (n in 1:length(tab)){
-      vect[as.numeric(names(tab)[n])] <- unname(tab[n])
-    }
-    return(vect)
-  }
-}
-delta <- function(rep=1,mean=0,sd=1.5){
-    x <- rnorm(rep,mean=mean,sd=sd)
-    if (x < 0){
-      x <- abs(x)
-      x <- ceiling(x)
-      x <- -x
-    }else{
-      x <- ceiling(x)
-    }
-    x
-}
-position <- function(len){
-  sample(len, 1)
-}
-
-
-changeSlip <- function(slip.list=slip.list){
-  idx <- which(unname(lapply(slip.list,sum))>0)
-  seq <- sample(length(idx),1)
-  slip <- slip.list[[idx[seq]]]
-  slip.idx <- getSlipLocations(slip)
-  
-  # choose a slip event to change
-  toEdit <- position(length(slip.idx[[1]]))
-  slip.idx[[1]][toEdit] <- slip.idx[[1]][toEdit] + delta()
-  slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
-}
-
 
 nucleotides <- c("A","C","G","T")
 llh <- mapply(function(tip, anc){

@@ -25,6 +25,10 @@ for (file in 1:length(ifolder)){
   iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep='\t')
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep='\t')
   
+  if (grepl("B.+$", filename) || grepl("OS.+$", filename) || grepl("G.+$", filename) || grepl("56549.+$", filename)){
+    next
+  }
+  
   for (i in 2:6){
     res <- unname(sapply(iCSV[,i], function(x){csvcount(x,":")}))
     iCSV[,i] <- res
@@ -109,7 +113,7 @@ hist(all.ins[all.ins<3000],
      main="Timing of Insertions",
      cex.axis=caxis, 
      cex.main=cmain, 
-     xlab="Days Since Start of Infection")
+     xlab="Normalized Time of Infection")
 #hist(imaxes[imaxes<3000], 
      #col='blue',add=T,breaks=seq(0,3000,200))
 
@@ -120,7 +124,7 @@ hist(all.del[all.del<3000],
      main="Timing of Deletions",
      cex.axis=caxis, 
      cex.main=cmain, 
-     xlab="Days Since Start of Infection")
+     xlab="Normalized Time of Infection")
 #hist(imaxes[imaxes<3000], 
 #col='blue',add=T,breaks=seq(0,3000,200))
 
