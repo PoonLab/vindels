@@ -83,7 +83,6 @@ slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Seq, insertio
 insertions$Header <- unname(mapply(patLabel, insertions$Header, insertions$Pat))
 names(slip.list) <- insertions$Header
 
-# for printing the slip.list 
 for (elem in 1:length(slip.list)){
   if(sum(slip.list[[elem]]) > 0){
     print(slip.list[elem])
@@ -93,13 +92,12 @@ for (elem in 1:length(slip.list)){
 
 
 # randomly shuffle the slip locations around 
-slip.list <- lapply(slip.list, function(x){
+new.slip <- lapply(slip.list, function(x){
   total <- sum(x)
   locs <- sample(length(x), total, replace=T)
   getSlipVector(locs, length(x))
 })
 
-# used to go from c(0,0,0,3,0,0,0) to c(4,4,4)
 getSlipLocations <- function(slip){
   nonzeros <- which(slip!=0)
   locations <- c()
@@ -107,9 +105,9 @@ getSlipLocations <- function(slip){
     locations <- c(locations, rep(pos, slip[pos]))
   }
   return (list(loc=locations,len=length(slip)))
+  
 }
 
-# used to go from c(4,4,4) to c(0,0,0,3,0,0,0) 
 getSlipVector <- function(locs, length){
   vect <- rep(0,length)
   if (length(locs) == 0){
@@ -137,17 +135,14 @@ position <- function(len){
   sample(len, 1)
 }
 
-
-changeSlip <- function(slip.list=slip.list){
-  idx <- which(unname(lapply(slip.list,sum))>0)
-  seq <- sample(length(idx),1)
-  slip <- slip.list[[idx[seq]]]
-  slip.idx <- getSlipLocations(slip)
-  
-  # choose a slip event to change
-  toEdit <- position(length(slip.idx[[1]]))
-  slip.idx[[1]][toEdit] <- slip.idx[[1]][toEdit] + delta()
-  slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
+masterIdx <- which(unname(lapply(slip.list,sum))>0)
+changeSlip <- function(slip.list){
+  seq <- sample(length(masterIdx),1)
+  slip <- slip.list[masterIdx[seq]]
+  s.idx <- getSlipLocations(slip)
+  toEdit <- position(length(s.idx[[1]]))
+  s.idx[[1]][toEdit] <- s.idx[[1]][toEdit] + delta()
+  getSlipVector(s.idx[[1]],s.idx[[2]])
 }
 
 
@@ -208,45 +203,48 @@ transitionCounts <- function(seq1, seq2){
   counts
 }
 
-# gtrmodel <- function(pA, pC, pG, rate){
-#   pT <- 1 - (pA+pC+pG)
-#   
-#   mew <- 2 * sum(pA*pC*rate, pA*pG*rate, pA*pT*rate, pC*pG*rate, pC*pT*rate, pG*pT*rate)
-#   
-#   mat <- matrix(0, nrow=4, ncol=4,dimnames=list(nt,nt))
-# }
+gtrmodel <- function(pA, pC, pG, rate){
+  pT <- 1 - (pA+pC+pG)
+  
+  mew <- 2 * sum(pA*pC*rate, pA*pG*rate, pA*pT*rate, pC*pG*rate, pC*pT*rate, pG*pT*rate)
+  
+  mat <- matrix(0, nrow=4, ncol=4,dimnames=list(nt,nt))
+}
 
 
 
-likelihood <- function(param){
+
+# attempted to find the log - likelihood of an affine model 
+likelihood2 <- function(param){
   p.enter <- param[1]
   p.stay  <- param[2]
   
-  x <- sum(slips == 0)
-  y <- sum(slips != 0)
-  z <- sum(slips[which(slips!=0)] - 1)
+  x <- sum(slip == 0)
+  y <- sum(slip != 0)
+  z <- sum(slip[which(slip!=0)] - 1)
   
+  llh <- c()
   # Log likelihood of each tip/anc pair
   #(1 - p.slip)^x * p.slip^y * (1-p.stay)^y * p.stay^z
   llh <-  x*log(1-p.enter) + y*log(p.enter) + y*log(1-p.stay) + z*log(p.stay)
-  llh
+  sum(llh)
   
 }
-# --------------------------------------------------
 
 prior <- function(param){
   p.enter <- param[1]
   p.stay  <- param[2]
   
-  prior.pe <- dlnorm(p.enter,meanlog=-10,sdlog=2, log=T)
-  prior.ps <- dlnorm(p.stay,meanlog=-0.15,sdlog=0.05,log=T)
+  prior.pe <- dlnorm(p.enter,meanlog=-40,sdlog=5,log=T)
+  prior.ps <- dlnorm(p.stay,meanlog=-0.3,sdlog=0.15,log=T)
   
   return(prior.pe + prior.ps)
 }
 
+
 posterior <- function(param){
-  #print(prior(param))
-  #print(likelihood(param))
+  print(prior(param))
+  print(likelihood(param))
   prior(param) + likelihood(param)
 }
 
@@ -260,7 +258,6 @@ proposalFunction <- function(param){
     p.stay <- rlnorm(1,meanlog=param[2],sdlog=0.01)
   }else{
     # perform a change on the sliplist 
-    changeSlip()
     # this will NOT change your two parameters, but WILL change the likelihood
   }
   
