@@ -35,14 +35,6 @@ slips <- slips[rnd]
 # it will do the following: 
 # a) count the number of substitution differences 
 
-llh.pair <- function(tip, anc, slips){
-  x <- sum(slips == 0)
-  y <- sum(slips != 0)
-  z <- sum(slips[which(slips!=0)] - 1)
-  
-  
-}
-
 # attempted to find the log - likelihood of an affine model 
 likelihood <- function(param){
   p.enter <- param[1]
