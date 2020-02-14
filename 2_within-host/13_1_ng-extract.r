@@ -141,10 +141,13 @@ for (n in 1:5){
   iTemp <- ins.v[[n]]
   dTemp <- del.v[[n]]
   
+  icounts <- nrow(ins.v[[n]])
+  dcounts <- nrow(del.v[[n]])
+  
   iTemp$glycs <- unname(sapply(iTemp$Anc, glycCount))
   dTemp$glycs <- unname(sapply(dTemp$Anc, glycCount))
   
-  ires <- t(unname(mapply(randomizationTest, iTemp$Anc,iTemp$Seq, iTemp$glycs)))
+  ires <- t(unname(mapply(insRandTest, iTemp$Anc,iTemp$Seq, iTemp$glycs)))
   ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
   
   iedist <- unname(unlist(lapply(ires, mean)))
@@ -158,7 +161,7 @@ for (n in 1:5){
   }
   iequantiles <- quantile(bs.means, c(0.025,0.975))
   
-  dres <- t(unname(mapply(randomizationTest, dTemp$Anc,dTemp$Seq, dTemp$glycs)))
+  dres <- t(unname(mapply(insRandTest, dTemp$Anc,dTemp$Seq, dTemp$glycs)))
   dres <- split(dres, rep(1:nrow(dres), each=ncol(dres)))
 
   dedist <- unname(unlist(lapply(dres, mean)))
@@ -199,13 +202,15 @@ for (n in 1:5){
                                          eupper=iequantiles[[2]],
                                          obs=iomean, 
                                          olower=ioquantiles[[1]],
-                                         oupper=ioquantiles[[2]]))
+                                         oupper=ioquantiles[[2]],
+                                         counts=icounts))
   del.data <- rbind(del.data, data.frame(exp=demean, 
                                          elower=dequantiles[[1]],
                                          eupper=dequantiles[[2]],
                                          obs=domean, 
                                          olower=doquantiles[[1]],
-                                         oupper=doquantiles[[2]]))
+                                         oupper=doquantiles[[2]],
+                                         counts=dcounts))
 }
 
 
@@ -216,18 +221,18 @@ cex=1
 par(pty="s", xpd=F, mar=c(6,8,4,1),las=0)
 
 # this take in data either as ins.data or del.data
-data <- ins.data
+data <- del.data
 lim = c(-1,1)
-plot(data[,c(1,4)], pch=as.numeric(row.names(data))+20, bg=colors,xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=3, main="Insertions - PNLGS")
+plot(data[,c(1,4)], pch=as.numeric(row.names(data))+20, cex=3, bg=colors,xlim=lim,ylim=lim,
+     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='', main="Deletions - PNLGS")
 abline(0,1)
 title(ylab="Observed Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
 title(xlab="Expected Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
 arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
 arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
-legend(1.1,-0.5,legend=vloops, pch=22,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.3,-0.12,legend=vloops, pch=as.numeric(row.names(data))+20,cex=1.2, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.1)
 #legend(0.10,0.58,legend=c("3", "Non-3"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
-
+0.5*sqrt(dcounts)
 
 
 
