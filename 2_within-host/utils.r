@@ -318,7 +318,7 @@ restoreIns <- function(tip, anc, indel){
 
 # general
 csvcount <- function(input,delim=","){
-  if (is.na(input)){
+  if (is.na(input) || input == "-1"){
     return(0)
   }
   commas <- str_count(input, delim)
@@ -394,20 +394,30 @@ delOriginal <- function(indel, pos, vseq){
 
 
 # 13 -- glycosylation analysis 
+truncate <- function(aaseq){
+  if (grepl("\\*",aaseq)){
+    idx <- gregexpr("\\*",aaseq)[[1]]-1
+    aaseq <- substr(aaseq, 1, idx)
+  }
+  aaseq
+}
+
 translate <- function(dna) {
   require(ape)
   
   if (nchar(dna) %% 3 != 0) {
-    return(NA)
+    extra <- nchar(dna) %% 3
+    dna <- substr(dna,1, nchar(dna)-extra)
   }
   dnabin <- as.DNAbin(DNAString(dna))
   aabin <- trans(dnabin)[[1]]
   aaseq <- paste(as.character(aabin),collapse="")
-  aaseq
+  truncate(aaseq)
 }
 
 # takes in an amino acid sequence and returns the locations of all Nglycs
 extractGlycs <- function(aaseq){
+  aaseq <- truncate(aaseq)
   result <- gregexpr("N[^P][ST][^P]", aaseq)[[1]]  # used for 0 indexing these position values for analysis in python 
   paste(result, collapse=",")
 }

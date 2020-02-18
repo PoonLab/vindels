@@ -50,12 +50,13 @@ delRandTest <- function(seq, indel, start){
   
   # for every number in this random sample 
   seq <- sapply(smpl, function(x){delete(seq,indel,x)})
-  
+
   # generate the result sequence ; use substring to add the insertion sequence into the seqestor 
   aa.seq <- unname(sapply(seq, translate))
   seq.glycs <- unname(sapply(aa.seq,extractGlycs))
   
   png.count <- unname(sapply(seq.glycs,csvcount))
+
   return(png.count - start)
 }
 
@@ -63,9 +64,9 @@ delRandTest <- function(seq, indel, start){
 glycCount <- function(seq){
   # determine the locations of all N-glyc sites in the ancestral sequence 
   aa.seq <- translate(seq)
-  if (is.na(aa.seq)){
-    return(0)
-  }
+  # if (is.na(aa.seq)){
+  #   return(0)
+  # }
   seq.glycs <- extractGlycs(aa.seq)
   csvcount(seq.glycs)
 }
@@ -138,6 +139,7 @@ ins.data <- data.frame()
 del.data <- data.frame()
 
 for (n in 1:5){
+  print(paste0("V-loop ",n))
   iTemp <- ins.v[[n]]
   dTemp <- del.v[[n]]
   
@@ -161,7 +163,7 @@ for (n in 1:5){
   }
   iequantiles <- quantile(bs.means, c(0.025,0.975))
   
-  dres <- t(unname(mapply(insRandTest, dTemp$Anc,dTemp$Seq, dTemp$glycs)))
+  dres <- t(unname(mapply(delRandTest, dTemp$Anc,dTemp$Seq, dTemp$glycs)))
   dres <- split(dres, rep(1:nrow(dres), each=ncol(dres)))
 
   dedist <- unname(unlist(lapply(dres, mean)))
@@ -219,20 +221,42 @@ colors <- brewer.pal(5, "Set1")
 vloops <- c("V1","V2","V3","V4","V5")
 cex=1
 par(pty="s", xpd=F, mar=c(6,8,4,1),las=0)
-
+#as.numeric(row.names(data))+20
 # this take in data either as ins.data or del.data
+sizes <- 0.5*sqrt(data$counts)
+sizes[3] <- 1.3
+data <- ins.data
+lim = c(-0.7,0.7)
+plot(data[,c('exp','obs')], pch=21, cex=sizes, bg=colors,xlim=lim,ylim=lim,
+     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='', main="Insertions - PNLGS")
+abline(0,1)
+title(ylab="Observed Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
+title(xlab="Expected Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
+arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
+arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
+legend(0.4,-0.1,legend=vloops, pch=21,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.5)
+#legend(0.10,0.58,legend=c("3", "Non-3"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
+
+
+require(RColorBrewer)
+colors <- brewer.pal(5, "Set1")
+vloops <- c("V1","V2","V3","V4","V5")
+cex=1
+par(pty="s", xpd=F, mar=c(6,8,4,1),las=0)
+#as.numeric(row.names(data))+20
+# this take in data either as ins.data or del.data
+sizes <- 0.45*sqrt(data$counts)
+sizes[3] <- 1.3
 data <- del.data
-lim = c(-1,1)
-plot(data[,c(1,4)], pch=as.numeric(row.names(data))+20, cex=3, bg=colors,xlim=lim,ylim=lim,
+lim = c(-0.8,0.8)
+plot(data[,c('exp','obs')], pch=21, cex=sizes, bg=colors,xlim=lim,ylim=lim,
      cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='', main="Deletions - PNLGS")
 abline(0,1)
 title(ylab="Observed Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
 title(xlab="Expected Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
 arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
 arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
-legend(0.3,-0.12,legend=vloops, pch=as.numeric(row.names(data))+20,cex=1.2, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.1)
-#legend(0.10,0.58,legend=c("3", "Non-3"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
-0.5*sqrt(dcounts)
+legend(0.5,-0.2,legend=vloops, pch=21,cex=1.2, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.5)
 
 
 
