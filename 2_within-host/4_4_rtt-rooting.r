@@ -1,3 +1,9 @@
+# This script will read in NEWICK phylogenetic trees from RAXML 
+# and use the RTT function in APE to root them. 
+# Rooted trees will be published to the "rooted_trees" directory
+# These rooted trees will then be read again in order to generate 
+# guide trees that have all their branch lengths scaled to 1.
+
 require(ape)
 args <- commandArgs(trailingOnly = T)
 args[1] <- "~/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/"
