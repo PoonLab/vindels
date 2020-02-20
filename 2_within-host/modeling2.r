@@ -124,6 +124,8 @@ insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq==""
 
 # CASE: remove instances with insertion position 0
 insertions <- insertions[-c(which(insertions$Pos==0)),]
+
+# Restore all deletions found in tip sequences and adjust the POS values accordinaly
 res <- as.data.frame(t(unname(mapply(restoreDel,insertions$Vseq, insertions$Anc, insertions$Seq, insertions$Pos))))
 insertions$Vseq <- as.character(res[,1])
 insertions$Pos <- as.numeric(as.character(res[,2]))
@@ -206,13 +208,12 @@ transitionCounts <- function(seq1, seq2){
   counts
 }
 
-# gtrmodel <- function(pA, pC, pG, rate){
-#   pT <- 1 - (pA+pC+pG)
-#   
-#   mew <- 2 * sum(pA*pC*rate, pA*pG*rate, pA*pT*rate, pC*pG*rate, pC*pT*rate, pG*pT*rate)
-#   
-#   mat <- matrix(0, nrow=4, ncol=4,dimnames=list(nt,nt))
-# }
+gtrmodel <- function(rate){
+  
+  mew <- 2 * sum(pA*pC*rate, pA*pG*rate, pA*pT*rate, pC*pG*rate, pC*pT*rate, pG*pT*rate)
+
+  mat <- matrix(0, nrow=4, ncol=4,dimnames=list(nt,nt))
+}
 
 
 
