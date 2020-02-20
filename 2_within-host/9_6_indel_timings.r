@@ -109,13 +109,15 @@ for (file in 1:length(ifolder)){
 
 
 
-averages <- lapply(ipatlist, function(list){
+# INEFFICIENT PLEASE REWRITE
+# -------------------------------
+idates <- lapply(ipatlist, function(list){
   counts <- rowSums(list[,1:5])
   dates <- rep(list[,6], counts)
   dates
 })
 
-bins <- lapply(averages, function(x){
+ibins <- lapply(idates, function(x){
   res <- c()
   for (i in 1:15){
     res[i] <- sum(x > (i-1)*500 & x < i*500)
@@ -123,15 +125,60 @@ bins <- lapply(averages, function(x){
   as.data.frame(t(res))
 })
 
-bins <- rbindlist(bins)
-colnames(bins) <- as.character(seq(0,7500,500)[-1])
-freq <- apply(bins, 2, mean)
+ddates <- lapply(dpatlist, function(list){
+  counts <- rowSums(list[,1:5])
+  dates <- rep(list[,6], counts)
+  dates
+})
+
+dbins <- lapply(ddates, function(x){
+  res <- c()
+  for (i in 1:15){
+    res[i] <- sum(x > (i-1)*500 & x < i*500)
+  }
+  as.data.frame(t(res))
+})
+
+
+# INSERTIONS 
+ibins <- rbindlist(ibins)
+colnames(ibins) <- as.character(seq(0,7500,500)[-1])
+ifreq <- apply(ibins, 2, mean)
 
 imaxes <- imaxes[!is.na(imaxes)]
-imaxes <- imaxes/500
-par(xpd=NA)
-bar <- barplot(freq, col="dodgerblue", space=0)
-arrows(imaxes, 0, imaxes, -0.5, length=0)
+newimaxes <- imaxes/500
+par(xpd=NA, mar=c(7,6,4,1))
+barplot(ifreq, col="dodgerblue", space=0, xaxt = "n",
+        #xlab="Days Since Start of Infection",
+        ylab="Average Number of Insertions / Patient",
+        main="Insertion Timings",
+        cex.lab=1.3,cex.main=1.7)
+arrows(newimaxes, 0, newimaxes, -0.2, length=0)
+axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
+title(xlab="Days Since Start of Infection", line=4, cex.lab=1.3)
+
+# DELETIONS
+dbins <- rbindlist(dbins)
+colnames(dbins) <- as.character(seq(0,7500,500)[-1])
+dfreq <- apply(dbins, 2, mean)
+
+dmaxes <- dmaxes[!is.na(dmaxes)]
+newdmaxes <- dmaxes/500
+par(xpd=NA, mar=c(7,6,4,1))
+barplot(dfreq, col="dodgerblue", space=0, xaxt = "n",
+        #xlab="Days Since Start of Infection",
+        ylab="Average Number of Deletions / Patient",
+        main="Deletion Timings",
+        cex.lab=1.3,cex.main=1.7)
+arrows(newdmaxes, 0, newdmaxes, -0.5, length=0)
+axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
+title(xlab="Days Since Start of Infection", line=4, cex.lab=1.3)
+
+
+
+
+
+
 
 # HISTOGRAMS (used for counts)
 # ----------------------
