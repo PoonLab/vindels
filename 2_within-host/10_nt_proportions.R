@@ -2,10 +2,10 @@ require(bbmle)
 require(stringr)
 require(ape)
 
-source("~/GitHub/vindels/2_within-host/utils.r")
+source("~/vindels/2_within-host/utils.r")
 # Lio
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
  
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))
@@ -92,12 +92,20 @@ for (file in 1:length(ifolder)){
   colnames(dCSV) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Anc","Pat")
 
   # ************************
+  # Retrieve variable loop positions from file 
+  tre <- read.nexus(paste0(path,"7_5_MCC/prelim/",strsplit(filename, "\\.csv")[[1]] , ".tree"))
+  
+  
+  branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]  
+  
+  iCSV$Date <- branches[match(gsub("_\\d$","",iCSV$Header), tre$tip.label)]
+  dCSV$Date <- branches[match(gsub("_\\d$","",dCSV$Header), tre$tip.label)]
+  print(ncol(iCSV))
   iCSV$Header <- unname(mapply(labels, iCSV$Header, iCSV$Pat, iCSV$Vloop))
   dCSV$Header <- unname(mapply(labels, dCSV$Header, dCSV$Pat, dCSV$Vloop))
   
   ins.glycs <- rbind(ins.glycs, iCSV)
   del.glycs <- rbind(del.glycs, dCSV)
-  
   # COMMA SEPARATION FIX
   # make a new data.frame for each CSV df
   # transport over all rows which do NOT contain a comma
@@ -114,7 +122,7 @@ for (file in 1:length(ifolder)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
       rownames(newrows[[i]]) <- seq(0,0.1*(len-1),length=len) + idx
-      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc", "Pat")
+      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc", "Pat", "Date")
       new.ins <- rbind(new.ins, newrows[[i]])
     }
   }
@@ -124,13 +132,12 @@ for (file in 1:length(ifolder)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
       rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc","Pat")
+      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc","Pat", "Date")
       newnew.del <- rbind(new.del, newrows[[i]])
 
     }
   }
   print("80% complete")
-  # Retrieve variable loop positions from file 
   
   new.ins[is.na(new.ins$Pos),"Pos"] <- ""
   new.del[is.na(new.del$Pos),"Pos"] <- ""

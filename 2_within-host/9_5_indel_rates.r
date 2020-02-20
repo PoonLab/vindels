@@ -88,7 +88,7 @@ for (file in 1:length(ifolder)){
   
   # adjusts the tre tip labels to match the accession numbers
   #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename , ".tree.sample")))
+  #tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename , ".tree.sample")))
   # retrieves branch lengths from the tree
   branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   
   

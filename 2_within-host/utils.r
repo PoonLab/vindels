@@ -39,7 +39,7 @@ splitRows <- function(row){
   seqs <- str_split(row[1,6], ",")[[1]]
   pos <- str_split(row[1,7],",")[[1]]
   len <- length(seqs)
-  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:10])
+  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:11])
 }
 
 

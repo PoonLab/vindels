@@ -181,38 +181,41 @@ llh <- mapply(function(tip, anc){
   # modify the checkDiff function or the transition function to generate a matrix of transition probs
   # start by getting counts at each location 
 
+
+# transitionCounts <- function(seq1, seq2){
+#   len <- nchar(seq1)
+#   nt <- c("A", "C", "G", "T")
+#   counts <- matrix(0, nrow=4, ncol=4,dimnames=list(nt,nt))
+#   
+#   #chars1 <- strsplit(seq1, "")[[1]]
+#   #chars2 <- strsplit(seq2, "")[[1]]
+#   if (seq1 != ""){
+#     for (i in 1:(len-1)){
+#       x <- substr(seq1, i, i)
+#       y <- substr(seq2, i ,i)
+#       counts[x,y] <- counts[x,y] + 1
+#     }
+#   }
+#   counts
+# }
+nt <- c("A", "C", "G", "T")
 estimateFreq <- function(seqs){
-  nucl <- c("A", "C", "G", "T")
+  require(stringr)
+  nt <- c("A", "C", "G", "T")
   output <- c()
-  for (n in 1:length(nucl)){
-    counts <- sum(unname(sapply(seqs,function(x) str_count(x, nucl[n]))))
+  for (n in 1:length(nt)){
+    counts <- sum(unname(sapply(seqs,function(x) str_count(x, nt[n]))))
     output[n] <- counts / sum(unname(sapply(seqs, nchar)))
   }
   output
 }
-
-transitionCounts <- function(seq1, seq2){
-  len <- nchar(seq1)
+allseqs <- c(insertions$Vseq, insertions$Anc)
+f <- estimateFreq(allseqs)
+getMatrix <- function(rate){
   nt <- c("A", "C", "G", "T")
-  counts <- matrix(0, nrow=4, ncol=4,dimnames=list(nt,nt))
+  mew <- 2 * sum(f[1]*f[2]*rate, f[1]*f[3]*rate, f[1]*f[4]*rate, f[2]*f[3]*rate, f[2]*f[4]*rate, f[3]*f[4]*rate)
+  mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
   
-  #chars1 <- strsplit(seq1, "")[[1]]
-  #chars2 <- strsplit(seq2, "")[[1]]
-  if (seq1 != ""){
-    for (i in 1:(len-1)){
-      x <- substr(seq1, i, i)
-      y <- substr(seq2, i ,i)
-      counts[x,y] <- counts[x,y] + 1
-    }
-  }
-  counts
-}
-
-gtrmodel <- function(rate){
-  
-  mew <- 2 * sum(pA*pC*rate, pA*pG*rate, pA*pT*rate, pC*pG*rate, pC*pT*rate, pG*pT*rate)
-
-  mat <- matrix(0, nrow=4, ncol=4,dimnames=list(nt,nt))
 }
 
 

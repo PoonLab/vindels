@@ -17,9 +17,13 @@ iseqcount <- 1
 dseqcount <- 1
 imaxes <- c()
 dmaxes <- c()
+
+ipatlist <- list()
+dpatlist <- list()
 for (file in 1:length(ifolder)){
   print(file)
   filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
+  pat <- gsub("_\\d+$","",filename)
   runno <- strsplit(filename, "_")[[1]][2]
   count <- count + 1
   iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep='\t')
@@ -85,25 +89,54 @@ for (file in 1:length(ifolder)){
     print(ddates)
   }
   
-  iprop <- idates / max(iCSV$length)
-  dprop <- ddates / max(dCSV$length)
+  ipatlist[[pat]] <- rbind(ipatlist[[pat]], iCSV[,2:7])
+  dpatlist[[pat]] <- rbind(dpatlist[[pat]], dCSV[,2:7])
+  
+  #iprop <- idates / max(iCSV$length)
+  #dprop <- ddates / max(dCSV$length)
   
   imaxes[count] <- max(iCSV$length)
   dmaxes[count] <- max(dCSV$length)
   
   # load the all.ins and all.del vectors (more efficient algorithm)
-  all.ins[iseqcount:(iseqcount+sum(icounts)-1)] <- iprop
-  all.del[dseqcount:(dseqcount+sum(dcounts)-1)] <- dprop
+  all.ins[iseqcount:(iseqcount+sum(icounts)-1)] <- idates
+  all.del[dseqcount:(dseqcount+sum(dcounts)-1)] <- ddates
   # used to maintain the vector loading algorithm above 
   iseqcount <- iseqcount + sum(icounts)
   dseqcount <- dseqcount + sum(dcounts)
   
 }
 
+
+
+averages <- lapply(ipatlist, function(list){
+  counts <- rowSums(list[,1:5])
+  dates <- rep(list[,6], counts)
+  dates
+})
+
+bins <- lapply(averages, function(x){
+  res <- c()
+  for (i in 1:15){
+    res[i] <- sum(x > (i-1)*500 & x < i*500)
+  }
+  as.data.frame(t(res))
+})
+
+bins <- rbindlist(bins)
+colnames(bins) <- as.character(seq(0,7500,500)[-1])
+freq <- apply(bins, 2, mean)
+
+imaxes <- imaxes[!is.na(imaxes)]
+imaxes <- imaxes/500
+par(xpd=NA)
+bar <- barplot(freq, col="dodgerblue", space=0)
+arrows(imaxes, 0, imaxes, -0.5, length=0)
+
 # HISTOGRAMS (used for counts)
 # ----------------------
-
-par(mar=c(5,5,5,2))
+imaxes <- imaxes[!is.na(imaxes)]
+par(mar=c(5,5,5,2),xpd=F)
 caxis=1.3
 clab=1.4
 cmain=1.5
