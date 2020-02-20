@@ -152,12 +152,6 @@ slip.list <- lapply(slip.list, function(x){
 })
 
 nucleotides <- c("A","C","G","T")
-llh <- mapply(function(tip, anc){
-  t.mat <- matrix(ncol=4, nrow=4, dimnames=list(nucleotides,nucleotides))
-})
-
-
-
 
 
 # get slip locations 
@@ -209,12 +203,27 @@ estimateFreq <- function(seqs){
   }
   output
 }
+
+getMat <- function(rate){
+  nt <- c("A", "C", "G", "T")
+  mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
+  mat <- mat * rate
+  diag(mat) <- sapply(1:4, function(x) -(sum(rate * f[-x]))) 
+  mat
+}
+
+
+getTMat <- function(mat, branch){
+  mat <- branch * mat
+  tmat <- expm(mat)
+  tmat
+}
+
 allseqs <- c(insertions$Vseq, insertions$Anc)
 f <- estimateFreq(allseqs)
-getMatrix <- function(rate){
-  nt <- c("A", "C", "G", "T")
-  mew <- 2 * sum(f[1]*f[2]*rate, f[1]*f[3]*rate, f[1]*f[4]*rate, f[2]*f[3]*rate, f[2]*f[4]*rate, f[3]*f[4]*rate)
-  mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
+pairllh <- function(seq1, seq2, rate, branch){
+  
+  tmat <- getTMat(getMat(rate), branch)
   
 }
 
