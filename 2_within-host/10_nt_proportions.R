@@ -93,14 +93,22 @@ for (file in 1:length(ifolder)){
 
   # ************************
   # Retrieve variable loop positions from file 
-  tre <- read.nexus(paste0(path,"7_5_MCC/prelim/",strsplit(filename, "\\.csv")[[1]] , ".tree"))
+  treename <- strsplit(filename, "\\.csv")[[1]]
   
-  
+  # Load time-based branch lengths from the time-scaled trees
+  tre <- read.nexus(paste0(path,"7_5_MCC/prelim/", treename, ".tree"))
   branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]  
   
   iCSV$Date <- branches[match(gsub("_\\d$","",iCSV$Header), tre$tip.label)]
   dCSV$Date <- branches[match(gsub("_\\d$","",dCSV$Header), tre$tip.label)]
-  print(ncol(iCSV))
+  
+  # Load subs/site branch lengths from the rescaled trees
+  tre <- read.tree(paste0(path,"7_5_MCC/final/",treename , ".tree"))
+  branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]  
+  
+  iCSV$length <- branches[match(gsub("_\\d$","",iCSV$Header), tre$tip.label)]
+  dCSV$length <- branches[match(gsub("_\\d$","",dCSV$Header), tre$tip.label)]
+  
   iCSV$Header <- unname(mapply(labels, iCSV$Header, iCSV$Pat, iCSV$Vloop))
   dCSV$Header <- unname(mapply(labels, dCSV$Header, dCSV$Pat, dCSV$Vloop))
   
@@ -117,22 +125,22 @@ for (file in 1:length(ifolder)){
   dCommas <- dCSV[grepl(",",dCSV$Seq),]
   # APPLY THE SPLIT ROWS TO GET ONE INDEL PER ROW
   if (nrow(iCommas) > 0){
-    newrows <- apply(iCommas,1,splitRows)
+    newrows <- apply(iCommas,1,splitRows, colnum=12)
     for (i in 1:length(newrows)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
       rownames(newrows[[i]]) <- seq(0,0.1*(len-1),length=len) + idx
-      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc", "Pat", "Date")
+      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc", "Pat", "Date","length")
       new.ins <- rbind(new.ins, newrows[[i]])
     }
   }
   if (nrow(dCommas) > 0){
-    newrows <- apply(dCommas,1,splitRows)
+    newrows <- apply(dCommas,1,splitRows, colnum=12)
     for (i in 1:length(newrows)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
       rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc","Pat", "Date")
+      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc","Pat", "Date","length")
       newnew.del <- rbind(new.del, newrows[[i]])
 
     }

@@ -1,4 +1,5 @@
 require(bbmle)
+require(ape)
 # used to fill in deletion gaps found in the tip sequences 
 
 source("~/vindels/2_within-host/utils.r")
@@ -102,16 +103,21 @@ position <- function(len){
   sample(len, 1)
 }
 
-
+# For use in the proposal function
 changeSlip <- function(slip.list=slip.list){
   idx <- which(unname(lapply(slip.list,sum))>0)
+  # choose a sequence to edit
   seq <- sample(length(idx),1)
+  
+  # convert it to indices
   slip <- slip.list[[idx[seq]]]
   slip.idx <- getSlipLocations(slip)
   
   # choose a slip event to change
   toEdit <- position(length(slip.idx[[1]]))
   slip.idx[[1]][toEdit] <- slip.idx[[1]][toEdit] + delta()
+  
+  # save this globally so that the change gets fixed
   slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
 }
 
@@ -126,9 +132,21 @@ insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq==""
 insertions <- insertions[-c(which(insertions$Pos==0)),]
 
 # Restore all deletions found in tip sequences and adjust the POS values accordinaly
-res <- as.data.frame(t(unname(mapply(restoreDel,insertions$Vseq, insertions$Anc, insertions$Seq, insertions$Pos))))
+res <- as.data.frame(t(unname(mapply(restoreTipDel,insertions$Vseq, insertions$Anc, insertions$Seq, insertions$Pos))))
 insertions$Vseq <- as.character(res[,1])
 insertions$Pos <- as.numeric(as.character(res[,2]))
+
+# CASE: restore all gaps from OTHER insertions
+insertions$Anc <- mapply(removeOtherGaps, insertions$Anc, insertions$Vseq, insertions$Seq, insertions$Pos)
+
+# SANITY CHECK: to make sure all seqs are equal
+a <- nchar(insertions$Vseq) - nchar(insertions$Seq)
+b <- nchar(gsub("-","",insertions$Anc))
+sum(a!=b)==0
+insertions[which(a!=b),]
+
+# ADD BRANCH LENGTHS 
+tre <-read.tree("~/PycharmProjects/hiv-withinhost/7_5_MCC/final/")
 
 # generate slip list 
 slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Seq, insertions$Pos))
@@ -204,29 +222,54 @@ estimateFreq <- function(seqs){
   output
 }
 
-getMat <- function(rate){
+
+getMat <- function(rate, branch){
+  require(expm)
   nt <- c("A", "C", "G", "T")
+  
+  # generate the F81 rate matrix 
   mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
   mat <- mat * rate
   diag(mat) <- sapply(1:4, function(x) -(sum(rate * f[-x]))) 
-  mat
-}
-
-
-getTMat <- function(mat, branch){
+  
+  # multiply by branch length
   mat <- branch * mat
+  
+  # exponentiate and return
   tmat <- expm(mat)
   tmat
 }
 
-allseqs <- c(insertions$Vseq, insertions$Anc)
-f <- estimateFreq(allseqs)
-pairllh <- function(seq1, seq2, rate, branch){
+pairllh <- function(anc, newtip, rate, branch, f){
+  nt <- c("A", "C", "G", "T")
+  tmat <- getMat(rate,branch)
+  achars <- strsplit(anc, "")[[1]]
+  tchars <- strsplit(newtip, "")[[1]]
   
-  tmat <- getTMat(getMat(rate), branch)
-  
+  result <- mapply(function(tchar,achar){
+    # initializes a matrix with a 
+    tip.llh <- matrix(as.numeric(tchar == nt), nrow=4,ncol=1,dimnames=list(nt))
+    
+    # finalize the calculation for tip likelihood
+    llh <- tmat %*% tip.llh
+    llh <- llh * f
+    
+    # likelihood given the exact nucleotide (state) that we see in the ancestor
+    total.llh <- llh[achar,]
+    return(log(total.llh))
+  }, achars, tchars)
+  sum(result)
 }
 
+seqllh <- function(rate){
+  nt <- c("A", "C", "G", "T")
+  allseqs <- c(insertions$Vseq, insertions$Anc)
+  f <- estimateFreq(allseqs)
+  
+  mapply(pairllh, )
+  
+  
+}
 
 
 likelihood <- function(param){

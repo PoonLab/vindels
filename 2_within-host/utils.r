@@ -34,12 +34,12 @@ bootstrap <- function(vector, replicates){
 
 # specifically handles fields containing a comma
 # and copies their data so they can be split into individual rows in a data frame
-splitRows <- function(row){
+splitRows <- function(row,colnum){
   row <- data.frame(t(row),stringsAsFactors = F)
   seqs <- str_split(row[1,6], ",")[[1]]
   pos <- str_split(row[1,7],",")[[1]]
   len <- length(seqs)
-  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:11])
+  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:colnum])
 }
 
 
@@ -267,14 +267,40 @@ slip <- function(seq, pos, p.exit){
 }
 
 # 13_1 nglycs and modeling
-restoreDel <- function(tip, anc, indel, pos){
-  # this is used to restore any gaps in tip sequences containing insertions 
+removeOtherGaps <- function(anc, tip, indel, pos){
+  # find the location of all gap characters in tip/anc
+  gaps <- gregexpr("-",anc)[[1]]
+  if (length(gaps) && gaps != -1){
+    # create a vector of positions to be copied over
+    idx <- rep(F, nchar(tip))
+    idx[gaps] <- T
+    
+    # retrieve the boundaries of the indel
+    end <- as.numeric(pos)
+    start <- as.numeric(pos) - nchar(indel) + 1
+    
+    # make sure it ignores the indel sequence
+    toIgnore <- start:end
+    idx[toIgnore] <- F
+    
+    # fill in all other insertions / deletions that are not the one of interest ***
+    anc.chars <- strsplit(anc, "")[[1]]
+    tip.chars <- strsplit(tip, "")[[1]]
+    anc.chars[idx] <- tip.chars[idx]
+    anc <- paste0(anc.chars, collapse="")
+  }
+  
+  return(anc)
+}
+
+restoreTipDel <- function(tip, anc, indel, pos){
+  # this is used to restore any deletion gaps in tip sequences containing insertions 
   # Reasoning:
   # I need to restore the tip sequence to its ORIGINAL STATE where no deletions have occurred
   # want to focus on investigating specific insertions at one time 
   # Any and all gaps in the tip sequence are deletions and need to be restored
   
-  if(!grepl("-",tip) || indel == "" || is.na(pos)){
+  if(!grepl("-",tip)){
     return(c(tip,pos))
   }else{
     tip.chars <- strsplit(tip, "")[[1]]
@@ -282,10 +308,9 @@ restoreDel <- function(tip, anc, indel, pos){
     idx <- which(tip.chars=="-")
     
     # perform a readjustment of the position (for insertions only 
-    if (any(idx < pos)){
-      pos <- as.character(pos + sum(idx < pos))
+    if (!is.na(pos)){
+      pos <- gregexpr("[ACTG]", tip)[[1]][pos]
     }
-    
     tip.chars[idx] <- anc.chars[idx]
     tip <- paste0(tip.chars,collapse="")
     return(c(tip, pos))
@@ -293,8 +318,8 @@ restoreDel <- function(tip, anc, indel, pos){
 }
 
 # 13_1 nglycs and modeling
-restoreIns <- function(tip, anc, indel){
-  # this is used to restore any gaps in ancestor sequences containing deletions 
+restoreAncIns <- function(tip, anc, indel){
+  # this is used to restore any insertion gaps in ancestor sequences containing deletions
   # Reasoning:
   # I need to restore the ancestor sequence to its ORIGINAL STATE where no insertions have occurred
   # want to focus on investigating specific insertions at one time

@@ -4,30 +4,7 @@ require(Biostrings)
 
 source("~/vindels/2_within-host/utils.r")
 
-removeGaps <- function(anc, tip, indel, pos){
-  # find the location of all gap characters in tip/anc
-  gaps <- gregexpr("-",anc)[[1]]
-  
-  # create a vector of positions to be copied over
-  idx <- rep(F, nchar(tip))
-  idx[gaps] <- T
-  
-  # retrieve the boundaries of the indel
-  end <- as.numeric(pos)
-  start <- as.numeric(pos) - nchar(indel) + 1
-  
-  # make sure it ignores the indel sequence
-  toIgnore <- start:end
-  idx[toIgnore] <- F
-  
-  # fill in all other insertions / deletions that are not the one of interest ***
-  anc.chars <- strsplit(anc, "")[[1]]
-  tip.chars <- strsplit(tip, "")[[1]]
-  anc.chars[idx] <- tip.chars[idx]
-  anc <- paste0(anc.chars, collapse="")
-  
-  return (gsub("-","",anc))
-}
+
 
 insRandTest <- function(seq, indel, start){
   # this will be the start point of the test insertion 
@@ -89,19 +66,19 @@ del$Vpos <- NULL
 del$Pos <- as.numeric(del$Pos) + nchar(del$Seq)
 
 # Insertions : fill in gaps found in the tip sequences 
-res <- as.data.frame(t(unname(mapply(restoreDel,ins$Vseq, ins$Anc, ins$Seq,ins$Pos))))
+res <- as.data.frame(t(unname(mapply(restoreTipDel,ins$Vseq, ins$Anc, ins$Seq,ins$Pos))))
 ins$Vseq <- as.character(res[,1])
 ins$Pos <- as.numeric(as.character(res[,2]))
 
 
 # Deletions : fill in gaps found in the ancestral sequences 
-del$Anc <- unname(mapply(restoreIns, del$Anc, del$Vseq, del$Seq))
+del$Anc <- unname(mapply(restoreAncIns, del$Anc, del$Vseq, del$Seq))
 
 # Insertions : 
-ins$Anc <- unname(mapply(removeGaps, ins$Anc,ins$Vseq, ins$Seq, ins$Pos))
-
+ins$Anc <- unname(mapply(removeOtherGaps, ins$Anc,ins$Vseq, ins$Seq, ins$Pos))
+ins$Anc <- gsub("-","",ins$Anc)
 # not needed for deletions because no sequences contain more than 1 deletion
-#ins$Anc <- unname(mapply(removeGaps, del$Vseq,del$Anc, del$Seq, del$Pos))
+#ins$Anc <- unname(mapply(removeOtherGaps, del$Vseq,del$Anc, del$Seq, del$Pos))
 
 
 ins.v <- split(ins, ins$Vloop)
