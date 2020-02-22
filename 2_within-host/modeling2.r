@@ -103,27 +103,14 @@ position <- function(len){
   sample(len, 1)
 }
 
-# For use in the proposal function
-changeSlip <- function(slip.list=slip.list){
-  idx <- which(unname(lapply(slip.list,sum))>0)
-  # choose a sequence to edit
-  seq <- sample(length(idx),1)
-  
-  # convert it to indices
-  slip <- slip.list[[idx[seq]]]
-  slip.idx <- getSlipLocations(slip)
-  
-  # choose a slip event to change
-  toEdit <- position(length(slip.idx[[1]]))
-  slip.idx[[1]][toEdit] <- slip.idx[[1]][toEdit] + delta()
-  
-  # save this globally so that the change gets fixed
-  slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
-}
+
 
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
 insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
+
+# FIX HEADERS
+insertions$Header <- gsub("_\\d$","",insertions$Header)
 
 # PROBLEMATIC CASE: remove instances with gaps in the ancestor but NO INSERTION
 insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq=="")),]
@@ -144,9 +131,6 @@ a <- nchar(insertions$Vseq) - nchar(insertions$Seq)
 b <- nchar(gsub("-","",insertions$Anc))
 sum(a!=b)==0
 insertions[which(a!=b),]
-
-# ADD BRANCH LENGTHS 
-tre <-read.tree("~/PycharmProjects/hiv-withinhost/7_5_MCC/final/")
 
 # generate slip list 
 slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Seq, insertions$Pos))
@@ -210,6 +194,24 @@ nucleotides <- c("A","C","G","T")
 #   }
 #   counts
 # }
+
+# For use in the proposal function
+changeSlip <- function(slip.list=slip.list){
+  idx <- which(unname(lapply(slip.list,sum))>0)
+  # choose a sequence to edit
+  seq <- sample(length(idx),1)
+  
+  # convert it to indices
+  slip <- slip.list[[idx[seq]]]
+  slip.idx <- getSlipLocations(slip)
+  
+  # choose a slip event to change
+  toEdit <- position(length(slip.idx[[1]]))
+  slip.idx[[1]][toEdit] <- slip.idx[[1]][toEdit] + delta()
+  
+  # save this globally so that the change gets fixed
+  slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
+}
 nt <- c("A", "C", "G", "T")
 estimateFreq <- function(seqs){
   require(stringr)
@@ -222,7 +224,7 @@ estimateFreq <- function(seqs){
   output
 }
 
-
+# returns the F81 transition probability matrtix 
 getMat <- function(rate, branch){
   require(expm)
   nt <- c("A", "C", "G", "T")
@@ -239,9 +241,8 @@ getMat <- function(rate, branch){
   tmat <- expm(mat)
   tmat
 }
-
+nt <- c("A", "C", "G", "T")
 pairllh <- function(anc, newtip, rate, branch, f){
-  nt <- c("A", "C", "G", "T")
   tmat <- getMat(rate,branch)
   achars <- strsplit(anc, "")[[1]]
   tchars <- strsplit(newtip, "")[[1]]
@@ -261,10 +262,13 @@ pairllh <- function(anc, newtip, rate, branch, f){
   sum(result)
 }
 
+nt <- c("A", "C", "G", "T")
+allseqs <- c(insertions$Vseq, insertions$Anc)
+f <- estimateFreq(allseqs)
 seqllh <- function(rate){
-  nt <- c("A", "C", "G", "T")
-  allseqs <- c(insertions$Vseq, insertions$Anc)
-  f <- estimateFreq(allseqs)
+  
+  anc.seqs <- gsub("-", "", insertions$Anc)
+  tip.seqs <- 
   
   mapply(pairllh, )
   
