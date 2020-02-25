@@ -358,9 +358,9 @@ proposalFunction <- function(param){
   rate <- param[3]
   
   if (runif(1) > 0.9){
-    p.enter <- rlnorm(1,meanlog=param[1],sdlog=0.1)
-    p.stay <- rlnorm(1,meanlog=param[2],sdlog=0.01)
-    rate <- rlnorm(1,meanlog=param[3],sdlog=0.1)
+    p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
+    p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.01)
+    rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.1)
   }else{
     # perform a change on the sliplist 
     # this will NOT change your three parameters, but WILL change the likelihood
