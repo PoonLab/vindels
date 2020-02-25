@@ -297,6 +297,7 @@ seqllh <- function(rate){
   anc.seqs <- gsub("-", "", insertions$Anc)
   tip.seqs <- unname(mapply(getTip, insertions$Vseq, slip.list))
   branches <- insertions$length
+  rate <- rep(rate, length(anc.seqs))
   total.llh <- unname(mapply(pairllh, anc.seqs, tip.seqs, rate, branches))
   sum(total.llh)
 }
@@ -342,10 +343,15 @@ proposalFunction <- function(param){
   p.stay <- param[2]
   rate <- param[3]
   
-  if (runif(1) > 0.9){
-    p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
-    p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.01)
-    rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.1)
+  num <- runif(1)
+  if (num > 0.9){
+    if (num-0.9 < 1/30){
+      p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
+    }else if(num-0.9 > 2/30){
+      p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.01)
+    }else{
+      rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.1)
+    }
   }else{
     # perform a change on the sliplist 
     # this will NOT change your three parameters, but WILL change the likelihood
@@ -361,8 +367,9 @@ runMCMC <- function(startvalue, iterations){
   
   for (i in 1:iterations){
     proposal <- proposalFunction(chain[i,])
-    print(proposal)
-    prop <- exp(posterior(proposal) - posterior(chain[i,]))
+    p <- posterior(chain[i,])
+    print(p)
+    prop <- exp(posterior(proposal) - p)
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
     if (runif(1) < prop) {
       chain[i+1,] <- proposal
