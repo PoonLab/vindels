@@ -74,21 +74,6 @@ getTip <- function(oldtip, slip){
   }
 }
 
-checkDiff <- function(seq1, seq2){
-  if (seq1 == seq2){
-    return(integer(0))
-  }else if (nchar(seq1) != nchar(seq2)){
-    return(NA)
-  }
-  
-  seq1 <- str_split(seq1, "")[[1]]
-  seq2 <- str_split(seq2, "")[[1]]
-  
-  chars <- rbind(seq1, seq2)
-  which(chars[1,]!=chars[2,])
-}
-
-
 # used to go from c(0,0,0,3,0,0,0) to c(4,4,4)
 getSlipLocations <- function(slip){
   nonzeros <- which(slip!=0)

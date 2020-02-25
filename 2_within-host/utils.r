@@ -130,7 +130,7 @@ delete <- function(str, indel, pos){
 
 checkDiff <- function(seq1, seq2){
   if (seq1 == seq2){
-    return(NULL)
+    return(integer(0))
   }else if (nchar(seq1) != nchar(seq2)){
     return(NA)
   }
