@@ -21,32 +21,56 @@ createSlips <- function(anc, ins, pos){
     return(base)
   }
 }
-
-newtip <- function(oldtip, slip){
+# n <- 0
+# pos <- 0
+# print(length(tip.chars))
+# while (pos < nchar(oldtip)){
+#   pos <- pos + 1
+#   n <- n+1
+#   #print(pos)
+#   count <- slip[n]
+#   print(pos)
+#   print(n)
+#   #print(count)
+#   if (count != 0){
+#     pos <- pos + (count-1)
+#     toAdd <- ""
+#   }else{
+#     toAdd <- tip.chars[pos]
+#   }
+#   new.chars[n] <- tip.chars[pos]
+# }
+getTip <- function(oldtip, slip){
   nonzeros <- which(slip != 0)
   
   if (length(nonzeros) == 0){
     return(oldtip)
   }else{
-    
-    newtip <- c()
+    #print(oldtip)
+    toCopy <- rep(T, nchar(oldtip))
     tip.chars <- strsplit(oldtip, "")[[1]]
-    new.chars <- c()
-    n <- 0
-    pos <- 0
-    while (pos < nchar(oldtip)){
-      pos <- pos + 1
-      n <- n+1
-      #print(pos)
-      count <- slip[n]
-      #print(count)
-      if (count != 0){
-        pos <- pos + (count-1)
-      }else{
-        new.chars <- c(new.chars, tip.chars[pos])
+    loc <- getSlipLocations(slip)[[1]]
+    tab <- table(loc)
+    for (n in 1:length(tab)){
+      start <- as.numeric(names(tab)[n])
+      stop <- start + (tab[[n]] - 1)
+      if (stop >= nchar(oldtip)){
+        stop <- nchar(oldtip)
       }
+      
+      # re-adjustment of positions 
+      # perform this action on all indices after the first
+      if (n > 1 && !toCopy[start]){
+        adjust <- min(which(toCopy[start:length(toCopy)])) - 1
+        start <- start + adjust
+        stop <- stop + adjust
+      }
+      #print(start)
+      #print(stop)
+      toCopy[start:stop] <- F
     }
-    return(paste0(new.chars,collapse=""))
+    #tip.chars[toCopy] <- "-"
+    return(paste0(tip.chars[toCopy],collapse=""))
   }
 }
 
@@ -72,6 +96,7 @@ getSlipLocations <- function(slip){
   for (pos in nonzeros){
     locations <- c(locations, rep(pos, slip[pos]))
   }
+  tab <- table(locations)
   return (list(loc=locations,len=length(slip)))
 }
 
@@ -112,7 +137,10 @@ insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1,
 # FIX HEADERS
 insertions$Header <- gsub("_\\d$","",insertions$Header)
 
-# PROBLEMATIC CASE: remove instances with gaps in the ancestor but NO INSERTION
+# CASE: remove instances missing ancestor and tip 
+insertions <- insertions[-c(which(insertions$Anc == "")),]
+
+# CASE: remove instances with gaps in the ancestor but NO INSERTION
 insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq=="")),]
 
 # CASE: remove instances with insertion position 0
@@ -132,11 +160,20 @@ b <- nchar(gsub("-","",insertions$Anc))
 sum(a!=b)==0
 insertions[which(a!=b),]
 
+# CASE: replace "R" nucleotides with the corresponding one found in the ancestor
+cases <- which(grepl("[RYSWKMBDHVN]", insertions$Vseq))
+for (idx in cases){
+  toEdit <- insertions[idx, "Vseq"]
+  pos <- gregexpr("[RYSWKMBDHVN]", toEdit)[[1]]
+  toUse <- insertions[idx,"Anc"]
+  insertions[idx, "Vseq"] <- paste0(substr(toEdit, 1, pos-1),substr(toUse,pos,pos), substr(toEdit, pos+1,nchar(toEdit)))
+}
+
 # generate slip list 
 slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Seq, insertions$Pos))
 
 # add the a/b replicate label to the headers
-insertions$Header <- unname(mapply(patLabel, insertions$Header, insertions$Pat))
+#insertions$Header <- unname(mapply(patLabel, insertions$Header, insertions$Pat))
 names(slip.list) <- insertions$Header
 
 # for printing the slip.list 
@@ -196,7 +233,7 @@ nucleotides <- c("A","C","G","T")
 # }
 
 # For use in the proposal function
-changeSlip <- function(slip.list=slip.list){
+changeSlip <- function(){
   idx <- which(unname(lapply(slip.list,sum))>0)
   # choose a sequence to edit
   seq <- sample(length(idx),1)
@@ -242,7 +279,7 @@ getMat <- function(rate, branch){
   tmat
 }
 nt <- c("A", "C", "G", "T")
-pairllh <- function(anc, newtip, rate, branch, f){
+pairllh <- function(anc, newtip, rate, branch){
   tmat <- getMat(rate,branch)
   achars <- strsplit(anc, "")[[1]]
   tchars <- strsplit(newtip, "")[[1]]
@@ -254,11 +291,17 @@ pairllh <- function(anc, newtip, rate, branch, f){
     # finalize the calculation for tip likelihood
     llh <- tmat %*% tip.llh
     llh <- llh * f
-    
+    if (!achar %in% nt){
+      print(achar)
+    }
     # likelihood given the exact nucleotide (state) that we see in the ancestor
-    total.llh <- llh[achar,]
-    return(log(total.llh))
+    final.llh <- llh[achar,]
+    return(log(final.llh))
   }, achars, tchars)
+  if (class(result) == "list"){
+    print(anc)
+    print(newtip)
+  }
   sum(result)
 }
 
@@ -266,19 +309,18 @@ nt <- c("A", "C", "G", "T")
 allseqs <- c(insertions$Vseq, insertions$Anc)
 f <- estimateFreq(allseqs)
 seqllh <- function(rate){
-  
   anc.seqs <- gsub("-", "", insertions$Anc)
-  tip.seqs <- 
-  
-  mapply(pairllh, )
-  
-  
+  tip.seqs <- unname(mapply(getTip, insertions$Vseq, slip.list))
+  branches <- insertions$length
+  total.llh <- unname(mapply(pairllh, anc.seqs, tip.seqs, rate, branches))
+  sum(total.llh)
 }
 
 
 likelihood <- function(param){
   p.enter <- param[1]
   p.stay  <- param[2]
+  rate <- param[3]
   
   x <- sum(slips == 0)
   y <- sum(slips != 0)
@@ -287,19 +329,20 @@ likelihood <- function(param){
   # Log likelihood of each tip/anc pair
   #(1 - p.slip)^x * p.slip^y * (1-p.stay)^y * p.stay^z
   llh <-  x*log(1-p.enter) + y*log(p.enter) + y*log(1-p.stay) + z*log(p.stay)
-  llh
-  
+  llh + seqllh(rate)
 }
 # --------------------------------------------------
 
 prior <- function(param){
   p.enter <- param[1]
   p.stay  <- param[2]
+  rate <- param[3]
   
   prior.pe <- dlnorm(p.enter,meanlog=-10,sdlog=2, log=T)
   prior.ps <- dlnorm(p.stay,meanlog=-0.15,sdlog=0.05,log=T)
+  prior.rate <- dlnorm(p.stay,meanlog=-8,sdlog=2,log=T)
   
-  return(prior.pe + prior.ps)
+  return(prior.pe + prior.ps + prior.rate)
 }
 
 posterior <- function(param){
@@ -311,23 +354,24 @@ posterior <- function(param){
 proposalFunction <- function(param){
   p.enter <- param[1]
   p.stay <- param[2]
+  rate <- param[3]
   
   num <- runif(1)
   if (num > 0.9){
     p.enter <- rlnorm(1,meanlog=param[1],sdlog=0.1)
     p.stay <- rlnorm(1,meanlog=param[2],sdlog=0.01)
+    rate <- rlnorm(1,meanlog=param[3],sdlog=0.1)
   }else{
     # perform a change on the sliplist 
     changeSlip()
-    # this will NOT change your two parameters, but WILL change the likelihood
+    # this will NOT change your three parameters, but WILL change the likelihood
   }
-  
-  return(c(p.enter,p.stay))
+  return(c(p.enter, p.stay, rate))
 }
 
 
 runMCMC <- function(startvalue, iterations){
-  chain <- array(dim = c(iterations+1,1))
+  chain <- array(dim = c(iterations+1,3))
   chain[1,] <- startvalue
   
   
