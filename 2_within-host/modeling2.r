@@ -322,6 +322,7 @@ likelihood <- function(param){
   p.stay  <- param[2]
   rate <- param[3]
   
+  slips <- unname(unlist(slip.list))
   x <- sum(slips == 0)
   y <- sum(slips != 0)
   z <- sum(slips[which(slips!=0)] - 1)
@@ -356,15 +357,14 @@ proposalFunction <- function(param){
   p.stay <- param[2]
   rate <- param[3]
   
-  num <- runif(1)
-  if (num > 0.9){
+  if (runif(1) > 0.9){
     p.enter <- rlnorm(1,meanlog=param[1],sdlog=0.1)
     p.stay <- rlnorm(1,meanlog=param[2],sdlog=0.01)
     rate <- rlnorm(1,meanlog=param[3],sdlog=0.1)
   }else{
     # perform a change on the sliplist 
-    changeSlip()
     # this will NOT change your three parameters, but WILL change the likelihood
+    changeSlip()
   }
   return(c(p.enter, p.stay, rate))
 }
@@ -374,30 +374,27 @@ runMCMC <- function(startvalue, iterations){
   chain <- array(dim = c(iterations+1,3))
   chain[1,] <- startvalue
   
-  
   for (i in 1:iterations){
-    
     proposal <- proposalFunction(chain[i,])
+    print(proposal)
     prop <- exp(posterior(proposal) - posterior(chain[i,]))
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
     if (runif(1) < prop) {
       chain[i+1,] <- proposal
       
-      # if the proportion is less than the random uniform sample, REJCECT the proposed value stick with current 
+    # if the proportion is less than the random uniform sample, REJECT the proposed value stick with current 
     } else {
       chain[i+1,] <- chain[i,]
     }
-    if (i %% 100 == 0){
-      print(paste0("STATE ",i,": ", chain[i,1]))
-    }
+    print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], sep=" "))
+    
   }
   return(chain)
-  
 }
 
 # RUN MCMC
-startvalue <- 0.5
-chain <- runMCMC(startvalue, 2000)
+startvalue <- c(0.001, 0.8, 0.001)
+chain <- runMCMC(startvalue, 100000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
