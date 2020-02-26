@@ -235,8 +235,8 @@ changeSlip <- function(){
   slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
 }
 nt <- c("A", "C", "G", "T")
+require(stringr)
 estimateFreq <- function(seqs){
-  require(stringr)
   nt <- c("A", "C", "G", "T")
   output <- c()
   for (n in 1:length(nt)){
@@ -245,10 +245,10 @@ estimateFreq <- function(seqs){
   }
   output
 }
-
+require(expm)
 # returns the F81 transition probability matrtix 
 getMat <- function(rate, branch){
-  require(expm)
+  
   nt <- c("A", "C", "G", "T")
   
   # generate the F81 rate matrix 
@@ -325,9 +325,9 @@ prior <- function(param){
   p.stay  <- param[2]
   rate <- param[3]
   
-  prior.pe <- dlnorm(p.enter,meanlog=-10,sdlog=2, log=T)
+  prior.pe <- dlnorm(p.enter,meanlog=-8,sdlog=2, log=T)
   prior.ps <- dlnorm(p.stay,meanlog=-0.15,sdlog=0.05,log=T)
-  prior.rate <- dlnorm(p.stay,meanlog=-8,sdlog=2,log=T)
+  prior.rate <- dlnorm(p.stay,meanlog=-7,sdlog=2,log=T)
   
   return(prior.pe + prior.ps + prior.rate)
 }
