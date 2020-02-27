@@ -378,14 +378,16 @@ runMCMC <- function(startvalue, iterations){
   
   for (i in 1:iterations){
     proposal <- proposalFunction(chain[i,])
-    p <- posterior(chain[i,])
-    print(p)
-    if(is.na(p)){
+    p.current <- posterior(chain[i,])
+    p.next <- posterior(proposal)
+    print(p.current)
+    print(p.next)
+    if(is.na(p.current) || is.na(p.next)){
       print("ERROR: Posterior could not be calculated")
       print(paste("Chain value:", chain[i,1], chain[i,2], chain[i,3], sep=" "))
       break
     }
-    prop <- exp(posterior(proposal) - p)
+    prop <- exp(p.next - p.current)
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
     if (runif(1) < prop) {
       chain[i+1,] <- proposal
