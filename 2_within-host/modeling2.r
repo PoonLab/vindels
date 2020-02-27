@@ -21,6 +21,9 @@ createSlips <- function(anc, ins, pos){
     return(base)
   }
 }
+
+
+
 # n <- 0
 # pos <- 0
 # print(length(tip.chars))
@@ -294,10 +297,12 @@ pairllh <- function(anc, newtip, rate, branch){
 nt <- c("A", "C", "G", "T")
 allseqs <- c(insertions$Vseq, insertions$Anc)
 f <- estimateFreq(allseqs)
+
+branches <- insertions$length
+anc.seqs <- gsub("-", "", insertions$Anc)
+
 seqllh <- function(rate){
-  anc.seqs <- gsub("-", "", insertions$Anc)
   tip.seqs <- unname(mapply(getTip, insertions$Vseq, slip.list))
-  branches <- insertions$length
   rate <- rep(rate, length(anc.seqs))
   total.llh <- unname(mapply(pairllh, anc.seqs, tip.seqs, rate, branches))
   sum(total.llh)
@@ -347,11 +352,11 @@ proposalFunction <- function(param){
   num <- runif(1)
   if (num > 0.9){
     if (num-0.9 < 1/30){
-      p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
+      p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.15)
     }else if(num-0.9 > 2/30){
-      p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.01)
+      p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.03)
     }else{
-      rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.1)
+      rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.15)
     }
   }else{
     # perform a change on the sliplist 
@@ -372,7 +377,7 @@ runMCMC <- function(startvalue, iterations){
     print(p)
     if(is.na(p)){
       print("ERROR: Posterior could not be calculated")
-      print(paste0("Chain value"chain[i,1], chain[i,2], chain[i,3], sep=" "))
+      print(paste0("Chain value:", chain[i,1], chain[i,2], chain[i,3], sep=" "))
       break
     }
     prop <- exp(posterior(proposal) - p)
@@ -392,7 +397,7 @@ runMCMC <- function(startvalue, iterations){
 
 # RUN MCMC
 startvalue <- c(0.001, 0.8, 0.001)
-chain <- runMCMC(startvalue, 100000)
+chain <- runMCMC(startvalue, 1000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
