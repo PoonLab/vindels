@@ -2139,7 +2139,7 @@
 		<distribution>
 			<logNormalDistributionModel meanInRealSpace="true">
 				<mean>
-					<parameter id="ucld.mean" value="1.2E-4" lower="0.0" upper="0.001"/>
+					<parameter id="ucld.mean" value="1.2E-4" lower="0.0"/>
 				</mean>
 				<stdev>
 					<parameter id="ucld.stdev" value="2E-4" lower="0.0"/>
@@ -2215,12 +2215,10 @@
 		<scaleOperator scaleFactor="0.75" weight="1">
 			<parameter idref="alpha"/>
 		</scaleOperator>
-		<randomWalkOperator windowSize="0.001" weight="3" autoOptimize="true">
-			<parameter idref="ucld.mean"/>
-		</randomWalkOperator> 
-		<!--<uniformOperator scaleFactor="0.75" weight="3" autoOptimize="true">
-			<parameter idref="ucld.mean"/>
-		</uniformOperator>-->
+		<scaleOperator scaleFactor="0.75" weight="3">
+			<parameter idref="ucld.mean" />
+		</scaleOperator>
+
 		<scaleOperator scaleFactor="0.75" weight="3">
 			<parameter idref="ucld.stdev"/>
 		</scaleOperator>
@@ -2266,7 +2264,7 @@
 	</operators>
 
 	<!-- Define MCMC                                                             -->
-	<mcmc id="mcmc" chainLength="500000000" autoOptimize="true" operatorAnalysis="step_0.ops">
+	<mcmc id="mcmc" chainLength="100000000" autoOptimize="true" operatorAnalysis="step_0.ops">
 		<posterior id="posterior">
 			<prior id="prior">
 				<logNormalPrior mean="1.0" stdev="1.25" offset="0.0">
@@ -2284,10 +2282,6 @@
 				<logNormalPrior mean="2E-4" stdev="5E-4" offset="0.0">
 					<parameter idref="ucld.stdev"/>
 				</logNormalPrior>
-				<!--<normalPrior mean="0.005" stdev="0.002551">
-					<parameter idref="ucld.mean"/>
-				</normalPrior>
-				-->
 				<logNormalPrior mean="1.2E-4" stdev="0.00015" offset="0.0">
 					<parameter idref="ucld.mean"/>
 				</logNormalPrior>
@@ -2304,7 +2298,7 @@
 		<operators idref="operators"/>
 
 		<!-- write log to screen                                                     -->
-		<log id="screenLog" logEvery="500000">
+		<log id="screenLog" logEvery="100000">
 			<column label="Posterior" dp="4" width="12">
 				<posterior idref="posterior"/>
 			</column>
@@ -2323,7 +2317,7 @@
 		</log>
 
 		<!-- write log to file                                                       -->
-		<log id="fileLog" logEvery="50000" fileName="step_0.log" overwrite="true">
+		<log id="fileLog" logEvery="10000" fileName="step_0.log" overwrite="true">
 			<posterior idref="posterior"/>
 			<prior idref="prior"/>
 			<likelihood idref="likelihood"/>
@@ -2346,7 +2340,7 @@
 		</log>
 
 		<!-- write tree log to file                                                  -->
-		<logTree id="treeFileLog" logEvery="500000" nexusFormat="true" fileName="step_0.trees" sortTranslationTable="true">
+		<logTree id="treeFileLog" logEvery="100000" nexusFormat="true" fileName="step_0.trees" sortTranslationTable="true">
 			<treeModel idref="treeModel"/>
 			<trait name="rate" tag="rate">
 				<discretizedBranchRates idref="branchRates"/>

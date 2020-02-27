@@ -274,6 +274,7 @@ pairllh <- function(anc, newtip, rate, branch){
     tip.llh <- matrix(as.numeric(tchar == nt), nrow=4,ncol=1,dimnames=list(nt))
     
     # finalize the calculation for tip likelihood
+    # dot product
     llh <- tmat %*% tip.llh
     llh <- llh * f
     if (!achar %in% nt){
@@ -369,6 +370,11 @@ runMCMC <- function(startvalue, iterations){
     proposal <- proposalFunction(chain[i,])
     p <- posterior(chain[i,])
     print(p)
+    if(is.na(p)){
+      print("ERROR: Posterior could not be calculated")
+      print(paste0("Chain value"chain[i,1], chain[i,2], chain[i,3], sep=" "))
+      break
+    }
     prop <- exp(posterior(proposal) - p)
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
     if (runif(1) < prop) {

@@ -17,6 +17,8 @@ iseqcount <- 1
 dseqcount <- 1
 imaxes <- c()
 dmaxes <- c()
+itotal <- 0
+dtotal <- 0
 
 ipatlist <- list()
 dpatlist <- list()
@@ -105,9 +107,13 @@ for (file in 1:length(ifolder)){
   iseqcount <- iseqcount + sum(icounts)
   dseqcount <- dseqcount + sum(dcounts)
   
+  itotal <- itotal + nrow(iCSV)
+  dtotal <- dtotal + nrow(dCSV)
+  
 }
 
-
+imaster <- rbindlist(ipatlist)
+dmaster <- rbindlist(dpatlist)
 
 # INEFFICIENT PLEASE REWRITE
 # -------------------------------

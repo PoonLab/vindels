@@ -25,7 +25,7 @@ vloops <- c("V1","V2","V3","V4","V5")
 
 # INSERTION PARSING ----------
 path <- "~/Lio/"
-#path <- "~/PycharmProjects/hiv-withinhost/"
+path <- "~/PycharmProjects/hiv-withinhost/"
 ifolder <- Sys.glob(paste0(path,"9Indels/rep/ins/*.csv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/rep/del/*.csv"))
 all.ins <- data.frame()
@@ -221,16 +221,18 @@ for (run in 1:20){
     dFinal <- dtemp[dtemp$Date < 325 & dtemp$Count < 3,]
     
     # ADDED THIS FOR RTT ANALYSIS
+    # used to retrieve the midpoint of each branch length along which an indel occurred
     irtt[[as.character(vloop)]] <- c(irtt[[as.character(vloop)]],iFinal[iFinal$Count>0,'mid.rtt'])
     drtt[[as.character(vloop)]] <- c(drtt[[as.character(vloop)]], dFinal[dFinal$Count>0,'mid.rtt'])
     #print(nrow(current) - nrow(iFinal))
     
-    ifit <- glm(nchar(gsub(",","",iFinal$Seq))*iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
+    # COUNTING NUCLEOTIDES: change the formula to this : nchar(gsub(",","",iFinal$Seq))*iFinal$Count ~ 1
+    ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
     irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
     irates <- c(irates, irate)
     print(summary(ifit))
     
-    dfit <- glm(nchar(gsub(",","",dFinal$Seq))*dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
+    dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
     drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
     drates <- c(drates, drate)
     print(summary(dfit))
@@ -370,19 +372,17 @@ insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
 delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
 # 
 insrates <- data.frame(vloop=vloops,
-                       rate=apply(ins.df, 1, median), 
-                       lower=apply(ins.df,1,function(x){quantile(x, c(0.025,0.975))[1]}), 
-                       upper=apply(ins.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
+                       rate=apply(ins.df, 2, median), 
+                       lower=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                       upper=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
 delrates <- data.frame(vloop=vloops,
-                       rate=apply(del.df, 1, median), 
-                       lower=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[1]}), 
-                       upper=apply(del.df,1,function(x){quantile(x, c(0.025,0.975))[2]}))
+                       rate=apply(del.df, 2, median), 
+                       lower=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                       upper=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
 
 
 
 # Used for looking at RTT midpoints (time when indels occur)
-
-
 insrates <- data.frame(vloop=vloops,
                        rate=unname(unlist(lapply(irtt, median))), 
                        lower=unname(unlist(lapply(irtt,function(x){quantile(x, c(0.25,0.75))[1]}))), 
@@ -409,7 +409,7 @@ g1 <- ggplot(insrates, aes(x=vloop, y=rate,width=0.8)) +
                 width = 0.25, size=1.1) +
   labs(x="Variable Loop",
        y=expression(paste("Insertion RTT Midpoint \n           (Days)", sep = "")))+
-  scale_y_continuous(expand = c(0, 0),limits = c(0, 1500), breaks=c(300,600,900,1200,1500)) +
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) + # breaks=c(300,600,900,1200,1500)) +
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),
@@ -438,7 +438,7 @@ g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) +
   labs(x="Variable Loop",
        y="Deletion RTT")+
   #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
-  scale_y_reverse(lim=c(1500,0), breaks=c(300,600,900,1200,1500))+
+  scale_y_reverse(lim=c(6,0)) + #breaks=c(300,600,900,1200,1500))+
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),

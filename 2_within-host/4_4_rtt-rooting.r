@@ -27,7 +27,7 @@ for (file in trefolder){
 
   rtd <- rtt(tre, as.numeric(tip.dates))
 
-  write.tree(rtd, file=paste0(path, "rooted_trees/", filename))
+  write.tree(rtd, file=paste0(path, "rooted_trees/", filename,2))
 }
 
 rtdfolder <- Sys.glob(paste0(path,"rooted_trees/*.tree"))
@@ -73,11 +73,12 @@ for (file in rtdfolder){
   dev.off()
   
   # calculate the tree root height for use in BEAST Skygrid
+  # when the PROJECTED start of infection took place (plus a 25% buffer)
   xint <- -coef(linear)[[1]]/coef(linear)[[2]]
   treeroot[n] <- ceiling((max(tip.dates) - xint)* 1.25)
   
-  write.tree(rtd, file=paste0(path,"guide_trees/", filename))
+  write.tree(rtd, file=paste0(path,"guide_trees/", filename,2))
 }
-#write.csv(data.frame(file=names, root_height=treeroot), "~/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/root-heights.csv",quote=F,row.names = F)
+write.csv(data.frame(file=names, root_height=treeroot), "~/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/root-heights.csv",quote=F,row.names = F)
 
 #write.csv(data.frame(file=names,date_range=daterange),"~/PycharmProjects/hiv-withinhost/date-ranges2.csv",quote=F,row.names = F)
