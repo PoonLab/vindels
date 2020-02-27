@@ -233,7 +233,7 @@ changeSlip <- function(){
   # choose a slip event to change
   toEdit <- position(length(slip.idx[[1]]))
   slip.idx[[1]][toEdit] <- slip.idx[[1]][toEdit] + delta()
-  
+  #print(slip.idx[[1]][toEdit])
   # save this globally so that the change gets fixed
   slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
 }
@@ -287,10 +287,11 @@ pairllh <- function(anc, newtip, rate, branch){
     final.llh <- llh[achar,]
     return(log(final.llh))
   }, achars, tchars)
-  if (class(result) == "list"){
-    print(anc)
-    print(newtip)
-  }
+  
+  # if (class(result) == "list"){
+  #   print(anc)
+  #   print(newtip)
+  # }
   sum(result)
 }
 
@@ -303,8 +304,10 @@ anc.seqs <- gsub("-", "", insertions$Anc)
 
 seqllh <- function(rate){
   tip.seqs <- unname(mapply(getTip, insertions$Vseq, slip.list))
+  #print(head(tip.seqs))
   rate <- rep(rate, length(anc.seqs))
   total.llh <- unname(mapply(pairllh, anc.seqs, tip.seqs, rate, branches))
+  #print(head(total.llh))
   sum(total.llh)
 }
 
@@ -319,9 +322,11 @@ likelihood <- function(param){
   y <- sum(slips != 0)
   z <- sum(slips[which(slips!=0)] - 1)
   
-  # Log likelihood of each tip/anc pair
-  #(1 - p.slip)^x * p.slip^y * (1-p.stay)^y * p.stay^z
-  llh <-  x*log(1-p.enter) + y*log(p.enter) + y*log(1-p.stay) + z*log(p.stay)
+  if (any(is.na(slips))){
+    llh <- log(0)
+  }else{
+    llh <-  x*log(1-p.enter) + y*log(p.enter) + y*log(1-p.stay) + z*log(p.stay)
+  }
   llh + seqllh(rate)
 }
 # --------------------------------------------------
@@ -377,7 +382,7 @@ runMCMC <- function(startvalue, iterations){
     print(p)
     if(is.na(p)){
       print("ERROR: Posterior could not be calculated")
-      print(paste0("Chain value:", chain[i,1], chain[i,2], chain[i,3], sep=" "))
+      print(paste("Chain value:", chain[i,1], chain[i,2], chain[i,3], sep=" "))
       break
     }
     prop <- exp(posterior(proposal) - p)
