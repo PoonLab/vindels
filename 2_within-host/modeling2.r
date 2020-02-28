@@ -57,10 +57,11 @@ getTip <- function(oldtip, slip){
     for (n in 1:length(tab)){
       start <- as.numeric(names(tab)[n])
       stop <- start + (tab[[n]] - 1)
-      if (stop >= nchar(oldtip)){
+      # Case to catch when the 
+      if (start > nchar(oldtip) || stop > nchar(oldtip)){
+        start <- nchar(oldtip) - (stop - start)
         stop <- nchar(oldtip)
       }
-      
       # re-adjustment of positions 
       # perform this action on all indices after the first
       if (n > 1 && !toCopy[start]){
@@ -179,50 +180,9 @@ slip.list <- lapply(slip.list, function(x){
 })
 
 nucleotides <- c("A","C","G","T")
-
-
-# get slip locations 
-
-# randomly sample a location on the slip locations 
-
-# change that value by a rnorm derived number
-
-# get slip vector again 
-
-# generate the newtip sequence from this slip vector
-
-# calculate the likelihood of the newtip sequence given the ancestor
-  # this requres the transition probability matrix 
-  # remember: matrix exponentiation 
-
-# transition matrix 
-  
-  # receive the newtip and the ancestor for input 
-  # first check that they are a) the same length, b) contain no gaps 
-  # modify the checkDiff function or the transition function to generate a matrix of transition probs
-  # start by getting counts at each location 
-
-
-# transitionCounts <- function(seq1, seq2){
-#   len <- nchar(seq1)
-#   nt <- c("A", "C", "G", "T")
-#   counts <- matrix(0, nrow=4, ncol=4,dimnames=list(nt,nt))
-#   
-#   #chars1 <- strsplit(seq1, "")[[1]]
-#   #chars2 <- strsplit(seq2, "")[[1]]
-#   if (seq1 != ""){
-#     for (i in 1:(len-1)){
-#       x <- substr(seq1, i, i)
-#       y <- substr(seq2, i ,i)
-#       counts[x,y] <- counts[x,y] + 1
-#     }
-#   }
-#   counts
-# }
-
+idx <- which(unname(lapply(slip.list,sum))>0)
 # For use in the proposal function
 changeSlip <- function(){
-  idx <- which(unname(lapply(slip.list,sum))>0)
   # choose a sequence to edit
   seq <- sample(length(idx),1)
   
@@ -232,8 +192,13 @@ changeSlip <- function(){
   
   # choose a slip event to change
   toEdit <- position(length(slip.idx[[1]]))
-  slip.idx[[1]][toEdit] <- slip.idx[[1]][toEdit] + delta()
-  #print(slip.idx[[1]][toEdit])
+  
+  # this is to ensure that the proposed change is never outside the slip region
+  proposal <- 0
+  while(proposal <= 0 || proposal > length(slip)){
+    proposal <- slip.idx[[1]][toEdit] + delta()
+  }
+  slip.idx[[1]][toEdit] <- proposal
   # save this globally so that the change gets fixed
   slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
 }
@@ -411,3 +376,28 @@ chain <- runMCMC(startvalue, 1000)
 burnin <- 200
 acceptance <- 1 - mean(duplicated(chain[-(1:burnin),]))
 print(paste0("Acceptance: ", acceptance))
+
+
+
+# get slip locations 
+
+# randomly sample a location on the slip locations 
+
+# change that value by a rnorm derived number
+
+# get slip vector again 
+
+# generate the newtip sequence from this slip vector
+
+# calculate the likelihood of the newtip sequence given the ancestor
+# this requres the transition probability matrix 
+# remember: matrix exponentiation 
+
+# transition matrix 
+
+# receive the newtip and the ancestor for input 
+# first check that they are a) the same length, b) contain no gaps 
+# modify the checkDiff function or the transition function to generate a matrix of transition probs
+# start by getting counts at each location 
+
+
