@@ -8,6 +8,8 @@ dfolder <- Sys.glob(paste0(path,"9Indels/rep/wholetree/del/*.tsv"))
 
 require(stringr)
 require(phangorn)
+require(data.table)
+require(bbmle)
 
 vlist <- list(V1=numeric(),V2=numeric(),V3=numeric(),V4=numeric(),V5=numeric())
 all.ins <- c()
@@ -20,8 +22,12 @@ dmaxes <- c()
 itotal <- 0
 dtotal <- 0
 
-ipatlist <- list()
-dpatlist <- list()
+#ipatlist <- list()
+#dpatlist <- list()
+iint <- data.frame()
+itip <- data.frame()
+dint <- data.frame()
+dtip <- data.frame()
 for (file in 1:length(ifolder)){
   print(file)
   filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
@@ -90,10 +96,21 @@ for (file in 1:length(ifolder)){
   if (is.na(max(ddates))){
     print(ddates)
   }
+  # Regular patient-based data frame
+  #ipatlist[[pat]] <- rbind(ipatlist[[pat]], iCSV[,2:7])
+  #dpatlist[[pat]] <- rbind(dpatlist[[pat]], dCSV[,2:7])
   
-  ipatlist[[pat]] <- rbind(ipatlist[[pat]], iCSV[,2:7])
-  dpatlist[[pat]] <- rbind(dpatlist[[pat]], dCSV[,2:7])
+  # Patient-based data frame split by interior vs tip
+  # iint[[pat]] <- rbind(iint[[pat]], iCSV[which(!grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7])
+  # itip[[pat]] <- rbind(itip[[pat]], iCSV[which(grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7])
+  # dint[[pat]] <- rbind(dint[[pat]], dCSV[which(!grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7])
+  # dtip[[pat]] <- rbind(dtip[[pat]], dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7])
   
+  # Cumulative data frame split by interior vs tip
+  iint <- rbind(iint, iCSV[which(!grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7])
+  itip <- rbind(itip, iCSV[which(grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7])
+  dint <- rbind(dint, dCSV[which(!grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7])
+  dtip <- rbind(dtip, dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7])
   #iprop <- idates / max(iCSV$length)
   #dprop <- ddates / max(dCSV$length)
   
@@ -112,8 +129,75 @@ for (file in 1:length(ifolder)){
   
 }
 
-imaster <- rbindlist(ipatlist)
-dmaster <- rbindlist(dpatlist)
+# NEED TO FIX THIS 
+vlengths <- c(72,126,105,87,33)
+
+# COMPARISON OF INSERTION RATES INTERIOR VS TIP
+int.df <- dint
+tip.df <- dtip
+# int.out <- data.frame()
+# tip.out <- data.frame()
+# for (run in 1:20){
+#   int.df <- iint[[run]]
+#   tip.df <- itip[[run]]
+#   
+  irates2 <- c()
+  trates2 <- c()
+  for (i in 1:5){
+    tip.fit <- glm(tip.df[,i] ~ 1, offset=log(tip.df[,"length"]), family="poisson")
+    int.fit <- glm(int.df[,i] ~ 1, offset=log(int.df[,"length"]), family="poisson")
+    
+    print(summary(tip.fit))
+    print(summary(int.fit))
+    
+    tip.rate <- exp(coef(tip.fit)[[1]])*365/vlengths[i]
+    int.rate <- exp(coef(int.fit)[[1]])*365/vlengths[i]
+    
+    irates2[i] <- int.rate
+    trates2[i] <- tip.rate
+    
+  }
+#   irates <- irates*10^3
+#   trates <- trates*10^3
+#   
+#   int.out <- rbind(int.out, data.frame(V1=irates[1],V2=irates[2],V3=irates[3],V4=irates[4],V5=irates[5]))
+#   tip.out <- rbind(tip.out, data.frame(V1=trates[1],V2=trates[2],V3=trates[3],V4=trates[4],V5=trates[5]))
+# }
+
+  comb1 <- data.frame(rate=irates, vloop=c("V1","V2","V3","V4","V5"), id=rep("Interior",5))
+  
+require(RColorBrewer)
+#pal <- c("gray28", "blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
+
+require(ggplot2)
+dplot <- ggplot() + 
+  geom_bar(aes(x=vloop, y=rate, fill=id), data=comb2, stat='identity', position="dodge") + 
+  scale_fill_manual(values=c("red","blue"))+
+  labs(x="Variable Loop", 
+       y="Deletion Rate (Events/Nt/Year)", title="Deletion Rates") +
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 1.3, r = 1, b = 0.7, l = 1.5, unit = "cm"),
+        axis.line = element_line(colour = "black"), 
+        axis.title=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
+        axis.text = element_text(size=16, colour="black"),
+        plot.title = element_text(size=22, hjust = 0.5),
+        legend.text=element_text(size=16), 
+        legend.background=element_rect(colour="black"),
+        legend.title=element_text(size=18))
+dplot
+
+
+
+# COMPARISON OF DELETION RATES INTERIOR VS TIP 
+
+
+#imaster <- as.data.frame(rbindlist(ipatlist))
+#dmaster <- as.data.frame(rbindlist(dpatlist))
 
 # INEFFICIENT PLEASE REWRITE
 # -------------------------------
