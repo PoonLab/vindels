@@ -110,6 +110,10 @@ chain <- runMCMC(startvalue, 1000000)
 burnin <- 100000
 acceptance <- round(1 - mean(duplicated(chain[-(1:burnin),])),2)
 
+
+chain <- read.csv("~/slip-model-parsed.csv", row.names = 1, header=F)
+
+
 med1 <- round(median(chain[-(1:burnin),1]),6)
 med2 <- round(median(chain[-(1:burnin),2]),3)
 
