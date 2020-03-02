@@ -204,6 +204,9 @@ all.df <- data.frame()
 
 irtt <- list()
 drtt <- list()
+
+all.ins <- list()
+all.del <- list()
 for (run in 1:20){
   iData <- iTotal[[run]]
   dData <- dTotal[[run]]
@@ -256,6 +259,9 @@ for (run in 1:20){
   del.df <- rbind(del.df, data.frame(V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5]))
 }
 
+require(data.table)
+iTotal2 <- rbindlist(iTotal)
+iTotal3 <- split(iTotal2, iTotal2$Vloop)
 
 
 # looking at rtt branch lengths and when indels tend to occur
@@ -270,7 +276,7 @@ for (i in 1:length(irtt)){
 
 
 # Comparing insertion and deletion rates to each other 
-
+# Shown that Deletions are singificantly higher than insertions
 ir <- c(ins.df[,1],ins.df[,2],ins.df[,3],ins.df[,4],ins.df[,5])
 dr <- c(del.df[,1],del.df[,2],del.df[,3],del.df[,4],del.df[,5])
 wilcox.test(ir,dr,paired=T)
@@ -379,6 +385,27 @@ delrates <- data.frame(vloop=vloops,
                        rate=apply(del.df, 2, median), 
                        lower=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
                        upper=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
+
+# BOOTSTRAPS 
+for (v in 1:5){
+  irates <- ins.df[,i]
+  drates <- del.df[,i]
+  
+  imeds <- c()
+  for (i in 1:1000){
+    rand <- sample(1:20, 20, replace=T)
+    imeds[i] <- median(irates[rand])
+  }
+  
+  dmeds <- c()
+  for (i in 1:1000){
+    rand <- sample(1:20, 20, replace=T)
+    dmeds[i] <- median(drates[rand])
+  }
+}
+
+
+
 
 
 
