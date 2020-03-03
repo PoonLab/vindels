@@ -126,12 +126,17 @@ for (n in 1:5){
   iTemp$glycs <- unname(sapply(iTemp$Anc, glycCount))
   dTemp$glycs <- unname(sapply(dTemp$Anc, glycCount))
   
+  
+  # EXPECTED GLYC CHANGES (RANDOMIZATION TEST)
+  # ---------------
+  # Insertions
   ires <- t(unname(mapply(insRandTest, iTemp$Anc,iTemp$Seq, iTemp$glycs)))
   ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
   
   iedist <- unname(unlist(lapply(ires, mean)))
   
   iemean <- mean(iedist)
+  # Boostraps for expected insertions
   bs.means <- c()
   for (i in 1:100){
     sam <- sample(length(iedist), length(iedist), replace=T)
@@ -140,12 +145,14 @@ for (n in 1:5){
   }
   iequantiles <- quantile(bs.means, c(0.025,0.975))
   
+  # Deletions
   dres <- t(unname(mapply(delRandTest, dTemp$Anc,dTemp$Seq, dTemp$glycs)))
   dres <- split(dres, rep(1:nrow(dres), each=ncol(dres)))
 
   dedist <- unname(unlist(lapply(dres, mean)))
   
   demean <- mean(dedist)
+  # Boostraps for expected deletions
   bs.means <- c()
   for (i in 1:100){
     sam <- sample(length(dedist), length(dedist), replace=T)
@@ -154,9 +161,13 @@ for (n in 1:5){
   }
   dequantiles <- quantile(bs.means, c(0.025,0.975))
   
+  
+  # OBSERVED GLYCOSYLATION SITE CHANGES (from the data)
+  # ----------------------
   iobs <- unname(mapply(observedGlycChange, iTemp$Anc, iTemp$Seq, iTemp$Pos, "i"))
   
   iomean <- mean(iobs)
+  # Boostraps for observed insertions
   bs.means <- c()
   for (i in 1:100){
     sam <- sample(length(iobs), length(iobs), replace=T)
@@ -168,6 +179,7 @@ for (n in 1:5){
   dobs <- unname(mapply(observedGlycChange, dTemp$Anc, dTemp$Seq, dTemp$Pos, "d"))
   
   domean <- mean(dobs)
+  # Boostraps for observed deletions
   bs.means <- c()
   for (i in 1:100){
     sam <- sample(length(dobs), length(dobs), replace=T)
@@ -200,19 +212,29 @@ cex=1
 par(pty="s", xpd=F, mar=c(6,8,4,1),las=0)
 #as.numeric(row.names(data))+20
 # this take in data either as ins.data or del.data
-sizes <- 0.5*sqrt(data$counts)
-sizes[3] <- 1.3
-data <- ins.data
-lim = c(-0.7,0.7)
-plot(data[,c('exp','obs')], pch=21, cex=sizes, bg=colors,xlim=lim,ylim=lim,
+data <- del.data
+sizes <- 0.4*sqrt(data$counts)
+sizes[3] <- 1.2
+
+lim = c(-0.8,0.8)
+
+plot(data[,c('exp','obs')], pch=1, cex=sizes, lwd=10, col=colors,xlim=lim,ylim=lim,
      cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='', main="Insertions - PNLGS")
 abline(0,1)
 title(ylab="Observed Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
 title(xlab="Expected Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
 arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
 arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
-legend(0.4,-0.1,legend=vloops, pch=21,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.5)
-#legend(0.10,0.58,legend=c("3", "Non-3"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
+
+data <- ins.data
+sizes <- 0.5*sqrt(data$counts)
+sizes[3] <- 1.2
+points(data[,c("exp","obs")], pch=21, cex=sizes,lwd=1, bg=colors )
+arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
+arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
+
+legend(0.45,-0.2,legend=vloops, pch=21,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.5)
+legend(0.45,0.2,legend=c("Ins", "Del"), pch=c(21,1),cex=1.3, pt.bg=colors[1],col=colors[1], x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 
 
 require(RColorBrewer)
