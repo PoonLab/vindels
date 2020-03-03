@@ -346,8 +346,9 @@ within <- c()
 for (row in 1:3){
   within <- c(within, as.double(indel.df[row,]))
 }
-btwrates <- max.llh[-c(6:15,26:35),]
 
+# max.llh is retrieved from indel_analysis.r in the ~/indelrates/ repo
+btwrates <- max.llh[-c(6:15,26:35),]
 wilcox.test(within, btwrates$adj.rate, paired=T)
 
 
@@ -362,53 +363,55 @@ wth.rates <- as.double(apply(indel.df, 2, median))
 wilcox.test(btw.rates,wth.rates, paired=T)
 
 
-
-
-# # BOXPLOTS 
-# # --------------------------
-# par(mar=c(6,6,3,2))
-# boxplot(ins.df, main="Insertions", xlab="Variable Loop", ylab="Events/Nt/Year x 10^-3",cex.main=1.8,cex.lab=1.6,cex.axis=1.4)
-# boxplot(del.df, main="Deletions", xlab="Variable Loop", ylab="Events/Nt/Year x 10^-3",cex.main=1.8,cex.lab=1.6,cex.axis=1.4)
-# ins.df <- t(ins.df)
-# del.df <- t(del.df)
-# 
-# 
-# 
-insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
-delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
-# 
-insrates <- data.frame(vloop=vloops,
-                       rate=apply(ins.df, 2, median), 
-                       lower=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
-                       upper=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
-delrates <- data.frame(vloop=vloops,
-                       rate=apply(del.df, 2, median), 
-                       lower=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
-                       upper=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
-
-# BOOTSTRAPS 
+# BOOTSTRAPS - over 20 replicates (simple)
+ins.rep <- matrix(nrow=2, ncol=5)
+del.rep <- matrix(nrow=2, ncol=5)
 for (v in 1:5){
-  irates <- ins.df[,i]
-  drates <- del.df[,i]
+  itemp <- ins.df[,v]
+  dtemp <- del.df[,v]
   
-  imeds <- c()
-  for (i in 1:1000){
+  imeds <- sapply(1:1000, function(x){
     rand <- sample(1:20, 20, replace=T)
-    imeds[i] <- median(irates[rand])
-  }
+    median(itemp[rand])
+  })
   
-  dmeds <- c()
-  for (i in 1:1000){
+  dmeds <- sapply(1:1000, function(x){
     rand <- sample(1:20, 20, replace=T)
-    dmeds[i] <- median(drates[rand])
-  }
+    median(dtemp[rand])
+  })
+  
+  ins.rep[,v] <- quantile(imeds, c(0.025,0.975))
+  del.rep[,v] <- quantile(dmeds, c(0.025,0.975))
 }
 
 
+# STANDARD INDEL RATES 
+# ---------------
+
+insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
+delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
+
+insrates <- data.frame(vloop=vloops,
+                       rate=apply(ins.df, 2, median),
+                       lower=ins.rep[1,],
+                       upper=ins.rep[2,])
+                       #lower=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                       #upper=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
+delrates <- data.frame(vloop=vloops,
+                       rate=apply(del.df, 2, median), 
+                       lower=del.rep[1,],
+                       upper=del.rep[2,])
+                       #lower=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                       #upper=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
 
 
 
 
+
+
+
+
+# MIDPOINTS
 # Used for looking at RTT midpoints (time when indels occur)
 insrates <- data.frame(vloop=vloops,
                        rate=unname(unlist(lapply(irtt, median))), 
