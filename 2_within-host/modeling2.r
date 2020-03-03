@@ -222,7 +222,7 @@ getMat <- function(rate, branch){
   # generate the F81 rate matrix 
   mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
   mat <- mat * rate
-  diag(mat) <- sapply(1:4, function(x) -(sum(rate * f[-x]))) 
+  diag(mat) <- sapply(1:4, function(x) -(sum(rate * f[-x]))) # entirely equivalent to -rate*(sum(f[-x]))
   
   # multiply by branch length
   mat <- branch * mat
@@ -237,7 +237,7 @@ pairllh <- function(anc, newtip, rate, branch){
   achars <- strsplit(anc, "")[[1]]
   tchars <- strsplit(newtip, "")[[1]]
   
-  result <- mapply(function(tchar,achar){
+  result <- mcmapply(function(tchar,achar){
     # initializes a matrix with a 
     tip.llh <- matrix(as.numeric(tchar == nt), nrow=4,ncol=1,dimnames=list(nt))
     
@@ -251,7 +251,7 @@ pairllh <- function(anc, newtip, rate, branch){
     # likelihood given the exact nucleotide (state) that we see in the ancestor
     final.llh <- llh[achar,]
     return(log(final.llh))
-  }, achars, tchars)
+  }, achars, tchars,mc.cores=8)
   
   # if (class(result) == "list"){
   #   print(anc)
@@ -268,16 +268,17 @@ branches <- insertions$length
 anc.seqs <- gsub("-", "", insertions$Anc)
 
 seqllh <- function(rate){
-  tip.seqs <- unname(mapply(getTip, insertions$Vseq, slip.list))
+  tip.seqs <- unname(mcmapply(getTip, insertions$Vseq, slip.list, mc.cores=16))
   #print(head(tip.seqs))
   rate <- rep(rate, length(anc.seqs))
-  total.llh <- unname(mapply(pairllh, anc.seqs, tip.seqs, rate, branches))
+  total.llh <- unname(mcmapply(pairllh, anc.seqs, tip.seqs, rate, branches, mc.cores=16))
   #print(head(total.llh))
   sum(total.llh)
 }
 
 
 likelihood <- function(param){
+  print("Starting LLH...")
   p.enter <- param[1]
   p.stay  <- param[2]
   rate <- param[3]
@@ -302,7 +303,7 @@ prior <- function(param){
   rate <- param[3]
   
   prior.pe <- dlnorm(p.enter,meanlog=-8,sdlog=2, log=T)
-  prior.ps <- dlnorm(p.stay,meanlog=-0.15,sdlog=0.05,log=T)
+  prior.ps <- dlnorm(p.stay,meanlog=-0.2,sdlog=0.1,log=T)
   prior.rate <- dlnorm(p.stay,meanlog=-7,sdlog=2,log=T)
   
   return(prior.pe + prior.ps + prior.rate)
@@ -322,11 +323,11 @@ proposalFunction <- function(param){
   num <- runif(1)
   if (num > 0.9){
     if (num-0.9 < 1/30){
-      p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.15)
+      p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
     }else if(num-0.9 > 2/30){
-      p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.03)
+      p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
     }else{
-      rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.15)
+      rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
     }
   }else{
     # perform a change on the sliplist 
@@ -342,8 +343,11 @@ runMCMC <- function(startvalue, iterations){
   chain[1,] <- startvalue
   
   for (i in 1:iterations){
+    print("Getting Proposal ...")
     proposal <- proposalFunction(chain[i,])
+    print("Getting Current Posterior ...")
     p.current <- posterior(chain[i,])
+    print("Getting Proposed Posterior ...")
     p.next <- posterior(proposal)
     print(p.current)
     print(p.next)
@@ -373,11 +377,34 @@ chain <- runMCMC(startvalue, 1000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
-burnin <- 200
+burnin <- 0.1*(nrow(chain)-1)
 acceptance <- 1 - mean(duplicated(chain[-(1:burnin),]))
 print(paste0("Acceptance: ", acceptance))
 
 
+med1 <- round(median(chain[-(1:burnin),1]),6)
+med2 <- round(median(chain[-(1:burnin),2]),3)
+
+par(mfrow=c(1,2), mar=c(5,5,4,1))
+# PLOTTING 
+hist(chain[-(1:burnin),1],nclass=30, main="Posterior of Enter", xlab="Prob(Enter)",ylab="Frequency",col="lightskyblue")
+abline(v = med1, col='red',lwd=2)
+text(0.000168, 70000, paste0("Median = ", med1))
+text(0.000168, 60000, paste0("Acceptance = ", as.character(acceptance)))
+hist(chain[-(1:burnin),2],nclass=30, main="Posterior of Stay", xlab="Prob(Stay)", ylab="Frequency",col="lightskyblue",xlim=c(0.87,0.91))
+text(0.905, 70000, paste0("Median = ", med2))
+abline(v = med2, col='red',lwd=2)
+#text(0.00017, 400, paste0("Acceptance = ",as.character(acceptance)))
+dev.off()
+
+len <- length(chain[,1])
+thinned <- seq(burnin, len, 100)
+
+par(mfrow=c(1,2), mar=c(5,5,4,1))
+plot(chain[thinned,1], type = "l", xlab="MCMC Steps" , ylab="Prob(Enter)",main = "Chain values of Enter")
+abline(h = med1, col="red")
+plot(chain[thinned,2], type = "l", xlab="MCMC Steps" , ylab="Prob(Stay)",main = "Chain values of Stay")
+abline(h = med2, col="red")
 
 # get slip locations 
 
