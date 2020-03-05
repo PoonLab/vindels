@@ -236,8 +236,8 @@ pairllh <- function(anc, newtip, rate, branch){
   tmat <- getMat(rate,branch)
   achars <- strsplit(anc, "")[[1]]
   tchars <- strsplit(newtip, "")[[1]]
-  
-  result <- mcmapply(function(tchar,achar){
+  print(branch)
+  result <- mapply(function(tchar,achar){
     # initializes a matrix with a 
     tip.llh <- matrix(as.numeric(tchar == nt), nrow=4,ncol=1,dimnames=list(nt))
     
@@ -251,7 +251,7 @@ pairllh <- function(anc, newtip, rate, branch){
     # likelihood given the exact nucleotide (state) that we see in the ancestor
     final.llh <- llh[achar,]
     return(log(final.llh))
-  }, achars, tchars,mc.cores=8)
+  }, achars, tchars)
   
   # if (class(result) == "list"){
   #   print(anc)
@@ -266,11 +266,13 @@ f <- estimateFreq(allseqs)
 
 branches <- insertions$length
 anc.seqs <- gsub("-", "", insertions$Anc)
-
+require(parallel)
 seqllh <- function(rate){
+  #print("Starting SeqLLH ... ")
   tip.seqs <- unname(mcmapply(getTip, insertions$Vseq, slip.list, mc.cores=16))
   #print(head(tip.seqs))
   rate <- rep(rate, length(anc.seqs))
+  #print("Calculating pairwise ... ")
   total.llh <- unname(mcmapply(pairllh, anc.seqs, tip.seqs, rate, branches, mc.cores=16))
   #print(head(total.llh))
   sum(total.llh)
@@ -278,7 +280,7 @@ seqllh <- function(rate){
 
 
 likelihood <- function(param){
-  print("Starting LLH...")
+  #print("Starting LLH...")
   p.enter <- param[1]
   p.stay  <- param[2]
   rate <- param[3]
@@ -287,12 +289,13 @@ likelihood <- function(param){
   x <- sum(slips == 0)
   y <- sum(slips != 0)
   z <- sum(slips[which(slips!=0)] - 1)
-  
   if (any(is.na(slips))){
     llh <- log(0)
+
   }else{
     llh <-  x*log(1-p.enter) + y*log(p.enter) + y*log(1-p.stay) + z*log(p.stay)
   }
+
   llh + seqllh(rate)
 }
 # --------------------------------------------------
@@ -343,11 +346,8 @@ runMCMC <- function(startvalue, iterations){
   chain[1,] <- startvalue
   
   for (i in 1:iterations){
-    print("Getting Proposal ...")
     proposal <- proposalFunction(chain[i,])
-    print("Getting Current Posterior ...")
     p.current <- posterior(chain[i,])
-    print("Getting Proposed Posterior ...")
     p.next <- posterior(proposal)
     print(p.current)
     print(p.next)
@@ -373,7 +373,7 @@ runMCMC <- function(startvalue, iterations){
 
 # RUN MCMC
 startvalue <- c(0.001, 0.8, 0.001)
-chain <- runMCMC(startvalue, 1000)
+chain <- runMCMC(startvalue, 10000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
