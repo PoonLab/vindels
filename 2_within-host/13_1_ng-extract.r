@@ -212,6 +212,8 @@ cex=1
 par(pty="s", xpd=F, mar=c(6,8,4,1),las=0)
 #as.numeric(row.names(data))+20
 # this take in data either as ins.data or del.data
+
+# Deletion data points 
 data <- del.data
 sizes <- 0.4*sqrt(data$counts)
 sizes[3] <- 1.2
@@ -226,6 +228,7 @@ title(xlab="Expected Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
 arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
 arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
 
+# Insertion data points 
 data <- ins.data
 sizes <- 0.5*sqrt(data$counts)
 sizes[3] <- 1.2
@@ -235,10 +238,16 @@ arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
 
 legend(0.45,-0.2,legend=vloops, pch=21,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.5)
 legend(0.45,0.2,legend=c("Ins", "Del"), pch=c(21,1),cex=1.3, pt.bg=colors[1],col=colors[1], x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
-xpos <- c(-0.3, -0.2, -0.2, -0.1, -0.5, -0.5,-0.3, -0.2, -0.6, -0.2)
-ypos <- c(0.3,0.2,0.1,0.5,0.35, -0.3, -0.25, -0.3,-0.45, -0.08)
 
-text(xpos, ypos, labels=rep(c("V1","V2","V3","V4","V5"),2))
+# positions for V1,V2,V3,V4,V5 (top set first )
+xposi <- c(-0.44, -0.18, -0.2, -0.73, 0)
+yposi <- c(0.35, 0.3, 0.05, 0.35, 0.30)
+
+xposd <- c(-0.55, -0.4, -0.1, -0.75, -0.1)
+yposd <- c(-0.30, -0.2, -0.22,-0.35, -0.03)
+
+text(xposi, yposi, labels=c("V1","V2","V3","V4","V5"))
+text(xposd, yposd, labels=c("V1","V2","V3","V4","V5"))
 
 require(RColorBrewer)
 colors <- brewer.pal(5, "Set1")
