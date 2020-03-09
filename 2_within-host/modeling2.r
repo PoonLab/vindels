@@ -22,27 +22,6 @@ createSlips <- function(anc, ins, pos){
   }
 }
 
-
-
-# n <- 0
-# pos <- 0
-# print(length(tip.chars))
-# while (pos < nchar(oldtip)){
-#   pos <- pos + 1
-#   n <- n+1
-#   #print(pos)
-#   count <- slip[n]
-#   print(pos)
-#   print(n)
-#   #print(count)
-#   if (count != 0){
-#     pos <- pos + (count-1)
-#     toAdd <- ""
-#   }else{
-#     toAdd <- tip.chars[pos]
-#   }
-#   new.chars[n] <- tip.chars[pos]
-# }
 getTip <- function(oldtip, slip){
   nonzeros <- which(slip != 0)
   
@@ -165,19 +144,19 @@ slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Seq, insertio
 #insertions$Header <- unname(mapply(patLabel, insertions$Header, insertions$Pat))
 names(slip.list) <- insertions$Header
 
-# for printing the slip.list 
-for (elem in 1:length(slip.list)){
-  if(sum(slip.list[[elem]]) > 0){
-    print(slip.list[elem])
-  }
-}
-# C.-.-.QT.10R.-.-_289_1_b
-# randomly shuffle the slip locations around 
-slip.list <- lapply(slip.list, function(x){
-  total <- sum(x)
-  locs <- sample(length(x), total, replace=T)
-  getSlipVector(locs, length(x))
-})
+# # for PRINTING the slip.list 
+# for (elem in 1:length(slip.list)){
+#   if(sum(slip.list[[elem]]) > 0){
+#     print(slip.list[elem])
+#   }
+# }
+# # C.-.-.QT.10R.-.-_289_1_b
+# # SHUFFLING --- randomly shuffle the slip locations around 
+# slip.list <- lapply(slip.list, function(x){
+#   total <- sum(x)
+#   locs <- sample(length(x), total, replace=T)
+#   getSlipVector(locs, length(x))
+# })
 
 nucleotides <- c("A","C","G","T")
 idx <- which(unname(lapply(slip.list,sum))>0)
