@@ -22,6 +22,30 @@ createSlips <- function(anc, ins, pos){
   }
 }
 
+
+# calculate the median lengths of the variable loops 
+ins.v <- split(insertions, insertions$Vloop)
+lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
+
+simulateDNA <- function(p.sub, p.indel, lambda, nfreq){
+  vlen <- lens[sample(1:5, 1)]
+  
+  seq <- sapply(1:vlen, function(x){
+    num <- runif(1)
+    
+    if (num < nfreq[1]){
+      nucl <- "A"
+    }else if (num > nfreq[1] && num < (nfreq[2]+nfreq[1])){
+      nucl <- "C"
+    }else if (num > (nfreq[2]+nfreq[1]) && num < (nfreq[3]+nfreq[2]+nfreq[1])){
+      nucl <- "G"
+    }else{
+      nucl <- "T"
+    }
+    nucl
+  })
+}
+
 getTip <- function(oldtip, slip){
   nonzeros <- which(slip != 0)
   
