@@ -256,13 +256,13 @@ for (nuc in nucleotides){
   dVProps <- c(dVProps, sum(str_count(total.del$Vseq, nuc)) / dTotals[2])
 }
 require(reshape)
-counts <- melt(counts)
+counts2 <- reshape2::melt(counts)
 
 ins.nt <- data.frame(nt=nucleotides,props=iProps,vprops=iVProps)
 del.nt <- data.frame(nt=nucleotides,props=dProps,vprops=dVProps)
 indel.nt <- rbind(ins.nt, del.nt)
 indel.nt$indel <- c(rep(0,4),rep(3,4))
-indel.nt$counts <- counts$value
+indel.nt$counts <- counts2$value
 
 # -----------------------------------------
 # RANDOMIZATION TEST (gave negative result)
