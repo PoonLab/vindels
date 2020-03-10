@@ -26,24 +26,52 @@ createSlips <- function(anc, ins, pos){
 # calculate the median lengths of the variable loops 
 ins.v <- split(insertions, insertions$Vloop)
 lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
-
-simulateDNA <- function(p.sub, p.indel, lambda, nfreq){
+f <- estimateFreq(allseqs)
+simulateDNA <- function(p.enter, p.stay, lambda){
   vlen <- lens[sample(1:5, 1)]
   
   seq <- sapply(1:vlen, function(x){
     num <- runif(1)
     
-    if (num < nfreq[1]){
+    if (num < f[1]){
       nucl <- "A"
-    }else if (num > nfreq[1] && num < (nfreq[2]+nfreq[1])){
+    }else if (num > f[1] && num < (f[2]+f[1])){
       nucl <- "C"
-    }else if (num > (nfreq[2]+nfreq[1]) && num < (nfreq[3]+nfreq[2]+nfreq[1])){
+    }else if (num > (f[2]+f[1]) && num < (f[3]+f[2]+f[1])){
       nucl <- "G"
     }else{
       nucl <- "T"
     }
     nucl
   })
+  
+  pois <- c()
+  # find all non-3 values
+  while(length(pois)<1000){
+    smpl <- rpois(1000,lambda=5)
+    non3 <- which(smpl%%3 !=0)
+    # choose ~90% of these non-3 values to place in the "toRemove" vector
+    toRemove <- which(sapply(1:length(non3), function(n){
+      if(runif(1) < 0.05) return (F) else return(T)
+    }))
+    
+    # the ~90% in the toRemove vector will be highlighted in the non3 vector,
+    # which will be removed from the pois sample
+    pois <- c(pois, smpl[-(non3[toRemove])])
+    print(length(pois))
+  }
+  
+  
+  
+  
+  
+  slips <- rep(0, nchar(seq)+1)
+  
+  
+}
+
+getSecond <- function(seq, p.enter, p.stay, lambda){
+  
 }
 
 getTip <- function(oldtip, slip){
