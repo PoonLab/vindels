@@ -1,7 +1,7 @@
 #
 nucleotides <- c("A","C","G","T")
 path <- "~/Lio/"
-#path <- "~/PycharmProjects/hiv-withinhost/"
+path <- "~/PycharmProjects/hiv-withinhost/"
 total.ins <- read.csv(paste0(path,"10_nucleotide/total-ins.csv"), row.names = 1, stringsAsFactors = F)
 total.del <- read.csv(paste0(path,"10_nucleotide/total-del.csv"), row.names = 1, stringsAsFactors = F)
 
@@ -80,11 +80,8 @@ for (n in 1:1000){
   total2 <- c(sum(unname(sapply(df2.bs[,"Seq"], nchar))), sum(unname(sapply(df2.bs[,"Vseq"], nchar))))
   
   props <- sapply(nucleotides, function(nuc){
-    icount <- sum(str_count(df1.bs$Seq, nuc))
-    dcount <- sum(str_count(df2.bs$Seq, nuc))
-    
-    iProps <-  icount / total1[1]
-    dProps <-  dcount / total2[1]
+    iProps <-  sum(str_count(df1.bs$Seq, nuc)) / total1[1]
+    dProps <-  sum(str_count(df2.bs$Seq, nuc)) / total2[1]
     
     iVProps <-  sum(str_count(df1$Vseq, nuc)) / total1[2]
     dVProps <-  sum(str_count(df2$Vseq, nuc)) / total2[2]
@@ -94,9 +91,9 @@ for (n in 1:1000){
   letter <- "i"
   for (n in nucleotides){
     bs.props[[paste0(letter,"3-",n)]] <- c(bs.props[[paste0(letter,"3-",n)]], unname(props[1,n]))
-    bs.props[[paste0(letter,"n3-",n)]] <- c(bs.props[[paste0(letter,"n3-",n)]], unname(props[2,n]))
+    bs.props[[paste0(letter,"non3-",n)]] <- c(bs.props[[paste0(letter,"non3-",n)]], unname(props[2,n]))
     bs.props[[paste0(letter,"v3-",n)]] <- c(bs.props[[paste0(letter,"v3-",n)]], unname(props[3,n]))
-    bs.props[[paste0(letter,"vn3-",n)]] <- c(bs.props[[paste0(letter,"vn3-",n)]], unname(props[4,n]))
+    bs.props[[paste0(letter,"vnon3-",n)]] <- c(bs.props[[paste0(letter,"vnon3-",n)]], unname(props[4,n]))
   }
 }
 medians <- unlist(lapply(bs.props,median))
@@ -111,59 +108,6 @@ upper.y <- con.int[which(!grepl("v",names(con.int)) & grepl("97.5",names(con.int
 
 
 
-#RANDOMIZATION TEST 
-# ---------------------------------
-iSample <- list(c(),c(),c(),c())
-dSample <- list(c(),c(),c(),c())
-# generates the randomly sampled substrings for each indel
-for (row in 1:nrow(df1)){
-  itemp <- sampleString(df1[row,"len"], df1[row,"Vseq"])
-  for (i in 1:4){
-    iSample[[i]] <- c(iSample[[i]], itemp[[i]])
-  }
-}
-for (row in 1:nrow(df2)){
-  dtemp <- sampleString(df2[row,"len"], df2[row,"Vseq"])
-  for (i in 1:4){
-    dSample[[i]] <- c(dSample[[i]], dtemp[[i]])
-  }
-}
-
-# compares the observed proportion to the overall distribution of each nucleotide 
-isign <- c()
-dsign <- c()
-for (i in 1:4){
-  idist <- iSample[[i]]
-  ddist <- dSample[[i]]
-  
-  iQT <- quantile(idist, probs=c(0.025,0.975))
-  dQT <- quantile(ddist, probs=c(0.025,0.975))
-  
-  ins.p <- ins.nt[i,2]
-  del.p <- del.nt[i,2]
-  
-  # highlight significant differences 
-  if (ins.p < iQT[[1]]){
-    isign <- c(isign, "lower")
-  }else if(ins.p > iQT[[2]]){
-    isign <- c(isign, "higher")
-  }else{
-    isign <- c(isign, "")
-  }
-  
-  # highlight significant differences 
-  if (del.p < dQT[[1]]){
-    dsign <- c(dsign, "lower")
-  }else if(del.p > dQT[[2]]){
-    dsign <- c(dsign, "higher")
-  }else{
-    dsign <- c(dsign, "")
-  }
-  
-}
-
-indel.nt$sign <- c(isign,dsign)
-
 
 # NT ALL INDELS PLOT 
 # broken down by variable loop and nucleotide
@@ -174,15 +118,15 @@ colors <- brewer.pal(4, "Set1")
 cex=1
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
-lim = c(0.1,0.60)
+lim = c(0.1,0.50)
 plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,
      cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=3, main="Insertions - Nt Proportions")
 title(ylab="Proportion Inside Indels", line=3,cex.lab=1.3)
 title(xlab="Proportion in Variable Loops", line=3,cex.lab=1.3)
 arrows(indel.nt[1:8,3], lower.y[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,3], upper.y[c(seq(1,8,2),seq(1,8,2)+1)], length=0.05, angle=90, code=3)
 arrows(lower.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], upper.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], length=0.05, angle=90, code=3)
-legend(0.53,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.10,0.58,legend=c("3", "Non-3"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
+legend(0.43,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.10,0.5,legend=c("3", "Non-3"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 par(xpd=F)
 abline(0,1)
 
@@ -272,4 +216,61 @@ legend(0.44,0.24,legend=nucleotides, pch=21,cex=1.5, pt.bg=del.props[,1],x.inter
 legend(0.35,0.24,legend=vloops2, pch=c(21,22,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 par(xpd=F)
 abline(0,1)
+
+
+# OLD 
+# -------------------
+
+#RANDOMIZATION TEST 
+# ---------------------------------
+iSample <- list(c(),c(),c(),c())
+dSample <- list(c(),c(),c(),c())
+# generates the randomly sampled substrings for each indel
+for (row in 1:nrow(df1)){
+  itemp <- sampleString(df1[row,"len"], df1[row,"Vseq"])
+  for (i in 1:4){
+    iSample[[i]] <- c(iSample[[i]], itemp[[i]])
+  }
+}
+for (row in 1:nrow(df2)){
+  dtemp <- sampleString(df2[row,"len"], df2[row,"Vseq"])
+  for (i in 1:4){
+    dSample[[i]] <- c(dSample[[i]], dtemp[[i]])
+  }
+}
+
+# compares the observed proportion to the overall distribution of each nucleotide 
+isign <- c()
+dsign <- c()
+for (i in 1:4){
+  idist <- iSample[[i]]
+  ddist <- dSample[[i]]
+  
+  iQT <- quantile(idist, probs=c(0.025,0.975))
+  dQT <- quantile(ddist, probs=c(0.025,0.975))
+  
+  ins.p <- ins.nt[i,2]
+  del.p <- del.nt[i,2]
+  
+  # highlight significant differences 
+  if (ins.p < iQT[[1]]){
+    isign <- c(isign, "lower")
+  }else if(ins.p > iQT[[2]]){
+    isign <- c(isign, "higher")
+  }else{
+    isign <- c(isign, "")
+  }
+  
+  # highlight significant differences 
+  if (del.p < dQT[[1]]){
+    dsign <- c(dsign, "lower")
+  }else if(del.p > dQT[[2]]){
+    dsign <- c(dsign, "higher")
+  }else{
+    dsign <- c(dsign, "")
+  }
+  
+}
+
+indel.nt$sign <- c(isign,dsign)
 
