@@ -27,7 +27,7 @@ createSlips <- function(anc, ins, pos){
 ins.v <- split(insertions, insertions$Vloop)
 lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
 f <- estimateFreq(allseqs)
-simulateDNA <- function(p.enter, p.stay, lambda){
+simulateDNA <- function(p.enter, p.stay, rate, lambda){
   vlen <- lens[sample(1:5, 1)]
   
   seq <- sapply(1:vlen, function(x){
