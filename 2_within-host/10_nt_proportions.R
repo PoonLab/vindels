@@ -264,111 +264,60 @@ indel.nt <- rbind(ins.nt, del.nt)
 indel.nt$indel <- c(rep(0,4),rep(3,4))
 indel.nt$counts <- counts$value
 
-# STRATIFICATION BY MULTIPLES OF 3 and NON 3 
-#--------------------------------------------------
-ins3 <- total.ins[nchar(total.ins$Seq) %% 3 ==0,]
-insnon3 <- total.ins[nchar(total.ins$Seq) %% 3 !=0,]
-del3 <- total.del[nchar(total.del$Seq) %% 3 ==0,]
-delnon3 <- total.del[nchar(total.del$Seq) %% 3 !=0,]
+# BOOTSTRAPS
+# ----------------
 
+df1 <- total.ins
+df2 <- total.del
+bs.props <- list()
 
-ins.3.t <- c(sum(unname(sapply(ins3[,'Seq'], nchar))), sum(unname(sapply(ins3[,"Vseq"], nchar))))
-ins.non3.t <- c(sum(unname(sapply(insnon3[,'Seq'], nchar))), sum(unname(sapply(insnon3[,"Vseq"], nchar))))
-del.3.t <- c(sum(unname(sapply(del3[,"Seq"], nchar))), sum(unname(sapply(del3[,"Vseq"], nchar))))
-del.non3.t <- c(sum(unname(sapply(delnon3[,"Seq"], nchar))), sum(unname(sapply(delnon3[,"Vseq"], nchar))))
-
-iProps <- c()
-dProps <- c()
-iVProps <- c()
-dVProps <- c()
-counts <- data.frame()
-for (nuc in nucleotides){
-  icount <- sum(str_count(ins3$Seq, nuc))
-  dcount <- sum(str_count(insnon3$Seq, nuc))
-  counts <- rbind(counts, data.frame(nucl=nuc, ins=icount, del=dcount))
+for (n in 1:1000){
   
-  iProps <- c(iProps, icount / ins.3.t[1])
-  dProps <- c(dProps, dcount / ins.non3.t[1])
+  # create the bootstrap sample 
+  sam1 <- sample(nrow(df1), nrow(df1), replace=T)
+  sam2 <- sample(nrow(df2), nrow(df2), replace=T)
   
-  iVProps <- c(iVProps, sum(str_count(ins3$Vseq, nuc)) / ins.3.t[2])
-  dVProps <- c(dVProps, sum(str_count(insnon3$Vseq, nuc)) / ins.non3.t[2])
-}
-require(reshape)
-counts <- melt(counts)
-
-ins.nt <- data.frame(nt=nucleotides,props=iProps,vprops=iVProps)
-del.nt <- data.frame(nt=nucleotides,props=dProps,vprops=dVProps)
-indel.nt <- rbind(ins.nt, del.nt)
-indel.nt$indel <- c(rep(0,4),rep(3,4))
-indel.nt$counts <- counts$value
-
-# RANDOMIZATION TEST 
-# -----------------------------------------
-sampleString <- function(len, vloop){
-  len <- len-1
-  idx <- sample(1:(nchar(vloop)-len),100, replace=TRUE)
-  strings <- sapply(idx, function(x){substr(vloop, x, x+len)})
-  a <- unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)}))
-  c <- unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)}))
-  g <- unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)}))
-  t <- unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)}))
-  list(a,c,g,t)
-}
-
-
-
-iSample <- list(c(),c(),c(),c())
-dSample <- list(c(),c(),c(),c())
-# generates the randomly sampled substrings for each indel
-for (row in 1:nrow(total.ins)){
-  itemp <- sampleString(total.ins[row,"len"], total.ins[row,"Vseq"])
-  for (i in 1:4){
-    iSample[[i]] <- c(iSample[[i]], itemp[[i]])
+  df1.bs <- df1[sam1,c('Seq','Vseq')]
+  df2.bs <- df2[sam2,c('Seq','Vseq')]
+  
+  total1 <- c(sum(unname(sapply(df1.bs[,"Seq"], nchar))), sum(unname(sapply(df1.bs[,"Vseq"], nchar))))
+  total2 <- c(sum(unname(sapply(df2.bs[,"Seq"], nchar))), sum(unname(sapply(df2.bs[,"Vseq"], nchar))))
+  
+  props <- sapply(nucleotides, function(nuc){
+    iProps <-  sum(str_count(df1.bs$Seq, nuc)) / total1[1]
+    dProps <-  sum(str_count(df2.bs$Seq, nuc)) / total2[1]
+    
+    iVProps <-  sum(str_count(df1$Vseq, nuc)) / total1[2]
+    dVProps <-  sum(str_count(df2$Vseq, nuc)) / total2[2]
+    
+    return(c(iProps, dProps, iVProps, dVProps))
+  })
+ 
+  for (n in nucleotides){
+    bs.props[[paste0("ins-",n)]] <- c(bs.props[[paste0("ins-",n)]], unname(props[1,n]))
+    bs.props[[paste0("del-",n)]] <- c(bs.props[[paste0("del-",n)]], unname(props[2,n]))
+    bs.props[[paste0("v-ins-",n)]] <- c(bs.props[[paste0("v-ins-",n)]], unname(props[3,n]))
+    bs.props[[paste0("v-del-",n)]] <- c(bs.props[[paste0("v-del-",n)]], unname(props[4,n]))
   }
 }
-for (row in 1:nrow(total.del)){
-  dtemp <- sampleString(total.del[row,"len"], total.del[row,"Vseq"])
-  for (i in 1:4){
-    dSample[[i]] <- c(dSample[[i]], dtemp[[i]])
-  }
+medians <- unlist(lapply(bs.props,median))
+m.tab <- matrix(nrow=4,ncol=4, dimnames=list(nucleotides,c("ins","del","v-ins","v-del")))
+cols <- rep(1:4,4)
+rows <- rep(1:4,each=4)
+for (i in 1:16){
+  m.tab[rows[i], cols[i]] <- medians[[i]]
 }
 
-# compares the observed proportion to the overall distribution of each nucleotide 
-isign <- c()
-dsign <- c()
-for (i in 1:4){
-  idist <- iSample[[i]]
-  ddist <- dSample[[i]]
-  
-  iQT <- quantile(idist, probs=c(0.025,0.975))
-  dQT <- quantile(ddist, probs=c(0.025,0.975))
-  
-  ins.p <- ins.nt[i,2]
-  del.p <- del.nt[i,2]
-  
-  # highlight significant differences 
-  if (ins.p < iQT[[1]]){
-    isign <- c(isign, "lower")
-  }else if(ins.p > iQT[[2]]){
-    isign <- c(isign, "higher")
-  }else{
-    isign <- c(isign, "")
-  }
-  
-  # highlight significant differences 
-  if (del.p < dQT[[1]]){
-    dsign <- c(dsign, "lower")
-  }else if(del.p > dQT[[2]]){
-    dsign <- c(dsign, "higher")
-  }else{
-    dsign <- c(dsign, "")
-  }
+med.x <- as.vector(m.tab[,c(3,4)])
+med.y <- as.vector(m.tab[,c(1,2)])
 
-}
-
-ins.nt$sign <- isign
-del.nt$sign <- dsign
-
+con.int <- unlist(lapply(bs.props, function(x){quantile(x, c(0.025,0.975))}))
+cols <- rep(1:4,4, each=2)
+rows <- rep(1:8,each=4)
+lower.x <- con.int[which(grepl("v",names(con.int)) & grepl("2.5",names(con.int)))]
+upper.x <- con.int[which(grepl("v",names(con.int)) & grepl("97.5",names(con.int)))]
+lower.y <- con.int[which(!grepl("v",names(con.int)) & grepl("2.5",names(con.int)))]
+upper.y <- con.int[which(!grepl("v",names(con.int)) & grepl("97.5",names(con.int)))]
 
 
 
@@ -382,10 +331,12 @@ cex=1
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
 lim = c(0.1,0.45)
-plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='',cex=2.8, main="Nucleotide Proportions")
+plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,cex=0.12*sqrt(indel.nt$counts),
+     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='', main="Nucleotide Proportions")
 title(ylab="Proportion Inside Indels", line=3,cex.lab=1.3)
 title(xlab="Proportion in Variable Loops", line=3,cex.lab=1.3)
+arrows(indel.nt[1:8,3], lower.y[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,3], upper.y[c(seq(1,8,2),seq(1,8,2)+1)], length=0.05, angle=90, code=3)
+arrows(lower.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], upper.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], length=0.05, angle=90, code=3)
 legend(0.38,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 par(xpd=F)
@@ -480,7 +431,8 @@ abline(0,1)
 
 
 
-
+#TRASH
+# -----------------
 cex=2
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
@@ -523,16 +475,71 @@ plot <- plot + labs(x="Nucleotide",
 
 
 
-#A
-cex=2
-par(pty="s", mfrow=c(2,2), xpd=NA, mar=c(3,8,4,1),las=0)
 
-lim = c(0.24,0.46)
-plot(list.df[[1]][,1:2], cex=sizes.v, pch=(list.df[[1]]$vregion+20), bg=rep(colors, 7),xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=0.9,cex.main=1.5, ylab='', xlab='')
-text(0.187,0.475,labels="a)", cex=1.5)
-text(0.245,0.452,labels="A", cex=1.5)
-title(ylab="Proportion Within Indels", line=2.5,cex.lab=1.15)
-title(xlab="Proportion Outside Indels", line=2.1,cex.lab=1.15)
-par(xpd=F)
-abline(0,1)
+# RANDOMIZATION TEST 
+# -----------------------------------------
+sampleString <- function(len, vloop){
+  len <- len-1
+  idx <- sample(1:(nchar(vloop)-len),100, replace=TRUE)
+  strings <- sapply(idx, function(x){substr(vloop, x, x+len)})
+  a <- unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)}))
+  c <- unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)}))
+  g <- unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)}))
+  t <- unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)}))
+  list(a,c,g,t)
+}
+
+
+
+iSample <- list(c(),c(),c(),c())
+dSample <- list(c(),c(),c(),c())
+# generates the randomly sampled substrings for each indel
+for (row in 1:nrow(total.ins)){
+  itemp <- sampleString(total.ins[row,"len"], total.ins[row,"Vseq"])
+  for (i in 1:4){
+    iSample[[i]] <- c(iSample[[i]], itemp[[i]])
+  }
+}
+for (row in 1:nrow(total.del)){
+  dtemp <- sampleString(total.del[row,"len"], total.del[row,"Vseq"])
+  for (i in 1:4){
+    dSample[[i]] <- c(dSample[[i]], dtemp[[i]])
+  }
+}
+
+# compares the observed proportion to the overall distribution of each nucleotide 
+isign <- c()
+dsign <- c()
+for (i in 1:4){
+  idist <- iSample[[i]]
+  ddist <- dSample[[i]]
+  
+  iQT <- quantile(idist, probs=c(0.025,0.975))
+  dQT <- quantile(ddist, probs=c(0.025,0.975))
+  
+  ins.p <- ins.nt[i,2]
+  del.p <- del.nt[i,2]
+  
+  # highlight significant differences 
+  if (ins.p < iQT[[1]]){
+    isign <- c(isign, "lower")
+  }else if(ins.p > iQT[[2]]){
+    isign <- c(isign, "higher")
+  }else{
+    isign <- c(isign, "")
+  }
+  
+  # highlight significant differences 
+  if (del.p < dQT[[1]]){
+    dsign <- c(dsign, "lower")
+  }else if(del.p > dQT[[2]]){
+    dsign <- c(dsign, "higher")
+  }else{
+    dsign <- c(dsign, "")
+  }
+  
+}
+
+ins.nt$sign <- isign
+del.nt$sign <- dsign
+
