@@ -49,17 +49,19 @@ simulateDNA <- function(p.enter, p.stay, rate, lambda){
   
   # this code runs with P(enter)
   if (runif(1) < p.enter){
-    
-    # get a poisson distributed value greater than 0 (0 is a waste of computation power)
-    smpl <- 0
-    while (smpl <= 0){
-      smpl <- rpois(1,lambda=5)
-    }
-    
+
     if (runif(1) < 0.05){
       # add a non-multiple of 3 indel
+      res <- 0
+      while (res %% 3 == 0 && res > 0){
+        res <- rpois(1,lambda=5)
+      }
     }else{
-
+      # add a multiple of 3 indel 
+      res <- 1
+      while (res %% 3 != 0 && res > 0){
+        res <- rpois(1,lambda=5)
+      }
     }
   }
   
@@ -90,11 +92,11 @@ simulateDNA <- function(p.enter, p.stay, rate, lambda){
   # to estimate the OBSERVED rate of indels, it is a simpler process
   # algorithm:
     # probability of enter is chosen
-    # draw a random number to determine whether a 
-    # if number %% 3 == 0:
-      # keep the number 
-    # else if number %% 3 != 0:
-      # while loop to redraw the number until 
+    # draw a random number to determine whether a 3 or non3 should be added
+    # if runif(1) < 0.05:
+      # add a non3 number 
+    # else:
+      # add a multiple of three 
   
   
   
