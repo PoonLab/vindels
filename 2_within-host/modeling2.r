@@ -27,41 +27,74 @@ createSlips <- function(anc, ins, pos){
 ins.v <- split(insertions, insertions$Vloop)
 lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
 f <- estimateFreq(allseqs)
+nucleotide <- function(x){
+  num <- runif(1)
+  if (num < f[1]){
+    nucl <- "A"
+  }else if (num > f[1] && num < (f[2]+f[1])){
+    nucl <- "C"
+  }else if (num > (f[2]+f[1]) && num < (f[3]+f[2]+f[1])){
+    nucl <- "G"
+  }else{
+    nucl <- "T"
+  }
+  nucl
+}
 simulateDNA <- function(p.enter, p.stay, rate, lambda){
   vlen <- lens[sample(1:5, 1)]
   
-  seq <- sapply(1:vlen, function(x){
-    num <- runif(1)
-    
-    if (num < f[1]){
-      nucl <- "A"
-    }else if (num > f[1] && num < (f[2]+f[1])){
-      nucl <- "C"
-    }else if (num > (f[2]+f[1]) && num < (f[3]+f[2]+f[1])){
-      nucl <- "G"
-    }else{
-      nucl <- "T"
-    }
-    nucl
-  })
+  seq <- sapply(1:vlen,nucleotide) 
   
   pois <- c()
-  # find all non-3 values
-  while(length(pois)<1000){
-    smpl <- rpois(1000,lambda=5)
-    non3 <- which(smpl%%3 !=0)
-    # choose ~90% of these non-3 values to place in the "toRemove" vector
-    toRemove <- which(sapply(1:length(non3), function(n){
-      if(runif(1) < 0.05) return (F) else return(T)
-    }))
+  
+  # this code runs with P(enter)
+  if (runif(1) < p.enter){
     
-    # the ~90% in the toRemove vector will be highlighted in the non3 vector,
-    # which will be removed from the pois sample
-    pois <- c(pois, smpl[-(non3[toRemove])])
-    print(length(pois))
+    # get a poisson distributed value greater than 0 (0 is a waste of computation power)
+    smpl <- 0
+    while (smpl <= 0){
+      smpl <- rpois(1,lambda=5)
+    }
+    
+    if (runif(1) < 0.05){
+      # add a non-multiple of 3 indel
+    }else{
+
+    }
   }
   
   
+  # find all non-3 values
+  non3 <- which(pois)
+  
+  # choose ~90% of these non-3 values to place in the "toRemove" vector
+  toRemove <- which(sapply(1:length(non3), function(n){
+    if(runif(1) < 0.05) return (F) else return(T)
+  }))
+  
+  # the ~90% in the toRemove vector will be highlighted in the non3 vector,
+  # which will be removed from the pois sample
+  pois <- c(pois, smpl[-(non3[toRemove])])
+  print(length(pois))
+  
+  
+  # to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
+  # algorithm:
+    # probability of enter is chosen
+    # draw a number from a poisson process
+    # if the number is %% 3 == 0: 
+      # keep it 100 percent
+    # else if the number if %%3 != 0:
+      # there's a low probability that it will be kept (penalty)
+  
+  # to estimate the OBSERVED rate of indels, it is a simpler process
+  # algorithm:
+    # probability of enter is chosen
+    # draw a random number to determine whether a 
+    # if number %% 3 == 0:
+      # keep the number 
+    # else if number %% 3 != 0:
+      # while loop to redraw the number until 
   
   
   
@@ -346,7 +379,11 @@ prior <- function(param){
 posterior <- function(param){
   #print(prior(param))
   #print(likelihood(param))
-  prior(param) + likelihood(param)
+  if (any(param > 1)){
+    return(log(0))
+  }else{
+    return(prior(param) + likelihood(param))
+  }
 }
 
 proposalFunction <- function(param){
