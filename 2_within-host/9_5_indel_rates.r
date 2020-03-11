@@ -273,8 +273,8 @@ for (i in 1:length(irtt)){
 }
 
 
-
-
+# --------------------------------
+# INSERTIONS VS DELETIONS 
 # Comparing insertion and deletion rates to each other 
 # Shown that Deletions are singificantly higher than insertions
 ir <- c(ins.df[,1],ins.df[,2],ins.df[,3],ins.df[,4],ins.df[,5])
@@ -283,7 +283,9 @@ wilcox.test(ir,dr,paired=T)
 
 
 
-# MODIFIED FOR BETWEEN HOST COMPARISON 
+
+# ----------------------------
+#  BETWEEN HOST COMPARISON 
 # Comparing combined within host indel rates to between host indel rates 
 subtypes <- c("A1", "B", "C")
 ins.sub <- list()
@@ -363,6 +365,8 @@ wth.rates <- as.double(apply(indel.df, 2, median))
 wilcox.test(btw.rates,wth.rates, paired=T)
 
 
+
+# --------------------------
 # BOOTSTRAPS - over 20 replicates (simple)
 ins.rep <- matrix(nrow=2, ncol=5)
 del.rep <- matrix(nrow=2, ncol=5)
@@ -385,8 +389,9 @@ for (v in 1:5){
 }
 
 
-# STANDARD INDEL RATES 
+
 # ---------------
+# STANDARD INDEL RATES 
 
 insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
 delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
@@ -438,7 +443,7 @@ g1 <- ggplot(insrates, aes(x=vloop, y=rate,width=0.8)) +
   geom_errorbar(aes(ymax = insrates$upper, ymin = insrates$lower),
                 width = 0.25, size=1.1) +
   labs(x="Variable Loop",
-       y=expression(paste("Insertion RTT Midpoint \n           (Days)", sep = "")))+
+       y=expression(paste("       Insertion Rate \n (Events/Nt/Year x  ",10^-3 ,")", sep = "")))+
   scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) + # breaks=c(300,600,900,1200,1500)) +
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),
@@ -446,7 +451,7 @@ g1 <- ggplot(insrates, aes(x=vloop, y=rate,width=0.8)) +
         panel.grid.minor.x = element_blank(),
         panel.spacing=unit(1, "mm"),
         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 42, r = 10, b = 4, l = 24, unit = "pt"),
+        plot.margin =margin(t = 42, r = 10, b = 4, l = 20, unit = "pt"),
         axis.line = element_line(colour = "black"),
         axis.title.y=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
         axis.title.x=element_blank(),
@@ -466,7 +471,7 @@ g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) +
   geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower),
                 width = 0.25, size=1.1) +
   labs(x="Variable Loop",
-       y="Deletion RTT")+
+       y="Deletion Rate")+
   #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
   scale_y_reverse(lim=c(6,0)) + #breaks=c(300,600,900,1200,1500))+
   theme(panel.grid.major.y = element_line(color="black",size=0.3),

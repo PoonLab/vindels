@@ -58,8 +58,8 @@ di.ins$vprop <- sapply(di.ins[,2], function(x){x/colSums(di.ins)[[2]]})
 di.del$dprop <- sapply(di.del[,1], function(x){x/colSums(di.del)[[1]]})
 di.del$vprop <- sapply(di.del[,2], function(x){x/colSums(di.del)[[2]]})
 
-di.ifinal <- data.frame(seq=colSums(di.i)[1:16]/colSums(di.i)[['sum']], vloop=colSums(di.iv)[1:16]/colSums(di.iv)[['sum']])
-di.dfinal <- data.frame(seq=colSums(di.d)[1:16]/colSums(di.d)[['sum']], vloop=colSums(di.dv)[1:16]/colSums(di.dv)[['sum']])
+#di.ifinal <- data.frame(seq=colSums(di.ins)[1:16]/colSums(di.i)[['sum']], vloop=colSums(di.iv)[1:16]/colSums(di.iv)[['sum']])
+#di.dfinal <- data.frame(seq=colSums(di.d)[1:16]/colSums(di.d)[['sum']], vloop=colSums(di.dv)[1:16]/colSums(di.dv)[['sum']])
 
 
 # RESIDUAL ANALYSIS
@@ -88,8 +88,9 @@ sampleString <- function(len, vloop){
 
 iSample <- list()
 dSample <- list()
-
-
+nt <- c("A","C","G","T")
+nts <- c()
+for(i in 1:4){for(j in 1:4){nts <- c(nts, paste0(nt[i],nt[j]))}}
 # generates the randomly sampled substrings for each indel
 for (row in 1:nrow(total.ins)){
   itemp <- sampleString(total.ins[row,"len"], total.ins[row,"Vseq"])
@@ -107,8 +108,8 @@ for (i in 1:16){
   idist <- iSample[[nts[i]]]
   ddist <- dSample[[nts[i]]]
   
-  iQT <- quantile(idist, probs=c(0.025,0.975))
-  dQT <- quantile(ddist, probs=c(0.025,0.975))
+  iQT <- quantile(idist, probs=c(0.05,0.95))
+  dQT <- quantile(ddist, probs=c(0.05,0.95))
   
   ins.p <- di.ins[i,3]
   del.p <- di.del[i,3]
