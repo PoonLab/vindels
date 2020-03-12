@@ -143,19 +143,24 @@ indel.max <- data.frame(max=c(imaxes,dmaxes), status=rep(1,length(imaxes)+length
 imax <- data.frame(max=imaxes, status=rep(1,length(imaxes)))
 dmax <- data.frame(max=dmaxes, status=rep(1,length(dmaxes)))
 
-ifit <- survfit(Surv(max,status) ~ 1, data=imax)
+data <- imax
+
+fit <- survfit(Surv(max,status) ~ 1, data=data)
 require(survminer)
-plot <- autoplot(ifit, facets=T, conf.int = F, surv.colour = "blue")  + 
-  labs(x="Variable Loop",
-       y="Survival (%)")+
+require(ggfortify)
+plot <- autoplot(fit, facets=T, conf.int = F, surv.colour = "red")  + 
+  labs(x="Time (Days)",
+       y="Survival (%)",title = "Patient Max Dates")+
   theme(panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 42, r = 10, b = 4, l = 20, unit = "pt"),
+        plot.margin =margin(t = 42, r = 10, b = 30, l = 20, unit = "pt"),
         axis.line = element_line(colour = "black"),
-        axis.title.y=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
-        axis.title.x=element_blank(),
+        axis.title.y=element_text(size=16,margin=margin(t = 0, r = 3, b = 0, l = 12)),
+        axis.title.x=element_text(size=16,margin=margin(t = 8, r = 3, b = 0, l = 0)),
         strip.text.x = element_blank(),
-        axis.text.x = element_blank(),
+        axis.text.x = element_text(size=14),
         axis.text.y = element_text(size=14),
+        plot.title=element_text(size=18,hjust=0.5)),
+        axis.title = ,
         legend.position="none")#+ geom_text(aes(y=0.4,x=3 ),
 #label="N/A",
 #size=6)
@@ -275,7 +280,7 @@ barplot(ifreq, col="dodgerblue", space=0, xaxt = "n",
         ylab="Average Number of Insertions / Patient",
         main="Insertion Timings",
         cex.lab=1.3,cex.main=1.7)
-arrows(newimaxes, 0, newimaxes, -0.2, length=0)
+#arrows(newimaxes, 0, newimaxes, -0.2, length=0)
 axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
 title(xlab="Days Since Start of Infection", line=4, cex.lab=1.3)
 
@@ -287,12 +292,12 @@ dfreq <- apply(dbins, 2, mean)
 dmaxes <- dmaxes[!is.na(dmaxes)]
 newdmaxes <- dmaxes/500
 par(xpd=NA, mar=c(7,6,4,1))
-barplot(dfreq, col="dodgerblue", space=0, xaxt = "n",
+barplot(dfreq, col="red", space=0, xaxt = "n",
         #xlab="Days Since Start of Infection",
         ylab="Average Number of Deletions / Patient",
         main="Deletion Timings",
         cex.lab=1.3,cex.main=1.7)
-arrows(newdmaxes, 0, newdmaxes, -0.5, length=0)
+#arrows(newdmaxes, 0, newdmaxes, -0.5, length=0)
 axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
 title(xlab="Days Since Start of Infection", line=4, cex.lab=1.3)
 
