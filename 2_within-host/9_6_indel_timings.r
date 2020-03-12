@@ -22,8 +22,8 @@ dmaxes <- c()
 itotal <- 0
 dtotal <- 0
 
-#ipatlist <- list()
-#dpatlist <- list()
+ipatlist <- list()
+dpatlist <- list()
 iint <- data.frame()
 itip <- data.frame()
 dint <- data.frame()
@@ -52,11 +52,13 @@ for (file in 1:length(ifolder)){
   tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename,".tree.sample")))
   lens <- node.depth.edgelength(tre)    # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
 
-  # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction
+  # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
   #lens <- lens[-(Ntip(tre)+1)]
   res <- unname(sapply(iCSV$header, function(x){
+    # this expression matches ALL NODES; second column provides the CAPTURED TIP LABELS ()
     tips <- str_match_all(x,"([^\\)\\(,\n:]+):")[[1]][,2]
     if (length(tips) == 0){
+      # This means its a TIP 
       # the index in the tre$tip.label vector is the final result
       index <- match(x, tre$tip.label)
     }else{
@@ -97,8 +99,8 @@ for (file in 1:length(ifolder)){
     print(ddates)
   }
   # Regular patient-based data frame
-  #ipatlist[[pat]] <- rbind(ipatlist[[pat]], iCSV[,2:7])
-  #dpatlist[[pat]] <- rbind(dpatlist[[pat]], dCSV[,2:7])
+  ipatlist[[pat]] <- rbind(ipatlist[[pat]], iCSV[,2:7])
+  dpatlist[[pat]] <- rbind(dpatlist[[pat]], dCSV[,2:7])
   
   # Patient-based data frame split by interior vs tip
   # iint[[pat]] <- rbind(iint[[pat]], iCSV[which(!grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7])
@@ -114,8 +116,8 @@ for (file in 1:length(ifolder)){
   #iprop <- idates / max(iCSV$length)
   #dprop <- ddates / max(dCSV$length)
   
-  imaxes[count] <- max(iCSV$length)
-  dmaxes[count] <- max(dCSV$length)
+  imaxes[count] <- max(iCSV$length,na.rm=T)
+  dmaxes[count] <- max(dCSV$length,na.rm=T)
   
   # load the all.ins and all.del vectors (more efficient algorithm)
   all.ins[iseqcount:(iseqcount+sum(icounts)-1)] <- idates
@@ -129,6 +131,36 @@ for (file in 1:length(ifolder)){
   
 }
 
+# -------------
+# SURVIVAL PLOT FOR INDEL TIMINGS
+
+imaxes <- imaxes[!is.na(imaxes)]
+dmaxes <- dmaxes[!is.na(dmaxes)]
+
+# amalgamate the data sets 
+indel.max <- data.frame(max=c(imaxes,dmaxes), status=rep(1,length(imaxes)+length(dmaxes)), type=c(rep("Insertion",length(imaxes)), rep("Deletion", length(dmaxes))))
+
+imax <- data.frame(max=imaxes, status=rep(1,length(imaxes)))
+dmax <- data.frame(max=dmaxes, status=rep(1,length(dmaxes)))
+
+ifit <- survfit(Surv(max,status) ~ 1, data=imax)
+require(survminer)
+plot <- autoplot(ifit, facets=T, conf.int = F, surv.colour = "blue")  + 
+  labs(x="Variable Loop",
+       y="Survival (%)")+
+  theme(panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 42, r = 10, b = 4, l = 20, unit = "pt"),
+        axis.line = element_line(colour = "black"),
+        axis.title.y=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
+        axis.title.x=element_blank(),
+        strip.text.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size=14),
+        legend.position="none")#+ geom_text(aes(y=0.4,x=3 ),
+#label="N/A",
+#size=6)
+
+
 # NEED TO FIX THIS 
 vlengths <- c(72,126,105,87,33)
 
@@ -141,22 +173,22 @@ tip.df <- dtip
 #   int.df <- iint[[run]]
 #   tip.df <- itip[[run]]
 #   
-  irates2 <- c()
-  trates2 <- c()
-  for (i in 1:5){
-    tip.fit <- glm(tip.df[,i] ~ 1, offset=log(tip.df[,"length"]), family="poisson")
-    int.fit <- glm(int.df[,i] ~ 1, offset=log(int.df[,"length"]), family="poisson")
-    
-    print(summary(tip.fit))
-    print(summary(int.fit))
-    
-    tip.rate <- exp(coef(tip.fit)[[1]])*365/vlengths[i]
-    int.rate <- exp(coef(int.fit)[[1]])*365/vlengths[i]
-    
-    irates2[i] <- int.rate
-    trates2[i] <- tip.rate
-    
-  }
+irates2 <- c()
+trates2 <- c()
+for (i in 1:5){
+  tip.fit <- glm(tip.df[,i] ~ 1, offset=log(tip.df[,"length"]), family="poisson")
+  int.fit <- glm(int.df[,i] ~ 1, offset=log(int.df[,"length"]), family="poisson")
+  
+  print(summary(tip.fit))
+  print(summary(int.fit))
+  
+  tip.rate <- exp(coef(tip.fit)[[1]])*365/vlengths[i]
+  int.rate <- exp(coef(int.fit)[[1]])*365/vlengths[i]
+  
+  irates2[i] <- int.rate
+  trates2[i] <- tip.rate
+  
+}
 #   irates <- irates*10^3
 #   trates <- trates*10^3
 #   

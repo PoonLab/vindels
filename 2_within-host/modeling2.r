@@ -27,59 +27,72 @@ createSlips <- function(anc, ins, pos){
 ins.v <- split(insertions, insertions$Vloop)
 lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
 f <- estimateFreq(allseqs)
-nucleotide <- function(x){
-  num <- runif(1)
-  if (num < f[1]){
-    nucl <- "A"
-  }else if (num > f[1] && num < (f[2]+f[1])){
-    nucl <- "C"
-  }else if (num > (f[2]+f[1]) && num < (f[3]+f[2]+f[1])){
-    nucl <- "G"
-  }else{
-    nucl <- "T"
-  }
-  nucl
-}
-simulateDNA <- function(p.enter, p.stay, rate, lambda){
-  vlen <- lens[sample(1:5, 1)]
-  
-  seq <- sapply(1:vlen,nucleotide) 
-  
-  pois <- c()
-  
-  # this code runs with P(enter)
-  if (runif(1) < p.enter){
-
-    if (runif(1) < 0.05){
-      # add a non-multiple of 3 indel
-      res <- 0
-      while (res %% 3 == 0 && res > 0){
-        res <- rpois(1,lambda=5)
-      }
+genSeq <- function(len){
+  seq <- c()
+  for (n in 1:len){
+    num <- runif(1)
+    if (num < f[1]){
+      nucl <- "A"
+    }else if (num > f[1] && num < (f[2]+f[1])){
+      nucl <- "C"
+    }else if (num > (f[2]+f[1]) && num < (f[3]+f[2]+f[1])){
+      nucl <- "G"
     }else{
-      # add a multiple of 3 indel 
-      res <- 1
-      while (res %% 3 != 0 && res > 0){
-        res <- rpois(1,lambda=5)
+      nucl <- "T"
+    }
+    seq[n] <- nucl
+  }
+  paste(seq, collapse="")
+}
+
+# -----
+# TESTING
+# for testing the probability 
+
+x <- c() 
+for (i in 1:29250){x[i] <- sum(runif(120) < 0.0001)}
+sum(x!=0)
+
+simPair <- function(p.enter, p.stay, rate, lambda){
+  vlen <- lens[sample(1:5, 1)]
+  anc <- genSeq(vlen)
+  
+  # make a copy of the ancestor to edit
+  tip <- anc
+  
+  # determine the number of insertions and deletions that occur 
+  count <- sum(runif(vlen) < p.enter)
+  if (count > 0){
+    for (n in 1:count){
+      if (runif(1) < 0.15){
+        # add a non-multiple of 3 indel
+        
+        
+        exit <- 1
+        count <- 0
+        while(exit > p.stay){
+          count <- count + 1
+          exit <- runif(1)
+        }
+     
+      }else{
+        # add a multiple of 3 indel 
+        len <- 1
+        while (len %% 3 != 0 || len == 0){
+          len <- rpois(1,lambda=8)
+        }
       }
+      # add the length and choose a random location for the slip event 
+      idx <- sample(1:length(slip)+1,1)
+      indel <- genSeq(len)
+      tip <- insert(tip, indel, idx)
+      anc <- insert(anc, rep("-",len), idx)
     }
   }
   
-  
-  # find all non-3 values
-  non3 <- which(pois)
-  
-  # choose ~90% of these non-3 values to place in the "toRemove" vector
-  toRemove <- which(sapply(1:length(non3), function(n){
-    if(runif(1) < 0.05) return (F) else return(T)
-  }))
-  
-  # the ~90% in the toRemove vector will be highlighted in the non3 vector,
-  # which will be removed from the pois sample
-  pois <- c(pois, smpl[-(non3[toRemove])])
-  print(length(pois))
-  
-  
+  # add in substitutions based on the rate value 
+    
+  return(c(tip,anc))
   # to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
   # algorithm:
     # probability of enter is chosen
@@ -97,12 +110,6 @@ simulateDNA <- function(p.enter, p.stay, rate, lambda){
       # add a non3 number 
     # else:
       # add a multiple of three 
-  
-  
-  
-  slips <- rep(0, nchar(seq)+1)
-  
-  
 }
 
 getSecond <- function(seq, p.enter, p.stay, lambda){
