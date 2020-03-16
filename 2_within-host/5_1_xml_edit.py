@@ -40,6 +40,9 @@ for infile in xmlFolder:
     xmlname = os.path.basename(infile) 
     print(xmlname)
 
+    if re.search("-original",xmlname) != None:
+        print(re.sub("-original","",xmlname))
+
     treename = xmlname.split("-")
 
     if len(treename) == 2: 
