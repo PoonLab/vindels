@@ -1,10 +1,10 @@
 args <- commandArgs(trailingOnly=T)
 
-# if (length(args)!= 2){
-# 
-# 	print("USAGE: Rscript bayes-factor.R [input dir 1] [input dir 2] ...")
-# 	quit()
-# }
+if (length(args)!= 2){
+
+	print("USAGE: Rscript bayes-factor.R [input dir 1] [input dir 2] ...")
+	quit()
+}
 for (i in 1:length(args)){
 	if (!endsWith(args[i],"/")){
 		args[i] <- paste0(args[i],"/")
@@ -59,7 +59,7 @@ for (j in 1:length(args)){
 
 bayes$best <- apply(bayes[,1:j+1], 1, function(x) which(x == max(x)))
 colnames(bayes) <- c("filename", runs, "best")
-write.csv(bayes, "~/PycharmProjects/hiv-withinhost/6_hm/bayes-comparison5.csv")
+write.csv(bayes, "~/PycharmProjects/hiv-withinhost/6_hm/temp-comparison.csv")
 for (x in 1:j){
   print(paste0("DIR",x," Count: ", sum(bayes$best == x)))
 }

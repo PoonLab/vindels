@@ -211,9 +211,6 @@ total.del$len <- sapply(total.del$Seq, nchar)
 write.csv(total.ins, paste0(path,"10_nucleotide/total-ins.csv"))
 write.csv(total.del, paste0(path,"10_nucleotide/total-del.csv"))
 
-
-
-
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
 total.ins2 <- total.ins[total.ins$len>1, ]

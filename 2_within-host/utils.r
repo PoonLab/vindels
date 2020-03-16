@@ -5,7 +5,7 @@ getSubtype <- function(header){
   newheader
 }
 
-patLabel <- function(header, pat){
+getPat <- function(header, pat){
   label <- strsplit(pat, "-")[[1]][2]
   paste0(header,"_",label)
 }

@@ -192,13 +192,12 @@ iTotal <- split(csv.ins, csv.ins$Run)
 dTotal <- split(csv.del, csv.del$Run)
 
 
-
 require(BSDA)
 # RATE ANALYSIS -------------
 ins.df <- data.frame()
 del.df <- data.frame()
 
-#median(as.numeric(all.ins[all.ins$Vloop==2,3])) # used to determine the median lengths of the variable loops
+#median(as.numeric(all.ins[all.ins$Vloop==2,3])) # used to det ermine the median lengths of the variable loops
 vlengths <- c(72,126,105,87,33)
 all.df <- data.frame()
 
@@ -229,18 +228,19 @@ for (run in 1:20){
     drtt[[as.character(vloop)]] <- c(drtt[[as.character(vloop)]], dFinal[dFinal$Count>0,'mid.rtt'])
     #print(nrow(current) - nrow(iFinal))
     
-    # COUNTING NUCLEOTIDES: change the formula to this : nchar(gsub(",","",iFinal$Seq))*iFinal$Count ~ 1
+    # INSERTION RATES 
     ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
     irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
     irates <- c(irates, irate)
     print(summary(ifit))
     
+    # DELETION RATES
     dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
     drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
     drates <- c(drates, drate)
     print(summary(dfit))
     
-    
+    # COUNTING NUCLEOTIDES: change the formula to this : nchar(gsub(",","",iFinal$Seq))*iFinal$Count ~ 1
     #print(1 - (fit$deviance/fit$null.deviance))
     #all.df <- rbind(all.df, iFinal)
     #EDA(residuals(fit))
