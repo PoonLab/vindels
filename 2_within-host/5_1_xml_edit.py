@@ -18,6 +18,7 @@ if len(sys.argv) != 2:
 
 run_id = sys.argv[1]
 
+# read in the separate CSV containing all the root heights of the trees
 df = pd.read_csv("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/root-heights.csv", index_col="file")
 print(df)
 
@@ -30,19 +31,23 @@ if os.path.isdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/'
     sys.exit()
 else:
     os.mkdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/' + run_id + "/")
-    
+
+# iterate through the 5BEAST/ --- folder directory    
 xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/"+run_id+"/*.xml")
 
 for infile in xmlFolder:
     xml = ET.parse(infile)
     xmlname = os.path.basename(infile) 
     print(xmlname)
+
     treename = xmlname.split("-")
+
     if len(treename) == 2: 
         treename = treename[0] + ".tree"
     else:
         treename = treename[0] + "-" +treename[1] + ".tree"
 
+    # open the tree file 
     treefile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/guide_trees/"+treename, "rU")
 
     tree = treefile.readline()
@@ -157,8 +162,11 @@ for infile in xmlFolder:
         #print(r)
         root.remove(r)'''
 
+    # extracts the root_height value from the root height CSV file 
     rheight = df.loc[treename.split(".")[0],'root_height']
     print(rheight)
+
+    # searches for the skygrid cutoff value and replaces it with the extracted root height
     for element in root.iter():
         if element.get("id") == "skygrid.cutOff":
             #print(element.attrib)
