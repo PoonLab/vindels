@@ -30,6 +30,8 @@ estimateSubs <- function(tip, anc){
 # calculate the median lengths of the variable loops 
 ins.v <- split(insertions, insertions$Vloop)
 lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
+
+# Generates a sequence that adheres to the nucleotide frequencies of the data 
 f <- estimateFreq(allseqs)
 genSeq <- function(len){
   seq <- c()
@@ -51,11 +53,9 @@ genSeq <- function(len){
 
 # -----
 # TESTING
-# for testing the probability 
-
-x <- c() 
-for (i in 1:29250){x[i] <- sum(runif(120) < 0.0001)}
-sum(x!=0)
+# used to test for the prior probability of P.ENTER
+res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
+sum(res!=0)
 
 simPair <- function(p.enter, p.stay, rate, lambda){
   vlen <- lens[sample(1:5, 1)]
@@ -68,27 +68,37 @@ simPair <- function(p.enter, p.stay, rate, lambda){
   count <- sum(runif(vlen) < p.enter)
   if (count > 0){
     for (n in 1:count){
-      if (runif(1) < 0.15){
+      if (runif(1) < 0.18){
         # add a non-multiple of 3 indel
         
-        
-        exit <- 1
+
         count <- 0
-        while(exit > p.stay){
-          count <- count + 1
-          exit <- runif(1)
+        # used to count how many SUBSEQUENT nucleotides will be added AFTER the first one
+        while (count %% 3 == 0){
+          # algorithm to compute an appropriate length
+          count <- 0
+          exit <- 1
+          while(exit > p.stay){
+            count <- count + 1
+            exit <- runif(1)
+          }
         }
-     
+          
       }else{
         # add a multiple of 3 indel 
-        len <- 1
-        while (len %% 3 != 0 || len == 0){
-          len <- rpois(1,lambda=8)
+        count <- 1
+        while (count %% 3 != 0 || count == 0){
+          count <- 0
+          exit <- 1
+          while(exit > p.stay){
+            count <- count <- 1 
+            exit <- runif(1)
+          }
         }
       }
       # add the length and choose a random location for the slip event 
       idx <- sample(1:length(slip)+1,1)
-      indel <- genSeq(len)
+      indel <- genSeq(count)
       tip <- insert(tip, indel, idx)
       anc <- insert(anc, rep("-",len), idx)
     }
