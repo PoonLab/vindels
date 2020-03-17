@@ -21,7 +21,11 @@ createSlips <- function(anc, ins, pos){
     return(base)
   }
 }
-
+estimateSubs <- function(tip, anc){
+  res <- unname(mapply(function(x,y){length(checkDiff(x,y))}, tip, anc))
+  lens <- unname(sapply(tip, nchar))
+  sum(res) / sum(lens)
+}
 
 # calculate the median lengths of the variable loops 
 ins.v <- split(insertions, insertions$Vloop)
@@ -378,9 +382,9 @@ prior <- function(param){
   p.stay  <- param[2]
   rate <- param[3]
   
-  prior.pe <- dlnorm(p.enter,meanlog=-8,sdlog=2, log=T)
-  prior.ps <- dlnorm(p.stay,meanlog=-0.2,sdlog=0.1,log=T)
-  prior.rate <- dlnorm(p.stay,meanlog=-7,sdlog=2,log=T)
+  prior.pe <- dlnorm(p.enter,meanlog=-8,sdlog=0.5, log=T)
+  prior.ps <- dlnorm(p.stay,meanlog=-0.17,sdlog=0.05,log=T)
+  prior.rate <- dlnorm(p.stay,meanlog=log(e.rate),sdlog=0.3,log=T)
   
   return(prior.pe + prior.ps + prior.rate)
 }
@@ -401,10 +405,11 @@ proposalFunction <- function(param){
   rate <- param[3]
   
   num <- runif(1)
-  if (num > 0.9){
-    if (num-0.9 < 1/30){
+  s2p <- 0.9
+  if (num > s2p){
+    if (num-s2p < (1/3 *(1-s2p))){
       p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
-    }else if(num-0.9 > 2/30){
+    }else if(num-s2p > (2/3 *(1-s2p))){
       p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
     }else{
       rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)

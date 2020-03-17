@@ -129,6 +129,7 @@ delete <- function(str, indel, pos){
 
 
 checkDiff <- function(seq1, seq2){
+  require(stringr)
   if (seq1 == seq2){
     return(integer(0))
   }else if (nchar(seq1) != nchar(seq2)){
@@ -138,8 +139,7 @@ checkDiff <- function(seq1, seq2){
   seq1 <- str_split(seq1, "")[[1]]
   seq2 <- str_split(seq2, "")[[1]]
   
-  chars <- rbind(seq1, seq2)
-  which(chars[1,]!=chars[2,])
+  which(seq1 != seq2)
 }
 
 # 14_flanking 
