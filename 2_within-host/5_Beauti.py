@@ -15,16 +15,16 @@ if len(sys.argv) != 3:
 template_id = sys.argv[1]
 run_id = sys.argv[2]
 
+if not os.path.isfile('/home/jpalmer/vindels/2_within-host/' + template_id):
+    print("ERROR: Template file not found" + '/home/jpalmer/vindels/2_within-host/' + template_id)
+    sys.exit()
+
 if os.path.isdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/' + run_id + "/"):
     print("ERROR: Run name already exists ")
     sys.exit()
 else:
     os.mkdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/' + run_id + "/")
     
-if not os.path.isfile('/home/jpalmer/vindels/2_within-host/' + template_id):
-    print("ERROR: Template file not found" + '/home/jpalmer/vindels/2_within-host/' + template_id)
-    sys.exit()
-
 
 template_file = '/home/jpalmer/vindels/2_within-host/'+ template_id
 

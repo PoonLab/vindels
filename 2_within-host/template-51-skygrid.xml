@@ -2115,13 +2115,13 @@
 		<populationSizes>
 
 			<!-- skygrid.logPopSize is in log units unlike other popSize                 -->
-			<parameter id="skygrid.logPopSize" dimension="20" value="1.0"/>
+			<parameter id="skygrid.logPopSize" dimension="10" value="1.0"/>
 		</populationSizes>
 		<precisionParameter>
 			<parameter id="skygrid.precision" value="0.1" lower="0.0"/>
 		</precisionParameter>
 		<numGridPoints>
-			<parameter id="skygrid.numGridPoints" value="19.0"/>
+			<parameter id="skygrid.numGridPoints" value="9.0"/>
 		</numGridPoints>
 		<cutOff>
 			<parameter id="skygrid.cutOff" value="3000.0"/>
