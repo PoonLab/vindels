@@ -38,11 +38,14 @@ xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/"+run_id+"
 for infile in xmlFolder:
     xml = ET.parse(infile)
     xmlname = os.path.basename(infile) 
-    print(xmlname)
 
     if re.search("-original",xmlname) != None:
-        print(re.sub("-original","",xmlname))
-
+        outname = re.sub("-original","",xmlname)
+    else:
+        outname = xmlname
+    
+    print(xmlname)
+    
     treename = xmlname.split("-")
 
     if len(treename) == 2: 
@@ -175,7 +178,7 @@ for infile in xmlFolder:
             #print(element.attrib)
             element.set("value", str(rheight))
             print(element.attrib)
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/"+run_id+"/"+xmlname)    
+    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/"+run_id+"/"+outname)    
 
 
 # For editing the SkyGrid

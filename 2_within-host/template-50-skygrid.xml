@@ -2139,10 +2139,10 @@
 		<distribution>
 			<logNormalDistributionModel meanInRealSpace="true">
 				<mean>
-					<parameter id="ucld.mean" value="1.2E-4" lower="0.0" upper="0.001"/>
+					<parameter id="ucld.mean" value="1.2E-4" lower="0.0" />
 				</mean>
 				<stdev>
-					<parameter id="ucld.stdev" value="0.3333333333333333" lower="0.0"/>
+					<parameter id="ucld.stdev" value="1E-4" lower="0.0"/>
 				</stdev>
 			</logNormalDistributionModel>
 		</distribution>
@@ -2279,9 +2279,9 @@
 				<exponentialPrior mean="0.5" offset="0.0">
 					<parameter idref="alpha"/>
 				</exponentialPrior>
-                <exponentialPrior mean="0.3333333333333333" offset="0.0">                                                          |  
-                    <parameter idref="ucld.stdev" />                                                                           | 
-                </exponentialPrior> 
+                		<exponentialPrior mean="0.3333333333333333" offset="0.0">                                                          |  
+                    			<parameter idref="ucld.stdev" />                                                                           | 
+                		</exponentialPrior> 
 				<logNormalPrior mean="1.2E-4" stdev="0.00015" offset="0.0">
 					<parameter idref="ucld.mean"/>
 				</logNormalPrior>
