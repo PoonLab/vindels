@@ -32,7 +32,7 @@ createSlips <- function(anc, ins, pos){
   }
 }
 
-
+# SIMULATE DNA 
 # ------------------
 # SIMULATE DNA SEQUENCES 
 
@@ -62,9 +62,8 @@ genSeq <- function(len){
 }
 
 # used to test for the prior probability of P.ENTER
-res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
-sum(res!=0)
-
+# res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
+# sum(res!=0)
 
 estimateSubs <- function(tip, anc){
   res <- unname(mapply(function(x,y){length(checkDiff(x,y))}, tip, anc))
@@ -72,7 +71,7 @@ estimateSubs <- function(tip, anc){
   sum(res) / sum(lens)
 }
 
-rate <- estimateSubs(insertions$Vseq, insertions$Anc)
+erate <- estimateSubs(insertions$Vseq, insertions$Anc)
 
 simPair <- function(p.enter, p.stay, rate){
   vlen <- lens[sample(1:5, 1)]
@@ -190,9 +189,7 @@ simPair <- function(p.enter, p.stay, rate){
       # add a multiple of three 
 }
 
-getSecond <- function(seq, p.enter, p.stay, lambda){
-  
-}
+# -----------------
 
 getTip <- function(oldtip, slip){
   nonzeros <- which(slip != 0)
@@ -264,9 +261,6 @@ delta <- function(rep=1,mean=0,sd=1.5){
   }
   x
 }
-position <- function(len){
-  sample(len, 1)
-}
 
 
 
@@ -324,16 +318,15 @@ names(slip.list) <- insertions$Header
 # }
 # # C.-.-.QT.10R.-.-_289_1_b
 # # SHUFFLING --- randomly shuffle the slip locations around 
-# slip.list <- lapply(slip.list, function(x){
-#   total <- sum(x)
-#   locs <- sample(length(x), total, replace=T)
-#   getSlipVector(locs, length(x))
-# })
+slip.list <- lapply(slip.list, function(x){
+  total <- sum(x)
+  locs <- sample(length(x), total, replace=T)
+  getSlipVector(locs, length(x))
+})
 
-nucleotides <- c("A","C","G","T")
 idx <- which(unname(lapply(slip.list,sum))>0)
 # For use in the proposal function
-changeSlip <- function(){
+changeSlip <- function(slip.list){
   # choose a sequence to edit
   seq <- sample(length(idx),1)
   
@@ -342,16 +335,19 @@ changeSlip <- function(){
   slip.idx <- getSlipLocations(slip)
   
   # choose a slip event to change
-  toEdit <- position(length(slip.idx[[1]]))
+  toEdit <- sample(length(slip.idx[[1]]),1)
   
   # this is to ensure that the proposed change is never outside the slip region
   proposal <- 0
   while(proposal <= 0 || proposal > length(slip)){
     proposal <- slip.idx[[1]][toEdit] + delta()
   }
+  # save the change to the slip list
   slip.idx[[1]][toEdit] <- proposal
-  # save this globally so that the change gets fixed
-  slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
+  
+  # save the whole list
+  slip.list[[idx[seq]]] <- getSlipVector(slip.idx[[1]],slip.idx[[2]])
+  slip.list
 }
 
 
@@ -403,13 +399,12 @@ pairllh <- function(anc, newtip, rate, branch){
 }
 
 nt <- c("A", "C", "G", "T")
-allseqs <- c(insertions$Vseq, insertions$Anc)
-f <- estimateFreq(allseqs)
+f <- estimateFreq(c(insertions$Vseq, insertions$Anc))
 
 branches <- insertions$length
 anc.seqs <- gsub("-", "", insertions$Anc)
 require(parallel)
-seqllh <- function(rate){
+seqllh <- function(rate, slip.list){
   #print("Starting SeqLLH ... ")
   tip.seqs <- unname(mcmapply(getTip, insertions$Vseq, slip.list, mc.cores=16))
   #print(head(tip.seqs))
@@ -421,7 +416,7 @@ seqllh <- function(rate){
 }
 
 
-likelihood <- function(param){
+likelihood<- function(param, slip.list){
   #print("Starting LLH...")
   p.enter <- param[1]
   p.stay  <- param[2]
@@ -431,15 +426,16 @@ likelihood <- function(param){
   x <- sum(slips == 0)
   y <- sum(slips != 0)
   z <- sum(slips[which(slips!=0)] - 1)
+  
   if (any(is.na(slips))){
     llh <- log(0)
-
   }else{
     llh <-  x*log(1-p.enter) + y*log(p.enter) + y*log(1-p.stay) + z*log(p.stay)
   }
-
-  llh + seqllh(rate)
+  llh + seqllh(rate, slip.list)
 }
+
+
 # --------------------------------------------------
 
 prior <- function(param){
@@ -449,28 +445,28 @@ prior <- function(param){
   
   prior.pe <- dlnorm(p.enter,meanlog=-8,sdlog=0.5, log=T)
   prior.ps <- dlnorm(p.stay,meanlog=-0.17,sdlog=0.05,log=T)
-  prior.rate <- dlnorm(p.stay,meanlog=log(e.rate),sdlog=0.3,log=T)
+  prior.rate <- dlnorm(rate,meanlog=log(erate),sdlog=0.3,log=T)
   
   return(prior.pe + prior.ps + prior.rate)
 }
 
-posterior <- function(param){
+posterior <- function(param, slip){
   #print(prior(param))
   #print(likelihood(param))
   if (any(param > 1)){
     return(log(0))
   }else{
-    return(prior(param) + likelihood(param))
+    return(prior(param) + likelihood(param, slip))
   }
 }
 
-proposalFunction <- function(param){
+proposalFunction <- function(param, slip_current){
   p.enter <- param[1]
   p.stay <- param[2]
   rate <- param[3]
   
   num <- runif(1)
-  s2p <- 0.9
+  s2p <- 0.85
   if (num > s2p){
     if (num-s2p < (1/3 *(1-s2p))){
       p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
@@ -479,48 +475,72 @@ proposalFunction <- function(param){
     }else{
       rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
     }
+    slip_proposed <- slip_current
   }else{
     # perform a change on the sliplist 
     # this will NOT change your three parameters, but WILL change the likelihood
-    changeSlip()
+    slip_proposed <- changeSlip(slip_current)
   }
-  return(c(p.enter, p.stay, rate))
+  return(list(param=c(p.enter, p.stay, rate), slip=slip_proposed))
 }
 
 
-runMCMC <- function(startvalue, iterations){
+runMCMC <- function(startvalue, iterations, slip.list){
   chain <- array(dim = c(iterations+1,3))
   chain[1,] <- startvalue
-  
+  slip_current <- slip.list
+  logfile <- file("~/vindels/2_within-host/slip-model.csv", "w")
+  write("p(Enter), p(Stay), Rate, Slip-changed, Accept", 
+      file=logfile)
   for (i in 1:iterations){
-    proposal <- proposalFunction(chain[i,])
-    p.current <- posterior(chain[i,])
-    p.next <- posterior(proposal)
+    # calculate posterior of current position
+    p.current <- posterior(chain[i,], slip_current)
+    
+    # generate proposal 
+    proposal <- proposalFunction(chain[i,], slip_current)
+    param_proposed <- proposal[[1]]
+    slip_proposed <- proposal[[2]]
+    
+    # calculate posterior of the new proposal 
+    p.next <- posterior(param_proposed, slip_proposed)
+    
     print(p.current)
     print(p.next)
+    # print(paste("PROPOSAL",i,":", param_proposed, sep=" "))
+    # print(paste0("Sliplist change proposed: ", any(unname(unlist(slip_current))!=unname(unlist(slip_proposed)))))
+    s.change <- any(unname(unlist(slip_current))!=unname(unlist(slip_proposed)))
+    # to catch problematic posterior calculations 
     if(is.na(p.current) || is.na(p.next)){
       print("ERROR: Posterior could not be calculated")
       print(paste("Chain value:", chain[i,1], chain[i,2], chain[i,3], sep=" "))
       break
     }
+    
     prop <- exp(p.next - p.current)
+    print(prop)
+    
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
     if (runif(1) < prop) {
-      chain[i+1,] <- proposal
-      
+      chain[i+1,] <- param_proposed
+      slip_current <- slip_proposed
+      #print("Accept")
+      accept <- T
     # if the proportion is less than the random uniform sample, REJECT the proposed value stick with current 
     } else {
       chain[i+1,] <- chain[i,]
+      #print("Reject")
+      accept <- F
     }
     print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], sep=" "))
-    
+    write(paste(c(chain[1,], as.numeric(s.change), as.numeric(accept)),collapse=",") , file=logfile, append=T)
   }
-  return(chain)
+  return(list(chain=chain, slip=slip_current))
+  close(logfile)
 }
 
 # RUN MCMC
 startvalue <- c(0.001, 0.8, 0.001)
-chain <- runMCMC(startvalue, 10000)
+chain <- runMCMC(startvalue, 50000, slip.list)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
