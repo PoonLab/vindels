@@ -1,9 +1,19 @@
 require(bbmle)
 require(ape)
 # used to fill in deletion gaps found in the tip sequences 
-
+nt <- c("A", "C", "G", "T")
+require(stringr)
 source("~/vindels/2_within-host/utils.r")
 
+estimateFreq <- function(seqs){
+  nt <- c("A", "C", "G", "T")
+  output <- c()
+  for (n in 1:length(nt)){
+    counts <- sum(unname(sapply(seqs,function(x) str_count(x, nt[n]))))
+    output[n] <- counts / sum(unname(sapply(seqs, nchar)))
+  }
+  output
+}
 createSlips <- function(anc, ins, pos){
   # start out with a base vector containing nchar number of zeros 
   # remove the gap characters from the ancestral sequence 
@@ -21,11 +31,10 @@ createSlips <- function(anc, ins, pos){
     return(base)
   }
 }
-estimateSubs <- function(tip, anc){
-  res <- unname(mapply(function(x,y){length(checkDiff(x,y))}, tip, anc))
-  lens <- unname(sapply(tip, nchar))
-  sum(res) / sum(lens)
-}
+
+
+# ------------------
+# SIMULATE DNA SEQUENCES 
 
 # calculate the median lengths of the variable loops 
 ins.v <- split(insertions, insertions$Vloop)
@@ -33,6 +42,7 @@ lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
 
 # Generates a sequence that adheres to the nucleotide frequencies of the data 
 f <- estimateFreq(allseqs)
+names(f) <- nt
 genSeq <- function(len){
   seq <- c()
   for (n in 1:len){
@@ -51,19 +61,27 @@ genSeq <- function(len){
   paste(seq, collapse="")
 }
 
-# -----
-# TESTING
 # used to test for the prior probability of P.ENTER
 res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
 sum(res!=0)
 
-simPair <- function(p.enter, p.stay, rate, lambda){
+
+estimateSubs <- function(tip, anc){
+  res <- unname(mapply(function(x,y){length(checkDiff(x,y))}, tip, anc))
+  lens <- unname(sapply(tip, nchar))
+  sum(res) / sum(lens)
+}
+
+rate <- estimateSubs(insertions$Vseq, insertions$Anc)
+
+simPair <- function(p.enter, p.stay, rate){
   vlen <- lens[sample(1:5, 1)]
   anc <- genSeq(vlen)
   
   # make a copy of the ancestor to edit
   tip <- anc
   
+  # INDELS 
   # determine the number of insertions and deletions that occur 
   count <- sum(runif(vlen) < p.enter)
   if (count > 0){
@@ -87,9 +105,11 @@ simPair <- function(p.enter, p.stay, rate, lambda){
       }else{
         # add a multiple of 3 indel 
         count <- 1
+        # keep trying until an indel of length > 0, and multiple of 3 is found 
         while (count %% 3 != 0 || count == 0){
           count <- 0
           exit <- 1
+          # grows an indel size
           while(exit > p.stay){
             count <- count <- 1 
             exit <- runif(1)
@@ -97,15 +117,59 @@ simPair <- function(p.enter, p.stay, rate, lambda){
         }
       }
       # add the length and choose a random location for the slip event 
-      idx <- sample(1:length(slip)+1,1)
+      idx <- sample(1:length(vlen)+1,1)
+      
+      # generate the sequence to insert / delete 
       indel <- genSeq(count)
+      
+      # generate the tip and ancestor sequence by adding / removing sequence 
       tip <- insert(tip, indel, idx)
       anc <- insert(anc, rep("-",len), idx)
     }
   }
   
   # add in substitutions based on the rate value 
+  subs <- which(sapply(1:vlen, function(x){runif(1) < rate}))
+  
+  if (length(subs) > 0){
+    tip.chars <- str_split(tip, "")[[1]]
+    anc.chars <- str_split(anc, "")[[1]]
     
+    for (i in subs){
+      # choose whether to mutate the tip sequence or ancestor 
+      if (runif(1) < 0.5){
+        toChange <- tip.chars
+        tip <- T
+      }else{
+        toChange <- anc.chars
+        tip <- F
+      }
+      
+      # store the nucleotide at the chosen location
+      n.idx <- which(names(f)==toChange[i])
+      # calculate the probabilities of changing to each of the others nucleotides 
+      t.probs <- f[-n.idx] / (1- f[[n.idx]])
+      
+      # based on the probabilities, change to the new nucleotide
+      rnum <- runif(1)
+      if (rnum < t.probs[[1]]){
+        out.nt <-  names(t.probs)[1]
+      }else if(rnum > t.probs[[1]] && rnum < (t.probs[[1]]+t.probs[[2]])){
+        out.nt <- names(t.probs)[2]
+      }else{
+        out.nt <- names(t.probs)[3]
+      }
+      
+      if (tip){
+        tip.chars[i] <- out.nt
+      }else{
+        anc.chars[i] <- out.nt
+      }
+      
+    }
+  }
+  
+  
   return(c(tip,anc))
   # to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
   # algorithm:
@@ -289,17 +353,8 @@ changeSlip <- function(){
   # save this globally so that the change gets fixed
   slip.list[[idx[seq]]] <<- getSlipVector(slip.idx[[1]],slip.idx[[2]])
 }
-nt <- c("A", "C", "G", "T")
-require(stringr)
-estimateFreq <- function(seqs){
-  nt <- c("A", "C", "G", "T")
-  output <- c()
-  for (n in 1:length(nt)){
-    counts <- sum(unname(sapply(seqs,function(x) str_count(x, nt[n]))))
-    output[n] <- counts / sum(unname(sapply(seqs, nchar)))
-  }
-  output
-}
+
+
 require(expm)
 # returns the F81 transition probability matrtix 
 getMat <- function(rate, branch){
