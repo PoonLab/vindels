@@ -103,28 +103,28 @@ if sys.argv[2][-1] != "/":
 def main():
     
 
-    if len(sys.argv) != 3 or len(sys.argv != 4):
+    if len(sys.argv) != 3: #and len(sys.argv) != 4:
         print("USAGE: python 6_sample-beast-trees.py [input trees folder] [output trees folder] [optional comma-delimiter exclusion]")
         quit()
-    for i in range(len(sys.argv)):
-        if not sys.argv[i].endswith("/"):
-            sys.argv[i] += "/"
+    #for i in range(len(sys.argv)):
+    #    if not sys.argv[i].endswith("/"):
+    #        sys.argv[i] += "/"
 
-    if len(sys.argv == 4):
-        exclude = sys.argv[4].split(",")
+    #if len(sys.argv) == 4:
+    #    exclude = sys.argv[4].split(",")
         
     infolder = glob(sys.argv[1]+"*.time.trees")
     outfolder = sys.argv[2]
     
     for infile in infolder:
         #filename = os.path.basename(infile).split(".")[0]
-        skip = False
-        for item in exclude:
-            if re.search(item, infile) != None:
-                skip = True
+        #skip = False
+        #for item in exclude:
+        #    if re.search(item, infile) != None:
+        #        skip = True
         
-        if skip:
-            continue
+        #if skip:
+        #    continue
         '''
         patfolder = outfolder + filename + "/"
         if not os.path.isdir(patfolder):
@@ -133,7 +133,7 @@ def main():
             shutil.rmtree(patfolder,ignore_errors=False)
             os.makedirs(patfolder)
         '''
-        sample_beast(infile,outfolder, 20)
+        sample_beast(infile,outfolder, 200)
 
 
 
