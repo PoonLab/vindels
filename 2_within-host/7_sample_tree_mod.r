@@ -39,6 +39,8 @@ for (logfile in logfolder){
   for (tree in pat_trees){
     treename <- basename(tree)
     
+    treename <- gsub("-original","",treename)
+    
     intree <- read.tree(tree)
     
     state <- as.numeric(paste0(strsplit(strsplit(treename, "\\.")[[1]][1], "_")[[1]][3],"00000"))
