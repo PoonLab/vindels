@@ -268,14 +268,21 @@ dbins <- lapply(ddates, function(x){
 
 
 # INSERTIONS 
-ibins <- rbindlist(ibins)
-colnames(ibins) <- as.character(seq(0,7500,500)[-1])
-ifreq <- apply(ibins, 2, mean)
+ibin.df <- as.data.frame(rbindlist(ibins))
+colnames(ibin.df) <- as.character(seq(0,7500,500)[-1])
+ifreq <- apply(ibin.df, 2, mean)
+
+# adjust the means for the number of patients
+adj.means <- mapply(function(bin, mean){
+  adj.factor <- (length(imaxes) - sum(imaxes <= (bin - 500))) / length(imaxes)
+  print(adj.factor)
+  mean / adj.factor
+}, as.numeric(colnames(ibin.df)), ifreq)
 
 imaxes <- imaxes[!is.na(imaxes)]
 newimaxes <- imaxes/500
 par(xpd=NA, mar=c(7,6,4,1))
-barplot(ifreq, col="dodgerblue", space=0, xaxt = "n",
+barplot(adj.means, col="dodgerblue", space=0, xaxt = "n",
         #xlab="Days Since Start of Infection",
         ylab="Average Number of Insertions / Patient",
         main="Insertion Timings",
@@ -285,14 +292,22 @@ axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
 title(xlab="Days Since Start of Infection", line=4, cex.lab=1.3)
 
 # DELETIONS
-dbins <- rbindlist(dbins)
-colnames(dbins) <- as.character(seq(0,7500,500)[-1])
-dfreq <- apply(dbins, 2, mean)
+dbin.df <- rbindlist(dbins)
+colnames(dbin.df) <- as.character(seq(0,7500,500)[-1])
+dfreq <- apply(dbin.df, 2, mean)
+
+# adjust the means for the number of patients
+adj.means <- mapply(function(bin, mean){
+  adj.factor <- (length(dmaxes) - sum(dmaxes <= (bin - 500))) / length(dmaxes)
+  print(adj.factor)
+  mean / adj.factor
+}, as.numeric(colnames(dbin.df)), dfreq)
+
 
 dmaxes <- dmaxes[!is.na(dmaxes)]
 newdmaxes <- dmaxes/500
 par(xpd=NA, mar=c(7,6,4,1))
-barplot(dfreq, col="red", space=0, xaxt = "n",
+barplot(adj.means, col="red", space=0, xaxt = "n",
         #xlab="Days Since Start of Infection",
         ylab="Average Number of Deletions / Patient",
         main="Deletion Timings",
