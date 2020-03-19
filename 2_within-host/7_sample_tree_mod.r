@@ -5,8 +5,8 @@ require(ape)
 
 args <- commandArgs(trailingOnly = T)
 
-if (length(args) != 2){
-  print("USAGE: Rscript 7_sample_tree_mod.r [working directory] [log directory]")
+if (length(args) != 3){
+  print("USAGE: Rscript 7_sample_tree_mod.r [log dir] [input dir] [output dir]")
   quit()
 }
 
@@ -18,45 +18,40 @@ for (i in 1:length(args)){
 
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
-infolder <- args[1]
-logpath <- args[2]
+logpath <- args[1]
+tfolder <- args[2]
+outfolder <- args[3]
 
-dir.create(paste0(infolder,"final/"), showWarnings = F)
-treefolder <- Sys.glob(paste0(infolder,"prelim/*.tree.sample"))
 
-for (treefile in treefolder){
+dir.create(outfolder, showWarnings = F)
+logfolder <- Sys.glob(paste0(logpath,"*.log"))
+
+for (logfile in logfolder){
   
-  print(treefile)
+  print(logfile)
+  filename <- basename(logfile)
+  pat <- strsplit(filename, "\\.")[[1]][1]
   
-  intree <- read.tree(treefile)
-  filename <- basename(treefile)
-  
-  state <- as.numeric(paste0(strsplit(strsplit(filename, "\\.")[[1]][1], "_")[[1]][3],"00000"))
-
-  # edits the tree file name to get the BEAST log file name
-  logname <- paste0(strsplit(filename, "_")[[1]][1], ".log")
-
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(paste0(logpath,logname), sep="\t", skip=4)
-
-  print(logname)
+  logfile <- read.csv(logfile, sep="\t", skip=4)
   
-  rescale.factor <- logfile[which(logfile$state == state),"ucld.mean"]
-  #counts the number of MCMC steps
-  #loglen <- nrow(logfile) -1
-  #print(loglen)
-  # calculates the start and end interval of MCMC steps AFTER the burn in (assuming last 90%)
-  #interval <- c(loglen*0.1+1,loglen+1)
-  #print(interval)
-  # calculates the rescale factor using the median of the UCLD.MEAN column (can check that this matches UCLD.MEDIAN on tracer)
-  #rescale.factor <- median(logfile$ucld.mean[interval[1]:interval[2]])
-  print(rescale.factor)
+  pat_trees <- Sys.glob(paste0(tfolder,pat,"*"))
+  for (tree in pat_trees){
+    treename <- basename(tree)
+    
+    intree <- read.tree(tree)
+    
+    state <- as.numeric(paste0(strsplit(strsplit(treename, "\\.")[[1]][1], "_")[[1]][3],"00000"))
+    
+    rescale.factor <- logfile[which(logfile$state == state),"ucld.mean"]
 
-  # rescales all the edge lengths of the tree
-  intree$edge.length <- (intree$edge.length * rescale.factor)
+    print(rescale.factor)
+  
+    # rescales all the edge lengths of the tree
+    intree$edge.length <- (intree$edge.length * rescale.factor)
 
-  # writes the rescaled tree to a new folder called "rescaled"
-  write.tree(intree,paste0("~/PycharmProjects/hiv-withinhost/7SampleTrees/final/", gsub(".sample","",filename)))
+    # writes the rescaled tree to a new folder called "rescaled"
+    write.tree(intree,paste0(outfolder, gsub(".sample","",treename)))
+  }
 }
-#}
 
