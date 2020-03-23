@@ -444,8 +444,8 @@ prior <- function(param){
   rate <- param[3]
   
   prior.pe <- dlnorm(p.enter,meanlog=-8,sdlog=0.5, log=T)
-  prior.ps <- dlnorm(p.stay,meanlog=-0.17,sdlog=0.05,log=T)
-  prior.rate <- dlnorm(rate,meanlog=log(erate),sdlog=0.3,log=T)
+  prior.ps <-  dunif(# dlnorm(p.stay,meanlog=-0.17,sdlog=0.05,log=T)
+  prior.rate <- dunif(rate, min=0, max=0.01, log=T )#dlnorm(rate,meanlog=log(erate),sdlog=0.3,log=T)
   
   return(prior.pe + prior.ps + prior.rate)
 }
