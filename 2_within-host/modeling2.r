@@ -18,7 +18,7 @@ createSlips <- function(anc, ins, pos){
   # start out with a base vector containing nchar number of zeros 
   # remove the gap characters from the ancestral sequence 
   anc <- gsub("-","",anc)
-  base <- rep(0,nchar(anc)+1)
+  base <- rep(0,nchar(anc))  # removed the nchar(anc) + 1 because there cannot be a slip at the final position (there is nothing to skip over)
   # if there is no insertion, simply add a zero to complete the vector 
   if (ins == ""){
     return (base)
@@ -61,8 +61,8 @@ insertions$Anc <- mapply(removeOtherGaps, insertions$Anc, insertions$Vseq, inser
 # SANITY CHECK: to make sure all seqs are equal
 a <- nchar(insertions$Vseq) - nchar(insertions$Seq)
 b <- nchar(gsub("-","",insertions$Anc))
-sum(a!=b)==0
-insertions[which(a!=b),]
+sum(a!=b)==0              # should be TRUE
+insertions[which(a!=b),]  # should be nrow = 0
 
 # CASE: replace "R" nucleotides with the corresponding one found in the ancestor
 cases <- which(grepl("[RYSWKMBDHVN]", insertions$Vseq))
@@ -144,7 +144,9 @@ collapseVect <- function(vect){
     # check whether there is overlap in these slip positions, if so, amalgamate
     current <- nonzero[i]
     previous <- nonzero[i-1]
-    if (current <= (previous + vect[previous])){
+    
+    # checks whether the previous nonzero is adjacent
+    if ((current - 1) == previous){
       vect[previous] <- vect[previous] + vect[current]
       vect[current] <- 0
     }
