@@ -32,236 +32,6 @@ createSlips <- function(anc, ins, pos){
   }
 }
 
-# SIMULATE DNA 
-# ------------------
-# SIMULATE DNA SEQUENCES 
-
-# calculate the median lengths of the variable loops 
-ins.v <- split(insertions, insertions$Vloop)
-lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
-
-# Generates a sequence that adheres to the nucleotide frequencies of the data 
-f <- estimateFreq(allseqs)
-names(f) <- nt
-genSeq <- function(len){
-  seq <- c()
-  for (n in 1:len){
-    num <- runif(1)
-    if (num < f[1]){
-      nucl <- "A"
-    }else if (num > f[1] && num < (f[2]+f[1])){
-      nucl <- "C"
-    }else if (num > (f[2]+f[1]) && num < (f[3]+f[2]+f[1])){
-      nucl <- "G"
-    }else{
-      nucl <- "T"
-    }
-    seq[n] <- nucl
-  }
-  paste(seq, collapse="")
-}
-
-# used to test for the prior probability of P.ENTER
-# res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
-# sum(res!=0)
-
-estimateSubs <- function(tip, anc){
-  res <- unname(mapply(function(x,y){length(checkDiff(x,y))}, tip, anc))
-  lens <- unname(sapply(tip, nchar))
-  sum(res) / sum(lens)
-}
-
-erate <- estimateSubs(insertions$Vseq, insertions$Anc)
-
-simPair <- function(p.enter, p.stay, rate){
-  vlen <- lens[sample(1:5, 1)]
-  anc <- genSeq(vlen)
-  
-  # make a copy of the ancestor to edit
-  tip <- anc
-  
-  # INDELS 
-  # determine the number of insertions and deletions that occur 
-  count <- sum(runif(vlen) < p.enter)
-  if (count > 0){
-    for (n in 1:count){
-      if (runif(1) < 0.18){
-        # add a non-multiple of 3 indel
-        
-
-        count <- 0
-        # used to count how many SUBSEQUENT nucleotides will be added AFTER the first one
-        while (count %% 3 == 0){
-          # algorithm to compute an appropriate length
-          count <- 0
-          exit <- 1
-          while(exit > p.stay){
-            count <- count + 1
-            exit <- runif(1)
-          }
-        }
-          
-      }else{
-        # add a multiple of 3 indel 
-        count <- 1
-        # keep trying until an indel of length > 0, and multiple of 3 is found 
-        while (count %% 3 != 0 || count == 0){
-          count <- 0
-          exit <- 1
-          # grows an indel size
-          while(exit > p.stay){
-            count <- count <- 1 
-            exit <- runif(1)
-          }
-        }
-      }
-      # add the length and choose a random location for the slip event 
-      idx <- sample(1:length(vlen)+1,1)
-      
-      # generate the sequence to insert / delete 
-      indel <- genSeq(count)
-      
-      # generate the tip and ancestor sequence by adding / removing sequence 
-      tip <- insert(tip, indel, idx)
-      anc <- insert(anc, rep("-",len), idx)
-    }
-  }
-  
-  # add in substitutions based on the rate value 
-  subs <- which(sapply(1:vlen, function(x){runif(1) < rate}))
-  
-  if (length(subs) > 0){
-    tip.chars <- str_split(tip, "")[[1]]
-    anc.chars <- str_split(anc, "")[[1]]
-    
-    for (i in subs){
-      # choose whether to mutate the tip sequence or ancestor 
-      if (runif(1) < 0.5){
-        toChange <- tip.chars
-        tip <- T
-      }else{
-        toChange <- anc.chars
-        tip <- F
-      }
-      
-      # store the nucleotide at the chosen location
-      n.idx <- which(names(f)==toChange[i])
-      # calculate the probabilities of changing to each of the others nucleotides 
-      t.probs <- f[-n.idx] / (1- f[[n.idx]])
-      
-      # based on the probabilities, change to the new nucleotide
-      rnum <- runif(1)
-      if (rnum < t.probs[[1]]){
-        out.nt <-  names(t.probs)[1]
-      }else if(rnum > t.probs[[1]] && rnum < (t.probs[[1]]+t.probs[[2]])){
-        out.nt <- names(t.probs)[2]
-      }else{
-        out.nt <- names(t.probs)[3]
-      }
-      
-      if (tip){
-        tip.chars[i] <- out.nt
-      }else{
-        anc.chars[i] <- out.nt
-      }
-      
-    }
-  }
-  
-  
-  return(c(tip,anc))
-  # to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
-  # algorithm:
-    # probability of enter is chosen
-    # draw a number from a poisson process
-    # if the number is %% 3 == 0: 
-      # keep it 100 percent
-    # else if the number if %%3 != 0:
-      # there's a low probability that it will be kept (penalty)
-  
-  # to estimate the OBSERVED rate of indels, it is a simpler process
-  # algorithm:
-    # probability of enter is chosen
-    # draw a random number to determine whether a 3 or non3 should be added
-    # if runif(1) < 0.05:
-      # add a non3 number 
-    # else:
-      # add a multiple of three 
-}
-
-# -----------------
-
-getTip <- function(oldtip, slip){
-  nonzeros <- which(slip != 0)
-  
-  if (length(nonzeros) == 0){
-    return(oldtip)
-  }else{
-    #print(oldtip)
-    toCopy <- rep(T, nchar(oldtip))
-    tip.chars <- strsplit(oldtip, "")[[1]]
-    loc <- getSlipLocations(slip)[[1]]
-    tab <- table(loc)
-    for (n in 1:length(tab)){
-      start <- as.numeric(names(tab)[n])
-      stop <- start + (tab[[n]] - 1)
-      # Case to catch when the 
-      if (start > nchar(oldtip) || stop > nchar(oldtip)){
-        start <- nchar(oldtip) - (stop - start)
-        stop <- nchar(oldtip)
-      }
-      # re-adjustment of positions 
-      # perform this action on all indices after the first
-      if (n > 1 && !toCopy[start]){
-        adjust <- min(which(toCopy[start:length(toCopy)])) - 1
-        start <- start + adjust
-        stop <- stop + adjust
-      }
-      #print(start)
-      #print(stop)
-      toCopy[start:stop] <- F
-    }
-    #tip.chars[toCopy] <- "-"
-    return(paste0(tip.chars[toCopy],collapse=""))
-  }
-}
-
-# used to go from c(0,0,0,3,0,0,0) to c(4,4,4)
-getSlipLocations <- function(slip){
-  nonzeros <- which(slip!=0)
-  locations <- c()
-  for (pos in nonzeros){
-    locations <- c(locations, rep(pos, slip[pos]))
-  }
-  tab <- table(locations)
-  return (list(loc=locations,len=length(slip)))
-}
-
-# used to go from c(4,4,4) to c(0,0,0,3,0,0,0) 
-getSlipVector <- function(locs, length){
-  vect <- rep(0,length)
-  if (length(locs) == 0){
-    return (vect)
-  }else{
-    tab <- table(locs)
-    for (n in 1:length(tab)){
-      vect[as.numeric(names(tab)[n])] <- unname(tab[n])
-    }
-    return(vect)
-  }
-}
-delta <- function(rep=1,mean=0,sd=1.5){
-  x <- rnorm(rep,mean=mean,sd=sd)
-  if (x < 0){
-    x <- abs(x)
-    x <- ceiling(x)
-    x <- -x
-  }else{
-    x <- ceiling(x)
-  }
-  x
-}
-
 
 
 path <- "~/PycharmProjects/hiv-withinhost/"
@@ -310,12 +80,7 @@ slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Seq, insertio
 #insertions$Header <- unname(mapply(patLabel, insertions$Header, insertions$Pat))
 names(slip.list) <- insertions$Header
 
-# # for PRINTING the slip.list 
-# for (elem in 1:length(slip.list)){
-#   if(sum(slip.list[[elem]]) > 0){
-#     print(slip.list[elem])
-#   }
-# }
+logfile <- 
 # # C.-.-.QT.10R.-.-_289_1_b
 # # SHUFFLING --- randomly shuffle the slip locations around 
 slip.list <- lapply(slip.list, function(x){
@@ -323,6 +88,94 @@ slip.list <- lapply(slip.list, function(x){
   locs <- sample(length(x), total, replace=T)
   getSlipVector(locs, length(x))
 })
+
+
+logfile <- 
+
+getTip <- function(oldtip, slip){
+  nonzeros <- which(slip != 0)
+  
+  if (length(nonzeros) == 0){
+    return(oldtip)
+  }else{
+    #print(oldtip)
+    toCopy <- rep(T, nchar(oldtip))logfile <- 
+    tip.chars <- strsplit(oldtip, "")[[1]]
+    loc <- getSlipLocations(slip)[[1]]
+    tab <- table(loc)
+    for (n in 1:length(tab)){
+      start <- as.numeric(names(tab)[n])
+      stop <- start + (tab[[n]] - 1)
+      # Case to catch when the 
+      if (start > nchar(oldtip) || stop > nchar(oldtip)){
+        start <- nchar(oldtip) - (stop - start)
+        stop <- nchar(oldtip)
+      }
+      # re-adjustment of positions 
+      # perform this action on all indices after the first
+      if (n > 1 && !toCopy[start]){
+        adjust <- min(which(toCopy[start:length(toCopy)])) - 1
+        start <- start + adjust
+        stop <- stop + adjust
+      }
+      #print(start)
+      #print(stop)
+      toCopy[start:stop] <- F
+    }
+    #tip.chars[toCopy] <- "-"
+    return(paste0(tip.chars[toCopy],collapse=""))
+  }
+}
+
+# used to go from c(0,0,0,3,0,0,0) to c(4,4,4)
+getSlipLocations <- function(slip){
+  nonzeros <- which(slip!=0)
+  locations <- c()
+  for (pos in nonzeros){
+    locations <- c(locations, rep(pos, slip[pos]))
+  }
+  tab <- table(locations)
+  return (list(loc=locations,len=length(slip)))
+}
+collapseVect <- function(vect){
+  nonzero <- which(vect != 0)
+  
+  for (i in length(nonzero):2){
+    # check whether there is overlap in these slip positions, if so, amalgamate
+    current <- nonzero[i]
+    previous <- nonzero[i-1]
+    if (current <= (previous + vect[previous])){
+      vect[previous] <- vect[previous] + vect[current]
+      vect[current] <- 0
+    }
+  }
+  return(vect)
+}
+# used to go from c(4,4,4) to c(0,0,0,3,0,0,0) 
+getSlipVector <- function(locs, length){
+  vect <- rep(0,length)
+  if (length(locs) == 0){
+    return (vect)
+  }else{
+    tab <- table(locs)
+    for (n in 1:length(tab)){
+      vect[as.numeric(names(tab)[n])] <- unname(tab[n])
+    }
+    return(collapseVect(vect))
+  }
+}
+
+delta <- function(rep=1,mean=0,sd=1.5){
+  x <- rnorm(rep,mean=mean,sd=sd)
+  if (x < 0){
+    x <- abs(x)
+    x <- ceiling(x)
+    x <- -x
+  }else{
+    x <- ceiling(x)
+  }
+  x
+}
 
 idx <- which(unname(lapply(slip.list,sum))>0)
 # For use in the proposal function
@@ -360,7 +213,7 @@ getMat <- function(rate, branch){
   # generate the F81 rate matrix 
   mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
   mat <- mat * rate
-  diag(mat) <- sapply(1:4, function(x) -(sum(rate * f[-x]))) # entirely equivalent to -rate*(sum(f[-x]))
+  diag(mat) <- sapply(1:4, function(x) -(rate*sum(f[-x]))) # equivalent to -rate*(sum(f[-x]))
   
   # multiply by branch length
   mat <- branch * mat
@@ -399,10 +252,13 @@ pairllh <- function(anc, newtip, rate, branch){
 }
 
 nt <- c("A", "C", "G", "T")
+# NORMAL DATA: 
 f <- estimateFreq(c(insertions$Vseq, insertions$Anc))
-
 branches <- insertions$length
 anc.seqs <- gsub("-", "", insertions$Anc)
+
+# SIMULATED DATA: 
+
 require(parallel)
 seqllh <- function(rate, slip.list){
   #print("Starting SeqLLH ... ")
@@ -444,7 +300,7 @@ prior <- function(param){
   rate <- param[3]
   
   prior.pe <- dlnorm(p.enter,meanlog=-8,sdlog=0.5, log=T)
-  prior.ps <-  dunif(# dlnorm(p.stay,meanlog=-0.17,sdlog=0.05,log=T)
+  prior.ps <-  dunif(p.stay, min=0.5, max=1.0, log=T) # dlnorm(p.stay,meanlog=-0.17,sdlog=0.05,log=T)
   prior.rate <- dunif(rate, min=0, max=0.01, log=T )#dlnorm(rate,meanlog=log(erate),sdlog=0.3,log=T)
   
   return(prior.pe + prior.ps + prior.rate)
@@ -489,7 +345,7 @@ runMCMC <- function(startvalue, iterations, slip.list){
   chain <- array(dim = c(iterations+1,3))
   chain[1,] <- startvalue
   slip_current <- slip.list
-  logfile <- file("~/vindels/2_within-host/slip-model.csv", "w")
+  logfile <- file("~/PycharmProjects/hiv-withinhost/slip-model.csv", "w")
   write("p(Enter), p(Stay), Rate, Slip-changed, Accept", 
       file=logfile)
   for (i in 1:iterations){
@@ -532,7 +388,9 @@ runMCMC <- function(startvalue, iterations, slip.list){
       accept <- F
     }
     print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], sep=" "))
-    write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept)),collapse=",") , file=logfile, append=T)
+    if (i %% 10 == 0){
+      write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept)),collapse=",") , file=logfile, append=T)
+    }
   }
   return(list(chain=chain, slip=slip_current))
   close(logfile)
