@@ -9,6 +9,9 @@ getPat <- function(header, pat){
   label <- strsplit(pat, "-")[[1]][2]
   paste0(header,"_",label)
 }
+extractPat <- function(header){
+  str_split(header,"\\.")[[1]][4]
+}
 getLoop <- function(header, vloop){
   paste0(header,"_",vloop)
 }

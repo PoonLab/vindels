@@ -168,8 +168,8 @@ def extractIndels(tip, anc, accno, vregions):
             if a != "-" or b != "-":
                 newvar[n] += a
                 newanc[n] += b
-    #vSeq[accno] = newvar 
-    #aSeq[accno] = newanc
+    vSeq[accno] = newvar 
+    aSeq[accno] = newanc
     #print(vLen)
         
     #SANITY CHECK 
@@ -190,8 +190,8 @@ def extractIndels(tip, anc, accno, vregions):
             print(extract_anc)
             #print(csvSeq)'''
 
-    return ({accno: insertions},{accno:deletions})
-
+    #return ({accno: insertions},{accno:deletions})
+    return vSeq, aSeq
 def addList(total, toAdd):
     for i in len(total):
         total[i].append(toAdd[i])
@@ -279,10 +279,10 @@ for f in folder:
     # returns a list of 1) vregion sequences and 2) boundaries for those sequences
     vregions, boundaries = getVRegions(vpath+csvfile)
         
-    # get alignment info (vregion and relative position lists) using a single iteration of the first sequence
+    # RETRIEVAL OF ALIGNMENT (vregion and relative position lists) using a SINGLE iteration of the first sequence
     vregion = []
     pos = []
-    #previous = []  # sanity check to ensure that all vregion and pos lists are identical 
+    previous = []  # sanity check to ensure that all vregion and pos lists are identical 
 
     header, seq = cdata[0]
     ai = 0

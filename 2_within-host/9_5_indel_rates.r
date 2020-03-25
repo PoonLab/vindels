@@ -42,6 +42,7 @@ sequences <- list()
 for (file in 1:length(ifolder)){
   print(file)
   filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
+  pat <- str_split(filename, "_")[[1]][1]
   runno <- strsplit(filename, "_")[[1]][2]
   count <- count + 1
   iCSV <- read.csv(ifolder[file], stringsAsFactors = F)
@@ -120,11 +121,16 @@ for (file in 1:length(ifolder)){
   iCSV$Count <- sapply(iCSV$V1, csvcount) 
   dCSV$Count <- sapply(dCSV$V1, csvcount)
   
-  iCSV <- iCSV[c(1,2,3,6,12,8,9,10,7,4,5,11)]
-  dCSV <- dCSV[c(1,2,3,6,12,8,9,10,7,4,5,11)]
+  iCSV$Pat <- paste0(str_split(rep(pat, nrow(iCSV)),"-")[[1]][1],"-", iCSV$Run)
+  dCSV$Pat <- paste0(str_split(rep(pat, nrow(dCSV)),"-")[[1]][1] ,"-", dCSV$Run)
   
-  colnames(iCSV) <- c("header","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos","mid.rtt","Vseq", "Anc", "Run")
-  colnames(dCSV) <- c("header", "Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos","mid.rtt", "Vseq", "Anc", "Run")
+  #rearrange
+  iCSV <- iCSV[c(1,2,3,6,12,8,9,10,7,4,5,13,11)]
+  dCSV <- dCSV[c(1,2,3,6,12,8,9,10,7,4,5,13,11)]
+  
+  c.headers <- c("header","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos","mid.rtt","Vseq", "Anc", "Pat", "Run")
+  colnames(iCSV) <- c.headers
+  colnames(dCSV) <- c.headers
   
 
   
@@ -188,8 +194,12 @@ for (file in 1:length(ifolder)){
   #   dTotal[[runno]] <- dCSV
   # }
 }
-iTotal <- split(csv.ins, csv.ins$Run)
-dTotal <- split(csv.del, csv.del$Run)
+
+csv.ins$header <- getPat(csv.ins$header, csv.ins$Pat)
+csv.del$header <- getPat(csv.del$header, csv.del$Pat)
+
+iTotal <- split(csv.ins, csv.ins$Pat)
+dTotal <- split(csv.del, csv.del$Pat)
 
 
 require(BSDA)
@@ -206,14 +216,12 @@ drtt <- list()
 
 all.ins <- list()
 all.del <- list()
-for (run in 1:20){
-  iData <- iTotal[[run]]
-  dData <- dTotal[[run]]
+for (name in unique(csv.ins$Pat)){
+  iData <- iTotal[[name]]
+  dData <- dTotal[[name]]
   
   irates <- c()
   drates <- c()
-  
-  
   
   for (vloop in 1:5){
     itemp <- iData[iData$Vloop==vloop,]
@@ -254,10 +262,17 @@ for (run in 1:20){
   irates <- irates*10^3
   drates <- drates*10^3
   
+  pat <- str_split(name, "-")[[1]][1]
+  run <- str_split(name, "-")[[1]][2]
+  
   # contain the 20 
-  ins.df <- rbind(ins.df, data.frame(V1=irates[1],V2=irates[2],V3=irates[3],V4=irates[4],V5=irates[5]))
-  del.df <- rbind(del.df, data.frame(V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5]))
+  ins.df <- rbind(ins.df, data.frame(pat=pat, run=run, V1=irates[1],V2=irates[2],V3=irates[3],V4=irates[4],V5=irates[5]))
+  del.df <- rbind(del.df, data.frame(pat=pat, run=run,V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5]))
 }
+
+rownames(ins.df) <- unique(csv.ins$Pat)
+rownames(del.df) <- unique(csv.ins$Pat) # this is on purpose
+
 
 require(data.table)
 iTotal2 <- rbindlist(iTotal)
