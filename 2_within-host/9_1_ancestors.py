@@ -308,22 +308,22 @@ for f in folder:
     result = treeIndelExtract(root, vregion, pdata)
     #print(result[0])
     tsvout = filename.split("_recon")[0] + ".tsv"
-    ioutput = open(opath+'ins/'+tsvout, 'w+')
-    doutput = open(opath+'del/'+tsvout,'w+') 
-    header = "header\tV1\tV2\tV3\tV4\tV5\n"
-    ioutput.write(header)
-    doutput.write(header)
+    # ioutput = open(opath+'ins/'+tsvout, 'w+')
+    # doutput = open(opath+'del/'+tsvout,'w+') 
+    # header = "header\tV1\tV2\tV3\tV4\tV5\n"
+    # ioutput.write(header)
+    # doutput.write(header)
     for n, node in enumerate(result[0]):
         data = [":".join(vloop) for vloop in result[0][node]]
         #print(",".join([node, data, "\n"]))
-        ioutput.write(node+"\t"+"\t".join(data)+"\n")
+        #ioutput.write(node+"\t"+"\t".join(data)+"\n")
 
     for n, node in enumerate(result[1]):
         data = [":".join(vloop) for vloop in result[1][node]]
         #print(",".join([node, data, "\n"]))
-        doutput.write(node+"\t"+"\t".join(data)+"\n")
-    ioutput.close()
-    doutput.close()
+        #doutput.write(node+"\t"+"\t".join(data)+"\n")
+    # ioutput.close()
+    # doutput.close()
 
     #tips = [ x for x in data.keys() if re.search('^[^\(\):\n]+$',x) != None]
 
