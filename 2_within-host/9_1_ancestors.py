@@ -96,6 +96,9 @@ def extractIndels(tip, anc, accno, vregions):
     #for compiling the variable regions to ensure they are properly examined
     aseqs = ['','','','','']
     vseqs = ['','','','','']
+
+    vSeq = {}
+    aSeq = {}
     
     # ai will count the number of nucleotides, skipping gaps 
     
@@ -174,20 +177,22 @@ def extractIndels(tip, anc, accno, vregions):
         
     #SANITY CHECK 
     #ensures that the iterated sequences are the proper variable loops and that they are identical to the one found in the csv file 
-    '''for n, vr in enumerate(vseqs):
+    for n, vr in enumerate(vseqs):
         extract_tip = vr.replace("-","")
         extract_anc = aseqs[n].replace("-","")
         
+        print(extract_tip)
+        print(extract_anc)
         # start, stop = boundaries[accno][n]
         # start = int(start)
         # stop = int(stop)
 
         # sliced = seqpairs[accno][0].replace("-","")[start:stop]
-        if extract_tip == extract_anc:
+        #if extract_tip == extract_anc:
             #print(accno)
             #print(sliced)
-            print(extract_tip)
-            print(extract_anc)
+            #print(extract_tip)
+            #print(extract_anc)
             #print(csvSeq)'''
 
     #return ({accno: insertions},{accno:deletions})
