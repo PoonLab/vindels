@@ -270,9 +270,10 @@ for (name in unique(csv.ins$Pat)){
   del.df <- rbind(del.df, data.frame(pat=pat, run=run,V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5]))
 }
 
-rownames(ins.df) <- unique(csv.ins$Pat)
-rownames(del.df) <- unique(csv.ins$Pat) # this is on purpose
+ins.list <- split(ins.df, ins.df$pat)
+del.list <- split(del.df, del.df$pat)
 
+lapply(ins.list, function(x) if (mean(x$V1)>10^-2){mean(x$V1)}else{NA})
 
 require(data.table)
 iTotal2 <- rbindlist(iTotal)
