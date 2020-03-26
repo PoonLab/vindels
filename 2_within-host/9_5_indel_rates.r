@@ -21,6 +21,40 @@ vloops <- c("V1","V2","V3","V4","V5")
 # used for extracting condensed CSV information 
 # specifically handles fields containing a comma
 
+res <- sapply(1:100, function(n) {
+  unname(unlist(lapply(ins.list, function(x){
+    x$V1[sample(1:nrow(x),1)]
+  })))
+})
+
+V1 <- res[res>10^-2]
+res <- sapply(1:100, function(n) {
+  unname(unlist(lapply(ins.list, function(x){
+    x$V2[sample(1:nrow(x),1)]
+  })))
+})
+V2 <- res[res>10^-2]
+res <- sapply(1:100, function(n) {
+  unname(unlist(lapply(ins.list, function(x){
+    x$V3[sample(1:nrow(x),1)]
+  })))
+})
+V3 <- res[res>10^-2]
+res <- sapply(1:100, function(n) {
+  unname(unlist(lapply(ins.list, function(x){
+    x$V4[sample(1:nrow(x),1)]
+  })))
+})
+V4 <- res[res>10^-2]
+res <- sapply(1:100, function(n) {
+  unname(unlist(lapply(ins.list, function(x){
+    x$V5[sample(1:nrow(x),1)]
+  })))
+})
+V5 <- res[res>10^-2]
+rates <- list(V1,V2,V3,V4,V5)
+boxplot(rates)
+View(rates)
 
 
 # INSERTION PARSING ----------
