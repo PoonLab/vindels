@@ -49,11 +49,17 @@ def vrSwitch(position, boundaries):
 
 def findChildren(node):
     #print(node)
+    # finds the locations of all commas in the ancestral nodes
     commas = re.finditer(",",node)
+    
+    # saves all the end positions of the regex match objects
     idx = [x.end()-1 for x in commas]
     
+
     found = False
     i = 0
+
+    # iterates through all comma positions until it finds the split point separating the two branches of the node 
     while found == False and i < len(idx):
         
         part1 = node[0:idx[i]]
@@ -62,13 +68,13 @@ def findChildren(node):
         left1 = len(re.findall("\(",part1))
         right1 = len(re.findall("\)", part1))
 
-        #print(left1)
-        #print(right1)
-        #print(part1)
-        #print(part2)
+        # 1 and 2 refers to the two children of the node
+        # left and right refer to the brackets that are being searched
         left2 = len(re.findall("\(",part2))
         right2 = len(re.findall("\)", part2))
 
+        # left1 must be one higher than right1
+        # right2 must be one higher than left2
         if left1 == right1+1 and left2+1 == right2:
             found = True
             #print(found)
@@ -82,13 +88,11 @@ def findChildren(node):
         i += 1
     return(None)
 
-#print(getIndels(t))
-
-def extractIndels(tip, anc, accno, vregions):
+def extractIndels(tip, anc, accno, vregion):
     iTemp = ''
     dTemp = ''
     #print(accno)
-
+   
     #for collecting insertion and deletion sequences in each variable region 
     insertions = [[],[],[],[],[]]
     deletions = [[],[],[],[],[]]
@@ -99,7 +103,13 @@ def extractIndels(tip, anc, accno, vregions):
 
     vSeq = {}
     aSeq = {}
-    
+    # case for retrieving the v-loops of the root node
+    #if anc == "":
+    #    for n, char in enumerate(tip):
+    #        if vregion[n] != -1:
+    #            vseqs[vregion[n]] += char
+    #    vSeq[accno] = vseqs 
+    #    return (vSeq, aSeq)
     # ai will count the number of nucleotides, skipping gaps 
     
     saved = 0
@@ -112,6 +122,8 @@ def extractIndels(tip, anc, accno, vregions):
         #if saved != vregion[n]:
             #print(n)
         saved = vregion[n]
+        # vregion is a list of numbers indicating what variable region the index belongs to 
+        # [-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1]
 
         if vregion[n] != -1:
             #print(n)
@@ -166,23 +178,23 @@ def extractIndels(tip, anc, accno, vregions):
                         dTemp = ''
     newvar = ['','','','','']
     newanc = ['','','','','']
-    for n in range(5):
-        for a,b in zip(vseqs[n], aseqs[n]):
-            if a != "-" or b != "-":
-                newvar[n] += a
-                newanc[n] += b
-    vSeq[accno] = newvar 
-    aSeq[accno] = newanc
+    #for n in range(5):
+    #    for a,b in zip(vseqs[n], aseqs[n]):
+    #        if a != "-" or b != "-":
+    #            newvar[n] += a
+    #            newanc[n] += b
+    vSeq[accno] = vseqs 
+    aSeq[accno] = aseqs
     #print(vLen)
         
     #SANITY CHECK 
     #ensures that the iterated sequences are the proper variable loops and that they are identical to the one found in the csv file 
-    for n, vr in enumerate(vseqs):
-        extract_tip = vr.replace("-","")
-        extract_anc = aseqs[n].replace("-","")
+    # for n, vr in enumerate(vseqs):
+        # extract_tip = vr.replace("-","")
+        # extract_anc = aseqs[n].replace("-","")
         
-        print(extract_tip)
-        print(extract_anc)
+        # print(vr)
+        # print(aseqs[n])
         # start, stop = boundaries[accno][n]
         # start = int(start)
         # stop = int(stop)
@@ -196,7 +208,7 @@ def extractIndels(tip, anc, accno, vregions):
             #print(csvSeq)'''
 
     #return ({accno: insertions},{accno:deletions})
-    return vSeq, aSeq
+    return (vSeq, aSeq)
 def addList(total, toAdd):
     for i in len(total):
         total[i].append(toAdd[i])
@@ -248,6 +260,8 @@ def treeIndelExtract(node, vregion, data):
         insertions.update(output[0])
         deletions.update(output[1])
     
+    #rootData = extractIndels(data[node], "", node, vregion)
+    #print(rootData)
     return (insertions, deletions)
     
     #------------------
@@ -255,10 +269,10 @@ def treeIndelExtract(node, vregion, data):
 
 #print(folder)
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/rep/*.fasta")
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/mcc/*.fasta") #/rep/*.fasta
 vpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
-tpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/final/'
-opath = '/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/rep/wholetree/'
+tpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/7_5_MCC/final/'                # /7SampleTrees/final/
+opath = '/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/mcc/fasta/'            # /9Indels/rep/wholetree/
 
 if not os.path.isdir(opath+"ins"):
     os.mkdir(opath+'ins')
@@ -275,7 +289,7 @@ for f in folder:
     tree = Tree(tpath+trefile)
     csvfile = filename.split('-')[0] + ".csv"
     #root = t.get_tree_root()
-    root = cdata[len(cdata)-1][0]
+    root, rootseq = cdata[len(cdata)-1]
     #print(root)
     infile.close()
 
@@ -287,19 +301,21 @@ for f in folder:
     # RETRIEVAL OF ALIGNMENT (vregion and relative position lists) using a SINGLE iteration of the first sequence
     vregion = []
     pos = []
-    previous = []  # sanity check to ensure that all vregion and pos lists are identical 
+    # previous = []  # sanity check to ensure that all vregion and pos lists are identical 
 
+
+    # CALIBRATION -- use an arbitrary sequence to calibrate the vregion list and the pos list
     header, seq = cdata[0]
     ai = 0
     for n, char in enumerate(seq):
         #retrieves a numeric value (0,1,2,3,4) to indicate which variable region the nucleotide is in, and -1 if outside of a vloop
-        # pos counts your position WITHIN the current variable loop 
+        #pos counts your position WITHIN the current variable loop 
         vr, p = vrSwitch(ai, boundaries[header])
         vregion.append(vr)
         pos.append(p)
         if char != '-':
             ai += 1
-    previous = vregion
+    # previous = vregion
     #print(root)
     
     infile = open(f, "rU")
@@ -307,19 +323,36 @@ for f in folder:
 
     result = treeIndelExtract(root, vregion, pdata)
     #print(result[0])
-    tsvout = filename.split("_recon")[0] + ".tsv"
+    
+
+    vseqs = ['','','','','']
+    for n, char in enumerate(rootseq):
+        if vregion[n] != -1:
+            vseqs[vregion[n]] += char
+    print({root:vseqs})
+    result[0].update({root:vseqs})
+
+    tsvout = filename.split("_recon")[0] + ".fasta"   #.tsv
     # ioutput = open(opath+'ins/'+tsvout, 'w+')
     # doutput = open(opath+'del/'+tsvout,'w+') 
     # header = "header\tV1\tV2\tV3\tV4\tV5\n"
     # ioutput.write(header)
     # doutput.write(header)
+    fastaout = open(opath+tsvout,"w+")
+    #sys.exit()
     for n, node in enumerate(result[0]):
-        data = [":".join(vloop) for vloop in result[0][node]]
+        #print(node)
+        #print(result[0][node])
+        # data = [":".join(vloop) for vloop in result[1][node]] 
+        data = "".join(result[0][node])   # for abayomi's output
+        #print(data)
+        fastaout.write(">"+node+"\n"+data+"\n")
         #print(",".join([node, data, "\n"]))
         #ioutput.write(node+"\t"+"\t".join(data)+"\n")
 
     for n, node in enumerate(result[1]):
         data = [":".join(vloop) for vloop in result[1][node]]
+        # print(data)
         #print(",".join([node, data, "\n"]))
         #doutput.write(node+"\t"+"\t".join(data)+"\n")
     # ioutput.close()
