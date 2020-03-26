@@ -80,7 +80,6 @@ slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Seq, insertio
 #insertions$Header <- unname(mapply(patLabel, insertions$Header, insertions$Pat))
 names(slip.list) <- insertions$Header
 
-logfile <- 
 # # C.-.-.QT.10R.-.-_289_1_b
 # # SHUFFLING --- randomly shuffle the slip locations around 
 slip.list <- lapply(slip.list, function(x){
@@ -89,8 +88,6 @@ slip.list <- lapply(slip.list, function(x){
   getSlipVector(locs, length(x))
 })
 
-
-logfile <- 
 
 getTip <- function(oldtip, slip){
   nonzeros <- which(slip != 0)
