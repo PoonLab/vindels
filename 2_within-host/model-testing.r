@@ -37,6 +37,53 @@ genSeq <- function(len){
   paste(seq, collapse="")
 }
 
+require(expm)
+# returns the F81 transition probability matrtix 
+getMat <- function(rate, branch){
+  
+  nt <- c("A", "C", "G", "T")
+  
+  # generate the F81 rate matrix 
+  mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
+  mat <- mat * rate
+  diag(mat) <- sapply(1:4, function(x) -(rate*sum(f[-x]))) # equivalent to -rate*(sum(f[-x]))
+  
+  # multiply by branch length
+  mat <- branch * mat
+  
+  # exponentiate and return
+  tmat <- expm(mat)
+  tmat
+}
+nt <- c("A", "C", "G", "T")
+pairllh <- function(anc, newtip, rate, branch){
+  tmat <- getMat(rate,branch)
+  achars <- strsplit(anc, "")[[1]]
+  tchars <- strsplit(newtip, "")[[1]]
+  print(branch)
+  result <- mapply(function(tchar,achar){
+    # initializes a matrix with a 
+    tip.llh <- matrix(as.numeric(tchar == nt), nrow=4,ncol=1,dimnames=list(nt))
+    
+    # finalize the calculation for tip likelihood
+    # dot product
+    llh <- tmat %*% tip.llh
+    llh <- llh * f
+    if (!achar %in% nt){
+      print(achar)
+    }
+    # likelihood given the exact nucleotide (state) that we see in the ancestor
+    final.llh <- llh[achar,]
+    return(log(final.llh))
+  }, achars, tchars)
+  
+  # if (class(result) == "list"){
+  #   print(anc)
+  #   print(newtip)
+  # }
+  sum(result)
+}
+
 # used to test for the prior probability of P.ENTER
 # res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
 # sum(res!=0)
