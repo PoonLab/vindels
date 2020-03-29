@@ -94,7 +94,7 @@ estimateSubs <- function(tip, anc){
   sum(res) / sum(lens)
 }
 
-erate <- estimateSubs(insertions$Vseq, insertions$Anc)
+erate <- estimateSubs(tip.seqs, anc.seqs)
 
 simPair <- function(p.enter, p.stay, rate){
   vlen <- lens[sample(1:5, 1)]

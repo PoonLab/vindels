@@ -96,7 +96,7 @@ getTip <- function(oldtip, slip){
     return(oldtip)
   }else{
     #print(oldtip)
-    toCopy <- rep(T, nchar(oldtip))logfile <- 
+    toCopy <- rep(T, nchar(oldtip))
     tip.chars <- strsplit(oldtip, "")[[1]]
     loc <- getSlipLocations(slip)[[1]]
     tab <- table(loc)
@@ -137,18 +137,22 @@ getSlipLocations <- function(slip){
 collapseVect <- function(vect){
   nonzero <- which(vect != 0)
   
-  for (i in length(nonzero):2){
-    # check whether there is overlap in these slip positions, if so, amalgamate
-    current <- nonzero[i]
-    previous <- nonzero[i-1]
-    
-    # checks whether the previous nonzero is adjacent
-    if ((current - 1) == previous){
-      vect[previous] <- vect[previous] + vect[current]
-      vect[current] <- 0
+  if (length(nonzero) < 2){
+    return (vect)
+  }else{
+    for (i in length(nonzero):2){
+      # check whether there is overlap in these slip positions, if so, amalgamate
+      current <- nonzero[i]
+      previous <- nonzero[i-1]
+      
+      # checks whether the previous nonzero is adjacent
+      if ((current - 1) == previous){
+        vect[previous] <- vect[previous] + vect[current]
+        vect[current] <- 0
+      }
     }
+    return(vect)
   }
-  return(vect)
 }
 # used to go from c(4,4,4) to c(0,0,0,3,0,0,0) 
 getSlipVector <- function(locs, length){
@@ -253,7 +257,7 @@ pairllh <- function(anc, newtip, rate, branch){
 nt <- c("A", "C", "G", "T")
 # NORMAL DATA: 
 f <- estimateFreq(c(insertions$Vseq, insertions$Anc))
-branches <- insertions$length
+branches <- insertions$Date
 anc.seqs <- gsub("-", "", insertions$Anc)
 
 # SIMULATED DATA: 
@@ -299,8 +303,8 @@ prior <- function(param){
   rate <- param[3]
   
   prior.pe <- dlnorm(p.enter,meanlog=-8,sdlog=0.5, log=T)
-  prior.ps <-  dunif(p.stay, min=0.5, max=1.0, log=T) # dlnorm(p.stay,meanlog=-0.17,sdlog=0.05,log=T)
-  prior.rate <- dunif(rate, min=0, max=0.01, log=T )#dlnorm(rate,meanlog=log(erate),sdlog=0.3,log=T)
+  prior.ps <-  dlnorm(p.stay,meanlog=-0.17,sdlog=0.05,log=T)
+  prior.rate <- dlnorm(rate,meanlog=log(0.0001), sdlog=0.5,log=T)
   
   return(prior.pe + prior.ps + prior.rate)
 }
