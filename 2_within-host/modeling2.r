@@ -281,6 +281,7 @@ likelihood<- function(param, slip.list){
   p.stay  <- param[2]
   rate <- param[3]
   
+  
   slips <- unname(unlist(slip.list))
   x <- sum(slips == 0)
   y <- sum(slips != 0)
@@ -345,6 +346,7 @@ proposalFunction <- function(param, slip_current){
 
 
 runMCMC <- function(startvalue, iterations, slip.list){
+  start.time <- proc.time()
   chain <- array(dim = c(iterations+1,3))
   chain[1,] <- startvalue
   slip_current <- slip.list
@@ -393,6 +395,7 @@ runMCMC <- function(startvalue, iterations, slip.list){
     print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], sep=" "))
     if (i %% 10 == 0){
       write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept)),collapse=",") , file=logfile, append=T)
+      print(proc.time() - start.time)
     }
   }
   return(list(chain=chain, slip=slip_current))
