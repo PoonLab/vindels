@@ -262,6 +262,12 @@ anc.seqs <- gsub("-", "", insertions$Anc)
 
 # SIMULATED DATA: 
 
+
+
+# likelihood of the entire slip.list
+# only calculated when : 
+  # a) rate parameter is changed
+  # b) before the MCMC starts for the first iteration
 require(parallel)
 seqllh <- function(rate, slip.list){
   #print("Starting SeqLLH ... ")
