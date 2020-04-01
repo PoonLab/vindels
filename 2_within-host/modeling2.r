@@ -334,15 +334,12 @@ proposalFunction <- function(param, slip_current, llh_current){
     if (num-s2p < (1/3 *(1-s2p))){
       p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
       llh_proposed <- llh_current   # stays the same
-      changed <- -1
     }else if(num-s2p > (2/3 *(1-s2p))){
       p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
       llh_proposed <- llh_current   # stays the same
-      changed <- -2
     }else{
       rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
       llh_proposed <- seqllh(rate, slip_current)  # recalcuate using the new rate
-      changed <- -3
     }
     slip_proposed <- slip_current    # stays the same
   
