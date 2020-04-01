@@ -37,6 +37,8 @@ genSeq <- function(len){
   paste(seq, collapse="")
 }
 
+s.branches <- rlnorm(20000, meanlog=3.55, sdlog=1.2)
+
 require(expm)
 # returns the F81 transition probability matrtix 
 getMat <- function(rate, branch){
@@ -104,51 +106,12 @@ simPair <- function(p.enter, p.stay, rate){
   tip <- anc
   
   # SUBSTITUTIONS
+  # ************ change this to utilize the transition probability matrix 
   # add in substitutions based on the rate value 
-  subs <- which(sapply(1:vlen, function(x){runif(1) < rate}))
   
-  if (length(subs) > 0){
-    tip.chars <- str_split(tip, "")[[1]]
-    anc.chars <- str_split(anc, "")[[1]]
-    
-    for (i in subs){
-      # choose whether to mutate the tip sequence or ancestor (assumed 50% chance)
-      if (runif(1) < 0.5){
-        toChange <- tip.chars
-        tipBool  <- T
-      }else{
-        toChange <- anc.chars
-        tipBool <- F
-      }
-      
-      # store the nucleotide at the chosen location
-      n.idx <- which(names(f)==toChange[i])
-      # calculate the probabilities of changing to each of the others nucleotides 
-      t.probs <- f[-n.idx] / (1- f[[n.idx]])
-      
-      # based on the probabilities, change to the new nucleotide
-      rnum <- runif(1)
-      if (rnum < t.probs[[1]]){
-        out.nt <-  names(t.probs)[1]
-      }else if(rnum > t.probs[[1]] && rnum < (t.probs[[1]]+t.probs[[2]])){
-        out.nt <- names(t.probs)[2]
-      }else{
-        out.nt <- names(t.probs)[3]
-      }
-      
-      if (tipBool){
-        tip.chars[i] <- out.nt
-      }else{
-        anc.chars[i] <- out.nt
-      }
-      
-    }
-    tip <- paste0(tip.chars,collapse="")
-    anc <- paste0(anc.chars,collapse="")
-  }
   
   # INDELS 
-  # determine the number of insertionsd that occur 
+  # determine the number of insertions that occur 
   count <- sum(runif(vlen) < p.enter)
   if (count > 0){
     for (n in 1:count){
