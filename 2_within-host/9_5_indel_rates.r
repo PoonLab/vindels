@@ -4,19 +4,6 @@ require(ape)
 source("~/vindels/2_within-host/utils.r")
 
 vloops <- c("V1","V2","V3","V4","V5")
-# csvcount <- function(input){
-#   commas <- str_count(input, ",")
-#   if (commas > 0){
-#     result <- commas + 1  
-#   }else if(input == ""){
-#     result <- 0
-#   }else{
-#     result <- 1
-#   }
-#   result
-# }
-
-
 
 # used for extracting condensed CSV information 
 # specifically handles fields containing a comma
