@@ -419,7 +419,7 @@ runMCMC <- function(startvalue, iterations, slip.list){
     
     if (i %% 10 == 0){
       print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], sep=" "))
-      write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept)), proc.time() - start.time, collapse=",") , file=logfile, append=T)
+      write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept), proc.time() - start.time), collapse=",") , file=logfile, append=T)
     }
   }
   return(list(chain=chain, slip=slip_current))

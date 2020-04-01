@@ -135,7 +135,7 @@ def extractIndels(seqpairs, vSeqFile):
     for accno in seqpairs.keys():
         iTemp = ''
         dTemp = ''
-        print(accno)
+        #print(accno)
 
         #for collecting insertion and deletion sequences in each variable region 
         insertions = [[],[],[],[],[]]
@@ -155,11 +155,14 @@ def extractIndels(seqpairs, vSeqFile):
             achar = seqpairs[accno][1][n]
             #vregion, pos = vrSwitch(ai, boundaries[accno]) 
             #this counts up the number of nucleotides found in the seq of interest
-    
+            
+            # sanity check to ensure the boundaries are being found properly
+            #if saved != vregion[n]:
+                #print(n)
+            #saved = vregion[n]
+            
+            
             #following code only runs if inside a variable loop
-            if saved != vregion[n]:
-                print(n)
-            saved = vregion[n]
             if vregion[n] != -1:
                 #print(n)
                 
@@ -226,11 +229,14 @@ def extractIndels(seqpairs, vSeqFile):
         
         #SANITY CHECK 
         #ensures that the iterated sequences are the proper variable loops and that they are identical to the one found in the csv file 
-        for n, vr in enumerate(vseqs):
+        '''for n, vr in enumerate(vseqs):
             extracted = vr.replace("-","")
-            extract_anc = aseqs[n].replace("-","")
+            #extract_anc = aseqs[n].replace("-","")
             csvSeq = vregions[accno][n] 
             
+            print(extracted)
+            print(csvSeq)
+
             start, stop = boundaries[accno][n]
             start = int(start)
             stop = int(stop)
@@ -241,7 +247,7 @@ def extractIndels(seqpairs, vSeqFile):
                 print(extracted)
                 print(extract_anc)
                 #print(csvSeq)
-                count +=1
+                count +=1'''
 
     return iDict, dDict, vSeq, aSeq
 
@@ -294,7 +300,7 @@ agtcatcagacagagatattcagacctgcaggaggaaatatgagggacaa\
 ttggagaagtgaattatataaatataaagtggtagaaattaaaccattag\
 gaatagcacccactaaggcgaaaaggagagtggtggagagagaaaaaaga'''
 
-    print(len(sample))
+    #print(len(sample))
     
     # folder of historian outputs 
     hFolder = glob(sys.argv[1]+"*.fasta")
@@ -308,9 +314,9 @@ gaatagcacccactaaggcgaaaaggagagtggtggagagagaaaaaaga'''
     # path to the variable region sequences 
     vPath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
 
-    totalseqs = 0
+    #totalseqs = 0
     for infile in hFolder:
-        print(infile)
+        #print(infile)
         filename = os.path.basename(infile)
         #if len(sys.argv) == 4:
         #replicate = filename.split("_")[0][-1]
@@ -319,18 +325,19 @@ gaatagcacccactaaggcgaaaaggagagtggtggagagagaaaaaaga'''
         reconfile = filename.split("_recon")[0] + ".csv"   #101827-a_15.csv
 
         if os.path.isfile(vPath+csvfile):
-            #ins_out = open(outpath+"ins/"+reconfile,'w')
-            #del_out = open(outpath+"del/"+reconfile,'w')
-            print(csvfile)
+            ins_out = open(outpath+"ins/"+reconfile,'w')
+            del_out = open(outpath+"del/"+reconfile,'w')
+            print(infile)
             terminals = getTerminals(infile)
             iDict, dDict, vSeq, aSeq = extractIndels(terminals, vPath+csvfile)
             
             #print(len(iDict))
             #print(len(vSeq))
-            #ins_out.write("header,ins,Vloop,Vlen,Vseq,anc\n")
-            #del_out.write("header,del,Vloop,Vlen,Vseq,anc\n")
+            ins_out.write("header,ins,Vloop,Vlen,Vseq,anc\n")
+            del_out.write("header,del,Vloop,Vlen,Vseq,anc\n")
 
-            '''for accno in iDict:      
+            for accno in iDict:
+                #totalseqs+=1
                 insertions = iDict[accno] # [ [], [], [], [], [] ]
                 deletions = dDict[accno] # [ [], [], [], [], [] ]
                 vsequences = vSeq[accno]   # [ V1-len, V2-len, V3-len, V4-len, V5-len]
@@ -347,10 +354,8 @@ gaatagcacccactaaggcgaaaaggagagtggtggagagagaaaaaaga'''
                     if delList == "":
                         delList = ""
                     newaccno = accno + "_" + str(k+1)
-                    del_out.write(",".join([newaccno, delList, str(k+1), str(len(vsequences[k])), vsequences[k], asequences[k]])+"\n")'''
-        
-        break 
-    print(totalseqs)
+                    del_out.write(",".join([newaccno, delList, str(k+1), str(len(vsequences[k])), vsequences[k], asequences[k]])+"\n") 
+    #print(totalseqs)
 
 
 if __name__ == '__main__': 
