@@ -331,6 +331,7 @@ del.final <- split(del.final, del.final$pat)
 
 
 pat <- c("28376", "30631", "30647", "30651", "30660", "30667")
+png(file="~/vindels/Figures/within-host/pat-histograms.png", width=1200,height=1000)
 par(mfrow=c(6,5))
 for (p in pat){
   for (v in 1:5){
@@ -342,7 +343,7 @@ for (p in pat){
     }
   }
 }
-png(filename="~/vindels/Figures/within-host/")
+dev.off()
 
 ins.list <- split(ins.df, ins.df$pat)
 del.list <- split(del.df, del.df$pat)
