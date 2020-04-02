@@ -1,4 +1,4 @@
-require(Biostrings)
+#require(Biostrings)
 # for changing headers from ACCNO_DATE format to ACCNO
 getSubtype <- function(header){
   newheader <- strsplit(as.character(header),"\\.")[[1]][1]

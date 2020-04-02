@@ -45,14 +45,14 @@ View(rates)
 
 
 # INSERTION PARSING ----------
-path <- "~/Lio/"
+#path <- "~/Lio/"
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/rep/ins/*.csv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/rep/del/*.csv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/rep2/ins/*.csv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/rep2/del/*.csv"))
 all.ins <- data.frame()
 all.del <- data.frame()
-csv.ins <- data.frame()
-csv.del <- data.frame()
+csv.ins <- list()
+csv.del <- list()
 
 iTotal <- list()
 dTotal <- list()
@@ -91,7 +91,7 @@ for (file in 1:length(ifolder)){
   
   
   # reads in the tree
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename , ".tree.sample")))
+  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim200/",filename , ".tree.sample")))
   
   tip.rtt <- node.depth.edgelength(tre)[1:Ntip(tre)]
   names(tip.rtt) <- tre$tip.label
@@ -142,14 +142,17 @@ for (file in 1:length(ifolder)){
   iCSV$Count <- sapply(iCSV$V1, csvcount) 
   dCSV$Count <- sapply(dCSV$V1, csvcount)
   
-  iCSV$Pat <- paste0(str_split(rep(pat, nrow(iCSV)),"-")[[1]][1],"-", iCSV$Run)
-  dCSV$Pat <- paste0(str_split(rep(pat, nrow(dCSV)),"-")[[1]][1] ,"-", dCSV$Run)
+  iCSV$PatRun <- paste0(strsplit(rep(pat, nrow(iCSV)),"-")[[1]][1],"-", iCSV$Run)
+  dCSV$PatRun <- paste0(strsplit(rep(pat, nrow(dCSV)),"-")[[1]][1],"-", dCSV$Run)
   
   #rearrange
   iCSV <- iCSV[c(1,2,3,6,12,8,9,10,7,4,5,13,11)]
   dCSV <- dCSV[c(1,2,3,6,12,8,9,10,7,4,5,13,11)]
   
-  c.headers <- c("header","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos","mid.rtt","Vseq", "Anc", "Pat", "Run")
+  iCSV$Pat <- strsplit(rep(pat, nrow(iCSV)),"-")[[1]][1]
+  dCSV$Pat <- strsplit(rep(pat, nrow(dCSV)),"-")[[1]][1]
+  c.headers <- c("header","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos",
+                 "mid.rtt","Vseq", "Anc",  "PatRun", "Run","Pat")
   colnames(iCSV) <- c.headers
   colnames(dCSV) <- c.headers
   
@@ -200,8 +203,20 @@ for (file in 1:length(ifolder)){
   # OUTPUT 2 
   # used for indel rates 
   
-  csv.ins <- rbind(csv.ins, iCSV)
-  csv.del <- rbind(csv.del, dCSV)
+  # REMOVED because inefficient for 12000 files
+  #csv.ins <- rbind(csv.ins, iCSV)
+  #csv.del <- rbind(csv.del, dCSV)
+  if (is.null(csv.ins[[filename]])){
+    csv.ins[[filename]] <- iCSV
+    csv.del[[filename]] <- dCSV
+  }else{
+    csv.ins[[filename]] <- rbind(csv.ins[[filename]], iCSV)
+    csv.del[[filename]] <- rbind(csv.del[[filename]], dCSV)
+    print(nrow(csv.ins[[filename]]) == 2* nrow(iCSV))
+    print(nrow(csv.del[[filename]]) == 2* nrow(dCSV))
+  }
+  
+  
   
   # if (!is.null(iTotal[[runno]])){
   #   iTotal[[runno]] <- rbind(iTotal[[runno]], iCSV)
@@ -215,32 +230,44 @@ for (file in 1:length(ifolder)){
   #   dTotal[[runno]] <- dCSV
   # }
 }
+all.ins <- as.data.frame(rbindlist(csv.ins))
+all.del <- as.data.frame(rbindlist(csv.del))
 
-csv.ins$header <- getPat(csv.ins$header, csv.ins$Pat)
-csv.del$header <- getPat(csv.del$header, csv.del$Pat)
+#csv.ins$header <- getPat(csv.ins$header, csv.ins$Pat)
+#csv.del$header <- getPat(csv.del$header, csv.del$Pat)
 
-iTotal <- split(csv.ins, csv.ins$Pat)
-dTotal <- split(csv.del, csv.del$Pat)
+iTotal <- split(all.ins, all.ins$PatRun)
+dTotal <- split(all.del, all.del$PatRun)
 
 
-require(BSDA)
-# RATE ANALYSIS -------------
-ins.df <- data.frame()
-del.df <- data.frame()
+
 
 #median(as.numeric(all.ins[all.ins$Vloop==2,3])) # used to det ermine the median lengths of the variable loops
-vlengths <- c(72,126,105,87,33)
 all.df <- data.frame()
 
 irtt <- list()
 drtt <- list()
 
-all.ins <- list()
-all.del <- list()
-for (name in unique(csv.ins$Pat)){
-  iData <- iTotal[[name]]
-  dData <- dTotal[[name]]
-  
+
+completed <-unname(unlist(sapply(unique(all.ins$Pat), function(x){
+  if (sum(grepl(paste0("^",x,"-"),names(iTotal))) == 200){
+    x
+  }else{
+    NA  
+  }
+})))
+iTotal <- iTotal[1:1800]
+dTotal <- dTotal[1:1800]
+
+require(BSDA)
+# RATE ANALYSIS -------------
+ins.list <- list()
+del.list <- list()
+
+for (i in 1:length(iTotal)){
+  iData <- iTotal[[i]]
+  dData <- dTotal[[i]]
+  print(i)
   irates <- c()
   drates <- c()
   
@@ -259,15 +286,15 @@ for (name in unique(csv.ins$Pat)){
     
     # INSERTION RATES 
     ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
-    irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
+    irate <- exp(coef(ifit)[[1]])*365/median(iFinal$Vlength)
     irates <- c(irates, irate)
-    print(summary(ifit))
+    #print(summary(ifit))
     
     # DELETION RATES
     dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
-    drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
+    drate <- exp(coef(dfit)[[1]])*365/median(dFinal$Vlength)
     drates <- c(drates, drate)
-    print(summary(dfit))
+    #print(summary(dfit))
     
     # COUNTING NUCLEOTIDES: change the formula to this : nchar(gsub(",","",iFinal$Seq))*iFinal$Count ~ 1
     #print(1 - (fit$deviance/fit$null.deviance))
@@ -283,13 +310,39 @@ for (name in unique(csv.ins$Pat)){
   irates <- irates*10^3
   drates <- drates*10^3
   
-  pat <- str_split(name, "-")[[1]][1]
-  run <- str_split(name, "-")[[1]][2]
+  pat <- str_split(names(iTotal)[i], "-")[[1]][1]
+  run <- str_split(names(dTotal)[i], "-")[[1]][2]
   
   # contain the 20 
-  ins.df <- rbind(ins.df, data.frame(pat=pat, run=run, V1=irates[1],V2=irates[2],V3=irates[3],V4=irates[4],V5=irates[5]))
-  del.df <- rbind(del.df, data.frame(pat=pat, run=run,V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5]))
+  ins.list[[i]] <- data.frame(pat=pat, run=run, V1=irates[1],V2=irates[2],V3=irates[3],V4=irates[4],V5=irates[5])
+  del.list[[i]] <- data.frame(pat=pat, run=run,V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5])
 }
+ins.final <- as.data.frame(rbindlist(ins.list))
+del.final<- as.data.frame(rbindlist(del.list))
+
+V1 <- ins.final[,c(1,2,3)]
+V2 <- ins.final[,c(1,2,4)]
+V3 <- ins.final[,c(1,2,5)]
+V4 <- ins.final[,c(1,2,6)]
+V5 <- ins.final[,c(1,2,7)]
+
+ins.final <- split(ins.final, ins.final$pat)
+del.final <- split(del.final, del.final$pat)
+
+
+pat <- c("28376", "30631", "30647", "30651", "30660", "30667")
+par(mfrow=c(6,5))
+for (p in pat){
+  for (v in 1:5){
+    data <- ins.final[[p]][ins.final[[p]][,v+2] > 10^-3,v+2]
+    if (length(data) > 0 ){
+      hist(data, main=paste0(p,"-V",v))
+    }else{
+      hist(c(0))
+    }
+  }
+}
+png(filename="~/vindels/Figures/within-host/")
 
 ins.list <- split(ins.df, ins.df$pat)
 del.list <- split(del.df, del.df$pat)
