@@ -30,3 +30,24 @@ plot(chain[thinned,1], type = "l", xlab="MCMC Steps" , ylab="Prob(Enter)",main =
 abline(h = med1, col="red")
 plot(chain[thinned,2], type = "l", xlab="MCMC Steps" , ylab="Prob(Stay)",main = "Chain values of Stay")
 abline(h = med2, col="red")
+
+# ----- SLIPPAGE MODEL -----
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model.csv", stringsAsFactors = F)
+
+data <- as.data.frame(sapply(1:ncol(csv), function(x){
+  sapply(1:nrow(csv), function(y){
+    as.numeric(strsplit(csv[y,x]," ")[[1]][1])
+  })
+}))
+
+colnames(data) <- c('p.enter', 'p.stay', 'rate', 'slip.changed', 'accept')
+png(file="~/vindels/Figures/within-host/finalized/slippage-trace2.png", width=600, height=800)
+par(mar=c(5,5,4,1), mfrow=c(3,1))
+plot(data$p.enter, type = "l", xlab="MCMC Steps (x10)" , ylab="Prob(Enter)",
+     main = "Chain values of Enter", cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
+
+plot(data$p.stay, type = "l", xlab="MCMC Steps (x10)" , ylab="Prob(Stay)",
+     main = "Chain values of Stay",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
+plot(data$rate, type = "l", xlab="MCMC Steps (x10)" , ylab="Rate",
+     main = "Chain values of Rate",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
+dev.off()

@@ -258,7 +258,7 @@ counts2 <- reshape2::melt(counts)
 ins.nt <- data.frame(nt=nucleotides,props=iProps,vprops=iVProps)
 del.nt <- data.frame(nt=nucleotides,props=dProps,vprops=dVProps)
 indel.nt <- rbind(ins.nt, del.nt)
-indel.nt$indel <- c(rep(0,4),rep(3,4))
+indel.nt$indel <- c(rep(0,4),rep(1,4))
 indel.nt$counts <- counts2$value
 
 # -----------------------------------------
@@ -389,20 +389,24 @@ upper.y <- con.int[which(!grepl("v",names(con.int)) & grepl("97.5",names(con.int
 # broken down by variable loop and nucleotide
 # -------------------------------------
 require(RColorBrewer)
-colors <- brewer.pal(4, "Set1")
+colors <- c("green", "dodgerblue", "red", "purple")
 
 cex=1
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
-lim = c(0.1,0.45)
-plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+21, bg=indel.nt[,1],xlim=lim,ylim=lim,cex=0.12*sqrt(indel.nt$counts),
-     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='', main="Nucleotide Proportions")
+xpos <- c(0.17,0.155,0.24,0.37)
+ypos <- c(0.15, 0.21, 0.26, 0.39)
+
+lim = c(0.14,0.42)
+plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.08*sqrt(indel.nt$counts),
+     cex.lab=1.3, cex.axis=1.2,cex.main=1.8,lwd=5, ylab='', xlab='', main="Nucleotide Proportions")
 title(ylab="Proportion Inside Indels", line=3,cex.lab=1.3)
 title(xlab="Proportion in Variable Loops", line=3,cex.lab=1.3)
-arrows(indel.nt[1:8,3], lower.y[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,3], upper.y[c(seq(1,8,2),seq(1,8,2)+1)], length=0.05, angle=90, code=3)
-arrows(lower.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], upper.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], length=0.05, angle=90, code=3)
-legend(0.38,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(21,24),cex=1.3, pt.bg="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
+arrows(indel.nt[1:8,3], lower.y[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,3], upper.y[c(seq(1,8,2),seq(1,8,2)+1)], length=0, angle=90, code=3,lwd=1.5)
+arrows(lower.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], upper.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], length=0, angle=90, code=3,lwd=1.5)
+#legend(0.38,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+text(xpos, ypos, cex=1.2, labels=c("C", "G", "T", "A"))
+legend(0.14,0.42,legend=c("Insertions", "Deletions"), pch=c(1,2),cex=1.3, col="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 par(xpd=F)
 abline(0,1)
 
