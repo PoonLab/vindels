@@ -6,12 +6,6 @@
 # ------------------
 # SIMULATE DNA SEQUENCES 
 
-# this calculates the mean substitution rate across all the observed sequences 
-# sum(all substitutions) / sum(all nucl sites)
-diffs <- sum(unname(mapply(function(x,y) {length(checkDiff(x,y))}, 
-                           tip.seqs, anc.seqs))) / sum(nchar(tip.seqs))
-
-
 # calculate the median lengths of the variable loops 
 ins.v <- split(insertions, insertions$Vloop)
 lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
@@ -37,12 +31,11 @@ genSeq <- function(len){
   paste(seq, collapse="")
 }
 
-s.branches <- rlnorm(20000, meanlog=3.55, sdlog=1.2)
 
-require(expm)
+
 # returns the F81 transition probability matrtix 
 getMat <- function(rate, branch){
-  
+  require(expm)
   nt <- c("A", "C", "G", "T")
   
   # generate the F81 rate matrix 
@@ -58,33 +51,6 @@ getMat <- function(rate, branch){
   tmat
 }
 nt <- c("A", "C", "G", "T")
-pairllh <- function(anc, newtip, rate, branch){
-  tmat <- getMat(rate,branch)
-  achars <- strsplit(anc, "")[[1]]
-  tchars <- strsplit(newtip, "")[[1]]
-  print(branch)
-  result <- mapply(function(tchar,achar){
-    # initializes a matrix with a 
-    tip.llh <- matrix(as.numeric(tchar == nt), nrow=4,ncol=1,dimnames=list(nt))
-    
-    # finalize the calculation for tip likelihood
-    # dot product
-    llh <- tmat %*% tip.llh
-    llh <- llh * f
-    if (!achar %in% nt){
-      print(achar)
-    }
-    # likelihood given the exact nucleotide (state) that we see in the ancestor
-    final.llh <- llh[achar,]
-    return(log(final.llh))
-  }, achars, tchars)
-  
-  # if (class(result) == "list"){
-  #   print(anc)
-  #   print(newtip)
-  # }
-  sum(result)
-}
 
 # used to test for the prior probability of P.ENTER
 # res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
@@ -102,29 +68,45 @@ simPair <- function(p.enter, p.stay, rate){
   vlen <- lens[sample(1:5, 1)]
   anc <- genSeq(vlen)
   
-  # make a copy of the ancestor to edit
-  tip <- anc
+  # pick a branch rate value from a distribution 
+  branch <- rlnorm(1, meanlog=4, sdlog=1.05)
   
-  # SUBSTITUTIONS
-  # ************ change this to utilize the transition probability matrix 
+  # ----SUBSTITUTIONS--------
   # add in substitutions based on the rate value 
-  
-  
-  # INDELS 
+
+  anc.chars <- strsplit(anc, "")[[1]]
+  tmat <- getMat(rate, branch)
+
+  tip <- paste(sapply(1:nchar(anc), function(n){
+    rand <- runif(1)
+    probs <- tmat[anc.chars[n],]
+    # choose the correct nucleotide based on the existing one and the random number 
+    if (rand < probs[1]){
+      "A"
+    }else if (rand > probs[1] && rand < probs[2]){
+      "C"
+    }else if (rand > (probs[1]+probs[2]) && rand < probs[3]){
+      "G"
+    }else{
+      "T"
+    }
+  }), collapse="")
+  #print("finished substitutions")
+  # ------ INDELS -------
   # determine the number of insertions that occur 
   count <- sum(runif(vlen) < p.enter)
   if (count > 0){
     for (n in 1:count){
       if (runif(1) < 0.18){
         # add a non-multiple of 3 indel
-        
+        #print('non3')
         len <- 0
         # used to count how many SUBSEQUENT nucleotides will be added AFTER the first one
         while (len %% 3 == 0){
           # algorithm to compute an appropriate length
           len <- 0
-          exit <- 1
-          while(exit > p.stay){
+          exit <- 0
+          while(exit < p.stay ){
             len <- len + 1
             exit <- runif(1)
           }
@@ -135,10 +117,11 @@ simPair <- function(p.enter, p.stay, rate){
         len <- 1
         # keep trying until an indel of length > 0, and multiple of 3 is found 
         while (len %% 3 != 0 || len == 0){
+          #print("3")
           len <- 0
-          exit <- 1
+          exit <- 0
           # grows an indel size
-          while(exit > p.stay){
+          while(exit < p.stay){
             len <- len + 1 
             exit <- runif(1)
           }
@@ -155,11 +138,8 @@ simPair <- function(p.enter, p.stay, rate){
       anc <- insert(anc, rep("-",len), idx)
     }
   }
-  
-  
-  
-  
-  return(list(tip=tip,anc=anc))
+  #print("finished indels")
+  return(list(tip=tip,anc=anc,branch=branch))
   # to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
   # algorithm:
   # probability of enter is chosen
@@ -169,14 +149,42 @@ simPair <- function(p.enter, p.stay, rate){
   # else if the number if %%3 != 0:
   # there's a low probability that it will be kept (penalty)
   
-  # to estimate the OBSERVED rate of indels, it is a simpler process
-  # algorithm:
-  # probability of enter is chosen
-  # draw a random number to determine whether a 3 or non3 should be added
-  # if runif(1) < 0.05:
-  # add a non3 number 
-  # else:
-  # add a multiple of three 
 }
 
+all.seqs <- sapply(1:10000, function(n){
+  print(n)
+  pair <- simPair(0.0007, 0.7, 0.0001)
+  # VALUE 1 = Tip, VALUE 2 = Ancestor
+  return(c(pair[[1]], pair[[2]]))
+})
+
+insertions <- as.data.frame(t(all.seqs), stringsAsFactors = F)
+colnames(insertions) <- c("Tip", "Anc")
+
+data <- t(unname(sapply(insertions$Anc, function(x){
+  # returns c(length, position) of insertion events
+  gaps <- gregexpr("-",x)[[1]]
+  if (length(gaps) == 1 && gaps == -1){
+    return (c(NA, NA))
+  }else{
+    return (c(length(gaps), max(gaps)))
+  }
+})))
+
+insertions$Len <- data[,1]
+insertions$Pos <- data[,2]
+
+slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Len, insertions$Pos))
+
+# # C.-.-.QT.10R.-.-_289_1_b
+# # SHUFFLING --- randomly shuffle the slip locations around 
+slip.list <- lapply(slip.list, function(x){
+  total <- sum(x)
+  if (total == 0){
+    return (x)
+  }else{
+    locs <- sample(length(x), total, replace=T)
+    getSlipVector(locs, length(x))
+  }
+})
 # -----------------
