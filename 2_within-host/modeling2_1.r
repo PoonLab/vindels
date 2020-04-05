@@ -67,111 +67,18 @@ slip.list <- lapply(slip.list, function(x){
   }
 })
 
-
+# needed for use in the CHANGESLIP function
 idx <- which(unname(lapply(slip.list,sum))>0)
-# For use in the proposal function
-changeSlip <- function(slip.list){
-  # choose a sequence to edit
-  rand <- sample(length(idx),1)
-  
-  # convert it to indices
-  slip <- slip.list[[idx[rand]]]
-  slip.idx <- getSlipLocations(slip)
-  
-  # choose a slip event to change
-  toEdit <- sample(length(slip.idx[[1]]),1)
-  
-  # this is to ensure that the proposed change is never outside the slip region
-  proposal <- 0
-  while(proposal <= 0 || proposal > length(slip)){
-    proposal <- slip.idx[[1]][toEdit] + delta()
-  }
-  # save the change to the slip list
-  slip.idx[[1]][toEdit] <- proposal
-  
-  # save the whole list
-  slip.list[[idx[rand]]] <- getSlipVector(slip.idx[[1]],slip.idx[[2]])
-  return(list(slip=slip.list, idx=idx[rand]))
-}
-
-
 
 nt <- c("A", "C", "G", "T")
 
 # NORMAL DATA: 
 f <- estimateFreq(c(insertions$Vseq, insertions$Anc))
+names(f) <- nt
 branches <- insertions$Date
 anc.seqs <- gsub("-", "", insertions$Anc)
 
-# likelihood of the entire slip.list
-# only calculated when : 
-  # a) rate parameter is changed
-  # b) before the MCMC starts for the first iteration
 
-runMCMC <- function(startvalue, iterations, slip.list){
-  # timing
-  start.time <- proc.time()
-  
-  # initialize the chain
-  chain <- array(dim = c(iterations+1,3))
-  chain[1,] <- startvalue
-  
-  # start the slip list and the llh list
-  slip_current <- slip.list
-  llh_current <- seqllh(startvalue[3], slip.list)
-  
-  # keep a logfile up to date
-  logfile <- file("~/PycharmProjects/hiv-withinhost/slip-model.csv", "w")
-  write("p(Enter), p(Stay), Rate, Slip-changed, Accept", file=logfile)
-  
-  for (i in 1:iterations){
-    # calculate posterior of current position
-    p.current <- posterior(chain[i,], slip_current, llh_current)
-    
-    # generate proposal 
-    proposal <- proposalFunction(chain[i,], slip_current, llh_current)
-  
-    
-    # calculate posterior of the new proposal (parameters, slip_proposed, llh_proposed)
-    p.next <- posterior(proposal[[1]], proposal[[2]], proposal[[3]])
-    
-    #print(paste("Current:", p.current, "Next:", p.next, sep=" "))
-    #print(paste(proposal[[1]], sep=" "))
-    s.change <- any(unname(unlist(slip_current))!=unname(unlist(proposal[[2]])))
-    #print(paste0("Sliplist change proposed: ", s.change))
-    
-    # to catch problematic posterior calculations 
-    if(is.na(p.current) || is.na(p.next)){
-      print("ERROR: Posterior could not be calculated")
-      print(paste("Chain value:", chain[i,1], chain[i,2], chain[i,3], sep=" "))
-      break
-    }
-    
-    prop <- exp(p.next - p.current)
-    #print(prop)
-    
-    # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
-    if (runif(1) < prop) {
-      chain[i+1,] <- proposal[[1]]
-      slip_current <- proposal[[2]]
-      llh_current <- proposal[[3]]
-      #print("Accept")
-      accept <- T
-    # if the proportion is less than the random uniform sample, REJECT the proposed value stick with current 
-    } else {
-      chain[i+1,] <- chain[i,]
-      #print("Reject")
-      accept <- F
-    }
-    
-    if (i %% 10 == 0){
-      print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], sep=" "))
-      write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept), proc.time() - start.time), collapse=",") , file=logfile, append=T)
-    }
-  }
-  return(list(chain=chain, slip=slip_current))
-  close(logfile)
-}
 
 # RUN MCMC
 startvalue <- c(0.001, 0.8, 0.001)

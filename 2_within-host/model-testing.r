@@ -5,14 +5,15 @@
 # SIMULATE DNA 
 # ------------------
 # SIMULATE DNA SEQUENCES 
-
+source("~/vindels/2_within-host/slippage-model.r")
 # calculate the median lengths of the variable loops 
 ins.v <- split(insertions, insertions$Vloop)
 lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
 rm (ins.v)
+rm(insertions)
+
 # Generates a sequence that adheres to the nucleotide frequencies of the data 
-f <- estimateFreq(allseqs)
-names(f) <- nt
+
 genSeq <- function(len){
   seq <- c()
   for (n in 1:len){
@@ -30,8 +31,6 @@ genSeq <- function(len){
   }
   paste(seq, collapse="")
 }
-
-
 
 # returns the F81 transition probability matrtix 
 getMat <- function(rate, branch){
@@ -55,14 +54,14 @@ nt <- c("A", "C", "G", "T")
 # used to test for the prior probability of P.ENTER
 # res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
 # sum(res!=0)
-
-estimateSubs <- function(tip, anc){
-  res <- unname(mapply(function(x,y){length(checkDiff(x,y))}, tip, anc))
-  lens <- unname(sapply(tip, nchar))
-  sum(res) / sum(lens)
-}
-
-erate <- estimateSubs(tip.seqs, anc.seqs)
+# 
+# estimateSubs <- function(tip, anc){
+#   res <- unname(mapply(function(x,y){length(checkDiff(x,y))}, tip, anc))
+#   lens <- unname(sapply(tip, nchar))
+#   sum(res) / sum(lens)
+# }
+# 
+# erate <- estimateSubs(tip.seqs, anc.seqs)
 
 simPair <- function(p.enter, p.stay, rate){
   vlen <- lens[sample(1:5, 1)]
@@ -128,7 +127,7 @@ simPair <- function(p.enter, p.stay, rate){
         }
       }
       # add the length and choose a random location for the slip event 
-      idx <- sample(1:length(vlen)+1,1)
+      idx <- sample(1:vlen+1,1)
       
       # generate the sequence to insert / delete 
       indel <- genSeq(len)
@@ -151,17 +150,18 @@ simPair <- function(p.enter, p.stay, rate){
   
 }
 
-all.seqs <- sapply(1:10000, function(n){
+# SIMULATE TIP + ANCESTOR SEQUENCES 
+all.seqs <- sapply(1:100, function(n){
   print(n)
   pair <- simPair(0.0007, 0.7, 0.0001)
   # VALUE 1 = Tip, VALUE 2 = Ancestor
-  return(c(pair[[1]], pair[[2]]))
+  return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
-
 insertions <- as.data.frame(t(all.seqs), stringsAsFactors = F)
-colnames(insertions) <- c("Tip", "Anc")
+colnames(insertions) <- c("tip", "anc", "branch")
 
-data <- t(unname(sapply(insertions$Anc, function(x){
+# Generate the length and position columns
+data <- t(unname(sapply(insertions$anc, function(x){
   # returns c(length, position) of insertion events
   gaps <- gregexpr("-",x)[[1]]
   if (length(gaps) == 1 && gaps == -1){
@@ -171,13 +171,12 @@ data <- t(unname(sapply(insertions$Anc, function(x){
   }
 })))
 
-insertions$Len <- data[,1]
-insertions$Pos <- data[,2]
+insertions$len <- data[,1]
+insertions$pos <- data[,2]
 
-slip.list <- unname(mapply(createSlips, insertions$Anc, insertions$Len, insertions$Pos))
+slip.list <- unname(mapply(createSlips, insertions$anc, insertions$len, insertions$pos))
 
-# # C.-.-.QT.10R.-.-_289_1_b
-# # SHUFFLING --- randomly shuffle the slip locations around 
+# SHUFFLING --- randomly shuffle the slip locations around 
 slip.list <- lapply(slip.list, function(x){
   total <- sum(x)
   if (total == 0){
@@ -188,3 +187,14 @@ slip.list <- lapply(slip.list, function(x){
   }
 })
 # -----------------
+
+# needed for use in the CHANGESLIP function
+idx <- which(unname(lapply(slip.list,sum))>0)
+
+anc.seqs <- gsub("-", "", insertions$Anc)
+
+
+# RUN MCMC
+startvalue <- c(0.001, 0.85, 0.001)
+chain <- runMCMC(startvalue, 100000, slip.list)
+

@@ -1,12 +1,12 @@
 # slippage model functions
-
+# INPUT
 createSlips <- function(anc, len, pos){
   # start out with a base vector containing nchar number of zeros 
   # remove the gap characters from the ancestral sequence 
   anc <- gsub("-","",anc)
   base <- rep(0,nchar(anc))  # removed the nchar(anc) + 1 because there cannot be a slip at the final position (there is nothing to skip over)
   # if there is no insertion, simply add a zero to complete the vector 
-  if (len == 0){
+  if (len == 0 || is.na(len)){
     return (base)
     
     # if there is an insertion, add the slip count  at the appropriate position
@@ -15,6 +15,41 @@ createSlips <- function(anc, len, pos){
     base[pos] <- len
     return (base)
   }
+}
+
+estimateFreq <- function(seqs){
+  nt <- c("A", "C", "G", "T")
+  output <- c()
+  for (n in 1:length(nt)){
+    counts <- sum(unname(sapply(seqs,function(x) str_count(x, nt[n]))))
+    output[n] <- counts / sum(unname(sapply(seqs, nchar)))
+  }
+  output
+}
+
+setup <- function(tip, anc, len, pos, branches){
+  indels <<- data.frame(tip=tip, anc=anc, len=len, pos=pos)
+  branches <<- branches
+  anc.seqs <<- gsub("-", "", anc)
+  
+  f <<- estimateFreq(c(tip, anc))
+  names(f) <<- nt
+  
+  # generate slip list 
+  slip.list <<- unname(mapply(createSlips, anc, len, pos))
+  
+  # SHUFFLING --- randomly shuffle the slip locations around 
+  slip.list <<- lapply(slip.list, function(x){
+    total <- sum(x)
+    if (total == 0){
+      return (x)
+    }else{
+      locs <- sample(length(x), total, replace=T)
+      getSlipVector(locs, length(x))
+    }
+  })
+  # needed for use in the CHANGESLIP function
+  idx <<- which(unname(lapply(slip.list,sum))>0)
 }
 
 getSlipVector <- function(locs, length){
@@ -50,16 +85,6 @@ collapseVect <- function(vect){
     }
     return(vect)
   }
-}
-
-estimateFreq <- function(seqs){
-  nt <- c("A", "C", "G", "T")
-  output <- c()
-  for (n in 1:length(nt)){
-    counts <- sum(unname(sapply(seqs,function(x) str_count(x, nt[n]))))
-    output[n] <- counts / sum(unname(sapply(seqs, nchar)))
-  }
-  output
 }
 
 getTip <- function(oldtip, slip){
@@ -140,6 +165,30 @@ getMat <- function(rate, branch){
   tmat
 }
 
+# For use in the proposal function
+changeSlip <- function(slip.list){
+  # choose a sequence to edit
+  rand <- sample(length(idx),1)
+  
+  # convert it to indices
+  slip <- slip.list[[idx[rand]]]
+  slip.idx <- getSlipLocations(slip)
+  
+  # choose a slip event to change
+  toEdit <- sample(length(slip.idx[[1]]),1)
+  
+  # this is to ensure that the proposed change is never outside the slip region
+  proposal <- 0
+  while(proposal <= 0 || proposal > length(slip)){
+    proposal <- slip.idx[[1]][toEdit] + delta()
+  }
+  # save the change to the slip list
+  slip.idx[[1]][toEdit] <- proposal
+  
+  # save the whole list
+  slip.list[[idx[rand]]] <- getSlipVector(slip.idx[[1]],slip.idx[[2]])
+  return(list(slip=slip.list, idx=idx[rand]))
+}
 
 # ------ MCMC FUNCTIONS ------
 pairllh <- function(anc, newtip, rate, branch){
@@ -170,10 +219,14 @@ pairllh <- function(anc, newtip, rate, branch){
   sum(result)
 }
 
+# likelihood of the entire slip.list
+# only calculated when : 
+# a) rate parameter is changed
+# b) before the MCMC starts for the first iteration
 seqllh <- function(rate, slip.list){
   require(parallel)
   #print("Starting SeqLLH ... ")
-  tip.seqs <- unname(mcmapply(getTip, insertions$Vseq, slip.list, mc.cores=16))
+  tip.seqs <- unname(mcmapply(getTip, indels$tip, slip.list, mc.cores=16))
   #print(head(tip.seqs))
   rate <- rep(rate, length(anc.seqs))
   #print("Calculating pairwise ... ")
@@ -253,8 +306,73 @@ proposalFunction <- function(param, slip_current, llh_current){
     
     # recalculate SINGLE pairwise llh at position = changed
     llh_proposed <- llh_current
-    new.seq <- getTip(insertions$Vseq[changed], slip.list[[changed]])
+    new.seq <- getTip(indels$tip[changed], slip.list[[changed]])
     llh_proposed[changed] <- pairllh(anc.seqs[changed], new.seq, rate, branches[changed])
   }
   return(list(param=c(p.enter, p.stay, rate), slip=slip_proposed, llh=llh_proposed))
+}
+
+runMCMC <- function(startvalue, iterations, slip.list){
+  # timing
+  start.time <- proc.time()
+  
+  # initialize the chain
+  chain <- array(dim = c(iterations+1,3))
+  chain[1,] <- startvalue
+  
+  # start the slip list and the llh list
+  slip_current <- slip.list
+  llh_current <- seqllh(startvalue[3], slip.list)
+  
+  # keep a logfile up to date
+  logfile <- file("~/PycharmProjects/hiv-withinhost/slip-model.csv", "w")
+  write("p(Enter), p(Stay), Rate, Slip-changed, Accept", file=logfile)
+  
+  for (i in 1:iterations){
+    # calculate posterior of current position
+    p.current <- posterior(chain[i,], slip_current, llh_current)
+    
+    # generate proposal 
+    proposal <- proposalFunction(chain[i,], slip_current, llh_current)
+    
+    
+    # calculate posterior of the new proposal (parameters, slip_proposed, llh_proposed)
+    p.next <- posterior(proposal[[1]], proposal[[2]], proposal[[3]])
+    
+    #print(paste("Current:", p.current, "Next:", p.next, sep=" "))
+    #print(paste(proposal[[1]], sep=" "))
+    s.change <- any(unname(unlist(slip_current))!=unname(unlist(proposal[[2]])))
+    #print(paste0("Sliplist change proposed: ", s.change))
+    
+    # to catch problematic posterior calculations 
+    if(is.na(p.current) || is.na(p.next)){
+      print("ERROR: Posterior could not be calculated")
+      print(paste("Chain value:", chain[i,1], chain[i,2], chain[i,3], sep=" "))
+      break
+    }
+    
+    prop <- exp(p.next - p.current)
+    #print(prop)
+    
+    # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
+    if (runif(1) < prop) {
+      chain[i+1,] <- proposal[[1]]
+      slip_current <- proposal[[2]]
+      llh_current <- proposal[[3]]
+      #print("Accept")
+      accept <- T
+      # if the proportion is less than the random uniform sample, REJECT the proposed value stick with current 
+    } else {
+      chain[i+1,] <- chain[i,]
+      #print("Reject")
+      accept <- F
+    }
+    
+    if (i %% 10 == 0){
+      print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], sep=" "))
+      write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept), proc.time() - start.time), collapse=",") , file=logfile, append=T)
+    }
+  }
+  return(list(chain=chain, slip=slip_current))
+  close(logfile)
 }
