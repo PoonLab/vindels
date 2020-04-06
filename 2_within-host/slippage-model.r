@@ -62,30 +62,30 @@ getSlipVector <- function(locs, length){
     for (n in 1:length(tab)){
       vect[as.numeric(names(tab)[n])] <- unname(tab[n])
     }
-    return(collapseVect(vect))
-  }
-}
-
-collapseVect <- function(vect){
-  nonzero <- which(vect != 0)
-  
-  if (length(nonzero) < 2){
-    return (vect)
-  }else{
-    for (i in length(nonzero):2){
-      # check whether there is overlap in these slip positions, if so, amalgamate
-      current <- nonzero[i]
-      previous <- nonzero[i-1]
-      
-      # checks whether the previous nonzero is adjacent
-      if ((current - 1) == previous){
-        vect[previous] <- vect[previous] + vect[current]
-        vect[current] <- 0
-      }
-    }
     return(vect)
   }
 }
+
+# collapseVect <- function(vect){
+#   nonzero <- which(vect != 0)
+#   
+#   if (length(nonzero) < 2){
+#     return (vect)
+#   }else{
+#     for (i in length(nonzero):2){
+#       # check whether there is overlap in these slip positions, if so, amalgamate
+#       current <- nonzero[i]
+#       previous <- nonzero[i-1]
+#       
+#       # checks whether the previous nonzero is adjacent
+#       if ((current - 1) == previous){
+#         vect[previous] <- vect[previous] + vect[current]
+#         vect[current] <- 0
+#       }
+#     }
+#     return(vect)
+#   }
+# }
 
 getTip <- function(oldtip, slip){
   # used to determine the new tip sequence using the slip index
@@ -168,12 +168,7 @@ getMat <- function(rate, branch){
 
 # For use in the proposal function
 changeSlip <- function(slip.list){
-  # choose a sequence to edit
-  rand <- sample(length(idx),1)
-  
-  # convert it to indices
-  slip <- slip.list[[idx[rand]]]
-  slip.idx <- getSlipLocations(slip)
+  slip.idx <- getSlipLocations(slip.list)
   
   # choose a slip event to change
   toEdit <- sample(length(slip.idx[[1]]),1)
@@ -187,8 +182,7 @@ changeSlip <- function(slip.list){
   slip.idx[[1]][toEdit] <- proposal
   
   # save the whole list
-  slip.list[[idx[rand]]] <- getSlipVector(slip.idx[[1]],slip.idx[[2]])
-  return(list(slip=slip.list, idx=idx[rand]))
+  getSlipVector(slip.idx[[1]],slip.idx[[2]])
 }
 
 # ------ MCMC FUNCTIONS ------
@@ -301,14 +295,17 @@ proposalFunction <- function(param, slip_current, llh_current){
     
     # CHANGE SLIP
   }else{
-    unpack <- changeSlip(slip_current)
-    slip_proposed <- unpack[[1]]        # this is the new slip.list with a single change
-    changed <- unpack[[2]]              # this is the location at which the slip.list was changed
-    
+    # choose a sequence to edit
+    rand <- sample(length(idx),1)
+    changed <- idx[rand]          # this is the location at which the slip.list was changed
+    # convert it to indices
+    slip_proposed <- slip_current
+    slip_proposed[[changed]] <- changeSlip(slip_current[[changed]]) # this is the new slip.list with a single change
+             
     # recalculate SINGLE pairwise llh at position = changed
     llh_proposed <- llh_current
-    new.seq <- getTip(indels$tip[changed], slip.list[[changed]])
-    llh_proposed[changed] <- pairllh(anc.seqs[changed], new.seq, rate, branches[changed])
+    new.tip <- getTip(indels$tip[changed], slip_proposed[[changed]])
+    llh_proposed[changed] <- pairllh(anc.seqs[changed], new.tip, rate, branches[changed])
   }
   return(list(param=c(p.enter, p.stay, rate), slip=slip_proposed, llh=llh_proposed))
 }
