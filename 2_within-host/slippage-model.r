@@ -38,7 +38,7 @@ setup <- function(tip, anc, len, pos, branches){
   # generate slip list 
   slip.list <<- unname(mapply(createSlips, anc, len, pos))
   
-  # SHUFFLING --- randomly shuffle the slip locations around 
+  #SHUFFLING --- randomly shuffle the slip locations around
   slip.list <<- lapply(slip.list, function(x){
     total <- sum(x)
     if (total == 0){
@@ -283,7 +283,7 @@ proposalFunction <- function(param, slip_current, llh_current){
   rate <- param[3]
   
   num <- runif(1)
-  s2p <- 0.90
+  s2p <- 0.94
   
   # CHANGE PARAMETERS 
   if (num > s2p){

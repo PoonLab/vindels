@@ -56,15 +56,7 @@ nt <- c("A", "C", "G", "T")
 # used to test for the prior probability of P.ENTER
 # res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
 # sum(res!=0)
-# 
-# estimateSubs <- function(tip, anc){
-#   res <- unname(mapply(function(x,y){length(checkDiff(x,y))}, tip, anc))
-#   lens <- unname(sapply(tip, nchar))
-#   sum(res) / sum(lens)
-# }
-# 
-# erate <- estimateSubs(tip.seqs, anc.seqs)
-
+lens <- c(10,20,20,30,30)
 simPair <- function(p.enter, p.stay, rate){
   vlen <- lens[sample(1:5, 1)]
   anc <- genSeq(vlen)
@@ -129,7 +121,7 @@ simPair <- function(p.enter, p.stay, rate){
         }
       }
       # add the length and choose a random location for the slip event 
-      idx <- sample(1:vlen+1,1)
+      idx <- sample(1:vlen,1)
       
       # generate the sequence to insert / delete 
       indel <- genSeq(len)
@@ -155,7 +147,7 @@ simPair <- function(p.enter, p.stay, rate){
 # SIMULATE TIP + ANCESTOR SEQUENCES 
 all.seqs <- sapply(1:100, function(n){
   print(n)
-  pair <- simPair(0.0007, 0.7, 0.0001)
+  pair <- simPair(0.0007, 0.5, 0.0001)
   # VALUE 1 = Tip, VALUE 2 = Ancestor
   return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
@@ -179,6 +171,6 @@ insertions$pos <- data[,2]
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch)
 
 # RUN MCMC
-startvalue <- c(0.001, 0.85, 0.001)
-chain <- runMCMC(startvalue, 1000000)
+startvalue <- c(0.001, 0.60, 0.0008)
+chain <- runMCMC(startvalue, 10000)
 
