@@ -9,6 +9,8 @@ source("~/vindels/2_within-host/slippage-model.r")
 # calculate the median lengths of the variable loops 
 ins.v <- split(insertions, insertions$Vloop)
 lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
+f <- estimateFreq(c(insertions$Vseq, insertions$Anc))
+names(f) <- nt
 rm (ins.v)
 rm(insertions)
 
@@ -174,27 +176,9 @@ data <- t(unname(sapply(insertions$anc, function(x){
 insertions$len <- data[,1]
 insertions$pos <- data[,2]
 
-slip.list <- unname(mapply(createSlips, insertions$anc, insertions$len, insertions$pos))
-
-# SHUFFLING --- randomly shuffle the slip locations around 
-slip.list <- lapply(slip.list, function(x){
-  total <- sum(x)
-  if (total == 0){
-    return (x)
-  }else{
-    locs <- sample(length(x), total, replace=T)
-    getSlipVector(locs, length(x))
-  }
-})
-# -----------------
-
-# needed for use in the CHANGESLIP function
-idx <- which(unname(lapply(slip.list,sum))>0)
-
-anc.seqs <- gsub("-", "", insertions$Anc)
-
+setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch)
 
 # RUN MCMC
 startvalue <- c(0.001, 0.85, 0.001)
-chain <- runMCMC(startvalue, 100000, slip.list)
+chain <- runMCMC(startvalue, 1000000)
 

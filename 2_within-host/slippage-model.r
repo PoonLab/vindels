@@ -28,8 +28,8 @@ estimateFreq <- function(seqs){
 }
 
 setup <- function(tip, anc, len, pos, branches){
-  indels <<- data.frame(tip=tip, anc=anc, len=len, pos=pos)
-  branches <<- branches
+  indels <<- data.frame(tip=tip, anc=anc, len=len, pos=pos, stringsAsFactors = F)
+  branches <<- as.numeric(branches)
   anc.seqs <<- gsub("-", "", anc)
   
   f <<- estimateFreq(c(tip, anc))
@@ -151,7 +151,8 @@ getMat <- function(rate, branch){
   # returns the F81 transition probability matrtix 
   require(expm)
   nt <- c("A", "C", "G", "T")
-  
+  print(rate)
+  print(branch)
   # generate the F81 rate matrix 
   mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
   mat <- mat * rate
@@ -312,7 +313,7 @@ proposalFunction <- function(param, slip_current, llh_current){
   return(list(param=c(p.enter, p.stay, rate), slip=slip_proposed, llh=llh_proposed))
 }
 
-runMCMC <- function(startvalue, iterations, slip.list){
+runMCMC <- function(startvalue, iterations){
   # timing
   start.time <- proc.time()
   
@@ -370,7 +371,7 @@ runMCMC <- function(startvalue, iterations, slip.list){
     
     if (i %% 10 == 0){
       print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], sep=" "))
-      write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept), proc.time() - start.time), collapse=",") , file=logfile, append=T)
+      write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
     }
   }
   return(list(chain=chain, slip=slip_current))
