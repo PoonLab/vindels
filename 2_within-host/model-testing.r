@@ -34,23 +34,7 @@ genSeq <- function(len){
   paste(seq, collapse="")
 }
 
-# returns the F81 transition probability matrtix 
-getMat <- function(rate, branch){
-  require(expm)
-  nt <- c("A", "C", "G", "T")
-  
-  # generate the F81 rate matrix 
-  mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
-  mat <- mat * rate
-  diag(mat) <- sapply(1:4, function(x) -(rate*sum(f[-x]))) # equivalent to -rate*(sum(f[-x]))
-  
-  # multiply by branch length
-  mat <- branch * mat
-  
-  # exponentiate and return
-  tmat <- expm(mat)
-  tmat
-}
+
 nt <- c("A", "C", "G", "T")
 
 # used to test for the prior probability of P.ENTER
