@@ -32,7 +32,7 @@ plot(chain[thinned,2], type = "l", xlab="MCMC Steps" , ylab="Prob(Stay)",main = 
 abline(h = med2, col="red")
 
 # ----- SLIPPAGE MODEL -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model.csv", stringsAsFactors = F, header=F)
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-ng.csv", stringsAsFactors = F, skip=1, header=F)
 
 # data <- as.data.frame(sapply(1:ncol(csv), function(x){
 #   sapply(1:nrow(csv), function(y){
@@ -50,4 +50,7 @@ plot(csv$p.stay, type = "l", xlab="MCMC Steps (x10)" , ylab="Prob(Stay)",
      main = "Chain values of Stay",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
 plot(csv$rate, type = "l", xlab="MCMC Steps (x10)" , ylab="Rate",
      main = "Chain values of Rate",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
+med1 <- median(csv$p.enter)
+med2 <- median(csv$p.stay)
+med3 <- median(csv$rate)
 #dev.off()

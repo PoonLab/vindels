@@ -48,35 +48,19 @@ for (idx in cases){
   insertions[idx, "Vseq"] <- paste0(substr(toEdit, 1, pos-1),substr(toUse,pos,pos), substr(toEdit, pos+1,nchar(toEdit)))
 }
 
-# generate slip list 
-slip.list <- unname(mapply(createSlips, insertions$Anc, nchar(insertions$Seq), insertions$Pos))
-
+setup(insertions$Vseq, insertions$Anc, nchar(insertions$Seq), insertions$Pos, insertions$Date)
 # add the a/b replicate label to the headers
 #insertions$Header <- unname(mapply(patLabel, insertions$Header, insertions$Pat))
 names(slip.list) <- insertions$Header
 
 # # C.-.-.QT.10R.-.-_289_1_b
-# # SHUFFLING --- randomly shuffle the slip locations around 
-slip.list <- lapply(slip.list, function(x){
-  total <- sum(x)
-  if (total == 0){
-    return (x)
-  }else{
-    locs <- sample(length(x), total, replace=T)
-    getSlipVector(locs, length(x))
-  }
-})
+
 
 # needed for use in the CHANGESLIP function
 idx <- which(unname(lapply(slip.list,sum))>0)
 
 nt <- c("A", "C", "G", "T")
 
-# NORMAL DATA: 
-f <- estimateFreq(c(insertions$Vseq, insertions$Anc))
-names(f) <- nt
-branches <- insertions$Date
-anc.seqs <- gsub("-", "", insertions$Anc)
 
 
 
