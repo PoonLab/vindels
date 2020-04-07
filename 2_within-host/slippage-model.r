@@ -134,9 +134,9 @@ getSlipLocations <- function(slip){
   return (list(loc=locations,len=length(slip)))
 }
 
-delta <- function(rep=1,mean=0,sd=1.5){
+delta <- function(sd=5){
   # chooses a normally distributed discrete value above 0
-  x <- rnorm(rep,mean=mean,sd=sd)
+  x <- rnorm(1,mean=0,sd=sd)
   if (x < 0){
     x <- abs(x)
     x <- ceiling(x)
@@ -151,8 +151,8 @@ getMat <- function(rate, branch){
   # returns the F81 transition probability matrtix 
   require(expm)
   nt <- c("A", "C", "G", "T")
-  print(rate)
-  print(branch)
+  #print(rate)
+  #print(branch)
   # generate the F81 rate matrix 
   mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
   mat <- mat * rate
@@ -175,7 +175,7 @@ changeSlip <- function(slip.list){
   
   # this is to ensure that the proposed change is never outside the slip region
   proposal <- 0
-  while(proposal <= 0 || proposal > length(slip)){
+  while(proposal <= 0 || proposal > length(slip.list)){
     proposal <- slip.idx[[1]][toEdit] + delta()
   }
   # save the change to the slip list
@@ -277,7 +277,7 @@ proposalFunction <- function(param, slip_current, llh_current){
   rate <- param[3]
   
   num <- runif(1)
-  s2p <- 0.94
+  s2p <- 0.97
   
   # CHANGE PARAMETERS 
   if (num > s2p){
@@ -369,6 +369,10 @@ runMCMC <- function(startvalue, iterations){
     if (i %% 10 == 0){
       print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], sep=" "))
       write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
+    }
+    if (i %% 100 == 0){
+      slip_current <<- slip_current
+      llh_current <<- llh_current
     }
   }
   return(list(chain=chain, slip=slip_current))

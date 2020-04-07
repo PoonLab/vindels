@@ -32,7 +32,7 @@ plot(chain[thinned,2], type = "l", xlab="MCMC Steps" , ylab="Prob(Stay)",main = 
 abline(h = med2, col="red")
 
 # ----- SLIPPAGE MODEL -----
-csv3 <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-lio.csv", stringsAsFactors = F, skip=1, header=F)
+csv3 <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-100seq.csv", stringsAsFactors = F, skip=1, header=F)
 
 # data <- as.data.frame(sapply(1:ncol(csv), function(x){
 #   sapply(1:nrow(csv), function(y){

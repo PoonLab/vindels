@@ -40,7 +40,7 @@ nt <- c("A", "C", "G", "T")
 # used to test for the prior probability of P.ENTER
 # res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
 # sum(res!=0)
-lens <- c(10,20,20,30,30)
+#lens <- c(10,20,20,30,30)
 simPair <- function(p.enter, p.stay, rate){
   vlen <- lens[sample(1:5, 1)]
   anc <- genSeq(vlen)
@@ -156,5 +156,5 @@ setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions
 
 # RUN MCMC
 startvalue <- c(0.001, 0.60, 0.0008)
-chain <- runMCMC(startvalue, 10000)
+chain <- runMCMC(startvalue, 100000)
 
