@@ -232,7 +232,10 @@ seqllh <- function(rate, slip.list){
 likelihood<- function(param, slip.list, llh.list){
   #print("Starting LLH...")
   p.enter <- param[1]
-  p.stay  <- param[2]
+  slope <- param[2]
+  int <- param[3]
+  
+  p.stay <- slope * p.enter + int
   
   # affine gap likelihood
   # utilizes both p.enter + p.stay
@@ -251,20 +254,20 @@ likelihood<- function(param, slip.list, llh.list){
 
 prior <- function(param){
   p.enter <- param[1]
-  p.stay  <- param[2]
-  rate <- param[3]
+  slope <- param[2]
+  int <- param[3]
+  rate <- param[4]
   
-  prior.pe <- dunif(p.enter, min=1e-5, max=1e-3, log=T) # dlnorm(p.enter,meanlog=log(0.000335),sdlog=0.5, log=T)
-  prior.ps <- dunif(p.stay, min=0.3, max=0.9, log=T) # dlnorm(slope,meanlog=log(15),sdlog=1.1,log=T)
-  prior.rate <- dunif(rate, min=1e-5, max=1e-3, log=T) # dlnorm(rate,meanlog=log(0.0001), sdlog=0.5,log=T)
+  prior.pe <- dlnorm(p.enter,meanlog=log(0.000335),sdlog=0.5, log=T)
+  prior.sl <-  dunif(slope, min=1, max=70, log=T) # dlnorm(slope,meanlog=log(15),sdlog=1.1,log=T)
+  prior.int <- dunif(int, min= 0.1, max=0.8,log=T) # P.STAY PRIOR: dlnorm(int,meanlog=log(0.8436648),sdlog=0.05,log=T)
+  prior.rate <- dunif(rate, min=1e-5, max=1e-3, log=T)#dlnorm(rate,meanlog=log(0.0001), sdlog=0.5,log=T)
   
-  return(prior.pe + prior.ps + prior.rate)
+  return(prior.pe + prior.sl + prior.int + prior.rate)
 }
 
 posterior <- function(param, slip, llh){
-  #print(prior(param))
-  #print(likelihood(param))
-  if (any(param > 1)){
+  if (any(param[-2] > 1)){
     return(log(0))
   }else{
     return(prior(param) + likelihood(param, slip, llh))
@@ -273,22 +276,28 @@ posterior <- function(param, slip, llh){
 
 proposalFunction <- function(param, slip_current, llh_current){
   p.enter <- param[1]
-  p.stay <- param[2]
-  rate <- param[3]
+  slope <- param[2]
+  int <- param[3]
+  rate <- param[4]
   
   num <- runif(1)
-  s2p <- 0.97
+  s2p <- 0.92
   
   # CHANGE PARAMETERS 
   if (num > s2p){
-    if (num-s2p < (1/3 *(1-s2p))){
+    new.num <- num - s2p
+    total <- 1-s2p
+    if (new.num < (1/4 *total)){
       p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
       llh_proposed <- llh_current   # stays the same
-    }else if(num-s2p > (2/3 *(1-s2p))){
-      p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
+    }else if(new.num > (1/4 *total) && new.num < (1/2*total)){
+      slope <- rlnorm(1,meanlog=log(param[2]),sdlog=0.05)
+      llh_proposed <- llh_current   # stays the same
+    }else if(new.num > (3/4 * total)){
+      int <- rlnorm(1,meanlog=log(param[3]),sdlog=0.03)
       llh_proposed <- llh_current   # stays the same
     }else{
-      rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
+      rate <- rlnorm(1,meanlog=log(param[4]),sdlog=0.08)
       llh_proposed <- seqllh(rate, slip_current)  # recalcuate using the new rate
     }
     slip_proposed <- slip_current    # stays the same
@@ -307,7 +316,7 @@ proposalFunction <- function(param, slip_current, llh_current){
     new.tip <- getTip(indels$tip[changed], slip_proposed[[changed]])
     llh_proposed[changed] <- pairllh(anc.seqs[changed], new.tip, rate, branches[changed])
   }
-  return(list(param=c(p.enter, p.stay, rate), slip=slip_proposed, llh=llh_proposed))
+  return(list(param=c(p.enter, slope, int, rate), slip=slip_proposed, llh=llh_proposed))
 }
 
 runMCMC <- function(startvalue, iterations){
@@ -315,16 +324,15 @@ runMCMC <- function(startvalue, iterations){
   start.time <- proc.time()
   
   # initialize the chain
-  chain <- array(dim = c(iterations+1,3))
+  chain <- array(dim = c(iterations+1,4))
   chain[1,] <- startvalue
   
   # start the slip list and the llh list
   slip_current <- slip.list
-  llh_current <- seqllh(startvalue[3], slip.list)
+  llh_current <- seqllh(startvalue[4], slip.list)
   
   # keep a logfile up to date
-  logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/slip-model", 
-                         substr(gsub("[\\ :-]","",Sys.time()), 9, 12),".csv"), "w")
+  logfile <- file("~/PycharmProjects/hiv-withinhost/slip-model.csv", "w")
   write("p(Enter), p(Stay), Rate, Slip-changed, Accept", file=logfile)
   
   for (i in 1:iterations){
@@ -333,7 +341,6 @@ runMCMC <- function(startvalue, iterations){
     
     # generate proposal 
     proposal <- proposalFunction(chain[i,], slip_current, llh_current)
-    
     
     # calculate posterior of the new proposal (parameters, slip_proposed, llh_proposed)
     p.next <- posterior(proposal[[1]], proposal[[2]], proposal[[3]])
@@ -346,7 +353,7 @@ runMCMC <- function(startvalue, iterations){
     # to catch problematic posterior calculations 
     if(is.na(p.current) || is.na(p.next)){
       print("ERROR: Posterior could not be calculated")
-      print(paste("Chain value:", chain[i,1], chain[i,2], chain[i,3], sep=" "))
+      print(paste("Chain value:", chain[i,1], chain[i,2], chain[i,3], chain[i,4],sep=" "))
       break
     }
     
@@ -358,17 +365,14 @@ runMCMC <- function(startvalue, iterations){
       chain[i+1,] <- proposal[[1]]
       slip_current <- proposal[[2]]
       llh_current <- proposal[[3]]
-      #print("Accept")
       accept <- T
       # if the proportion is less than the random uniform sample, REJECT the proposed value stick with current 
     } else {
       chain[i+1,] <- chain[i,]
-      #print("Reject")
       accept <- F
     }
-    
     if (i %% 100 == 0){
-      print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], sep=" "))
+      print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], chain[i,4], sep=" "))
       write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
     }
     if (i %% 1000 == 0){

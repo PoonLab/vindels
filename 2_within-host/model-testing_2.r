@@ -5,7 +5,7 @@
 # SIMULATE DNA 
 # ------------------
 # SIMULATE DNA SEQUENCES 
-source("~/vindels/2_within-host/slippage-model.r")
+source("~/vindels/2_within-host/slippage-model_2.r")
 # calculate the median lengths of the variable loops 
 ins.v <- split(insertions, insertions$Vloop)
 lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
@@ -41,10 +41,11 @@ nt <- c("A", "C", "G", "T")
 # res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
 # sum(res!=0)
 #lens <- c(10,20,20,30,30)
-simPair <- function(p.enter, p.stay, rate){
+simPair <- function(p.enter, slope, int, rate){
   vlen <- lens[sample(1:5, 1)]
   anc <- genSeq(vlen)
   
+  p.stay <- slope * p.enter + int
   # pick a branch rate value from a distribution 
   branch <- rlnorm(1, meanlog=4, sdlog=1.05)
   
@@ -85,7 +86,7 @@ simPair <- function(p.enter, p.stay, rate){
           # algorithm to compute an appropriate length
           len <- 0
           exit <- 0
-          while(exit < p.stay ){
+          while(exit < p.stay){
             len <- len + 1
             exit <- runif(1)
           }
@@ -119,21 +120,21 @@ simPair <- function(p.enter, p.stay, rate){
   }
   #print("finished indels")
   return(list(tip=tip,anc=anc,branch=branch))
-  # to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
-  # algorithm:
-  # probability of enter is chosen
-  # draw a number from a poisson process
-  # if the number is %% 3 == 0: 
-  # keep it 100 percent
-  # else if the number if %%3 != 0:
-  # there's a low probability that it will be kept (penalty)
-  
 }
 
+# to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
+# algorithm:
+# probability of enter is chosen
+# draw a number from a poisson process
+# if the number is %% 3 == 0: 
+# keep it 100 percent
+# else if the number if %%3 != 0:
+# there's a low probability that it will be kept (penalty)
+
 # SIMULATE TIP + ANCESTOR SEQUENCES 
-all.seqs <- sapply(1:500, function(n){
+all.seqs <- sapply(1:1000, function(n){
   print(n)
-  pair <- simPair(0.0001, 0.75, 0.00005)
+  pair <- simPair(0.001, 25, 0.5, 0.0005)
   # VALUE 1 = Tip, VALUE 2 = Ancestor
   return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
@@ -157,6 +158,10 @@ insertions$pos <- data[,2]
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch)
 
 # RUN MCMC
-startvalue <- c(0.001, 0.60, 0.0003)
-chain <- runMCMC(startvalue, 100000)
+startvalue <- c(0.005, 15, 0.3, 0.0001)
+chain <- runMCMC(startvalue, 1000000)
+
+# ----- For checking -----
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model.csv", stringsAsFactors = F, skip=1, header=F)
+colnames(csv) <- c('p.enter', 'slope', 'int', "rate" ,'slip.changed', 'accept', 'time')
 
