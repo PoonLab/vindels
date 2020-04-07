@@ -72,7 +72,11 @@ simPair <- function(p.enter, p.stay, rate){
   # ------ INDELS -------
   # determine the number of insertions that occur 
   count <- sum(runif(vlen) < p.enter)
+  posx <- ""
+  lenx <- ""
+  
   if (count > 0){
+    
     for (n in 1:count){
       if (runif(1) < 0.18){
         # add a non-multiple of 3 indel
@@ -129,9 +133,9 @@ simPair <- function(p.enter, p.stay, rate){
 }
 
 # SIMULATE TIP + ANCESTOR SEQUENCES 
-all.seqs <- sapply(1:100, function(n){
+all.seqs <- sapply(1:500, function(n){
   print(n)
-  pair <- simPair(0.0007, 0.5, 0.0001)
+  pair <- simPair(0.0001, 0.75, 0.00005)
   # VALUE 1 = Tip, VALUE 2 = Ancestor
   return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
@@ -155,6 +159,6 @@ insertions$pos <- data[,2]
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch)
 
 # RUN MCMC
-startvalue <- c(0.001, 0.60, 0.0008)
+startvalue <- c(0.001, 0.60, 0.0003)
 chain <- runMCMC(startvalue, 100000)
 

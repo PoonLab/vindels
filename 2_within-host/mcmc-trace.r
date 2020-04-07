@@ -32,7 +32,7 @@ plot(chain[thinned,2], type = "l", xlab="MCMC Steps" , ylab="Prob(Stay)",main = 
 abline(h = med2, col="red")
 
 # ----- SLIPPAGE MODEL -----
-csv3 <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-100seq.csv", stringsAsFactors = F, skip=1, header=F)
+csv4 <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-100seq.csv", stringsAsFactors = F, skip=1, header=F)
 
 # data <- as.data.frame(sapply(1:ncol(csv), function(x){
 #   sapply(1:nrow(csv), function(y){
@@ -40,7 +40,7 @@ csv3 <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-100seq.csv", strin
 #   })
 # }))
 
-colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'slip.changed', 'accept', 'time')
+colnames(csv4) <- c('p.enter', 'p.stay', 'rate', 'slip.changed', 'accept', 'time')
 #png(file="~/vindels/Figures/within-host/finalized/slippage-trace2.png", width=600, height=800)
 par(mar=c(5,5,4,1), mfrow=c(3,1))
 plot(csv$p.enter, type = "l", xlab="MCMC Steps (x10)" , ylab="Prob(Enter)",
