@@ -1,10 +1,6 @@
-# model testing 
+# MODEL TESTING 2
 # relies upon modeling2.r
 
-
-# SIMULATE DNA 
-# ------------------
-# SIMULATE DNA SEQUENCES 
 source("~/vindels/2_within-host/slippage-model_2.r")
 # calculate the median lengths of the variable loops 
 ins.v <- split(insertions, insertions$Vloop)
@@ -12,7 +8,7 @@ lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
 f <- estimateFreq(c(insertions$Vseq, insertions$Anc))
 names(f) <- nt
 rm (ins.v)
-rm(insertions)
+rm(insertions, res, a, b, cases, idx, pos, toEdit, toUse)
 
 # Generates a sequence that adheres to the nucleotide frequencies of the data 
 
@@ -33,7 +29,6 @@ genSeq <- function(len){
   }
   paste(seq, collapse="")
 }
-
 
 nt <- c("A", "C", "G", "T")
 
@@ -122,17 +117,9 @@ simPair <- function(p.enter, slope, int, rate){
   return(list(tip=tip,anc=anc,branch=branch))
 }
 
-# to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
-# algorithm:
-# probability of enter is chosen
-# draw a number from a poisson process
-# if the number is %% 3 == 0: 
-# keep it 100 percent
-# else if the number if %%3 != 0:
-# there's a low probability that it will be kept (penalty)
 
 # SIMULATE TIP + ANCESTOR SEQUENCES 
-all.seqs <- sapply(1:1000, function(n){
+all.seqs <- sapply(1:10000, function(n){
   print(n)
   pair <- simPair(0.001, 25, 0.5, 0.0005)
   # VALUE 1 = Tip, VALUE 2 = Ancestor
@@ -140,7 +127,7 @@ all.seqs <- sapply(1:1000, function(n){
 })
 insertions <- as.data.frame(t(all.seqs), stringsAsFactors = F)
 colnames(insertions) <- c("tip", "anc", "branch")
-
+rm(all.seqs)
 # Generate the length and position columns
 data <- t(unname(sapply(insertions$anc, function(x){
   # returns c(length, position) of insertion events
@@ -156,12 +143,22 @@ insertions$len <- data[,1]
 insertions$pos <- data[,2]
 
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch)
-
+rm(insertions)
 # RUN MCMC
-startvalue <- c(0.005, 15, 0.3, 0.0001)
+startvalue <- c(0.0005, 15, 0.3, 0.0001)
 chain <- runMCMC(startvalue, 1000000)
 
 # ----- For checking -----
 csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model.csv", stringsAsFactors = F, skip=1, header=F)
 colnames(csv) <- c('p.enter', 'slope', 'int', "rate" ,'slip.changed', 'accept', 'time')
+
+# -----IDEA TO IMPLEMENT ------
+# to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
+# algorithm:
+# probability of enter is chosen
+# draw a number from a poisson process
+# if the number is %% 3 == 0: 
+# keep it 100 percent
+# else if the number if %%3 != 0:
+# there's a low probability that it will be kept (penalty)
 
