@@ -21,17 +21,15 @@ data {
 parameters {
   real <lower=0.01, upper=100> sub_rate;
   real<lower=0.01, upper=100> pat_rate;
-  real <lower=0,upper=10> sub_sd;
-  real <lower=0,upper=10> pat_sd;
 }
 
 // The model to be estimated. We model the output
 // 'y' to be normally distributed with mean 'mu'
 // and standard deviation 'sigma'.
 model {
-  pat_rate ~ lognormal(sub_rate, sub_sd);
+  pat_rate ~ lognormal(sub_rate, 0.5);
   
   for (pat in 1:npat){
-    mat[pat] ~ normal(pat_rate, pat_sd);
+    mat[pat] ~ normal(pat_rate, 0.5);
   }
 }

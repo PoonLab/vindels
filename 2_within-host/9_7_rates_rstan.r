@@ -4,8 +4,8 @@ library(rstan)
 
 # will receive data in from 9_5 indel rates 
 
-
-num.pat <- 100
+# ---- Simulate Data ----
+num.pat <- 19
 num.data <- 200
 rstan_options(auto_write=T)
 options(mc.cores = parallel::detectCores()-2)
@@ -21,7 +21,12 @@ for (i in 1:num.pat){
   mat[,i] <- rnorm(num.data, mean=sub.rate[i], sd=1.2)
 }
 
+# ----- Read data into a matrix ----
 
+mat <- matrix(nrow=num.data, ncol=num.pat)
+for (x in 1:length(V1)){
+  mat[,x] <- V1[[x]]
+}
 data.stan <- list(npat = num.pat,
                   ndata = num.data,
                   mat = mat)
