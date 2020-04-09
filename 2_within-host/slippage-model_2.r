@@ -134,7 +134,7 @@ getSlipLocations <- function(slip){
   return (list(loc=locations,len=length(slip)))
 }
 
-delta <- function(sd=5){
+delta <- function(sd=3){
   # chooses a normally distributed discrete value above 0
   x <- rnorm(1,mean=0,sd=sd)
   if (x < 0){
@@ -371,9 +371,11 @@ runMCMC <- function(startvalue, iterations){
       chain[i+1,] <- chain[i,]
       accept <- F
     }
+    if (i %% 10 == 0){
+      write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
+    }
     if (i %% 100 == 0){
       print(paste("STATE",i,":", chain[i,1], chain[i,2], chain[i,3], chain[i,4], sep=" "))
-      write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
     }
     if (i %% 1000 == 0){
       slip_current <<- slip_current
