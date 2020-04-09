@@ -24,10 +24,14 @@ dtotal <- 0
 
 ipatlist <- list()
 dpatlist <- list()
-iint <- data.frame()
-itip <- data.frame()
-dint <- data.frame()
-dtip <- data.frame()
+iint <- list()
+itip <- list()
+dint <- list()
+dtip <- list()
+
+imid <- list()
+dmid <- list()
+
 for (file in 1:length(ifolder)){
   print(file)
   filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
@@ -55,13 +59,15 @@ for (file in 1:length(ifolder)){
   # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
   #lens <- lens[-(Ntip(tre)+1)]
   res <- unname(sapply(iCSV$header, function(x){
-    # this expression matches ALL NODES; second column provides the CAPTURED TIP LABELS ()
+    # this expression will return results for NODES ONLY
+    # second column provides the CAPTURED TIP LABELS from within the node label
     tips <- str_match_all(x,"([^\\)\\(,\n:]+):")[[1]][,2]
     if (length(tips) == 0){
-      # This means its a TIP 
+      # no colons; this means its a TIP 
       # the index in the tre$tip.label vector is the final result
       index <- match(x, tre$tip.label)
     }else{
+      # retreive all descendants of every node and tip in the tree
       desc <- Descendants(tre)
 
       # find the numeric labels of all extracted tips 
@@ -73,11 +79,16 @@ for (file in 1:length(ifolder)){
     if (length(index)!=1){
       return(paste0("PROBLEM:",as.character(index)))
     }
-    return(lens[index])
+    return(c(lens[index], index))
   }))
   
-  iCSV$length <- res
-  dCSV$length <- res
+  res <- as.data.frame(t(res))
+  
+  iCSV$length <- res[,1]
+  dCSV$length <- res[,1]
+  
+  iCSV$rtt.mid <- (res[,1] + lens[tre$edge[match(res[,2], tre$edge[,2]),1]]) / 2
+  dCSV$rtt.mid <- iCSV$rtt.mid
   
   icounts <- rowSums(iCSV[,2:6])
   dcounts <- rowSums(dCSV[,2:6])
@@ -109,12 +120,23 @@ for (file in 1:length(ifolder)){
   # dtip[[pat]] <- rbind(dtip[[pat]], dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7])
   
   # Cumulative data frame split by interior vs tip
-  iint <- rbind(iint, iCSV[which(!grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7])
-  itip <- rbind(itip, iCSV[which(grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7])
-  dint <- rbind(dint, dCSV[which(!grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7])
-  dtip <- rbind(dtip, dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7])
+  iint[[file]] <- iCSV[which(!grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7]
+  itip[[file]]  <- iCSV[which(grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7]
+  dint[[file]]  <- dCSV[which(!grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7]
+  dtip[[file]]  <- dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7]
   #iprop <- idates / max(iCSV$length)
   #dprop <- ddates / max(dCSV$length)
+  
+  sapply(2:6, function(x){
+    lens <- rep(iCSV$rtt.mid, iCSV[,x])
+    if (length(lens) > 0 ){
+      return(lens)
+    }else{
+      return(c())
+    }
+  })
+  imid[[file]] <- data.frame(iCSV[iCSV$])
+  dmid[[file]] <- dCSV$rtt.mid
   
   imaxes[count] <- max(iCSV$length,na.rm=T)
   dmaxes[count] <- max(dCSV$length,na.rm=T)
@@ -131,11 +153,25 @@ for (file in 1:length(ifolder)){
   
 }
 
+require(data.table)
+imid.df <- as.data.frame(rbindlist(imid))
+dmid.df <- as.data.frame(rbindlist(dmid))
+iint <- as.data.frame(rbindlist(iint))
+itip <- as.data.frame(rbindlist(itip))
+dint <- as.data.frame(rbindlist(dint))
+dtip <- as.data.frame(rbindlist(dtip))
+
+
+# ---- RIDGES PLOT FOR INDEL TIMINGS --------
+
+
+
+
 # -------------
 # SURVIVAL PLOT FOR INDEL TIMINGS
 
-imaxes <- imaxes[!is.na(imaxes)]
-dmaxes <- dmaxes[!is.na(dmaxes)]
+#imaxes <- imaxes[!is.na(imaxes)]
+#dmaxes <- dmaxes[!is.na(dmaxes)]
 
 # amalgamate the data sets 
 indel.max <- data.frame(max=c(imaxes,dmaxes), status=rep(1,length(imaxes)+length(dmaxes)), type=c(rep("Insertion",length(imaxes)), rep("Deletion", length(dmaxes))))
@@ -170,8 +206,8 @@ plot <- autoplot(fit, facets=T, conf.int = F, surv.colour = "red")  +
 vlengths <- c(72,126,105,87,33)
 
 # COMPARISON OF INSERTION RATES INTERIOR VS TIP
-int.df <- dint
-tip.df <- dtip
+int.df <- iint
+tip.df <- itip
 # int.out <- data.frame()
 # tip.out <- data.frame()
 # for (run in 1:20){

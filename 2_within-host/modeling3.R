@@ -103,11 +103,11 @@ runMCMC <- function(startvalue, iterations){
 
 # RUN MCMC
 startvalue <- c(1e-5,0.7)
-chain <- runMCMC(startvalue, 1000000)
+chain <- runMCMC(startvalue, 10000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
-burnin <- 100000
+burnin <- 1000
 acceptance <- round(1 - mean(duplicated(chain[-(1:burnin),])),2)
 
 
@@ -119,13 +119,28 @@ med2 <- round(median(chain[-(1:burnin),2]),3)
 
 par(mfrow=c(1,2), mar=c(5,5,4,1))
 # PLOTTING 
-hist(chain[-(1:burnin),1],nclass=30, main="Posterior of Enter", xlab="Prob(Enter)",ylab="Frequency",col="lightskyblue")
-abline(v = med1, col='red',lwd=2)
+hist(chain[-(1:burnin),1],
+     nclass=30, 
+     main="Posterior of Enter", 
+     xlab="Prob(Enter)",
+     ylab="Frequency",
+     col="lightskyblue",
+     xlim=c(0.00005, 0.0008))
+lines(density(rlnorm(2000,meanlog=-10,sdlog=2)), xlim=c(0,0.001))
+
+#abline(v = med1, col='red',lwd=2)
 text(0.000168, 70000, paste0("Median = ", med1))
 text(0.000168, 60000, paste0("Acceptance = ", as.character(acceptance)))
-hist(chain[-(1:burnin),2],nclass=30, main="Posterior of Stay", xlab="Prob(Stay)", ylab="Frequency",col="lightskyblue",xlim=c(0.87,0.91))
+hist(chain[-(1:burnin),2],
+     nclass=30, 
+     main="Posterior of Stay", 
+     xlab="Prob(Stay)", 
+     ylab="Frequency",
+     col="lightskyblue",
+     xlim=c(0.75,0.95))
+lines(density(rlnorm(2000,meanlog=-0.15,sdlog=0.05)))
 text(0.905, 70000, paste0("Median = ", med2))
-abline(v = med2, col='red',lwd=2)
+#abline(v = med2, col='red',lwd=2)
 #text(0.00017, 400, paste0("Acceptance = ",as.character(acceptance)))
 dev.off()
 

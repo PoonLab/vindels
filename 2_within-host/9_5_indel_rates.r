@@ -61,8 +61,8 @@ for (file in 1:length(ifolder)){
   tip.rtt <- node.depth.edgelength(tre)[1:Ntip(tre)]
   names(tip.rtt) <- tre$tip.label
   
-  tip.rows <- which(tre$edge[,2] <= Ntip(tre))
-  tip.nodes <- tre$edge[tip.rows,1]
+  tip.rows <- which(tre$edge[,2] <= Ntip(tre)) # this locates the rows in the edge table that correspond to tips 
+  tip.nodes <- tre$edge[tip.rows,1]  
   anc.rtt <- node.depth.edgelength(tre)[tip.nodes]
   names(anc.rtt) <- tre$tip.label
   
@@ -274,11 +274,11 @@ for (i in 1:length(iTotal)){
   ins.list[[i]] <- data.frame(pat=pat, run=run, V1=irates[1],V2=irates[2],V3=irates[3],V4=irates[4],V5=irates[5])
   del.list[[i]] <- data.frame(pat=pat, run=run,V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5])
 }
-ins.final <- as.data.frame(rbindlist(ins.list))
-del.final<- as.data.frame(rbindlist(del.list))
+ins.df <- as.data.frame(rbindlist(ins.list))
+del.df <- as.data.frame(rbindlist(del.list))
 
-ins.final <- split(ins.final, ins.final$pat)
-del.final <- split(del.final, del.final$pat)
+ins.final <- split(ins.df, ins.df$pat)
+del.final <- split(del.df, del.df$pat)
 
 
 pat <- names(ins.final)
@@ -318,41 +318,17 @@ lapply(ins.list, function(x) if (mean(x$V1)>10^-2){mean(x$V1)}else{NA})
 
 
 # used to randomly sample a single rate from each patient, to get a sense of the variation among patients 
-# res <- sapply(1:100, function(n) {
-#   unname(unlist(lapply(ins.list, function(x){
-#     x$V1[sample(1:nrow(x),1)]
-#   })))
-# })
-# 
-# V1 <- res[res>10^-2]
-# res <- sapply(1:100, function(n) {
-#   unname(unlist(lapply(ins.list, function(x){
-#     x$V2[sample(1:nrow(x),1)]
-#   })))
-# })
-# V2 <- res[res>10^-2]
-# res <- sapply(1:100, function(n) {
-#   unname(unlist(lapply(ins.list, function(x){
-#     x$V3[sample(1:nrow(x),1)]
-#   })))
-# })
-# V3 <- res[res>10^-2]
-# res <- sapply(1:100, function(n) {
-#   unname(unlist(lapply(ins.list, function(x){
-#     x$V4[sample(1:nrow(x),1)]
-#   })))
-# })
-# V4 <- res[res>10^-2]
-# res <- sapply(1:100, function(n) {
-#   unname(unlist(lapply(ins.list, function(x){
-#     x$V5[sample(1:nrow(x),1)]
-#   })))
-# })
-# V5 <- res[res>10^-2]
+
+res <- lapply(1:5, function(v){
+  c(sapply(1:100, function(n){
+    unname(unlist(lapply(ins.final, function(x){
+      x[sample(1:nrow(x),1), v+2]
+    })))
+  }))
+})
 # rates <- list(V1,V2,V3,V4,V5)
 # boxplot(rates)
 # View(rates)
-
 
 
 require(data.table)
