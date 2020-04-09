@@ -274,26 +274,31 @@ for (i in 1:length(iTotal)){
   ins.list[[i]] <- data.frame(pat=pat, run=run, V1=irates[1],V2=irates[2],V3=irates[3],V4=irates[4],V5=irates[5])
   del.list[[i]] <- data.frame(pat=pat, run=run,V1=drates[1],V2=drates[2],V3=drates[3],V4=drates[4],V5=drates[5])
 }
-ins.df <- as.data.frame(rbindlist(ins.list))
-del.df <- as.data.frame(rbindlist(del.list))
+ins.list <- as.data.frame(rbindlist(ins.list))
+ins.list <- as.data.frame(rbindlist(del.list))
 
-ins.final <- split(ins.df, ins.df$pat)
-del.final <- split(del.df, del.df$pat)
+ins.final <- split(ins.list, ins.list$pat)
+del.final <- split(del.list, del.list$pat)
 
 
 pat <- names(ins.final)
-png(file="~/vindels/Figures/within-host/pat-histograms.png", width=1200,height=1000)
-par(mfrow=c(3,2))
-i <- 1
-p.data <- ins.final[[i]]
-for (v in 3:7){
-  vloop <- p.data[p.data[,v] > 10^-3,v]
-  if (length(vloop) > 0 ){
-    hist(vloop, main=paste0(pat[i],"-V",v-2), breaks=30)
-  }else{
-    hist(c(0))
+
+
+for (i in 1:26){
+  p.data <- ins.final[[i]]
+  png(file=paste0("~/vindels/Figures/within-host/rates/pat/",names(ins.final)[i],".png"), width=1200,height=1000)
+  par(mfrow=c(3,2))
+  for (v in 3:7){
+    vloop <- p.data[p.data[,v] > 10^-3,v]
+    if (length(vloop) > 0 ){
+      hist(vloop, main=paste0(pat[i],"-V",v-2), breaks=30, col="skyblue")
+    }else{
+      hist(c(0))
+    }
   }
+  dev.off()
 }
+
 
 V1 <- lapply(ins.final, function(x){if (median(x[,3] > 1e-2))x[,3]})
 V2 <- lapply(ins.final, function(x){if (median(x[,4] > 1e-2))x[,4]})

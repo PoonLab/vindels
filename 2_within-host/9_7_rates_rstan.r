@@ -1,6 +1,10 @@
 # stan model for indel rates 
 library(rstan)
 
+
+# will receive data in from 9_5 indel rates 
+
+
 num.pat <- 100
 num.data <- 200
 rstan_options(auto_write=T)
