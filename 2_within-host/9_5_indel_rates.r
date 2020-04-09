@@ -8,41 +8,6 @@ vloops <- c("V1","V2","V3","V4","V5")
 # used for extracting condensed CSV information 
 # specifically handles fields containing a comma
 
-# res <- sapply(1:100, function(n) {
-#   unname(unlist(lapply(ins.list, function(x){
-#     x$V1[sample(1:nrow(x),1)]
-#   })))
-# })
-# 
-# V1 <- res[res>10^-2]
-# res <- sapply(1:100, function(n) {
-#   unname(unlist(lapply(ins.list, function(x){
-#     x$V2[sample(1:nrow(x),1)]
-#   })))
-# })
-# V2 <- res[res>10^-2]
-# res <- sapply(1:100, function(n) {
-#   unname(unlist(lapply(ins.list, function(x){
-#     x$V3[sample(1:nrow(x),1)]
-#   })))
-# })
-# V3 <- res[res>10^-2]
-# res <- sapply(1:100, function(n) {
-#   unname(unlist(lapply(ins.list, function(x){
-#     x$V4[sample(1:nrow(x),1)]
-#   })))
-# })
-# V4 <- res[res>10^-2]
-# res <- sapply(1:100, function(n) {
-#   unname(unlist(lapply(ins.list, function(x){
-#     x$V5[sample(1:nrow(x),1)]
-#   })))
-# })
-# V5 <- res[res>10^-2]
-# rates <- list(V1,V2,V3,V4,V5)
-# boxplot(rates)
-# View(rates)
-
 
 # INSERTION PARSING ----------
 #path <- "~/Lio/"
@@ -126,6 +91,7 @@ for (file in 1:length(ifolder)){
   insInfo$V2 <- as.character(insInfo$V2)
   iCSV <- cbind(iCSV, insInfo)
   iCSV$ins <- NULL
+  rm(insInfo)
   
   delInfo <- unname(sapply(dCSV$del, extractInfo))
   delInfo <- t(delInfo)
@@ -134,6 +100,7 @@ for (file in 1:length(ifolder)){
   delInfo$V2 <- as.character(delInfo$V2)
   dCSV <- cbind(dCSV, delInfo)
   dCSV$del <- NULL
+  rm(delInfo)
   
   iCSV$Run <- rep(runno, nrow(iCSV))
   dCSV$Run <- rep(runno, nrow(dCSV))
@@ -155,9 +122,7 @@ for (file in 1:length(ifolder)){
                  "mid.rtt","Vseq", "Anc",  "PatRun", "Run","Pat")
   colnames(iCSV) <- c.headers
   colnames(dCSV) <- c.headers
-  
 
-  
   # COMMA SEPARATION FIX
   
   # new.ins <- data.frame()
@@ -206,14 +171,15 @@ for (file in 1:length(ifolder)){
   # REMOVED because inefficient for 12000 files
   #csv.ins <- rbind(csv.ins, iCSV)
   #csv.del <- rbind(csv.del, dCSV)
+  filename <- gsub("[ab]","", paste(strsplit(filename, "_")[[1]][-3],collapse = ""))
   if (is.null(csv.ins[[filename]])){
     csv.ins[[filename]] <- iCSV
     csv.del[[filename]] <- dCSV
   }else{
     csv.ins[[filename]] <- rbind(csv.ins[[filename]], iCSV)
     csv.del[[filename]] <- rbind(csv.del[[filename]], dCSV)
-    print(nrow(csv.ins[[filename]]) == 2* nrow(iCSV))
-    print(nrow(csv.del[[filename]]) == 2* nrow(dCSV))
+    #print(nrow(csv.ins[[filename]]) == 2* nrow(iCSV))
+    #print(nrow(csv.del[[filename]]) == 2* nrow(dCSV))
   }
   
   
@@ -229,35 +195,26 @@ for (file in 1:length(ifolder)){
   # }else{
   #   dTotal[[runno]] <- dCSV
   # }
+  
 }
+# checks for which patient did not fully complete all 200 replicates
+table(unname(sapply(names(csv.ins), function(x)strsplit(x, "-")[[1]][1])))
+iTotal <- csv.ins[-which(unname(sapply(names(csv.ins), function(x)strsplit(x, "-")[[1]][1]))== '56552')]
+dTotal <- csv.del[-which(unname(sapply(names(csv.del), function(x)strsplit(x, "-")[[1]][1]))== '56552')]
+
+rm(csv.ins)
+rm(csv.del)
+
+require(data.table)
 all.ins <- as.data.frame(rbindlist(csv.ins))
 all.del <- as.data.frame(rbindlist(csv.del))
 
 #csv.ins$header <- getPat(csv.ins$header, csv.ins$Pat)
 #csv.del$header <- getPat(csv.del$header, csv.del$Pat)
 
-iTotal <- split(all.ins, all.ins$PatRun)
-dTotal <- split(all.del, all.del$PatRun)
-
-
-
-
-#median(as.numeric(all.ins[all.ins$Vloop==2,3])) # used to det ermine the median lengths of the variable loops
-all.df <- data.frame()
 
 irtt <- list()
 drtt <- list()
-
-
-completed <-unname(unlist(sapply(unique(all.ins$Pat), function(x){
-  if (sum(grepl(paste0("^",x,"-"),names(iTotal))) == 200){
-    x
-  }else{
-    NA  
-  }
-})))
-iTotal <- iTotal[1:1800]
-dTotal <- dTotal[1:1800]
 
 require(BSDA)
 # RATE ANALYSIS -------------
@@ -320,35 +277,83 @@ for (i in 1:length(iTotal)){
 ins.final <- as.data.frame(rbindlist(ins.list))
 del.final<- as.data.frame(rbindlist(del.list))
 
-V1 <- ins.final[,c(1,2,3)]
-V2 <- ins.final[,c(1,2,4)]
-V3 <- ins.final[,c(1,2,5)]
-V4 <- ins.final[,c(1,2,6)]
-V5 <- ins.final[,c(1,2,7)]
-
 ins.final <- split(ins.final, ins.final$pat)
 del.final <- split(del.final, del.final$pat)
 
 
-pat <- c("28376", "30631", "30647", "30651", "30660", "30667")
+pat <- names(ins.final)
 png(file="~/vindels/Figures/within-host/pat-histograms.png", width=1200,height=1000)
-par(mfrow=c(6,5))
-for (p in pat){
-  for (v in 1:5){
-    data <- ins.final[[p]][ins.final[[p]][,v+2] > 10^-3,v+2]
-    if (length(data) > 0 ){
-      hist(data, main=paste0(p,"-V",v))
-    }else{
-      hist(c(0))
-    }
+par(mfrow=c(3,2))
+i <- 1
+p.data <- ins.final[[i]]
+for (v in 3:7){
+  vloop <- p.data[p.data[,v] > 10^-3,v]
+  if (length(vloop) > 0 ){
+    hist(vloop, main=paste0(pat[i],"-V",v-2), breaks=30)
+  }else{
+    hist(c(0))
   }
 }
+
+V1 <- lapply(ins.final, function(x){if (median(x[,3] > 1e-2))x[,3]})
+V2 <- lapply(ins.final, function(x){if (median(x[,4] > 1e-2))x[,4]})
+V3 <- lapply(ins.final, function(x){if (median(x[,5] > 1e-2))x[,5]})
+V4 <- lapply(ins.final, function(x){if (median(x[,6] > 1e-2))x[,6]})
+V5 <- lapply(ins.final, function(x){if (median(x[,7] > 1e-2))x[,7]})
+
+require(plyr)
+V1 <- compact(V1)
+V2 <- compact(V2)
+V3 <- compact(V3)
+V4 <- compact(V4)
+V5 <- compact(V5)
+
+
 dev.off()
 
 ins.list <- split(ins.df, ins.df$pat)
 del.list <- split(del.df, del.df$pat)
 
 lapply(ins.list, function(x) if (mean(x$V1)>10^-2){mean(x$V1)}else{NA})
+
+
+# used to randomly sample a single rate from each patient, to get a sense of the variation among patients 
+# res <- sapply(1:100, function(n) {
+#   unname(unlist(lapply(ins.list, function(x){
+#     x$V1[sample(1:nrow(x),1)]
+#   })))
+# })
+# 
+# V1 <- res[res>10^-2]
+# res <- sapply(1:100, function(n) {
+#   unname(unlist(lapply(ins.list, function(x){
+#     x$V2[sample(1:nrow(x),1)]
+#   })))
+# })
+# V2 <- res[res>10^-2]
+# res <- sapply(1:100, function(n) {
+#   unname(unlist(lapply(ins.list, function(x){
+#     x$V3[sample(1:nrow(x),1)]
+#   })))
+# })
+# V3 <- res[res>10^-2]
+# res <- sapply(1:100, function(n) {
+#   unname(unlist(lapply(ins.list, function(x){
+#     x$V4[sample(1:nrow(x),1)]
+#   })))
+# })
+# V4 <- res[res>10^-2]
+# res <- sapply(1:100, function(n) {
+#   unname(unlist(lapply(ins.list, function(x){
+#     x$V5[sample(1:nrow(x),1)]
+#   })))
+# })
+# V5 <- res[res>10^-2]
+# rates <- list(V1,V2,V3,V4,V5)
+# boxplot(rates)
+# View(rates)
+
+
 
 require(data.table)
 iTotal2 <- rbindlist(iTotal)
