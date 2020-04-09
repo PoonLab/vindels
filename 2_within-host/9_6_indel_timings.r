@@ -32,6 +32,11 @@ dtip <- list()
 imid <- list()
 dmid <- list()
 
+for (i in 1:5){
+  imid[[i]] <- numeric()
+  dmid[[i]] <- numeric()
+}
+
 for (file in 1:length(ifolder)){
   print(file)
   filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
@@ -126,8 +131,7 @@ for (file in 1:length(ifolder)){
   dtip[[file]]  <- dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7]
   #iprop <- idates / max(iCSV$length)
   #dprop <- ddates / max(dCSV$length)
-  
-  sapply(2:6, function(x){
+  ires <- sapply(2:6, function(x){
     lens <- rep(iCSV$rtt.mid, iCSV[,x])
     if (length(lens) > 0 ){
       return(lens)
@@ -135,8 +139,18 @@ for (file in 1:length(ifolder)){
       return(c())
     }
   })
-  imid[[file]] <- data.frame(iCSV[iCSV$])
-  dmid[[file]] <- dCSV$rtt.mid
+  dres <- sapply(2:6, function(x){
+    lens <- rep(dCSV$rtt.mid, dCSV[,x])
+    if (length(lens) > 0 ){
+      return(lens)
+    }else{
+      return(c())
+    }
+  })
+  for (n in 1:5){
+    imid[[n]] <- c(imid[[n]], ires[[n]])
+    dmid[[n]] <- c(dmid[[n]], dres[[n]])
+  }
   
   imaxes[count] <- max(iCSV$length,na.rm=T)
   dmaxes[count] <- max(dCSV$length,na.rm=T)
@@ -154,8 +168,6 @@ for (file in 1:length(ifolder)){
 }
 
 require(data.table)
-imid.df <- as.data.frame(rbindlist(imid))
-dmid.df <- as.data.frame(rbindlist(dmid))
 iint <- as.data.frame(rbindlist(iint))
 itip <- as.data.frame(rbindlist(itip))
 dint <- as.data.frame(rbindlist(dint))
@@ -163,7 +175,32 @@ dtip <- as.data.frame(rbindlist(dtip))
 
 
 # ---- RIDGES PLOT FOR INDEL TIMINGS --------
+library(ggplot2)
+library(ggridges)
 
+data <- dmid
+par(mfrow=c(5,1), mar=c(3,5,1,1))
+for (i in 1:4){
+  hist(data[[i]], 
+       breaks=30, 
+       col="red", 
+       xaxt='n',
+       xlab="",
+       main=paste0("Variable Loop ",i), 
+       cex.lab=1.4,
+       cex.axis=1.2,
+       cex.main=1.4)
+}
+par(mar=c(4,5,1,1))
+hist(data[[5]], 
+     breaks=30, 
+     col="red",
+     main=paste0("Variable Loop ",5), 
+     xlab="Days",
+     cex.lab=1.4,
+     cex.axis=1.2,
+     cex.main=1.4)
+axis(1, labels=T,at=seq(0, 7000, 1000), line=3)
 
 
 

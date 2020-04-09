@@ -126,7 +126,7 @@ hist(chain[-(1:burnin),1],
      ylab="Frequency",
      col="lightskyblue",
      xlim=c(0.00005, 0.0008))
-lines(density(rlnorm(2000,meanlog=-10,sdlog=2)), xlim=c(0,0.001))
+lines(density(rlnorm(2000,meanlog=-10,sdlog=2)), xlim=c(0,0.001), col="red", lwd=1.2)
 
 #abline(v = med1, col='red',lwd=2)
 text(0.000168, 70000, paste0("Median = ", med1))
@@ -138,7 +138,7 @@ hist(chain[-(1:burnin),2],
      ylab="Frequency",
      col="lightskyblue",
      xlim=c(0.75,0.95))
-lines(density(rlnorm(2000,meanlog=-0.15,sdlog=0.05)))
+lines(density(rlnorm(2000,meanlog=-0.15,sdlog=0.05)), col="red", lwd=1.2)
 text(0.905, 70000, paste0("Median = ", med2))
 #abline(v = med2, col='red',lwd=2)
 #text(0.00017, 400, paste0("Acceptance = ",as.character(acceptance)))
