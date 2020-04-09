@@ -269,10 +269,10 @@ def treeIndelExtract(node, vregion, data):
 
 #print(folder)
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/mcc/*.fasta") #/rep/*.fasta
+folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/rep2/*.fasta") #/rep/*.fasta
 vpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
-tpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/7_5_MCC/final/'                # /7SampleTrees/final/
-opath = '/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/mcc/fasta/'            # /9Indels/rep/wholetree/
+tpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/final/'               
+opath = '/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/rep2/wholetree/'
 
 if not os.path.isdir(opath+"ins"):
     os.mkdir(opath+'ins')
