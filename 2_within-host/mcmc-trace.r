@@ -1,4 +1,4 @@
-slip <- read.csv("~/slip-model.csv")
+slip <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model.csv")
 
 chain <- slip[,1:3]
 
@@ -32,24 +32,32 @@ plot(chain[thinned,2], type = "l", xlab="MCMC Steps" , ylab="Prob(Stay)",main = 
 abline(h = med2, col="red")
 
 # ----- SLIPPAGE MODEL -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model.csv", stringsAsFactors = F, skip=1, header=F)
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-lio.csv", stringsAsFactors = F, skip=1, header=F)
 
-# data <- as.data.frame(sapply(1:ncol(csv), function(x){
-#   sapply(1:nrow(csv), function(y){
-#     as.numeric(strsplit(csv[y,x]," ")[[1]][1])
-#   })
-# }))
+csv <- as.data.frame(sapply(1:ncol(csv), function(x){
+  sapply(1:nrow(csv), function(y){
+    as.numeric(strsplit(csv[y,x]," ")[[1]][1])
+  })
+}))
 
-colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'slip.changed', 'accept', 'time')
+colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'slip.changed', 'accept')
+# colnames(csv) <- c('p.enter', 'slope','int', 'rate', 'slip.changed', 'accept', 'time')
 #png(file="~/vindels/Figures/within-host/finalized/slippage-trace2.png", width=600, height=800)
-par(mar=c(5,5,4,1), mfrow=c(3,1))
+par(mar=c(2.5,5,3,1), mfrow=c(3,1))
 plot(csv$p.enter, type = "l", xlab="MCMC Steps (x10)" , ylab="Prob(Enter)",
      main = "Chain values of Enter", cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
-
-plot(csv$p.stay, type = "l", xlab="MCMC Steps (x10)" , ylab="Prob(Stay)",
-     main = "Chain values of Stay",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
+#abline(h=tru[1],col='red',lwd=2)
+plot(csv$p.stay, type = "l", xlab="MCMC Steps (x10)" , ylab="Slope",
+     main = "Chain values of Slope",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
+#abline(h=tru[2],col='red',lwd=2)
+# plot(csv$int, type = "l", xlab="MCMC Steps (x10)" , ylab="Intercept",
+#      main = "Chain values of Intercept",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
+# abline(h=tru[3],col='red',lwd=2)
 plot(csv$rate, type = "l", xlab="MCMC Steps (x10)" , ylab="Rate",
      main = "Chain values of Rate",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
+abline(h=tru[4],col='red',lwd=2)
+tru <- c(0.001, 25, 0.5, 0.0005)
+
 med1 <- median(csv$p.enter)
 med2 <- median(csv$p.stay)
 med3 <- median(csv$rate)

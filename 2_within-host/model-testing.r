@@ -131,7 +131,7 @@ simPair <- function(p.enter, p.stay, rate){
 }
 
 # SIMULATE TIP + ANCESTOR SEQUENCES 
-all.seqs <- sapply(1:500, function(n){
+all.seqs <- sapply(1:5000, function(n){
   print(n)
   pair <- simPair(0.0001, 0.75, 0.00005)
   # VALUE 1 = Tip, VALUE 2 = Ancestor
