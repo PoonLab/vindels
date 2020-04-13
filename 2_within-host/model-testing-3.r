@@ -1,11 +1,12 @@
 # model testing 
 # relies upon modeling2.r
-
+# 'combined' approach to the proposal function 
+# all three parameters are changed simultaneously 
 
 # SIMULATE DNA 
 # ------------------
 # SIMULATE DNA SEQUENCES 
-source("~/vindels/2_within-host/slippage-model.r")
+source("~/vindels/2_within-host/slippage-model_3.r")
 # calculate the median lengths of the variable loops 
 ins.v <- split(insertions, insertions$Vloop)
 lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
@@ -157,7 +158,7 @@ insertions$pos <- data[,2]
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch)
 
 # RUN MCMC
-startvalue <- c(0.01, 0.60, 0.001)
+startvalue <- c(0.01, 0.55, 0.001)
 chain <- runMCMC(startvalue, 1000000, 'combined')
 
 

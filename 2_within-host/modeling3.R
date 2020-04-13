@@ -56,8 +56,8 @@ prior <- function(param){
   p.enter <- param[1]
   p.stay  <- param[2]
   
-  prior.pe <- dlnorm(p.enter,meanlog=-10,sdlog=2, log=T)
-  prior.ps <- dlnorm(p.stay,meanlog=-0.15,sdlog=0.05,log=T)
+  prior.pe <- dunif(p.enter, min=1e-6, max=5e-3, log=T)
+  prior.ps <- dunif(p.stay, min=0.3, max=0.9, log=T)
   
   return(prior.pe + prior.ps)
 }

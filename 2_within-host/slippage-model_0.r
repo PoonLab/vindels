@@ -252,32 +252,31 @@ likelihood<- function(param, slip.list, llh.list){
 prior <- function(param){
   p.enter <- param[1]
   p.stay  <- param[2]
-  rate <- param[3]
+
   
   prior.pe <- dunif(p.enter, min=1e-5, max=1e-2, log=T) # dlnorm(p.enter,meanlog=log(0.000335),sdlog=0.5, log=T)
   prior.ps <- dunif(p.stay, min=0.3, max=0.9, log=T) # dlnorm(slope,meanlog=log(15),sdlog=1.1,log=T)
-  prior.rate <- dunif(rate, min=1e-5, max=1e-3, log=T) # dlnorm(rate,meanlog=log(0.0001), sdlog=0.5,log=T)
-  
-  return(prior.pe + prior.ps + prior.rate)
+
+  return(prior.pe + prior.ps)
 }
 
-posterior <- function(param, slip, llh){
+posterior <- function(param){
   #print(prior(param))
   #print(likelihood(param))
   if (any(param > 1)){
     return(log(0))
   }else{
-    return(prior(param) + likelihood(param, slip, llh))
+    return(prior(param) + likelihood(param))
   }
 }
 
-proposalFunction <- function(param, slip_current, llh_current){
+proposalFunction <- function(param){
   p.enter <- param[1]
   p.stay <- param[2]
-  rate <- param[3]
+
   
   num <- runif(1)
-  s2p <- 0.90
+  s2p <- 0.97
   
   # CHANGE PARAMETERS 
   if (num > s2p){

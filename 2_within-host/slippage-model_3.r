@@ -1,4 +1,7 @@
 # slippage model functions
+# Version 3 
+# 'combined' approach to the proposal function 
+  # all three parameters are changed simultaneously 
 # INPUT
 createSlips <- function(anc, len, pos){
   # start out with a base vector containing nchar number of zeros 
@@ -277,23 +280,17 @@ proposalFunction <- function(param, slip_current, llh_current){
   rate <- param[3]
   
   num <- runif(1)
-  s2p <- 0.90
+  s2p <- 0.92
   
-  # CHANGE PARAMETERS 
+  # CHANGE ALL PARAMETERS AT ONCE (Version 2) 
   if (num > s2p){
-    if (num-s2p < (1/3 *(1-s2p))){
-      p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
-      llh_proposed <- llh_current   # stays the same
-    }else if(num-s2p > (2/3 *(1-s2p))){
-      p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
-      llh_proposed <- llh_current   # stays the same
-    }else{
-      rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
-      llh_proposed <- seqllh(rate, slip_current)  # recalcuate using the new rate
-    }
+    p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
+    p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
+    rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
+    llh_proposed <- seqllh(rate, slip_current)  # recalcuate using the new rate
     slip_proposed <- slip_current    # stays the same
     
-    # CHANGE SLIP
+  # CHANGE SLIP
   }else{
     # choose a sequence to edit
     rand <- sample(length(idx),1)
@@ -326,7 +323,7 @@ runMCMC <- function(startvalue, iterations, runno){
   logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/slip-model-", 
                          runno,#substr(gsub("[\\ :-]","",Sys.time()), 9, 12),
                          ".csv"), "w")
-  write("p(Enter), p(Stay), Rate, Slip-changed, Accept", file=logfile)
+  write("p(Enter), p(Stay), Rate, Slip-changed, Accept, Time", file=logfile)
   
   for (i in 1:iterations){
     # calculate posterior of current position
