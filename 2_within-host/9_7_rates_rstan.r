@@ -36,6 +36,9 @@ stan.fit <- stan("~/vindels/2_within-host/rates.stan",
                  data= data.stan, 
                  chains=1,
                  iter=100000)
+pdf()
+traceplot()
+dev.off()
 rstan::summary(stan.fit)
 
 traceplot(stan.fit, alpha=0.7)

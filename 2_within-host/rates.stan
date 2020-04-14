@@ -21,7 +21,7 @@ data {
 parameters {
   real sub_rate;
   real pat_rate;
-  real<lower=0, upper=10> sub_sd;
+  real<lower=0, upper=0.5> sub_sd;
   real<lower=0, upper=10> pat_sd;
 }
 
@@ -29,10 +29,11 @@ parameters {
 // 'y' to be normally distributed with mean 'mu'
 // and standard deviation 'sigma'.
 model {
-  pat_rate ~ lognormal(sub_rate, sub_sd);
+  pat_rate ~ uniform(0, 4);  // --> after running, posterior is normally distributed
+  //pat_rate ~ lognormal(sub_rate, sub_sd);
   
   for (i in 1:npat){
-    mat[i] ~ normal(pat_rate, pat_sd);
+    mat[i] ~ normal(pat_rate, pat_sd); // within patient distribution 
   }
 }
 

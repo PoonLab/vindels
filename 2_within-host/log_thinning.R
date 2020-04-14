@@ -19,7 +19,7 @@ for (file in logfiles){
   name <- strsplit(basename(file),"\\.")[[1]][1]
   
   loglen <- nrow(log)-1
-  interval <- c(((loglen)*0.1)+1,loglen) + 1
+  interval <- c(((loglen)*0.1),loglen) + 1
   log2 <- log[seq(interval[1], interval[2], length.out=901), ]
   
   print(name)
