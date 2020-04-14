@@ -5,6 +5,7 @@
 # SIMULATE DNA 
 # ------------------
 # SIMULATE DNA SEQUENCES 
+source('~/vindels/2_within-host/utils.r')
 source("~/vindels/2_within-host/slippage-model_0.r")
 # calculate the median lengths of the variable loops
 # ins.v <- split(insertions, insertions$Vloop)
@@ -136,15 +137,15 @@ data <- t(unname(sapply(insertions$anc, function(x){
 insertions$len <- data[,1]
 insertions$pos <- data[,2]
 
-setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, F)
+setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
 
 # RUN MCMC
 startvalue <- c(0.01, 0.55, 0.001)
-chain <- runMCMC(startvalue, 1000000, 'simple-indel')
+chain <- runMCMC(startvalue, 1000000, 'simple-indel-shuffled')
 
 
 # ----- For checking -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-perfect.csv", stringsAsFactors = F, skip=1, header=F)
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-simple-indel.csv", stringsAsFactors = F, skip=1, header=F)
 colnames(csv) <- c('p.enter', 'p.stay', "rate" ,'slip.changed', 'accept', 'time')
 
 # -----IDEA TO IMPLEMENT ------
