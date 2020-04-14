@@ -1,6 +1,6 @@
 # slippage model functions
 # Version 3 
-# 'combined' approach to the proposal function 
+# COMBINED approach to the proposal function 
   # all three parameters are changed simultaneously 
 # INPUT
 createSlips <- function(anc, len, pos){

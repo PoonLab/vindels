@@ -27,7 +27,7 @@ estimateFreq <- function(seqs){
   output
 }
 
-setup <- function(tip, anc, len, pos, branches){
+setup <- function(tip, anc, len, pos, branches, shuffle){
   indels <<- data.frame(tip=tip, anc=anc, len=len, pos=pos, stringsAsFactors = F)
   branches <<- as.numeric(branches)
   anc.seqs <<- gsub("-", "", anc)
@@ -39,15 +39,17 @@ setup <- function(tip, anc, len, pos, branches){
   slip.list <<- unname(mapply(createSlips, anc, len, pos))
   
   # #SHUFFLING --- randomly shuffle the slip locations around
-  # slip.list <<- lapply(slip.list, function(x){
-  #   total <- sum(x)
-  #   if (total == 0){
-  #     return (x)
-  #   }else{
-  #     locs <- sample(length(x), total, replace=T)
-  #     getSlipVector(locs, length(x))
-  #   }
-  # })
+  if (shuffle){
+    slip.list <<- lapply(slip.list, function(x){
+      total <- sum(x)
+      if (total == 0){
+        return (x)
+      }else{
+        locs <- sample(length(x), total, replace=T)
+        getSlipVector(locs, length(x))
+      }
+    })
+  }
   # needed for use in the CHANGESLIP function
   idx <<- which(unname(lapply(slip.list,sum))>0)
 }
@@ -252,31 +254,32 @@ likelihood<- function(param, slip.list, llh.list){
 prior <- function(param){
   p.enter <- param[1]
   p.stay  <- param[2]
-
+  rate <- param[3]
   
   prior.pe <- dunif(p.enter, min=1e-5, max=1e-2, log=T) # dlnorm(p.enter,meanlog=log(0.000335),sdlog=0.5, log=T)
   prior.ps <- dunif(p.stay, min=0.3, max=0.9, log=T) # dlnorm(slope,meanlog=log(15),sdlog=1.1,log=T)
-
-  return(prior.pe + prior.ps)
+  prior.rate <- dunif(rate, min=1e-5, max=1e-3, log=T) # dlnorm(rate,meanlog=log(0.0001), sdlog=0.5,log=T)
+  
+  return(prior.pe + prior.ps + prior.rate)
 }
 
-posterior <- function(param){
+posterior <- function(param, slip, llh){
   #print(prior(param))
   #print(likelihood(param))
   if (any(param > 1)){
     return(log(0))
   }else{
-    return(prior(param) + likelihood(param))
+    return(prior(param) + likelihood(param, slip, llh))
   }
 }
 
-proposalFunction <- function(param){
+proposalFunction <- function(param, slip_current, llh_current){
   p.enter <- param[1]
   p.stay <- param[2]
-
+  rate <- param[3]
   
   num <- runif(1)
-  s2p <- 0.97
+  s2p <- 0.90
   
   # CHANGE PARAMETERS 
   if (num > s2p){
