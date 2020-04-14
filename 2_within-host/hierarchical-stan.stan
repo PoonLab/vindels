@@ -17,9 +17,8 @@ data {
 }
 
 parameters {
-  //real<lower=0.01, upper = 100> lambda;
-  real<lower=0.01, upper=1> mlog;
-  real<lower=0.01, upper = 100> lambda;
+  real mlog;
+  real lambda;
 }
 
 model {

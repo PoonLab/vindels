@@ -19,8 +19,8 @@ data {
 // The parameters accepted by the model. Our model
 // accepts two parameters 'mu' and 'sigma'.
 parameters {
-  real <lower=0.01, upper=100> sub_rate;
-  real<lower=0.01, upper=100> pat_rate;
+  real sub_rate;
+  real pat_rate;
   real<lower=0, upper=10> sub_sd;
   real<lower=0, upper=10> pat_sd;
 }
@@ -31,7 +31,8 @@ parameters {
 model {
   pat_rate ~ lognormal(sub_rate, sub_sd);
   
-  for (pat in 1:npat){
-    mat[pat] ~ normal(pat_rate, 0.5);
+  for (i in 1:npat){
+    mat[i] ~ normal(pat_rate, pat_sd);
   }
 }
+
