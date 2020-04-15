@@ -306,16 +306,16 @@ adj.means <- mapply(function(bin, mean){
   mean / adj.factor
 }, as.numeric(colnames(ibin.df)), ifreq)
 
-
+png("~/vindels/Figures/within-host/finalized/ins-timings2.png", width=1200, height=800)
 par(xpd=NA, mar=c(7,6,4,1))
 barplot(adj.means, col="dodgerblue", space=0, xaxt = "n",
         #xlab="Days Since Start of Infection",
-        ylab="Average Number of Insertions / Patient",
+        ylab="Average Insertion Count / Patient",
         main="Insertion Timings",
         cex.lab=1.3,cex.main=1.7)
 axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
-title(xlab="Days Since Start of Infection \n(Branch Midpoints)", line=5, cex.lab=1.3)
-
+title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=5, cex.lab=1.3)
+dev.off()
 # ---- DELETIONS ----
 dbins <- lapply(dpatlist, function(df){
   counts <- rowSums(df[,1:5])
@@ -344,11 +344,11 @@ dmaxes <- dmaxes[!is.na(dmaxes)]
 par(xpd=NA, mar=c(7,6,4,1))
 barplot(adj.means, col="red", space=0, xaxt = "n",
         #xlab="Days Since Start of Infection",
-        ylab="Average Number of Deletions / Patient",
+        ylab="Average Deletion Count / Patient",
         main="Deletion Timings",
         cex.lab=1.3,cex.main=1.7)
 axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
-title(xlab="Days Since Start of Infection", line=4, cex.lab=1.3)
+title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=5, cex.lab=1.3)
 
 
 
