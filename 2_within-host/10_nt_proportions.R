@@ -218,16 +218,17 @@ total.del2 <- total.del[total.del$len>1, ]
 write.csv(total.ins2, paste0(path,"10_nucleotide/total-ins2.csv"))
 write.csv(total.del2, paste0(path,"10_nucleotide/total-del2.csv"))
 
-# FLANKING INSERTIONS PROPORTIONS OUTPUT 
+# FLANKING INSERTIONS (14) OUTPUT 
 # ------------------------------------
-write.csv(ins, paste0(path,"/10_nucleotide/ins-sep-only.csv"))
-write.csv(del, paste0(path,"/10_nucleotide/del-sep-only.csv"))
-
-write.csv(all.ins, paste0(path,"/10_nucleotide/ins-sep-all.csv"))
-write.csv(all.ins, paste0(path,"/10_nucleotide/del-sep-all.csv"))
+write.csv(ins, paste0(path,"/10_nucleotide/ins-sep.csv"))
+write.csv(del, paste0(path,"/10_nucleotide/del-sep.csv"))
 
 write.csv(ins.glycs, paste0(path,"/10_nucleotide/ins-nosep-all.csv"))
 write.csv(del.glycs, paste0(path,"/10_nucleotide/del-nosep-all.csv"))
+
+# --- Modeling 2 ----
+write.csv(all.ins, paste0(path,"/10_nucleotide/ins-sep-all.csv"))
+write.csv(all.ins, paste0(path,"/10_nucleotide/del-sep-all.csv"))
 
 
 
