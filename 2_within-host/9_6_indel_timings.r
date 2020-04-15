@@ -277,9 +277,6 @@ dplot
 #imaster <- as.data.frame(rbindlist(ipatlist))
 #dmaster <- as.data.frame(rbindlist(dpatlist))
 
-# INEFFICIENT PLEASE REWRITE
-# -------------------------------
-
 
 # ---- INSERTIONS ----
 ibins <- lapply(ipatlist, function(df){

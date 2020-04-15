@@ -68,27 +68,6 @@ getSlipVector <- function(locs, length){
   }
 }
 
-# collapseVect <- function(vect){
-#   nonzero <- which(vect != 0)
-#   
-#   if (length(nonzero) < 2){
-#     return (vect)
-#   }else{
-#     for (i in length(nonzero):2){
-#       # check whether there is overlap in these slip positions, if so, amalgamate
-#       current <- nonzero[i]
-#       previous <- nonzero[i-1]
-#       
-#       # checks whether the previous nonzero is adjacent
-#       if ((current - 1) == previous){
-#         vect[previous] <- vect[previous] + vect[current]
-#         vect[current] <- 0
-#       }
-#     }
-#     return(vect)
-#   }
-# }
-
 getTip <- function(oldtip, slip){
   # used to determine the new tip sequence using the slip index
   nonzeros <- which(slip != 0)
@@ -328,7 +307,7 @@ runMCMC <- function(startvalue, iterations, runno){
   logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/slip-model-", 
                          runno,#substr(gsub("[\\ :-]","",Sys.time()), 9, 12),
                          ".csv"), "w")
-  write("p(Enter), p(Stay), Rate, Slip-changed, Accept", file=logfile)
+  write("p(Enter), p(Stay), Rate, Slip-changed, Accept, Time", file=logfile)
   
   for (i in 1:iterations){
     # calculate posterior of current position
