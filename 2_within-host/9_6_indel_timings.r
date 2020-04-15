@@ -115,8 +115,8 @@ for (file in 1:length(ifolder)){
     print(ddates)
   }
   # Regular patient-based data frame
-  ipatlist[[pat]] <- rbind(ipatlist[[pat]], iCSV[,2:7])
-  dpatlist[[pat]] <- rbind(dpatlist[[pat]], dCSV[,2:7])
+  ipatlist[[pat]] <- rbind(ipatlist[[pat]], iCSV[,2:8])
+  dpatlist[[pat]] <- rbind(dpatlist[[pat]], dCSV[,2:8])
   
   # Patient-based data frame split by interior vs tip
   # iint[[pat]] <- rbind(iint[[pat]], iCSV[which(!grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7])
@@ -125,10 +125,10 @@ for (file in 1:length(ifolder)){
   # dtip[[pat]] <- rbind(dtip[[pat]], dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7])
   
   # Cumulative data frame split by interior vs tip
-  iint[[file]] <- iCSV[which(!grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7]
-  itip[[file]]  <- iCSV[which(grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7]
-  dint[[file]]  <- dCSV[which(!grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7]
-  dtip[[file]]  <- dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7]
+  iint[[file]] <- iCSV[which(!grepl("^[^\\(\\):\n]+$", iCSV$header)),2:8]
+  itip[[file]]  <- iCSV[which(grepl("^[^\\(\\):\n]+$", iCSV$header)),2:8]
+  dint[[file]]  <- dCSV[which(!grepl("^[^\\(\\):\n]+$", dCSV$header)),2:8]
+  dtip[[file]]  <- dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:8]
   #iprop <- idates / max(iCSV$length)
   #dprop <- ddates / max(dCSV$length)
   ires <- sapply(2:6, function(x){
@@ -204,39 +204,7 @@ axis(1, labels=T,at=seq(0, 7000, 1000), line=3)
 
 
 
-# -------------
-# SURVIVAL PLOT FOR INDEL TIMINGS
 
-#imaxes <- imaxes[!is.na(imaxes)]
-#dmaxes <- dmaxes[!is.na(dmaxes)]
-
-# amalgamate the data sets 
-indel.max <- data.frame(max=c(imaxes,dmaxes), status=rep(1,length(imaxes)+length(dmaxes)), type=c(rep("Insertion",length(imaxes)), rep("Deletion", length(dmaxes))))
-
-imax <- data.frame(max=imaxes, status=rep(1,length(imaxes)))
-dmax <- data.frame(max=dmaxes, status=rep(1,length(dmaxes)))
-
-data <- imax
-
-fit <- survfit(Surv(max,status) ~ 1, data=data)
-require(survminer)
-require(ggfortify)
-plot <- autoplot(fit, facets=T, conf.int = F, surv.colour = "red")  + 
-  labs(x="Time (Days)",
-       y="Survival (%)",title = "Patient Max Dates")+
-  theme(panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 42, r = 10, b = 30, l = 20, unit = "pt"),
-        axis.line = element_line(colour = "black"),
-        axis.title.y=element_text(size=16,margin=margin(t = 0, r = 3, b = 0, l = 12)),
-        axis.title.x=element_text(size=16,margin=margin(t = 8, r = 3, b = 0, l = 0)),
-        strip.text.x = element_blank(),
-        axis.text.x = element_text(size=14),
-        axis.text.y = element_text(size=14),
-        plot.title=element_text(size=18,hjust=0.5)),
-        axis.title = ,
-        legend.position="none")#+ geom_text(aes(y=0.4,x=3 ),
-#label="N/A",
-#size=6)
 
 
 # NEED TO FIX THIS 
@@ -311,61 +279,56 @@ dplot
 
 # INEFFICIENT PLEASE REWRITE
 # -------------------------------
-idates <- lapply(ipatlist, function(list){
-  counts <- rowSums(list[,1:5])
-  dates <- rep(list[,6], counts)
-  dates
-})
 
-ibins <- lapply(idates, function(x){
+
+# ---- INSERTIONS ----
+ibins <- lapply(ipatlist, function(df){
+  counts <- rowSums(df[,1:5])
+  dates <- rep(df[,7], counts)
+  
   res <- c()
   for (i in 1:15){
-    res[i] <- sum(x > (i-1)*500 & x < i*500)
+    res[i] <- sum(dates > (i-1)*500 & dates < i*500)
   }
   as.data.frame(t(res))
 })
 
-ddates <- lapply(dpatlist, function(list){
-  counts <- rowSums(list[,1:5])
-  dates <- rep(list[,6], counts)
-  dates
-})
-
-dbins <- lapply(ddates, function(x){
-  res <- c()
-  for (i in 1:15){
-    res[i] <- sum(x > (i-1)*500 & x < i*500)
-  }
-  as.data.frame(t(res))
-})
-
-
-# INSERTIONS 
 ibin.df <- as.data.frame(rbindlist(ibins))
 colnames(ibin.df) <- as.character(seq(0,7500,500)[-1])
 ifreq <- apply(ibin.df, 2, mean)
 
+imaxes <- imaxes[!is.na(imaxes)]
 # adjust the means for the number of patients
 adj.means <- mapply(function(bin, mean){
+  # this is a calculation of how many data sets are still active, decreasing as less data is available
   adj.factor <- (length(imaxes) - sum(imaxes <= (bin - 500))) / length(imaxes)
   print(adj.factor)
   mean / adj.factor
 }, as.numeric(colnames(ibin.df)), ifreq)
 
-imaxes <- imaxes[!is.na(imaxes)]
-newimaxes <- imaxes/500
+
 par(xpd=NA, mar=c(7,6,4,1))
 barplot(adj.means, col="dodgerblue", space=0, xaxt = "n",
         #xlab="Days Since Start of Infection",
         ylab="Average Number of Insertions / Patient",
         main="Insertion Timings",
         cex.lab=1.3,cex.main=1.7)
-#arrows(newimaxes, 0, newimaxes, -0.2, length=0)
 axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
-title(xlab="Days Since Start of Infection", line=4, cex.lab=1.3)
+title(xlab="Days Since Start of Infection \n(Branch Midpoints)", line=5, cex.lab=1.3)
 
-# DELETIONS
-dbin.df <- rbindlist(dbins)
+# ---- DELETIONS ----
+dbins <- lapply(dpatlist, function(df){
+  counts <- rowSums(df[,1:5])
+  dates <- rep(df[,7], counts)
+  
+  res <- c()
+  for (i in 1:15){
+    res[i] <- sum(dates > (i-1)*500 & dates < i*500)
+  }
+  as.data.frame(t(res))
+})
+
+dbin.df <- as.data.frame(rbindlist(dbins))
 colnames(dbin.df) <- as.character(seq(0,7500,500)[-1])
 dfreq <- apply(dbin.df, 2, mean)
 
@@ -378,25 +341,19 @@ adj.means <- mapply(function(bin, mean){
 
 
 dmaxes <- dmaxes[!is.na(dmaxes)]
-newdmaxes <- dmaxes/500
 par(xpd=NA, mar=c(7,6,4,1))
 barplot(adj.means, col="red", space=0, xaxt = "n",
         #xlab="Days Since Start of Infection",
         ylab="Average Number of Deletions / Patient",
         main="Deletion Timings",
         cex.lab=1.3,cex.main=1.7)
-#arrows(newdmaxes, 0, newdmaxes, -0.5, length=0)
 axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
 title(xlab="Days Since Start of Infection", line=4, cex.lab=1.3)
 
 
 
 
-
-
-
-# HISTOGRAMS (used for counts)
-# ----------------------
+# --------- HISTOGRAMS (used for counts) -------------
 imaxes <- imaxes[!is.na(imaxes)]
 par(mar=c(5,5,5,2),xpd=F)
 caxis=1.3
@@ -449,6 +406,38 @@ hist(all.del,
      xlab="Days Since Start of Infection")
 
 
+# -------------
+# SURVIVAL PLOT FOR INDEL TIMINGS
 
+#imaxes <- imaxes[!is.na(imaxes)]
+#dmaxes <- dmaxes[!is.na(dmaxes)]
+
+# amalgamate the data sets 
+indel.max <- data.frame(max=c(imaxes,dmaxes), status=rep(1,length(imaxes)+length(dmaxes)), type=c(rep("Insertion",length(imaxes)), rep("Deletion", length(dmaxes))))
+
+imax <- data.frame(max=imaxes, status=rep(1,length(imaxes)))
+dmax <- data.frame(max=dmaxes, status=rep(1,length(dmaxes)))
+
+data <- imax
+
+fit <- survfit(Surv(max,status) ~ 1, data=data)
+require(survminer)
+require(ggfortify)
+plot <- autoplot(fit, facets=T, conf.int = F, surv.colour = "red")  + 
+  labs(x="Time (Days)",
+       y="Survival (%)",title = "Patient Max Dates")+
+  theme(panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 42, r = 10, b = 30, l = 20, unit = "pt"),
+        axis.line = element_line(colour = "black"),
+        axis.title.y=element_text(size=16,margin=margin(t = 0, r = 3, b = 0, l = 12)),
+        axis.title.x=element_text(size=16,margin=margin(t = 8, r = 3, b = 0, l = 0)),
+        strip.text.x = element_blank(),
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size=14),
+        plot.title=element_text(size=18,hjust=0.5)),
+axis.title = ,
+legend.position="none")#+ geom_text(aes(y=0.4,x=3 ),
+#label="N/A",
+#size=6)
 
 
