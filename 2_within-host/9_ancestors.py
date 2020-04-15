@@ -252,55 +252,12 @@ def extractIndels(seqpairs, vSeqFile):
     return iDict, dDict, vSeq, aSeq
 
 def main():
-    '''hFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/mcc/*.fasta")
-    print(hFolder[0])
-    result = getTerminals(hFolder[0])
-    for r in result:
-        print(r)
-        print(result[r][0][:250])
-        print(result[r][1][:250])'''
-
-    #if len(sys.argv) != 3:
-        #print("USAGE: python 9_ancestors.py [input Historian folder] [output folder]")
-        #quit()
-    #for i in range(len(sys.argv)):
-        #if not sys.argv[i].endswith("/"):
-            #sys.argv[i] += "/"
-
-    sample = '''----------atgagagtgatggggatacagaggaattgtcaacgatggt\
-ggatatggggcatcttaggcttttggatgatatatagtgggatggggcaa\
-ttgtgggtcacagtctattatggggtacctgtatggaaggaagcaaaaac\
-tactctattttgtgcatcagatgctaaagcatattcccaagaagcacata\
-atatctgggctacacatgcctgcgtacctacagaccccaatccacaagaa\
-atggttttagaaaatgtaacagaaaattttaacatgtggaaaaatgacat\
-ggtagatcagatgcatgaggatataatcagtttatgggatcaaagcctaa\
-agccatgtgtaaagttgaccccactctgtgtcactttaaactgtaccact\
-gttaatgttaatgttaccc------------------agccccttaatga\
-tagtgatag---ttacatgagaaactgctctttcaatatgaccacagaac\
-tacaagataaaaagaaggaagagagggcattgtttcatagacttgatcta\
-gtaccacttaatgag------------------aatagtagcc-------\
------------a------------------gtatatattaacaaattgta\
-atacctcaaccatagcacaggcctgtccaaagatcgcgtttgatccgatt\
-cctatacattattgtgctccagctggttatgcgattctaaaatgtaataa\
-taaggcattcaatggatcaggaccatgcactaatgtcagcacagtacaat\
-gtacacatggaattaagccagtggtatcaactcagctactgttaaatggt\
-agcctagcagaagagataataatcagatctgaaaatctgacaaacaatgt\
-caaaacaataatagtacaccttaatgaatctgtagaaattttgtgtacaa\
-gacccaacaataatacaagaaaaagtatgaggataggaccaggacaaaca\
-ttctatgcaacaggagaaataataggagatataagacaagcacattgtaa\
-cattactgaaggaaaatggaataaaactttagaaagaataaggaacaaat\
-tagcagagtacttccctaataaaacaatacaatttcaaagcgcctcagga\
-ggggacctagaaattacatcacatagctttaattgtggaggagaattttt\
-ctattgcaacacatcaagattgtttaatcatacatct-------------\
---------a---------------------atgagacatcaaacaaaaac\
-atcacactccaatgtaggataaaacaaattataaacatgtggcagggggt\
-aggacgagcaatatatgcccctcccattgcaggaaacataacatgtaact\
-caaatatcacaggactactattgacacgtgatggaggggagagtaatagt\
-agtcatcagacagagatattcagacctgcaggaggaaatatgagggacaa\
-ttggagaagtgaattatataaatataaagtggtagaaattaaaccattag\
-gaatagcacccactaaggcgaaaaggagagtggtggagagagaaaaaaga'''
-
-    #print(len(sample))
+    if len(sys.argv) != 3:
+        print("USAGE: python 9_ancestors.py [input Historian folder] [output folder]")
+        quit()
+    for i in range(len(sys.argv)):
+        if not sys.argv[i].endswith("/"):
+            sys.argv[i] += "/"
     
     # folder of historian outputs 
     hFolder = glob(sys.argv[1]+"*.fasta")
@@ -325,8 +282,8 @@ gaatagcacccactaaggcgaaaaggagagtggtggagagagaaaaaaga'''
         reconfile = filename.split("_recon")[0] + ".csv"   #101827-a_15.csv
 
         if os.path.isfile(vPath+csvfile):
-            ins_out = open(outpath+"ins/"+reconfile,'w')
-            del_out = open(outpath+"del/"+reconfile,'w')
+            ins_out = open(outpath+"ins/"+reconfile+"2",'w')
+            del_out = open(outpath+"del/"+reconfile+"2",'w')
             print(infile)
             terminals = getTerminals(infile)
             iDict, dDict, vSeq, aSeq = extractIndels(terminals, vPath+csvfile)
