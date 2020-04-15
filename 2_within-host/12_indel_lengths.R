@@ -28,9 +28,7 @@ categorize <- function(seqList){
   })))
   category
 }
-getLength <- function(seq){
-  
-}
+
 path <- "~/PycharmProjects/hiv-withinhost/"
 path <- "~/Lio/"
 iLength <- read.csv(paste0(path,"12_lengths/ins-full.csv"), row.names=1, stringsAsFactors = F)

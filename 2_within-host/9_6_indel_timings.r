@@ -273,11 +273,6 @@ dplot
 
 # COMPARISON OF DELETION RATES INTERIOR VS TIP 
 
-
-#imaster <- as.data.frame(rbindlist(ipatlist))
-#dmaster <- as.data.frame(rbindlist(dpatlist))
-
-
 # ---- INSERTIONS ----
 ibins <- lapply(ipatlist, function(df){
   counts <- rowSums(df[,1:5])
@@ -303,15 +298,19 @@ adj.means <- mapply(function(bin, mean){
   mean / adj.factor
 }, as.numeric(colnames(ibin.df)), ifreq)
 
-png("~/vindels/Figures/within-host/finalized/ins-timings2.png", width=1200, height=800)
+cairo_pdf("~/vindels/Figures/within-host/finalized/ins-timings.pdf",height=8, width=12)
 par(xpd=NA, mar=c(7,6,4,1))
 barplot(adj.means, col="dodgerblue", space=0, xaxt = "n",
-        #xlab="Days Since Start of Infection",
         ylab="Average Insertion Count / Patient",
         main="Insertion Timings",
-        cex.lab=1.3,cex.main=1.7)
-axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
-title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=5, cex.lab=1.3)
+        cex.lab=1.4,
+        cex.axis=1.1,
+        cex.main=1.7,
+        las=1)
+        #ylim=c(0,20))
+axis(1, seq(0,15), labels=F, tick=T, line=0.5)
+text(0:15,rep(-0.7,16), labels=seq(0,7500,500), srt=25, cex=1.1)
+title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=5, cex.lab=1.4)
 dev.off()
 # ---- DELETIONS ----
 dbins <- lapply(dpatlist, function(df){
@@ -329,6 +328,7 @@ dbin.df <- as.data.frame(rbindlist(dbins))
 colnames(dbin.df) <- as.character(seq(0,7500,500)[-1])
 dfreq <- apply(dbin.df, 2, mean)
 
+dmaxes <- dmaxes[!is.na(dmaxes)]
 # adjust the means for the number of patients
 adj.means <- mapply(function(bin, mean){
   adj.factor <- (length(dmaxes) - sum(dmaxes <= (bin - 500))) / length(dmaxes)
@@ -336,17 +336,19 @@ adj.means <- mapply(function(bin, mean){
   mean / adj.factor
 }, as.numeric(colnames(dbin.df)), dfreq)
 
-
-dmaxes <- dmaxes[!is.na(dmaxes)]
+cairo_pdf("~/vindels/Figures/within-host/finalized/del-timings.pdf",height=8, width=12)
 par(xpd=NA, mar=c(7,6,4,1))
 barplot(adj.means, col="red", space=0, xaxt = "n",
-        #xlab="Days Since Start of Infection",
         ylab="Average Deletion Count / Patient",
         main="Deletion Timings",
-        cex.lab=1.3,cex.main=1.7)
-axis(1, seq(0,15), labels=seq(0,7500,500), tick=T, line=0.5)
-title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=5, cex.lab=1.3)
-
+        cex.lab=1.4,
+        cex.axis=1.1,
+        cex.main=1.7,
+        las=1)
+axis(1, seq(0,15), labels=F, tick=T, line=0.5)
+text(0:15,rep(-2.1,16), labels=seq(0,7500,500), srt=25, cex=1.1)
+title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=5.5, cex.lab=1.4)
+dev.off()
 
 
 
