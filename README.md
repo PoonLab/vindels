@@ -10,11 +10,3 @@ Overview:
 6) extracted cherries of the phylogenetic trees and checked for length differences in their variable regions to detect indels
 7) applied a binomial-Poisson model to these data to determine indel rates for each variable loop within each group M clade
 
-
-
-
-
-# kaitlyns idea
-- look at the flanking regions left and right of the indel event
-- see if +/- 5 nucleotides might contain higher proportions of A or T 
-- 
