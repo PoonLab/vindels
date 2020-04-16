@@ -30,7 +30,7 @@ categorize <- function(seqList){
 }
 
 path <- "~/PycharmProjects/hiv-withinhost/"
-path <- "~/Lio/"
+#path <- "~/Lio/"
 iLength <- read.csv(paste0(path,"12_lengths/ins-full.csv"), row.names=1, stringsAsFactors = F)
 dLength <- read.csv(paste0(path,"12_lengths/del-full.csv"), row.names=1, stringsAsFactors = F)
  
@@ -108,6 +108,36 @@ dplot <- ggplot() +
         legend.background=element_rect(colour="black"),
         legend.title=element_text(size=18))
 dplot
+
+# --- Mosaic Plot -----
+data <- data.frame(bin=factor(rep(idf$Bin, idf$Count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(idf$Vloop, idf$Count))
+
+# reorder the data frame 
+data$bin <- factor(data$bin, levels=c("1-2","3","4-5","6","7-8","9",">9"))
+data[order(data$bin),]
+
+mosaic(~ bin + vloop,
+       data = data,
+       shade=T, main=NULL,
+       spacing=spacing_equal(sp = unit(0.7, "lines")),
+       residuals_type="Pearson", direction="v",
+       margins=c(2,2,6,2),
+       labeling_args = list(tl_labels = c(F,T), 
+                            tl_varnames=c(F,T),
+                            gp_labels=gpar(fontsize=24),
+                            gp_varnames=gpar(fontsize=28),
+                            set_varnames = c(vloop="Variable Loop", 
+                                            bin="Indel Length (nt)"),
+                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
+       legend=legend_resbased(fontsize = 20, fontfamily = "",
+                              x = unit(0.5, "lines"), y = unit(2,"lines"),
+                              height = unit(0.8, "npc"),
+                              width = unit(1, "lines"), range=c(-10,10)),
+       set_labels=list(Variable.Loop=c("V1","V2","V3","V4","V5")))
+
+
+
+
 
 # TEST : ALLUVIAL PLOT
 # ----------------------------------------
