@@ -8,7 +8,7 @@ source("~/vindels/2_within-host/utils.r")
 
 insRandTest <- function(seq, indel, start){
   # this will be the start point of the test insertion 
-  smpl <- sample(nchar(seq)+1,300, replace=T)
+  smpl <- sample(nchar(seq)+1,500, replace=T)
   
   # for every number in this random sample 
   seq <- sapply(smpl, function(x){insert(seq,indel,x)})
@@ -23,7 +23,7 @@ insRandTest <- function(seq, indel, start){
 
 delRandTest <- function(seq, indel, start){
   # this will be the start point of the test insertion 
-  smpl <- sample((nchar(seq) - nchar(indel) + 1),300, replace=T)
+  smpl <- sample((nchar(seq) - nchar(indel) + 1),500, replace=T)
   
   # for every number in this random sample 
   seq <- sapply(smpl, function(x){delete(seq,indel,x)})
@@ -37,6 +37,29 @@ delRandTest <- function(seq, indel, start){
   return(png.count - start)
 }
 
+# GLYC SITE RANDOMIZATION TEST 
+
+observedGlycChange <- function(anc, indel, pos, option="i"){
+  anc <- gsub("-","",anc)
+  aa.seq <- unname(sapply(anc, translate))
+  glycs <- unname(sapply(aa.seq,extractGlycs))
+  before <- unname(sapply(glycs,csvcount))
+  
+  # generate the new sequence by applying the appropriate insertion or deletion
+  if (option == "i"){
+    newanc <- insert(anc, indel, (pos - nchar(indel) + 1))
+  }else{
+    newanc <- delete(anc, indel, (pos - nchar(indel) + 1))
+  }
+
+  # recalculate the number of N-glyc sites 
+  new.aa <- unname(sapply(newanc, translate))
+  glycs <- unname(sapply(new.aa,extractGlycs))
+  after <- unname(sapply(glycs,csvcount))
+
+  # report this as a net change in the number of Nglyc sites
+  return(after - before)
+} 
 
 glycCount <- function(seq){
   # determine the locations of all N-glyc sites in the ancestral sequence 
@@ -85,33 +108,7 @@ ins.v <- split(ins, ins$Vloop)
 del.v <- split(del, del$Vloop)
 
 
-# GLYC SITE RANDOMIZATION TEST 
-
-observedGlycChange <- function(anc, indel, pos, option="i"){
-  anc <- gsub("-","",anc)
-  aa.seq <- unname(sapply(anc, translate))
-  glycs <- unname(sapply(aa.seq,extractGlycs))
-  before <- unname(sapply(glycs,csvcount))
-  
-  if (option == "i"){
-    newanc <- insert(anc, indel, (pos - nchar(indel) + 1))
-  }else{
-    newanc <- delete(anc, indel, (pos - nchar(indel) + 1))
-  }
-  
-  #print(newanc)
-  # generate the result sequence ; use substring to add the insertion sequence into the seqestor 
-  
-  new.aa <- unname(sapply(newanc, translate))
-  glycs <- unname(sapply(new.aa,extractGlycs))
-  after <- unname(sapply(glycs,csvcount))
-  # recalculate the number of N-glyc sites 
-  # adjust the location of all N-glyc locations falling AFTER the random position to check their similarity 
-  
-  # report this as a positive or a negative result zzzz
-  return(after - before)
-} 
-
+# ----- Randomization Test ---- 
 ins.data <- data.frame()
 del.data <- data.frame()
 
