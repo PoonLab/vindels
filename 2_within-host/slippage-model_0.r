@@ -291,6 +291,8 @@ proposalFunction <- function(param, slip_current, llh_current){
   return(list(param=c(p.enter, p.stay, rate), slip=slip_proposed, llh=llh_proposed))
 }
 
+# MODIFIED TO CONTINUE RUN 
+
 runMCMC <- function(startvalue, iterations, runno){
   # timing
   start.time <- proc.time()
@@ -300,14 +302,14 @@ runMCMC <- function(startvalue, iterations, runno){
   chain[1,] <- startvalue
   
   # start the slip list and the llh list
-  slip_current <- slip.list
-  llh_current <- seqllh(startvalue[3], slip.list)
+  #slip_current <- slip.list
+  #llh_current <- seqllh(startvalue[3], slip.list)
   
   # keep a logfile up to date
   logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/slip-model-", 
                          runno,#substr(gsub("[\\ :-]","",Sys.time()), 9, 12),
                          ".csv"), "w")
-  write("p(Enter), p(Stay), Rate, Slip-changed, Accept, Time", file=logfile)
+  #write("p(Enter), p(Stay), Rate, Slip-changed, Accept, Time", file=logfile)
   
   for (i in 1:iterations){
     # calculate posterior of current position
