@@ -21,15 +21,15 @@ data {
 parameters {
   real sub_rate;
   real pat_rate;
-  real<lower=0, upper=0.5> sub_sd;
-  real<lower=0, upper=10> pat_sd;
+  real<lower=0, upper=5> pat_sd;
 }
 
 // The model to be estimated. We model the output
 // 'y' to be normally distributed with mean 'mu'
 // and standard deviation 'sigma'.
 model {
-  pat_rate ~ uniform(0, 4);  // --> after running, posterior is normally distributed
+  pat_rate ~ uniform(0, 4);  // --> after running, posterior is normally distributed; 
+  pat_sd ~ uniform(0,10);           // this shows the prior distribution and the
   //pat_rate ~ lognormal(sub_rate, sub_sd);
   
   for (i in 1:npat){
