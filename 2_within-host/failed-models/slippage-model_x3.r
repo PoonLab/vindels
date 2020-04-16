@@ -1,4 +1,7 @@
 # slippage model functions
+# Version 3 
+# COMBINED approach to the proposal function 
+  # all three parameters are changed simultaneously 
 # INPUT
 createSlips <- function(anc, len, pos){
   # start out with a base vector containing nchar number of zeros 
@@ -27,7 +30,7 @@ estimateFreq <- function(seqs){
   output
 }
 
-setup <- function(tip, anc, len, pos, branches, shuffle){
+setup <- function(tip, anc, len, pos, branches){
   indels <<- data.frame(tip=tip, anc=anc, len=len, pos=pos, stringsAsFactors = F)
   branches <<- as.numeric(branches)
   anc.seqs <<- gsub("-", "", anc)
@@ -39,24 +42,15 @@ setup <- function(tip, anc, len, pos, branches, shuffle){
   slip.list <<- unname(mapply(createSlips, anc, len, pos))
   
   # #SHUFFLING --- randomly shuffle the slip locations around
-  if (shuffle){
-    slip.list <<- lapply(slip.list, function(x){
-      total <- sum(x)
-      if (total == 0){
-        return (x)
-      }else{
-        locs <- getSlipLocations(x)[[1]]
-        for (n in 1:length(locs)){
-          proposed <- -1
-          while(proposed < 0 || proposed > length(x)){
-            proposed <- locs[n] + delta(3)
-          }
-          locs[n] <- proposed
-        }
-        getSlipVector(locs, length(x))
-      }
-    })
-  }
+  # slip.list <<- lapply(slip.list, function(x){
+  #   total <- sum(x)
+  #   if (total == 0){
+  #     return (x)
+  #   }else{
+  #     locs <- sample(length(x), total, replace=T)
+  #     getSlipVector(locs, length(x))
+  #   }
+  # })
   # needed for use in the CHANGESLIP function
   idx <<- which(unname(lapply(slip.list,sum))>0)
 }
@@ -74,6 +68,27 @@ getSlipVector <- function(locs, length){
     return(vect)
   }
 }
+
+# collapseVect <- function(vect){
+#   nonzero <- which(vect != 0)
+#   
+#   if (length(nonzero) < 2){
+#     return (vect)
+#   }else{
+#     for (i in length(nonzero):2){
+#       # check whether there is overlap in these slip positions, if so, amalgamate
+#       current <- nonzero[i]
+#       previous <- nonzero[i-1]
+#       
+#       # checks whether the previous nonzero is adjacent
+#       if ((current - 1) == previous){
+#         vect[previous] <- vect[previous] + vect[current]
+#         vect[current] <- 0
+#       }
+#     }
+#     return(vect)
+#   }
+# }
 
 getTip <- function(oldtip, slip){
   # used to determine the new tip sequence using the slip index
@@ -242,9 +257,9 @@ prior <- function(param){
   p.stay  <- param[2]
   rate <- param[3]
   
-  prior.pe <- dlnorm(p.enter,meanlog=log(0.0007),sdlog=1, log=T)
-  prior.ps <- dlnorm(p.stay,meanlog=log(0.75),sdlog=0.1,log=T)
-  prior.rate <- dlnorm(rate,meanlog=log(0.0001), sdlog=1,log=T)
+  prior.pe <- dunif(p.enter, min=1e-5, max=1e-2, log=T) # dlnorm(p.enter,meanlog=log(0.000335),sdlog=0.5, log=T)
+  prior.ps <- dunif(p.stay, min=0.3, max=0.9, log=T) # dlnorm(slope,meanlog=log(15),sdlog=1.1,log=T)
+  prior.rate <- dunif(rate, min=1e-5, max=1e-3, log=T) # dlnorm(rate,meanlog=log(0.0001), sdlog=0.5,log=T)
   
   return(prior.pe + prior.ps + prior.rate)
 }
@@ -265,23 +280,17 @@ proposalFunction <- function(param, slip_current, llh_current){
   rate <- param[3]
   
   num <- runif(1)
-  s2p <- 0.90
+  s2p <- 0.92
   
-  # CHANGE PARAMETERS 
+  # CHANGE ALL PARAMETERS AT ONCE (Version 2) 
   if (num > s2p){
-    if (num-s2p < (1/3 *(1-s2p))){
-      p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
-      llh_proposed <- llh_current   # stays the same
-    }else if(num-s2p > (2/3 *(1-s2p))){
-      p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
-      llh_proposed <- llh_current   # stays the same
-    }else{
-      rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
-      llh_proposed <- seqllh(rate, slip_current)  # recalcuate using the new rate
-    }
+    p.enter <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
+    p.stay <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
+    rate <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
+    llh_proposed <- seqllh(rate, slip_current)  # recalcuate using the new rate
     slip_proposed <- slip_current    # stays the same
     
-    # CHANGE SLIP
+  # CHANGE SLIP
   }else{
     # choose a sequence to edit
     rand <- sample(length(idx),1)
@@ -297,8 +306,6 @@ proposalFunction <- function(param, slip_current, llh_current){
   }
   return(list(param=c(p.enter, p.stay, rate), slip=slip_proposed, llh=llh_proposed))
 }
-
-# MODIFIED TO CONTINUE RUN 
 
 runMCMC <- function(startvalue, iterations, runno){
   # timing

@@ -1,24 +1,22 @@
 # model testing 
 # relies upon modeling2.r
-# used to test the 
+# 'combined' approach to the proposal function 
+# all three parameters are changed simultaneously 
 
 # SIMULATE DNA 
 # ------------------
 # SIMULATE DNA SEQUENCES 
-source('~/vindels/2_within-host/utils.r')
 source("~/vindels/2_within-host/slippage-model_3.r")
-# calculate the median lengths of the variable loops
-# ins.v <- split(insertions, insertions$Vloop)
-# lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
-# f <- estimateFreq(c(insertions$Vseq, insertions$Anc))
-# names(f) <- nt
-# rm (ins.v)
-# rm(insertions)
-lens <- c(75, 126, 105,  90 , 33)
-f <- c(0.4158261, 0.1649874, 0.1761463, 0.2423612 )
+# calculate the median lengths of the variable loops 
+ins.v <- split(insertions, insertions$Vloop)
+lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
+f <- estimateFreq(c(insertions$Vseq, insertions$Anc))
 names(f) <- nt
+rm (ins.v)
+rm(insertions)
 
 # Generates a sequence that adheres to the nucleotide frequencies of the data 
+
 genSeq <- function(len){
   seq <- c()
   for (n in 1:len){
@@ -36,6 +34,7 @@ genSeq <- function(len){
   }
   paste(seq, collapse="")
 }
+
 
 nt <- c("A", "C", "G", "T")
 
@@ -55,12 +54,11 @@ simPair <- function(p.enter, p.stay, rate){
 
   anc.chars <- strsplit(anc, "")[[1]]
   tmat <- getMat(rate, branch)
-  
-  # generate the tip sequence based on the transition rate matrix 
+
   tip <- paste(sapply(1:nchar(anc), function(n){
     rand <- runif(1)
     probs <- tmat[anc.chars[n],]
-     
+    # choose the correct nucleotide based on the existing one and the random number 
     if (rand < probs[1]){
       "A"
     }else if (rand > probs[1] && rand < probs[2]){
@@ -71,7 +69,7 @@ simPair <- function(p.enter, p.stay, rate){
       "T"
     }
   }), collapse="")
-  
+  #print("finished substitutions")
   # ------ INDELS -------
   # determine the number of insertions that occur 
   count <- sum(runif(vlen) < p.enter)
@@ -79,13 +77,36 @@ simPair <- function(p.enter, p.stay, rate){
   if (count > 0){
     
     for (n in 1:count){
-      len <- 0
-      exit <- 0
-      while(exit < p.stay ){
-        len <- len + 1
-        exit <- runif(1)
-      }
+      if (runif(1) < 0.18){
+        # add a non-multiple of 3 indel
+        #print('non3')
+        len <- 0
+        # used to count how many SUBSEQUENT nucleotides will be added AFTER the first one
+        while (len %% 3 == 0){
+          # algorithm to compute an appropriate length
+          len <- 0
+          exit <- 0
+          while(exit < p.stay ){
+            len <- len + 1
+            exit <- runif(1)
+          }
+        }
         
+      }else{
+        # add a multiple of 3 indel 
+        len <- 1
+        # keep trying until an indel of length > 0, and multiple of 3 is found 
+        while (len %% 3 != 0 || len == 0){
+          #print("3")
+          len <- 0
+          exit <- 0
+          # grows an indel size
+          while(exit < p.stay){
+            len <- len + 1 
+            exit <- runif(1)
+          }
+        }
+      }
       # add the length and choose a random location for the slip event 
       idx <- sample(1:vlen,1)
       
@@ -111,9 +132,9 @@ simPair <- function(p.enter, p.stay, rate){
 }
 
 # SIMULATE TIP + ANCESTOR SEQUENCES 
-all.seqs <- sapply(1:1000, function(n){
+all.seqs <- sapply(1:5000, function(n){
   print(n)
-  pair <- simPair(0.001, 0.70, 0.0001)
+  pair <- simPair(0.001, 0.75, 0.0001)
   # VALUE 1 = Tip, VALUE 2 = Ancestor
   return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
@@ -134,15 +155,15 @@ data <- t(unname(sapply(insertions$anc, function(x){
 insertions$len <- data[,1]
 insertions$pos <- data[,2]
 
-setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
+setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch)
 
 # RUN MCMC
 startvalue <- c(0.01, 0.55, 0.001)
-chain <- runMCMC(startvalue, 200000, 'loc-prior')
+chain <- runMCMC(startvalue, 1000000, 'combined')
 
 
 # ----- For checking -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-simple-indel-shuffled.csv", stringsAsFactors = F, skip=1, header=F)
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-perfect.csv", stringsAsFactors = F, skip=1, header=F)
 colnames(csv) <- c('p.enter', 'p.stay', "rate" ,'slip.changed', 'accept', 'time')
 
 # -----IDEA TO IMPLEMENT ------
