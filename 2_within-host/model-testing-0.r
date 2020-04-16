@@ -116,7 +116,7 @@ simPair <- function(p.enter, p.stay, rate){
 # SIMULATE TIP + ANCESTOR SEQUENCES 
 all.seqs <- sapply(1:5000, function(n){
   print(n)
-  pair <- simPair(0.001, 0.70, 0.0001)
+  pair <- simPair(0.001, 0.75, 0.0001)
   # VALUE 1 = Tip, VALUE 2 = Ancestor
   return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
@@ -137,11 +137,11 @@ data <- t(unname(sapply(insertions$anc, function(x){
 insertions$len <- data[,1]
 insertions$pos <- data[,2]
 
-#setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
+setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, F)
 
 # RUN MCMC
 startvalue <- c(0.01, 0.55, 0.001)
-chain <- runMCMC(startvalue, 1000000, 'simple-indel-shuffled')
+chain <- runMCMC(startvalue, 1000000, 'perfect2')
 
 
 # ----- For checking -----
