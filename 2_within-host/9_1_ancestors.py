@@ -268,11 +268,26 @@ def treeIndelExtract(node, vregion, data):
     
 
 #print(folder)
+if len(sys.argv) != 4:
+    print("USAGE: python 9_1_ancestors.py [input Historian folder] [tree folder] [output folder]")
+    quit() 
+for i in range(len(sys.argv)):
+    if not sys.argv[i].endswith("/"):
+        sys.argv[i] += "/"
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/8Historian/rep2/*.fasta") #/rep/*.fasta
+folder = glob(sys.argv[1]+"*.fasta") #/rep/*.fasta
 vpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
-tpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/7SampleTrees/final/'               
-opath = '/home/jpalmer/PycharmProjects/hiv-withinhost/9Indels/rep2/wholetree/'
+tpath = sys.argv[2]              
+opath = sys.argv[3]
+
+
+# output path for indel csv files
+outpath = sys.argv[2]
+if not os.path.isdir(outpath+"ins/"):
+    os.mkdir(outpath+"ins/")
+if not os.path.isdir(outpath+"del/"):
+    os.mkdir(outpath+"del/")
+
 
 if not os.path.isdir(opath+"ins"):
     os.mkdir(opath+'ins')
