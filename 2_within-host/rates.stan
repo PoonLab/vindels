@@ -19,7 +19,7 @@ data {
 // The parameters accepted by the model. Our model
 // accepts two parameters 'mu' and 'sigma'.
 parameters {
-  real sub_rate;
+  //real sub_rate;
   real pat_rate;
   real<lower=0, upper=5> pat_sd;
 }
@@ -28,7 +28,7 @@ parameters {
 // 'y' to be normally distributed with mean 'mu'
 // and standard deviation 'sigma'.
 model {
-  pat_rate ~ uniform(0, 4);  // --> after running, posterior is normally distributed; 
+  pat_rate ~ uniform(0, 7);  // --> after running, posterior is normally distributed; 
   pat_sd ~ uniform(0,10);           // this shows the prior distribution and the
   //pat_rate ~ lognormal(sub_rate, sub_sd);
   

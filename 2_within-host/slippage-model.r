@@ -326,7 +326,7 @@ runMCMC <- function(startvalue, iterations, runno){
   logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/slip-model-", 
                          runno,#substr(gsub("[\\ :-]","",Sys.time()), 9, 12),
                          ".csv"), "w")
-  write("p(Enter), p(Stay), Rate, Slip-changed, Accept", file=logfile)
+  write("p(Enter), p(Stay), Rate, Slip-changed, Accept, Time", file=logfile)
   
   for (i in 1:iterations){
     # calculate posterior of current position
