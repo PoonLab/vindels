@@ -280,15 +280,6 @@ vpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/
 tpath = sys.argv[2]              
 opath = sys.argv[3]
 
-
-# output path for indel csv files
-outpath = sys.argv[2]
-if not os.path.isdir(outpath+"ins/"):
-    os.mkdir(outpath+"ins/")
-if not os.path.isdir(outpath+"del/"):
-    os.mkdir(outpath+"del/")
-
-
 if not os.path.isdir(opath+"ins"):
     os.mkdir(opath+'ins')
 if not os.path.isdir (opath+"del"):
