@@ -39,18 +39,18 @@ csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-loc-prior.csv", str
 #   })
 # }))
 burnin <- 200
-tru <- c(0.001, 0.70, 0.0001)
+tru <- c(0.001, 0.80, 0.0001)
 colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'slip.changed', 'accept', 'time')
 # colnames(csv) <- c('p.enter', 'slope','int', 'rate', 'slip.changed', 'accept', 'time')
 #png(file="~/vindels/Figures/within-host/finalized/slippage-trace2.png", width=600, height=800)
 par(mar=c(2.5,5,3,1), mfrow=c(3,1))
-plot(csv[,'p.enter'], type = "l", xlab="MCMC Steps (x10)" , ylab="Prob(Enter)",
+plot(csv[-(1:burnin),'p.enter'], type = "l", xlab="MCMC Steps (x10)" , ylab="Prob(Enter)",
      main = "Chain values of Enter", cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
 abline(h=tru[1],col='red',lwd=2)
-plot(csv[,'p.stay'], type = "l", xlab="MCMC Steps (x10)" , ylab="P(Stay)",
+plot(csv[-(1:burnin),'p.stay'], type = "l", xlab="MCMC Steps (x10)" , ylab="P(Stay)",
      main = "Chain values of Stay",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)
 abline(h=tru[2],col='red',lwd=2)
-plot(csv[,'rate'], type = "l", xlab="MCMC Steps (x10)" , ylab="Rate",
+plot(csv[-(1:burnin),'rate'], type = "l", xlab="MCMC Steps (x10)" , ylab="Rate",
      main = "Chain values of Rate",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7, ylim=c(0.0001,0.00015))
 abline(h=tru[3],col='red',lwd=2)
 

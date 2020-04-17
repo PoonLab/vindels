@@ -302,14 +302,14 @@ runMCMC <- function(startvalue, iterations, runno){
   chain[1,] <- startvalue
   
   # start the slip list and the llh list
-  #slip_current <- slip.list
-  #llh_current <- seqllh(startvalue[3], slip.list)
+  slip_current <- slip.list
+  llh_current <- seqllh(startvalue[3], slip.list)
   
   # keep a logfile up to date
   logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/slip-model-", 
                          runno,#substr(gsub("[\\ :-]","",Sys.time()), 9, 12),
                          ".csv"), "w")
-  #write("p(Enter), p(Stay), Rate, Slip-changed, Accept, Time", file=logfile)
+  write("p(Enter), p(Stay), Rate, Slip-changed, Accept, Time", file=logfile)
   
   for (i in 1:iterations){
     # calculate posterior of current position

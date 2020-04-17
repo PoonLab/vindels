@@ -141,7 +141,7 @@ setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions
 
 # RUN MCMC
 startvalue <- c(0.01, 0.55, 0.001)
-chain <- runMCMC(startvalue, 1000000, 'perfect2')
+chain <- runMCMC(startvalue, 100000, 'perfect2')
 
 
 # ----- For checking -----
