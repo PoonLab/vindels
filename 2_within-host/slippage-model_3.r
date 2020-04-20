@@ -1,5 +1,7 @@
 # slippage model functions
-# INPUT
+# CURRENT VERSION :
+# location prior
+# improves on previous iterations by localizing slips when initializing MCMC 
 createSlips <- function(anc, len, pos){
   # start out with a base vector containing nchar number of zeros 
   # remove the gap characters from the ancestral sequence 
@@ -39,6 +41,7 @@ setup <- function(tip, anc, len, pos, branches, shuffle){
   slip.list <<- unname(mapply(createSlips, anc, len, pos))
   
   # #SHUFFLING --- randomly shuffle the slip locations around
+  # slip-model-3  --- location prior added 
   if (shuffle){
     slip.list <<- lapply(slip.list, function(x){
       total <- sum(x)
@@ -242,9 +245,12 @@ prior <- function(param){
   p.stay  <- param[2]
   rate <- param[3]
   
-  prior.pe <- dlnorm(p.enter,meanlog=log(0.0007),sdlog=1, log=T)
-  prior.ps <- dlnorm(p.stay,meanlog=log(0.75),sdlog=0.1,log=T)
-  prior.rate <- dlnorm(rate,meanlog=log(0.0001), sdlog=1,log=T)
+  prior.pe <- dunif(p.enter, min=1e-6, max=1e-2, log=T) 
+  prior.ps <- dunif(p.stay, min=0.4, max=0.9, log=T) 
+  prior.rate <- dunif(rate, min=1e-7, max=1e-3, log=T)
+  #prior.pe <- dlnorm(p.enter,meanlog=log(0.00015),sdlog=1.2, log=T)
+  #prior.ps <- dlnorm(p.stay,meanlog=log(0.75),sdlog=0.1,log=T)
+  #prior.rate <- dlnorm(rate,meanlog=log(0.00001), sdlog=1.5,log=T)
   
   return(prior.pe + prior.ps + prior.rate)
 }
@@ -265,7 +271,7 @@ proposalFunction <- function(param, slip_current, llh_current){
   rate <- param[3]
   
   num <- runif(1)
-  s2p <- 0.90
+  s2p <- 0.95
   
   # CHANGE PARAMETERS 
   if (num > s2p){

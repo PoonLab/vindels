@@ -111,9 +111,9 @@ simPair <- function(p.enter, p.stay, rate){
 }
 
 # SIMULATE TIP + ANCESTOR SEQUENCES 
-all.seqs <- sapply(1:1000, function(n){
+all.seqs <- sapply(1:25000, function(n){
   print(n)
-  pair <- simPair(0.001, 0.70, 0.0001)
+  pair <- simPair(0.00016, 0.75, 0.00001)
   # VALUE 1 = Tip, VALUE 2 = Ancestor
   return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
@@ -137,8 +137,8 @@ insertions$pos <- data[,2]
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
 
 # RUN MCMC
-startvalue <- c(0.01, 0.55, 0.001)
-chain <- runMCMC(startvalue, 200000, 'loc-prior')
+startvalue <- c(0.01, 0.55, 0.000001)
+chain <- runMCMC(startvalue, 2000000, 'loc-prior-2')
 
 
 # ----- For checking -----
