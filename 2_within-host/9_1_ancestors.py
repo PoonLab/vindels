@@ -335,34 +335,34 @@ for f in folder:
     for n, char in enumerate(rootseq):
         if vregion[n] != -1:
             vseqs[vregion[n]] += char
-    print({root:vseqs})
+    #print({root:vseqs})
     result[0].update({root:vseqs})
 
     tsvout = filename.split("_recon")[0] + ".fasta"   #.tsv
-    # ioutput = open(opath+'ins/'+tsvout, 'w+')
-    # doutput = open(opath+'del/'+tsvout,'w+') 
+    ioutput = open(opath+'ins/'+tsvout, 'w+')
+    doutput = open(opath+'del/'+tsvout,'w+') 
     # header = "header\tV1\tV2\tV3\tV4\tV5\n"
-    # ioutput.write(header)
-    # doutput.write(header)
+    ioutput.write(header)
+    doutput.write(header)
     fastaout = open(opath+tsvout,"w+")
     #sys.exit()
     for n, node in enumerate(result[0]):
         #print(node)
         #print(result[0][node])
-        # data = [":".join(vloop) for vloop in result[1][node]] 
-        data = "".join(result[0][node])   # for abayomi's output
+        data = [":".join(vloop) for vloop in result[0][node]] 
+        #data = "".join(result[0][node])   # for abayomi's output
         #print(data)
-        fastaout.write(">"+node+"\n"+data+"\n")
+        #fastaout.write(">"+node+"\n"+data+"\n")
         #print(",".join([node, data, "\n"]))
-        #ioutput.write(node+"\t"+"\t".join(data)+"\n")
+        ioutput.write(node+"\t"+"\t".join(data)+"\n")
 
     for n, node in enumerate(result[1]):
         data = [":".join(vloop) for vloop in result[1][node]]
         # print(data)
         #print(",".join([node, data, "\n"]))
-        #doutput.write(node+"\t"+"\t".join(data)+"\n")
-    # ioutput.close()
-    # doutput.close()
+        doutput.write(node+"\t"+"\t".join(data)+"\n")
+    ioutput.close()
+    doutput.close()
 
     #tips = [ x for x in data.keys() if re.search('^[^\(\):\n]+$',x) != None]
 
