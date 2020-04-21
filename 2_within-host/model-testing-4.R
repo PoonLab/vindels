@@ -6,7 +6,7 @@
 # ------------------
 # SIMULATE DNA SEQUENCES 
 source('~/vindels/2_within-host/utils.r')
-source("~/vindels/2_within-host/slippage-model-3.r")
+source("~/vindels/2_within-host/slippage-model-4.r")
 # calculate the median lengths of the variable loops
 # ins.v <- split(insertions, insertions$Vloop)
 # lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
@@ -52,7 +52,7 @@ simPair <- function(p.enter, p.stay, rate){
   
   # ----SUBSTITUTIONS--------
   # add in substitutions based on the rate value 
-
+  
   anc.chars <- strsplit(anc, "")[[1]]
   tmat <- getMat(rate, branch)
   
@@ -60,7 +60,7 @@ simPair <- function(p.enter, p.stay, rate){
   tip <- paste(sapply(1:nchar(anc), function(n){
     rand <- runif(1)
     probs <- tmat[anc.chars[n],]
-     
+    
     if (rand < probs[1]){
       "A"
     }else if (rand > probs[1] && rand < probs[2]){
@@ -85,7 +85,7 @@ simPair <- function(p.enter, p.stay, rate){
         len <- len + 1
         exit <- runif(1)
       }
-        
+      
       # add the length and choose a random location for the slip event 
       idx <- sample(1:vlen,1)
       
@@ -114,7 +114,7 @@ simPair <- function(p.enter, p.stay, rate){
 all.seqs <- sapply(1:25000, function(n){
   print(n)
   pair <- simPair(0.00016, 0.75, 0.00001)
-  # VALUE 1 = Tip, VALUE 2 = Ancestor
+  # VALUE 1 = Tip, VALUE 2 = Ancestor, VALUE 3 = Branch length
   return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
 insertions <- as.data.frame(t(all.seqs), stringsAsFactors = F)
@@ -134,11 +134,34 @@ data <- t(unname(sapply(insertions$anc, function(x){
 insertions$len <- data[,1]
 insertions$pos <- data[,2]
 
+vec <- c()
+for (i in 1:1000){
+  x <- round(rexp(1000, 0.1))
+  x <- x[x>0]
+  vec[i] <- sum(x%%3==0) / 1000
+}
+median(vec)   # this number is used to calibrate the MCMC 
+
+
+# VERSION 4:
+# generate a vector of T/F values to remove non3 values from the data
+toInclude <- sapply(insertions$len, function(len){
+  if (is.na(len)){
+    T
+  }else if (len %% 3 != 0){
+    runif(1) < 0.15
+  }else{
+    T
+  }
+})
+
+# filter out insertions based on the fixation parameter 
+insertions <- insertions[toInclude,]
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
 
 # RUN MCMC
-startvalue <- c(0.01, 0.55, 0.000001)
-chain <- runMCMC(startvalue, 2000000, 'loc-prior-2')
+startvalue <- c(0.01, 0.55, 0.000001, 0.3, 1)
+chain <- runMCMC(startvalue, 300000, 'v4-fix-param')
 
 
 # ----- For checking -----
