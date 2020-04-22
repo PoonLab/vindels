@@ -234,7 +234,7 @@ likelihood<- function(param, slip.list, llh.list){
   totals <- unlist(lapply(slip.list, sum))
   totals <- totals[totals != 0]
   est.non3 <- (sum(totals %% 3 == 0) / 0.276) - sum(totals %% 3 == 0)
-  fix <- sum(totals %% 3 != 0) / est.non3 
+  est.fix <- sum(totals %% 3 != 0) / est.non3 
   
   llh.fix <- dnorm(est.fix, mean=param[4], sd=0.05)
   
@@ -321,7 +321,7 @@ proposalFunction <- function(param, slip_current, llh_current){
 
 # MODIFIED TO CONTINUE RUN 
 
-runMCMC <- function(startvalue, iterations, runno){
+runMCMC <- function(startvalue, iterations, runno, name){
   # timing
   start.time <- proc.time()
   
@@ -334,9 +334,9 @@ runMCMC <- function(startvalue, iterations, runno){
   llh_current <- seqllh(startvalue[3], slip.list)
   
   # keep a logfile up to date
-  logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/slip-model-", 
-                         runno,#substr(gsub("[\\ :-]","",Sys.time()), 9, 12),
-                         ".csv"), "w")
+  logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/slip-", 
+                         as.character(runno),#substr(gsub("[\\ :-]","",Sys.time()), 9, 12),
+                         name,".csv"), "w")
   write("p(Enter), p(Stay), Rate, Fixation, Slip-changed, Accept, Time", file=logfile)
   
   for (i in 1:iterations){
@@ -383,9 +383,14 @@ runMCMC <- function(startvalue, iterations, runno){
       print(paste(c("STATE",i,":", chain[i,]), collapse=" "))
       write(paste(c(chain[i,], as.numeric(s.change), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
     }
-    if (i %% 100000 == 0){
+    if (i %% 50000 == 0){
       slip_current <<- slip_current
       llh_current <<- llh_current
+      slip <- unlist(lapply(slip_current, function(x){
+        paste(x, collapse="")
+      }))
+      writeLines(slip, con=paste0("~/PycharmProjects/hiv-withinhost/15_modeling/list-",as.character(runno),'.csv'))
+      writeLines(llh_current, con=paste0("~/PycharmProjects/hiv-withinhost/15_modeling/llh-",as.character(runno),'.csv'))
     }
   }
   return(list(chain=chain, slip=slip_current))

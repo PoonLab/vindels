@@ -113,12 +113,15 @@ simPair <- function(p.enter, p.stay, rate){
 # vec <- c()
 # for (i in 1:50){
 # SIMULATE TIP + ANCESTOR SEQUENCES
-all.seqs <- sapply(1:5000, function(n){
+all.seqs <- sapply(1:25000, function(n){
   #print(n)
-  pair <- simPair(0.01, 0.75, 0.00001)
+  pair <- simPair(0.00016, 0.75, 0.00001)
   # VALUE 1 = Tip, VALUE 2 = Ancestor, VALUE 3 = Branch length
   return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
+
+
+
 insertions <- as.data.frame(t(all.seqs), stringsAsFactors = F)
 colnames(insertions) <- c("tip", "anc", "branch")
 
@@ -159,26 +162,41 @@ toInclude <- sapply(insertions$len, function(len){
 
 # filter out insertions based on the fixation parameter
 new.ins <- insertions[toInclude,]
-#setup(new.ins$tip, new.ins$anc, new.ins$len, new.ins$pos, new.ins$branch, T)
+rm(insertions)
+setup(new.ins$tip, new.ins$anc, new.ins$len, new.ins$pos, new.ins$branch, F)
 
 # ----- algorithm testing ---
 
-all.len <- insertions[!is.na(insertions$len), 'len']
-filt.len <- new.ins[!is.na(new.ins$len), 'len']
-#sum(all.len %% 3 == 0)
-#sum(all.len %% 3 != 0)
-x <- sum(filt.len %% 3 == 0)
-vec[i] <- sum(filt.len %% 3 != 0) / ((x / 0.276) - x)
+# all.len <- insertions[!is.na(insertions$len), 'len']
+# filt.len <- new.ins[!is.na(new.ins$len), 'len']
+# sum(all.len %% 3 == 0)
+# sum(all.len %% 3 != 0)
+# x <- sum(filt.len %% 3 == 0)
+# vec[i] <- sum(filt.len %% 3 != 0) / ((x / 0.276) - x)
 #}
 
 
 # RUN MCMC
 startvalue <- c(0.01, 0.55, 0.000001, 0.3)
-chain <- runMCMC(startvalue, 300000, 'v4-1')
+chain <- runMCMC(startvalue, 200000, '10', 'fix3')
 
+# --- print out the whole slip list  ----
+indels$slip <- lapply(lapply(slip_current, function(x){
+  getSlipLocations(x)[[1]]}), function(slip){
+    if(is.null(slip)){
+      NA
+    }else{
+      paste(slip, collapse=',')
+    }
+})
+
+input <- readLines("~/PycharmProjects/hiv-withinhost/15_modeling/list-10.csv")
+input <- unname(sapply(input, function(x){
+  unname(sapply(strsplit(x, "")[[1]], as.numeric))
+}))
 
 # ----- For checking -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-simple-indel-shuffled.csv", stringsAsFactors = F, skip=1, header=F)
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-v4-1.csv", stringsAsFactors = F, skip=1, header=F)
 colnames(csv) <- c('p.enter', 'p.stay', "rate" ,'slip.changed', 'accept', 'time')
 
 # -----IDEA TO IMPLEMENT ------
