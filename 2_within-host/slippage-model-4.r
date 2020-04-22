@@ -273,8 +273,7 @@ posterior <- function(param, slip, llh){
 }
 
 proposalFunction <- function(param, slip_current, llh_current){
-  rate <- param[3]
-  
+
   num <- runif(1)
   s2p <- 0.95
   
@@ -289,7 +288,7 @@ proposalFunction <- function(param, slip_current, llh_current){
       llh_proposed <- llh_current   # stays the same
     }else if(num > 5/10 && num < 8/10){
       param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.02)
-      llh_proposed <- seqllh(rate, slip_current)  # recalcuate using the new rate
+      llh_proposed <- seqllh(param[3], slip_current)  # recalcuate using the new rate
     }else if(num > 8/10 && num < 9/10){
       param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.05)
       llh_proposed <- llh_current
@@ -310,7 +309,7 @@ proposalFunction <- function(param, slip_current, llh_current){
     # recalculate SINGLE pairwise llh at position = changed
     llh_proposed <- llh_current
     new.tip <- getTip(indels$tip[changed], slip_proposed[[changed]])
-    llh_proposed[changed] <- pairllh(anc.seqs[changed], new.tip, rate, branches[changed])
+    llh_proposed[changed] <- pairllh(anc.seqs[changed], new.tip, param[3], branches[changed])
   }
   return(list(param=param, slip=slip_proposed, llh=llh_proposed))
 }
