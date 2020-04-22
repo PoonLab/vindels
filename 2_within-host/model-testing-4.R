@@ -6,7 +6,7 @@
 # ------------------
 # SIMULATE DNA SEQUENCES 
 source('~/vindels/2_within-host/utils.r')
-source("~/vindels/2_within-host/slippage-model-4.r")
+source("~/vindels/2_within-host/slippage-model-4-1.r")
 # calculate the median lengths of the variable loops
 # ins.v <- split(insertions, insertions$Vloop)
 # lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
