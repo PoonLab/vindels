@@ -110,10 +110,12 @@ simPair <- function(p.enter, p.stay, rate){
   
 }
 
-# SIMULATE TIP + ANCESTOR SEQUENCES 
-all.seqs <- sapply(1:25000, function(n){
-  print(n)
-  pair <- simPair(0.00016, 0.75, 0.00001)
+# vec <- c()
+# for (i in 1:50){
+# SIMULATE TIP + ANCESTOR SEQUENCES
+all.seqs <- sapply(1:5000, function(n){
+  #print(n)
+  pair <- simPair(0.01, 0.75, 0.00001)
   # VALUE 1 = Tip, VALUE 2 = Ancestor, VALUE 3 = Branch length
   return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
@@ -134,14 +136,14 @@ data <- t(unname(sapply(insertions$anc, function(x){
 insertions$len <- data[,1]
 insertions$pos <- data[,2]
 
-vec <- c()
-for (i in 1:1000){
-  x <- round(rexp(1000, 0.1))
-  x <- x[x>0]
-  vec[i] <- sum(x%%3==0) / 1000
-}
-median(vec)   # this number is used to calibrate the MCMC 
-
+# vec <- c()
+# for (i in 1:1000){
+#   x <- round(rgeom(1000, 0.17))
+#   x <- x[x>0]
+#   vec[i] <- sum(x%%3==0) / 1000
+# }
+# median(vec)   # this number is used to calibrate the MCMC
+# rm(vec)
 
 # VERSION 4:
 # generate a vector of T/F values to remove non3 values from the data
@@ -149,19 +151,30 @@ toInclude <- sapply(insertions$len, function(len){
   if (is.na(len)){
     T
   }else if (len %% 3 != 0){
-    runif(1) < 0.15
+    runif(1) < 0.12
   }else{
     T
   }
 })
 
-# filter out insertions based on the fixation parameter 
-insertions <- insertions[toInclude,]
-setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
+# filter out insertions based on the fixation parameter
+new.ins <- insertions[toInclude,]
+#setup(new.ins$tip, new.ins$anc, new.ins$len, new.ins$pos, new.ins$branch, T)
+
+# ----- algorithm testing ---
+
+all.len <- insertions[!is.na(insertions$len), 'len']
+filt.len <- new.ins[!is.na(new.ins$len), 'len']
+#sum(all.len %% 3 == 0)
+#sum(all.len %% 3 != 0)
+x <- sum(filt.len %% 3 == 0)
+vec[i] <- sum(filt.len %% 3 != 0) / ((x / 0.276) - x)
+#}
+
 
 # RUN MCMC
-startvalue <- c(0.01, 0.55, 0.000001, 0.3, 1)
-chain <- runMCMC(startvalue, 300000, 'v4-fix-param-2')
+startvalue <- c(0.01, 0.55, 0.000001, 0.3)
+chain <- runMCMC(startvalue, 300000, 'v4-1')
 
 
 # ----- For checking -----

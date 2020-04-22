@@ -31,7 +31,7 @@ plot(csv[thinned,2], type = "l", xlab="MCMC Steps" , ylab="Prob(Stay)",main = "C
 abline(h = med2, col="red")
 
 # ----- SLIPPAGE MODEL -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-v4-fix-param.csv", stringsAsFactors = F)#, skip=1, header=F)
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-v4-fix-param-2.csv", stringsAsFactors = F)#, skip=1, header=F)
 
 # csv <- as.data.frame(sapply(1:ncol(csv), function(x){
 #   sapply(1:nrow(csv), function(y){
