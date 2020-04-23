@@ -180,6 +180,9 @@ setup(new.ins$tip, new.ins$anc, new.ins$len, new.ins$pos, new.ins$branch, F)
 startvalue <- c(0.01, 0.55, 0.000001, 0.3)
 chain <- runMCMC(startvalue, 200000, '10', 'fix3')
 
+
+# fix3 : (0.00016, 0.75, 0.00001)
+
 # --- print out the whole slip list  ----
 indels$slip <- lapply(lapply(slip_current, function(x){
   getSlipLocations(x)[[1]]}), function(slip){
