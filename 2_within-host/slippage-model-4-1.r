@@ -390,7 +390,7 @@ runMCMC <- function(startvalue, iterations, runno, name){
         paste(x, collapse="")
       }))
       writeLines(slip, con=paste0("~/PycharmProjects/hiv-withinhost/15_modeling/list-",as.character(runno),'.csv'))
-      writeLines(llh_current, con=paste0("~/PycharmProjects/hiv-withinhost/15_modeling/llh-",as.character(runno),'.csv'))
+      writeLines(as.character(llh_current), con=paste0("~/PycharmProjects/hiv-withinhost/15_modeling/llh-",as.character(runno),'.csv'))
     }
   }
   return(list(chain=chain, slip=slip_current))
