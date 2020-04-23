@@ -163,7 +163,7 @@ toInclude <- sapply(insertions$len, function(len){
 # filter out insertions based on the fixation parameter
 new.ins <- insertions[toInclude,]
 rm(insertions)
-setup(new.ins$tip, new.ins$anc, new.ins$len, new.ins$pos, new.ins$branch, F)
+setup(new.ins$tip, new.ins$anc, new.ins$len, new.ins$pos, new.ins$branch, T)
 
 # ----- algorithm testing ---
 
@@ -185,20 +185,20 @@ chain <- runMCMC(startvalue, 200000, '10', 'fix3')
 # loc-prior : (0.001, 0.70, 0.0001)
 # loc-prior2 : (0.00016, 0.75, 0.00001)
 
-# --- print out the whole slip list  ----
-indels$slip <- lapply(lapply(slip_current, function(x){
-  getSlipLocations(x)[[1]]}), function(slip){
-    if(is.null(slip)){
-      NA
-    }else{
-      paste(slip, collapse=',')
-    }
-})
-
-input <- readLines("~/PycharmProjects/hiv-withinhost/15_modeling/list-10.csv")
-input <- unname(sapply(input, function(x){
-  unname(sapply(strsplit(x, "")[[1]], as.numeric))
-}))
+# # --- print out the whole slip list  ----
+# indels$slip <- lapply(lapply(slip_current, function(x){
+#   getSlipLocations(x)[[1]]}), function(slip){
+#     if(is.null(slip)){
+#       NA
+#     }else{
+#       paste(slip, collapse=',')
+#     }
+# })
+# 
+# input <- readLines("~/PycharmProjects/hiv-withinhost/15_modeling/list-10.csv")
+# input <- unname(sapply(input, function(x){
+#   unname(sapply(strsplit(x, "")[[1]], as.numeric))
+# }))
 
 # ----- For checking -----
 csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-v4-1.csv", stringsAsFactors = F, skip=1, header=F)

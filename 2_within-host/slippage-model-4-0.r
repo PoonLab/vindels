@@ -230,14 +230,6 @@ likelihood<- function(param, slip.list, llh.list){
   p.enter <- param[1]
   p.stay  <- param[2]
   
-  # this calculates the observed probability of seeing non3 indels 
-  totals <- unlist(lapply(slip.list, sum))
-  totals <- totals[totals != 0]
-  est.non3 <- (sum(totals %% 3 == 0) / 0.276) - sum(totals %% 3 == 0)
-  est.fix <- sum(totals %% 3 != 0) / est.non3 
-  
-  llh.fix <- dnorm(est.fix, mean=param[4], sd=0.05)
-  
   # affine gap likelihood
   # utilizes both p.enter + p.stay
   slips <- unname(unlist(slip.list))
@@ -250,20 +242,20 @@ likelihood<- function(param, slip.list, llh.list){
   }else{
     slipllh <-  x*log(1-p.enter) + y*log(p.enter) + y*log(1-p.stay) + z*log(p.stay)
   }
-  slipllh + sum(llh.list) + llh.fix
+  slipllh + sum(llh.list)
 }
 
 prior <- function(param){
   prior.pe <- dunif(param[1], min=1e-6, max=1e-2, log=T) 
   prior.ps <- dunif(param[2], min=0.4, max=0.9, log=T) 
   prior.rate <- dunif(param[3], min=1e-7, max=1e-3, log=T)
-  prior.fix <- dbeta(param[4], shape1=4, shape2=16, log=T)
+  #prior.fix <- dbeta(param[4], shape1=4, shape2=16, log=T)
   #prior.fixsd <- dexp(param[5], rate=1, log=T)
   #prior.pe <- dlnorm(p.enter,meanlog=log(0.00015),sdlog=1.2, log=T)
   #prior.ps <- dlnorm(p.stay,meanlog=log(0.75),sdlog=0.1,log=T)
   #prior.rate <- dlnorm(rate,meanlog=log(0.00001), sdlog=1.5,log=T)
   
-  return(prior.pe + prior.ps + prior.rate + prior.fix) # + prior.fixsd)
+  return(prior.pe + prior.ps + prior.rate )# + prior.fix) # + prior.fixsd)
 }
 
 posterior <- function(param, slip, llh){
@@ -288,10 +280,10 @@ proposalFunction <- function(param, slip_current, llh_current){
       param[1] <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
       llh_proposed <- llh_current   # stays the same
     }else if(num > 2/10 && num < 5/10){
-      param[2] <- rlnorm(1,meanlog=log(param[2]),sdlog=0.04)
+      param[2] <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
       llh_proposed <- llh_current   # stays the same
     }else if(num > 5/10 && num < 8/10){
-      param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.02)
+      param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.05)
       llh_proposed <- seqllh(param[3], slip_current)  # recalcuate using the new rate
     # }else if(num > 8/10 && num < 9/10){
     #   param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.05)
