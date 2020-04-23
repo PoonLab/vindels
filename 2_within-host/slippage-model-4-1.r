@@ -288,10 +288,10 @@ proposalFunction <- function(param, slip_current, llh_current){
       param[1] <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
       llh_proposed <- llh_current   # stays the same
     }else if(num > 2/10 && num < 5/10){
-      param[2] <- rlnorm(1,meanlog=log(param[2]),sdlog=0.04)
+      param[2] <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
       llh_proposed <- llh_current   # stays the same
     }else if(num > 5/10 && num < 8/10){
-      param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.02)
+      param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.05)
       llh_proposed <- seqllh(param[3], slip_current)  # recalcuate using the new rate
     # }else if(num > 8/10 && num < 9/10){
     #   param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.05)
