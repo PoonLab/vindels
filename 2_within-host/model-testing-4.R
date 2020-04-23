@@ -180,8 +180,9 @@ setup(new.ins$tip, new.ins$anc, new.ins$len, new.ins$pos, new.ins$branch, F)
 startvalue <- c(0.01, 0.55, 0.000001, 0.3)
 chain <- runMCMC(startvalue, 200000, '10', 'fix3')
 
-
-# fix3 : (0.00016, 0.75, 0.00001)
+# fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
+# fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE
+# loc-prior : (0.001, 0.70, 0.0001)
 # loc-prior2 : (0.00016, 0.75, 0.00001)
 
 # --- print out the whole slip list  ----
