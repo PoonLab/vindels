@@ -1,5 +1,5 @@
 # ----- SLIPPAGE MODEL -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-loc-prior-2.csv", stringsAsFactors = F)#, skip=1, header=F)
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-9-fix2.csv", stringsAsFactors = F)#, skip=1, header=F)
 
 # csv <- as.data.frame(sapply(1:ncol(csv), function(x){
 #   sapply(1:nrow(csv), function(y){
@@ -7,22 +7,22 @@ csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-loc-prior-2.csv", s
 #   })
 # }))
 burnin <- ceiling(0.1*nrow(csv))
-tru <- c(0.00016, 0.75, 0.00001)
+tru <- c(0.00001, 0.75, 0.00001)
 #colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'fix','fix-sd', 'slip.changed', 'accept', 'time')
 # colnames(csv) <- c('p.enter', 'slope','int', 'rate', 'slip.changed', 'accept', 'time')
 #png(file="~/vindels/Figures/within-host/finalized/slippage-trace2.png", width=600, height=800)
 par(mar=c(2.5,5,3,1), mfrow=c(3,1))
-plot(csv[#-(1:burnin)
+plot(csv[-(1:burnin)
          ,1], type = "l", xlab="MCMC Steps (x10)" , ylab="Prob(Enter)",
-     main = "Chain values of Enter", cex.axis=1.3, cex.lab=1.4, cex.main=1.7, ylim=c(0.00015, 0.00025))
+     main = "Chain values of Enter", cex.axis=1.3, cex.lab=1.4, cex.main=1.7)#, ylim=c(0.00015, 0.00025))
 abline(h=tru[1],col='red',lwd=2)
-plot(csv[#-(1:burnin)
+plot(csv[-(1:burnin)
          ,2], type = "l", xlab="MCMC Steps (x10)" , ylab="P(Stay)",
-     main = "Chain values of Stay",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7, ylim=c(0.62, 0.77))
+     main = "Chain values of Stay",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)#, ylim=c(0.62, 0.77))
 abline(h=tru[2],col='red',lwd=2)
-plot(csv[#-(1:burnin)
+plot(csv[-(1:burnin)
          ,3], type = "l", xlab="MCMC Steps (x10)" , ylab="Rate",
-     main = "Chain values of Rate",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7, ylim=c(0.00001,0.000025))
+     main = "Chain values of Rate",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)#, ylim=c(0.00001,0.000025))
 abline(h=tru[3],col='red',lwd=2)
 plot(csv[-(1:burnin)
          ,'fix'], type = "l", xlab="MCMC Steps (x10)" , ylab="Fix",

@@ -182,6 +182,7 @@ chain <- runMCMC(startvalue, 200000, '10', 'fix3')
 
 
 # fix3 : (0.00016, 0.75, 0.00001)
+# loc-prior2 : (0.00016, 0.75, 0.00001)
 
 # --- print out the whole slip list  ----
 indels$slip <- lapply(lapply(slip_current, function(x){
