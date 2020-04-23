@@ -276,21 +276,18 @@ proposalFunction <- function(param, slip_current, llh_current){
   # CHANGE PARAMETERS 
   if (num > s2p){
     num <- (num - s2p) / (1-s2p)
-    if (num < 1/5){
+    if (num < 3/10){
       param[1] <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
       llh_proposed <- llh_current   # stays the same
-    }else if(num > 2/10 && num < 5/10){
+    }else if(num > 3/10 && num < 6/10){
       param[2] <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
       llh_proposed <- llh_current   # stays the same
-    }else if(num > 5/10 && num < 8/10){
+    }else{
       param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.05)
       llh_proposed <- seqllh(param[3], slip_current)  # recalcuate using the new rate
     # }else if(num > 8/10 && num < 9/10){
     #   param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.05)
     #   llh_proposed <- llh_current
-    }else{
-      param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.05)
-      llh_proposed <- llh_current
     }
     slip_proposed <- slip_current    # stays the same
   
@@ -313,12 +310,12 @@ proposalFunction <- function(param, slip_current, llh_current){
 
 # MODIFIED TO CONTINUE RUN 
 
-runMCMC <- function(startvalue, iterations, runno, name){
+runMCMC <- function(startvalue, iterations, runno, notes){
   # timing
   start.time <- proc.time()
   
   # initialize the chain
-  chain <- array(dim = c(iterations+1,4))
+  chain <- array(dim = c(iterations+1,3))
   chain[1,] <- startvalue
   
   # start the slip list and the llh list
@@ -326,10 +323,13 @@ runMCMC <- function(startvalue, iterations, runno, name){
   llh_current <- seqllh(startvalue[3], slip.list)
   
   # keep a logfile up to date
-  logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/slip-", 
+  logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/15_modeling/slip-", 
                          as.character(runno),#substr(gsub("[\\ :-]","",Sys.time()), 9, 12),
-                         "-",name,".csv"), "w")
-  write("p(Enter), p(Stay), Rate, Fixation, Likelihood, Slip-changed, Accept, Time", file=logfile)
+                         ".csv"), "w")
+  notes <- gsub("^", "#",notes)
+  notes <- gsub("\n", "\n#", notes)
+  write(notes, file=logfile)
+  write("p(Enter), p(Stay), Rate, Likelihood, Slip-changed, Accept, Time", file=logfile, append=T)
   
   for (i in 1:iterations){
     # calculate posterior of current position

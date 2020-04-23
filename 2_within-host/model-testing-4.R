@@ -6,7 +6,7 @@
 # ------------------
 # SIMULATE DNA SEQUENCES 
 source('~/vindels/2_within-host/utils.r')
-source("~/vindels/2_within-host/slippage-model-4-1.r")
+source("~/vindels/2_within-host/slippage-model-4-0.r")
 # calculate the median lengths of the variable loops
 # ins.v <- split(insertions, insertions$Vloop)
 # lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
@@ -162,8 +162,8 @@ toInclude <- sapply(insertions$len, function(len){
 
 # filter out insertions based on the fixation parameter
 new.ins <- insertions[toInclude,]
-rm(insertions)
-setup(new.ins$tip, new.ins$anc, new.ins$len, new.ins$pos, new.ins$branch, T)
+#rm(insertions)
+setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
 
 # ----- algorithm testing ---
 
@@ -177,8 +177,14 @@ setup(new.ins$tip, new.ins$anc, new.ins$len, new.ins$pos, new.ins$branch, T)
 
 
 # RUN MCMC
-startvalue <- c(0.01, 0.55, 0.000001, 0.3)
-chain <- runMCMC(startvalue, 200000, '10', 'fix3')
+startvalue <- c(0.01, 0.55, 0.000001)
+notes <- "this removes the fixation parameter to compare to run 10
+truevalues:(0.00016, 0.75, 0.00001)
+startvalues:(0.01, 0.55, 0.000001)
+priors: all uninformative, uniform, broad
+shuffle: on
+"
+chain <- runMCMC(startvalue, 200000, '11-nofix', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE
