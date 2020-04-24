@@ -271,7 +271,7 @@ dplot
 
 
 
-# COMPARISON OF DELETION RATES INTERIOR VS TIP 
+# --------INDEL TIMINGS -------
 
 # ---- INSERTIONS ----
 ibins <- lapply(ipatlist, function(df){

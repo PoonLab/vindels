@@ -487,24 +487,6 @@ delrates <- data.frame(vloop=vloops,
                        #upper=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
 
 
-
-
-
-
-
-
-# MIDPOINTS
-# Used for looking at RTT midpoints (time when indels occur)
-insrates <- data.frame(vloop=vloops,
-                       rate=unname(unlist(lapply(irtt, median))), 
-                       lower=unname(unlist(lapply(irtt,function(x){quantile(x, c(0.25,0.75))[1]}))), 
-                       upper=unname(unlist(lapply(irtt,function(x){quantile(x, c(0.25,0.75))[2]}))))
-delrates <- data.frame(vloop=vloops,
-                       rate=unname(unlist(lapply(drtt, median))), 
-                       lower=unname(unlist(lapply(drtt,function(x){quantile(x, c(0.25,0.75))[1]}))), 
-                       upper=unname(unlist(lapply(drtt,function(x){quantile(x, c(0.25,0.75))[2]}))))
-
-
 print(insrates)
 print(delrates)
 #indels <- cbind(insrates, delrates[,c(2,3)])
