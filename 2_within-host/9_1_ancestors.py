@@ -282,7 +282,7 @@ opath = sys.argv[3]
 
 if not os.path.isdir(opath+"ins"):
     os.mkdir(opath+'ins')
-if not os.path.isdir (opath+"del"):
+if not os.path.isdir(opath+"del"):
     os.mkdir(opath+'del')
 
 for f in folder:
