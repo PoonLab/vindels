@@ -178,13 +178,13 @@ def extractIndels(tip, anc, accno, vregion):
                         dTemp = ''
     newvar = ['','','','','']
     newanc = ['','','','','']
-    #for n in range(5):
-    #    for a,b in zip(vseqs[n], aseqs[n]):
-    #        if a != "-" or b != "-":
-    #            newvar[n] += a
-    #            newanc[n] += b
-    vSeq[accno] = vseqs 
-    aSeq[accno] = aseqs
+    for n in range(5):
+        for a,b in zip(vseqs[n], aseqs[n]):
+            if a != "-" or b != "-":
+                newvar[n] += a
+                newanc[n] += b
+    vSeq[accno] = newvar 
+    aSeq[accno] = newanc
     #print(vLen)
         
     #SANITY CHECK 
@@ -207,8 +207,8 @@ def extractIndels(tip, anc, accno, vregion):
             #print(extract_anc)
             #print(csvSeq)'''
 
-    #return ({accno: insertions},{accno:deletions})
-    return (vSeq, aSeq)
+    return ({accno: insertions},{accno:deletions})
+    
 def addList(total, toAdd):
     for i in len(total):
         total[i].append(toAdd[i])
@@ -331,20 +331,20 @@ for f in folder:
     #print(result[0])
     
 
-    vseqs = ['','','','','']
-    for n, char in enumerate(rootseq):
-        if vregion[n] != -1:
-            vseqs[vregion[n]] += char
+    #vseqs = ['','','','','']
+    #for n, char in enumerate(rootseq):
+    #    if vregion[n] != -1:
+    #        vseqs[vregion[n]] += char
     #print({root:vseqs})
-    result[0].update({root:vseqs})
+    #result[0].update({root:vseqs})
 
-    tsvout = filename.split("_recon")[0] + ".fasta"   #.tsv
+    tsvout = filename.split("_recon")[0] + ".tsv"   #.tsv
     ioutput = open(opath+'ins/'+tsvout, 'w+')
     doutput = open(opath+'del/'+tsvout,'w+') 
-    # header = "header\tV1\tV2\tV3\tV4\tV5\n"
+    header = "header\tV1\tV2\tV3\tV4\tV5\n"
     ioutput.write(header)
     doutput.write(header)
-    fastaout = open(opath+tsvout,"w+")
+    #fastaout = open(opath+tsvout,"w+")
     #sys.exit()
     for n, node in enumerate(result[0]):
         #print(node)
@@ -363,7 +363,7 @@ for f in folder:
         doutput.write(node+"\t"+"\t".join(data)+"\n")
     ioutput.close()
     doutput.close()
-
+    
     #tips = [ x for x in data.keys() if re.search('^[^\(\):\n]+$',x) != None]
 
         

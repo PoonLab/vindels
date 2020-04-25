@@ -3,8 +3,8 @@ source("~/vindels/2_within-host/utils.r")
 # INSERTION PARSING ----------
 path <- "~/Lio/"
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/rep/wholetree/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/rep/wholetree/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/del/*.tsv"))
 
 require(stringr)
 require(phangorn)
@@ -58,7 +58,7 @@ for (file in 1:length(ifolder)){
   }
   
   # reads in the tree
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename,".tree.sample")))
+  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim200/",filename,".tree.sample")))
   lens <- node.depth.edgelength(tre)    # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
 
   # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
