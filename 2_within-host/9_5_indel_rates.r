@@ -195,7 +195,6 @@ for (file in 1:length(ifolder)){
   # }else{
   #   dTotal[[runno]] <- dCSV
   # }
-  
 }
 # checks for which patient did not fully complete all 200 replicates
 table(unname(sapply(names(csv.ins), function(x)strsplit(x, "-")[[1]][1])))

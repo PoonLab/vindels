@@ -40,8 +40,8 @@ for (i in 1:5){
 for (file in 1:length(ifolder)){
   print(file)
   filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
-  pat <- gsub("_\\d+$","",filename)
-  runno <- strsplit(filename, "_")[[1]][2]
+  full.id <- gsub("_\\d+$","",filename)
+
   count <- count + 1
   iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep='\t')
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep='\t')
@@ -59,8 +59,8 @@ for (file in 1:length(ifolder)){
   
   # reads in the tree
   tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim200/",filename,".tree.sample")))
-  lens <- node.depth.edgelength(tre)    # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
-
+      # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
+  
   # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
   #lens <- lens[-(Ntip(tre)+1)]
   res <- unname(sapply(iCSV$header, function(x){
@@ -84,15 +84,16 @@ for (file in 1:length(ifolder)){
     if (length(index)!=1){
       return(paste0("PROBLEM:",as.character(index)))
     }
-    return(c(lens[index], index))
+    return(c(index))
   }))
   
-  res <- as.data.frame(t(res))
   
-  iCSV$length <- res[,1]
-  dCSV$length <- res[,1]
   
-  iCSV$rtt.mid <- (res[,1] + lens[tre$edge[match(res[,2], tre$edge[,2]),1]]) / 2
+  iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
+  dCSV$length <- iCSV$length
+  
+  lens <- node.depth.edgelength(tre)
+  iCSV$rtt.mid <- (lens[res] + lens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
   dCSV$rtt.mid <- iCSV$rtt.mid
   
   icounts <- rowSums(iCSV[,2:6])
@@ -105,8 +106,10 @@ for (file in 1:length(ifolder)){
     next
   }
   
-  idates <- rep(iCSV$length, icounts)
-  ddates <- rep(dCSV$length, dcounts)
+  # ----- INDEL TIMINGS ---
+  
+  idates <- rep(iCSV$rtt.mid, icounts)
+  ddates <- rep(dCSV$rtt.mid, dcounts)
   
   if (is.na(max(idates))){
     print(idates)
@@ -114,64 +117,60 @@ for (file in 1:length(ifolder)){
   if (is.na(max(ddates))){
     print(ddates)
   }
-  # Regular patient-based data frame
-  ipatlist[[pat]] <- rbind(ipatlist[[pat]], iCSV[,2:8])
-  dpatlist[[pat]] <- rbind(dpatlist[[pat]], dCSV[,2:8])
+
+  imid[[full.id]] <- idates
+  dmid[[full.id]] <- ddates
   
-  # Patient-based data frame split by interior vs tip
-  # iint[[pat]] <- rbind(iint[[pat]], iCSV[which(!grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7])
-  # itip[[pat]] <- rbind(itip[[pat]], iCSV[which(grepl("^[^\\(\\):\n]+$", iCSV$header)),2:7])
-  # dint[[pat]] <- rbind(dint[[pat]], dCSV[which(!grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7])
-  # dtip[[pat]] <- rbind(dtip[[pat]], dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:7])
-  
-  # Cumulative data frame split by interior vs tip
-  iint[[file]] <- iCSV[which(!grepl("^[^\\(\\):\n]+$", iCSV$header)),2:8]
-  itip[[file]]  <- iCSV[which(grepl("^[^\\(\\):\n]+$", iCSV$header)),2:8]
-  dint[[file]]  <- dCSV[which(!grepl("^[^\\(\\):\n]+$", dCSV$header)),2:8]
-  dtip[[file]]  <- dCSV[which(grepl("^[^\\(\\):\n]+$", dCSV$header)),2:8]
-  #iprop <- idates / max(iCSV$length)
-  #dprop <- ddates / max(dCSV$length)
-  ires <- sapply(2:6, function(x){
-    lens <- rep(iCSV$rtt.mid, iCSV[,x])
-    if (length(lens) > 0 ){
-      return(lens)
-    }else{
-      return(c())
-    }
-  })
-  dres <- sapply(2:6, function(x){
-    lens <- rep(dCSV$rtt.mid, dCSV[,x])
-    if (length(lens) > 0 ){
-      return(lens)
-    }else{
-      return(c())
-    }
-  })
-  for (n in 1:5){
-    imid[[n]] <- c(imid[[n]], ires[[n]])
-    dmid[[n]] <- c(dmid[[n]], dres[[n]])
-  }
-  
+  # these remain 'lengths' and not 'rtt.mid's because I need to use the full tree length as the maximum cutoff
   imaxes[count] <- max(iCSV$length,na.rm=T)
   dmaxes[count] <- max(dCSV$length,na.rm=T)
   
   # load the all.ins and all.del vectors (more efficient algorithm)
-  all.ins[iseqcount:(iseqcount+sum(icounts)-1)] <- idates
-  all.del[dseqcount:(dseqcount+sum(dcounts)-1)] <- ddates
+  #all.ins[iseqcount:(iseqcount+sum(icounts)-1)] <- idates
+  #all.del[dseqcount:(dseqcount+sum(dcounts)-1)] <- ddates
   # used to maintain the vector loading algorithm above 
-  iseqcount <- iseqcount + sum(icounts)
-  dseqcount <- dseqcount + sum(dcounts)
+  #iseqcount <- iseqcount + sum(icounts)
+  #dseqcount <- dseqcount + sum(dcounts)
+  
+  # ----- TIP + INTERIOR INDEL COUNTS ---
+  # Cumulative data frame split by interior vs tip
+  id <- gsub("[ab]_","",full.id)   # 16362-100
+  
+  tips <-  which(grepl("^[^\\(\\):\n]+$", iCSV$header))
+  nodes <- which(!grepl("^[^\\(\\):\n]+$", iCSV$header))
+  if (is.null(iint[[id]])){
+    iint[[id]] <- iCSV[nodes,2:8]
+    itip[[id]]  <- iCSV[tips,2:8]
+    dint[[id]]  <- dCSV[nodes,2:8]
+    dtip[[id]]  <- dCSV[tips,2:8]
+  }else{
+    iint[[id]] <- rbind(iint[[id]], iCSV[nodes,2:8])
+    itip[[id]]  <- rbind(itip[[id]], iCSV[tips,2:8])
+    dint[[id]]  <- rbind(dint[[id]] , dCSV[nodes,2:8])
+    dtip[[id]]  <- rbind(dtip[[id]], dCSV[tips,2:8])
+  }
   
   itotal <- itotal + nrow(iCSV)
   dtotal <- dtotal + nrow(dCSV)
   
 }
+# determine which patients did not complete fully 
+pat.idx <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
+table(pat.idx)
+toRemove <- which(pat.idx == "F" | pat.idx == "H" | pat.idx == "QJ" | pat.idx == "56552")
+
+iint <- iint[-toRemove]
+itip <- itip[-toRemove]
+dint <- dint[-toRemove]
+dtip <- dtip[-toRemove]
+
 
 require(data.table)
 iint <- as.data.frame(rbindlist(iint))
 itip <- as.data.frame(rbindlist(itip))
 dint <- as.data.frame(rbindlist(dint))
 dtip <- as.data.frame(rbindlist(dtip))
+
 
 
 # ---- RIDGES PLOT FOR INDEL TIMINGS --------
@@ -211,38 +210,135 @@ axis(1, labels=T,at=seq(0, 7000, 1000), line=3)
 vlengths <- c(72,126,105,87,33)
 
 # COMPARISON OF INSERTION RATES INTERIOR VS TIP
-int.df <- iint
-tip.df <- itip
-# int.out <- data.frame()
-# tip.out <- data.frame()
-# for (run in 1:20){
-#   int.df <- iint[[run]]
-#   tip.df <- itip[[run]]
-#   
-irates2 <- c()
-trates2 <- c()
-for (i in 1:5){
-  tip.fit <- glm(tip.df[,i] ~ 1, offset=log(tip.df[,"length"]), family="poisson")
-  int.fit <- glm(int.df[,i] ~ 1, offset=log(int.df[,"length"]), family="poisson")
-  
-  print(summary(tip.fit))
-  print(summary(int.fit))
-  
-  tip.rate <- exp(coef(tip.fit)[[1]])*365/vlengths[i]
-  int.rate <- exp(coef(int.fit)[[1]])*365/vlengths[i]
-  
-  irates2[i] <- int.rate
-  trates2[i] <- tip.rate
-  
-}
-#   irates <- irates*10^3
-#   trates <- trates*10^3
-#   
-#   int.out <- rbind(int.out, data.frame(V1=irates[1],V2=irates[2],V3=irates[3],V4=irates[4],V5=irates[5]))
-#   tip.out <- rbind(tip.out, data.frame(V1=trates[1],V2=trates[2],V3=trates[3],V4=trates[4],V5=trates[5]))
-# }
 
-  comb1 <- data.frame(rate=irates, vloop=c("V1","V2","V3","V4","V5"), id=rep("Interior",5))
+all.rates <- list('1'=list(),'2'=list(),'3'=list(),'4'=list())
+
+
+for (i in 1:length(iint)){
+  print(i)
+  rate.list <- list('1'=c(),'2'=c(),'3'=c(),'4'=c())
+  
+  data.list <- list(ins.tip = itip[[i]], 
+                    ins.node = iint[[i]], 
+                    del.tip = dtip[[i]],
+                    del.node = dint[[i]])
+  for (j in 1:5){
+
+    fit.list <- lapply(data.list, function(list){
+      tryCatch(
+        {
+          glm(list[,j] ~ 1, offset=log(list[,"length"]), family="poisson")
+        },
+        error=function(cond) {
+          return(NA)
+        })
+    })
+    # in.fit <- glm(ins.node[,i] ~ 1, offset=log(ins.node[,"length"]), family="poisson")
+    # dt.fit <- glm(del.tip[,i] ~ 1, offset=log(del.tip[,"length"]), family="poisson")
+    # dn.fit <- glm(del.node[,i] ~ 1, offset=log(del.node[,"length"]), family="poisson")
+    
+    rates <- unname(sapply(fit.list, function(x){
+      if (all(is.na(x))){
+        return(NA)
+      }
+      rate <- exp(coef(x)[[1]])*365/vlengths[j]
+      if (rate > 10^-8){
+        rate
+      }else{
+        NA
+      }
+    }))
+    
+    for (x in 1:4){
+      rate.list[[x]][j] <- rates[x]
+    }
+
+    
+    # in.rates[j] <- exp(coef(in.fit)[[1]])*365/vlengths[i]
+    # dt.rates[j] <- exp(coef(dt.fit)[[1]])*365/vlengths[i]
+    # dn.rates[j] <- exp(coef(dn.fit)[[1]])*365/vlengths[i]
+    
+  }
+  rate.list <- lapply(rate.list, function(x){
+    x * 10^3
+  })
+  patid <- strsplit(names(iint)[i], "-")[[1]][1]
+  runno <- strsplit(names(iint)[i], "-")[[1]][2]
+  
+  for (y in 1:4){
+    all.rates[[y]][[i]] <- data.frame(pat=patid, 
+                                 runno=runno, 
+                                 V1=rate.list[[y]][1],
+                                 V2=rate.list[[y]][2],
+                                 V3=rate.list[[y]][3],
+                                 V4=rate.list[[y]][4],
+                                 V5=rate.list[[y]][5])
+  }
+}
+
+all.rates <- lapply(1:4, function(x){
+  df <- as.data.frame(rbindlist(all.rates[[x]]))
+  split(df, df[,"pat"])
+})
+
+
+vloop <- lapply(1:5, function(w){
+  lapply(1:4, function(x){
+    compact(lapply(all.rates[[x]], function(y){
+      nas <- sum(is.na(y[,w+2]))
+      if (nas > 100){
+        NULL
+      }else{
+        y[,w+2]
+      }
+    }))
+  })
+})
+
+vloop.mat <- lapply(1:5, function(w){
+  lapply(1:4, function(x){
+    data <- vloop[[w]][[x]]
+    if (length(data) == 0){
+      return(NA)
+    }else{
+      mat <- matrix(nrow=200, ncol=length(data))
+      
+      # load the matrix 
+      for (i in 1:ncol(mat)){
+        mat[,i] <- data[[i]]
+      }
+      toRemove <- c()
+      for (j in 1:ncol(mat)){
+        if (any(is.na(mat[,j]))){
+          toRemove <- c(toRemove, j)
+        }
+      }
+      if (length(toRemove) > 0){
+        mat[,-toRemove]
+      }else{
+        mat
+      }
+    }
+  })
+})
+
+# remove NAs from matrix
+
+
+V1 <- lapply(ins.final, function(x){if (median(x[,3] > 1e-2))x[,3]})
+V2 <- lapply(ins.final, function(x){if (median(x[,4] > 1e-2))x[,4]})
+V3 <- lapply(ins.final, function(x){if (median(x[,5] > 1e-2))x[,5]})
+V4 <- lapply(ins.final, function(x){if (median(x[,6] > 1e-2))x[,6]})
+V5 <- lapply(ins.final, function(x){if (median(x[,7] > 1e-2))x[,7]})
+
+require(plyr)
+V1 <- compact(V1)
+V2 <- compact(V2)
+V3 <- compact(V3)
+V4 <- compact(V4)
+V5 <- compact(V5)
+
+comb1 <- data.frame(rate=irates, vloop=c("V1","V2","V3","V4","V5"), id=rep("Interior",5))
   
 require(RColorBrewer)
 #pal <- c("gray28", "blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
