@@ -370,10 +370,7 @@ dplot
 # --------INDEL TIMINGS -------
 
 # ---- INSERTIONS ----
-ibins <- lapply(ipatlist, function(df){
-  counts <- rowSums(df[,1:5])
-  dates <- rep(df[,7], counts)
-  
+ibins <- lapply(imid, function(dates){
   res <- c()
   for (i in 1:15){
     res[i] <- sum(dates > (i-1)*500 & dates < i*500)
@@ -387,32 +384,14 @@ ifreq <- apply(ibin.df, 2, mean)
 
 imaxes <- imaxes[!is.na(imaxes)]
 # adjust the means for the number of patients
-adj.means <- mapply(function(bin, mean){
+iadj.means <- mapply(function(bin, mean){
   # this is a calculation of how many data sets are still active, decreasing as less data is available
   adj.factor <- (length(imaxes) - sum(imaxes <= (bin - 500))) / length(imaxes)
   print(adj.factor)
   mean / adj.factor
 }, as.numeric(colnames(ibin.df)), ifreq)
 
-cairo_pdf("~/vindels/Figures/within-host/finalized/ins-timings.pdf",height=8, width=12)
-par(xpd=NA, mar=c(7,6,4,1))
-barplot(adj.means, col="dodgerblue", space=0, xaxt = "n",
-        ylab="Average Insertion Count / Patient",
-        main="Insertion Timings",
-        cex.lab=1.4,
-        cex.axis=1.1,
-        cex.main=1.7,
-        las=1)
-        #ylim=c(0,20))
-axis(1, seq(0,15), labels=F, tick=T, line=0.5)
-text(0:15,rep(-0.7,16), labels=seq(0,7500,500), srt=25, cex=1.1)
-title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=5, cex.lab=1.4)
-dev.off()
-# ---- DELETIONS ----
-dbins <- lapply(dpatlist, function(df){
-  counts <- rowSums(df[,1:5])
-  dates <- rep(df[,7], counts)
-  
+dbins <- lapply(dmid, function(dates){
   res <- c()
   for (i in 1:15){
     res[i] <- sum(dates > (i-1)*500 & dates < i*500)
@@ -426,27 +405,44 @@ dfreq <- apply(dbin.df, 2, mean)
 
 dmaxes <- dmaxes[!is.na(dmaxes)]
 # adjust the means for the number of patients
-adj.means <- mapply(function(bin, mean){
+dadj.means <- mapply(function(bin, mean){
   adj.factor <- (length(dmaxes) - sum(dmaxes <= (bin - 500))) / length(dmaxes)
   print(adj.factor)
   mean / adj.factor
 }, as.numeric(colnames(dbin.df)), dfreq)
 
-cairo_pdf("~/vindels/Figures/within-host/finalized/del-timings.pdf",height=8, width=12)
-par(xpd=NA, mar=c(7,6,4,1))
-barplot(adj.means, col="red", space=0, xaxt = "n",
-        ylab="Average Deletion Count / Patient",
-        main="Deletion Timings",
+
+
+#cairo_pdf("~/vindels/Figures/within-host/finalized/ins-timings.pdf",height=8, width=12)
+par(xpd=NA, mar=c(0,6,6,1), mfrow=c(2,1))
+barplot(iadj.means, col="dodgerblue", space=0, xaxt = "n",
+        ylab="Average Insertion Count \n Per Patient",
+        main="Indel Timings",
         cex.lab=1.4,
         cex.axis=1.1,
         cex.main=1.7,
-        las=1)
+        las=1,
+        ylim=c(0,40))
+        #ylim=c(0,20))
+#axis(1, seq(0,15), labels=F, tick=T, line=0.5)
+#text(0:15,rep(-0.7,16), labels=seq(0,7500,500), srt=25, cex=1.1)
+#title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=5, cex.lab=1.4)
+# ---- DELETIONS ----
+
+#cairo_pdf("~/vindels/Figures/within-host/finalized/del-timings.pdf",height=8, width=12)
+par(xpd=NA, mar=c(6,6,0,1))
+barplot(dadj.means, col="red", space=0, xaxt = "n",
+        ylab="Average Deletion Count  \n Per Patient",
+        #main="Deletion Timings",
+        cex.lab=1.4,
+        cex.axis=1.1,
+        cex.main=1.7,
+        las=1, 
+        ylim=c(40,0))
 axis(1, seq(0,15), labels=F, tick=T, line=0.5)
-text(0:15,rep(-2.1,16), labels=seq(0,7500,500), srt=25, cex=1.1)
-title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=5.5, cex.lab=1.4)
-dev.off()
-
-
+text(0:15,rep(46.5,16), labels=seq(0,7500,500), srt=25, cex=1.1)
+title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=4.5, cex.lab=1.4)
+#dev.off()
 
 # --------- HISTOGRAMS (used for counts) -------------
 imaxes <- imaxes[!is.na(imaxes)]
