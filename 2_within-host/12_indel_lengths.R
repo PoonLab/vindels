@@ -110,14 +110,16 @@ dplot <- ggplot() +
 dplot
 
 # --- Mosaic Plot -----
-data <- data.frame(bin=factor(rep(idf$Bin, idf$Count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(idf$Vloop, idf$Count))
+data <- ddf
+df <- data.frame(bin=factor(rep(data$Bin, data$Count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(data$Vloop, data$Count))
 
 # reorder the data frame 
-data$bin <- factor(data$bin, levels=c("1-2","3","4-5","6","7-8","9",">9"))
-data[order(data$bin),]
+df$bin <- factor(df$bin, levels=c("1-2","3","4-5","6","7-8","9",">9"))
+df <- df[order(df$bin),]
 
+require(vcd)
 mosaic(~ bin + vloop,
-       data = data,
+       data = df,
        shade=T, main=NULL,
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson", direction="v",
