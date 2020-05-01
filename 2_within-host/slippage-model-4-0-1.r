@@ -1,8 +1,6 @@
 # slippage model functions
-# CURRENT VERSION : #4-0
-# control version of the penalty factor
-# removes the penalty factor in order to perform model comparison 
-# 
+# CURRENT VERSION : #4-0-1
+# this version is an attempted fix at the rate convergence issue 
 # this parameter will selectively remove non3 indel sequences from analysis based on a beta distribution  
 createSlips <- function(anc, len, pos){
   # start out with a base vector containing nchar number of zeros 

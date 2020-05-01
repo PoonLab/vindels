@@ -6,7 +6,7 @@
 # ------------------
 # SIMULATE DNA SEQUENCES 
 source('~/vindels/2_within-host/utils.r')
-source("~/vindels/2_within-host/slippage-model-4-0.r")
+source("~/vindels/2_within-host/slippage-model-4-0-1.r")
 # calculate the median lengths of the variable loops
 # ins.v <- split(insertions, insertions$Vloop)
 # lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
@@ -163,7 +163,7 @@ toInclude <- sapply(insertions$len, function(len){
 # filter out insertions based on the fixation parameter
 new.ins <- insertions[toInclude,]
 #rm(insertions)
-setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
+setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, F)
 
 # ----- algorithm testing ---
 
@@ -178,16 +178,18 @@ setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions
 
 # RUN MCMC
 startvalue <- c(0.01, 0.55, 0.000001)
-notes <- "this is to test whether the discrepancy in rate is a consistent value or if it changes
+notes <- "this is to test a potential fix to the rate parameter
 truevalues:(0.00016, 0.75, 0.001)
 startvalues:(0.01, 0.55, 0.000001)
 priors: all uninformative, uniform, broad
-shuffle: on
+shuffle: off
 "
-chain <- runMCMC(startvalue, 200000, '12-ratetest', notes)
+chain <- runMCMC(startvalue, 200000, '13-ratetest2', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE
+# 11-nofix : (0.00016, 0.75, 0.00001)
+# 12-ratetest : (0.00016, 0.75, 0.001)
 # loc-prior : (0.001, 0.70, 0.0001)
 # loc-prior2 : (0.00016, 0.75, 0.00001)
 
