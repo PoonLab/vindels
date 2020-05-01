@@ -6,7 +6,7 @@
 # ------------------
 # SIMULATE DNA SEQUENCES 
 source('~/vindels/2_within-host/utils.r')
-source("~/vindels/2_within-host/slippage-model-4-0-1.r")
+source("~/vindels/2_within-host/slippage-model-4-0.r")
 # calculate the median lengths of the variable loops
 # ins.v <- split(insertions, insertions$Vloop)
 # lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
@@ -178,13 +178,13 @@ setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions
 
 # RUN MCMC
 startvalue <- c(0.01, 0.55, 0.000001)
-notes <- "this is to test a potential fix to the rate parameter
+notes <- "just to see how the rate parameter fares with a different value
 truevalues:(0.00016, 0.75, 0.001)
 startvalues:(0.01, 0.55, 0.000001)
 priors: all uninformative, uniform, broad
 shuffle: off
 "
-chain <- runMCMC(startvalue, 200000, '13-ratetest2', notes)
+chain <- runMCMC(startvalue, 200000, '12-ratetest', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE
