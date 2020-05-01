@@ -1,8 +1,7 @@
 # slippage model functions
-# CURRENT VERSION : #4-1
-# Addition of penalty parameter ONLY
-# 4-1 : removed the incorporation of the Standard deviation as a model parameter
-  # fixed this value as 0.05
+# CURRENT VERSION : #4-0
+# this version is used as a control for the 4-1 fixation parameter
+# its used as a comparison to determine whether the new parameter improves the posterior 
 # this parameter will selectively remove non3 indel sequences from analysis based on a beta distribution  
 createSlips <- function(anc, len, pos){
   # start out with a base vector containing nchar number of zeros 
