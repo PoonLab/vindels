@@ -160,11 +160,11 @@ dint <- dint[-toRemove]
 dtip <- dtip[-toRemove]
 
 
-require(data.table)
-iint <- as.data.frame(rbindlist(iint))
-itip <- as.data.frame(rbindlist(itip))
-dint <- as.data.frame(rbindlist(dint))
-dtip <- as.data.frame(rbindlist(dtip))
+# require(data.table)
+# iint <- as.data.frame(rbindlist(iint))
+# itip <- as.data.frame(rbindlist(itip))
+# dint <- as.data.frame(rbindlist(dint))
+# dtip <- as.data.frame(rbindlist(dtip))
 
 
 
