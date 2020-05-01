@@ -64,11 +64,12 @@ likelihood <- function(slip){
   }else if (slip > 1){
     return(-Inf)
   }
-  sum(dgeom(counts,prob=(1-slip), log=T))
+  #sum(dgeom(counts,prob=(1-slip), log=T))
+  sum(dpois(counts,lambda=slip, log=T))
 }
 
 prior <- function(slip){
-  prior <- dunif(slip, min=0, max=1, log = T)
+  prior <- dunif(slip, min=0, max=10, log = T)
   
   return(prior)
 }
@@ -79,7 +80,7 @@ posterior <- function(slip){
 }
 
 proposalFunction <- function(slip){
-  return(rnorm(1,mean=slip, sd=0.001))
+  return(rnorm(1,mean=slip, sd=0.01))
 }
 
 
@@ -111,7 +112,7 @@ runMCMC <- function(startvalue, iterations){
 }
 
 # RUN MCMC
-startvalue <- 0.1
+startvalue <- 0.5
 chain <- runMCMC(startvalue, 25000)
 
 
