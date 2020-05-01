@@ -151,9 +151,10 @@ getMat <- function(rate, branch){
   #print(branch)
   # generate the F81 rate matrix 
   mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
+  inv.freq <- sapply(1:4, function(x) 1-f[x])
   mat <- mat * rate
-  diag(mat) <- sapply(1:4, function(x) -(rate*sum(f[-x]))) # equivalent to -rate*(sum(f[-x]))
-  
+  #diag(mat) <- sapply(1:4, function(x) -(rate*sum(f[-x]))) # equivalent to -rate*(sum(f[-x]))
+  diag(mat) <- sapply(1:4, function(x) -(rate*inv.freq[x]))
   # multiply by branch length
   mat <- branch * mat
   
@@ -321,7 +322,8 @@ proposalFunction <- function(param, slip_current, llh_current){
 
 # MODIFIED TO CONTINUE RUN 
 
-runMCMC <- function(startvalue, iterations, runno, name){
+
+runMCMC <- function(startvalue, iterations, runno, notes){
   # timing
   start.time <- proc.time()
   
@@ -334,15 +336,18 @@ runMCMC <- function(startvalue, iterations, runno, name){
   llh_current <- seqllh(startvalue[3], slip.list)
   
   # keep a logfile up to date
-  logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/slip-", 
+  logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/15_modeling/slip-", 
                          as.character(runno),#substr(gsub("[\\ :-]","",Sys.time()), 9, 12),
-                         "-",name,".csv"), "w")
-  write("p(Enter), p(Stay), Rate, Fixation, Likelihood, Slip-changed, Accept, Time", file=logfile)
+                         ".csv"), "w")
+  notes <- gsub("^", "#",notes)
+  notes <- gsub("\n", "\n#", notes)
+  write(notes, file=logfile)
+  write("p(Enter), p(Stay), Rate, Likelihood, Slip-changed, Accept, Time", file=logfile, append=T)
   
   for (i in 1:iterations){
     # calculate posterior of current position
     p.current <- posterior(chain[i,], slip_current, llh_current)
-
+    
     
     # generate proposal 
     proposal <- proposalFunction(chain[i,], slip_current, llh_current)
