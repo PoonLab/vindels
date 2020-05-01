@@ -115,7 +115,7 @@ simPair <- function(p.enter, p.stay, rate){
 # SIMULATE TIP + ANCESTOR SEQUENCES
 all.seqs <- sapply(1:25000, function(n){
   #print(n)
-  pair <- simPair(0.00016, 0.75, 0.00001)
+  pair <- simPair(0.00016, 0.75, 0.001)
   # VALUE 1 = Tip, VALUE 2 = Ancestor, VALUE 3 = Branch length
   return(c(pair[[1]], pair[[2]], pair[[3]]))
 })
@@ -178,13 +178,13 @@ setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions
 
 # RUN MCMC
 startvalue <- c(0.01, 0.55, 0.000001)
-notes <- "this removes the fixation parameter to compare to run 10
-truevalues:(0.00016, 0.75, 0.00001)
+notes <- "this is to test whether the discrepancy in rate is a consistent value or if it changes
+truevalues:(0.00016, 0.75, 0.001)
 startvalues:(0.01, 0.55, 0.000001)
 priors: all uninformative, uniform, broad
 shuffle: on
 "
-chain <- runMCMC(startvalue, 200000, '11-nofix', notes)
+chain <- runMCMC(startvalue, 200000, '12-ratetest', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE

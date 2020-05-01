@@ -15,15 +15,11 @@ vlist <- list(V1=numeric(),V2=numeric(),V3=numeric(),V4=numeric(),V5=numeric())
 all.ins <- c()
 all.del <- c()
 count <- 0
-iseqcount <- 1
-dseqcount <- 1
-imaxes <- c()
-dmaxes <- c()
+
+maxes <- c()
 itotal <- 0
 dtotal <- 0
 
-ipatlist <- list()
-dpatlist <- list()
 iint <- list()
 itip <- list()
 dint <- list()
@@ -46,9 +42,9 @@ for (file in 1:length(ifolder)){
   iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep='\t')
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep='\t')
   
-  if (grepl("B.+$", filename) || grepl("OS.+$", filename) || grepl("G.+$", filename) || grepl("56549.+$", filename)){
-    next
-  }
+  # if (grepl("B.+$", filename) || grepl("OS.+$", filename) || grepl("G.+$", filename) || grepl("56549.+$", filename)){
+  #   next
+  # }
   
   for (i in 2:6){
     res <- unname(sapply(iCSV[,i], function(x){csvcount(x,":")}))
@@ -122,8 +118,7 @@ for (file in 1:length(ifolder)){
   dmid[[full.id]] <- ddates
   
   # these remain 'lengths' and not 'rtt.mid's because I need to use the full tree length as the maximum cutoff
-  imaxes[count] <- max(iCSV$length,na.rm=T)
-  dmaxes[count] <- max(dCSV$length,na.rm=T)
+  maxes[count] <- max(lens,na.rm=T)
   
   # load the all.ins and all.del vectors (more efficient algorithm)
   #all.ins[iseqcount:(iseqcount+sum(icounts)-1)] <- idates
@@ -325,12 +320,6 @@ vloop.mat <- lapply(1:5, function(w){
 # remove NAs from matrix
 
 
-V1 <- lapply(ins.final, function(x){if (median(x[,3] > 1e-2))x[,3]})
-V2 <- lapply(ins.final, function(x){if (median(x[,4] > 1e-2))x[,4]})
-V3 <- lapply(ins.final, function(x){if (median(x[,5] > 1e-2))x[,5]})
-V4 <- lapply(ins.final, function(x){if (median(x[,6] > 1e-2))x[,6]})
-V5 <- lapply(ins.final, function(x){if (median(x[,7] > 1e-2))x[,7]})
-
 require(plyr)
 V1 <- compact(V1)
 V2 <- compact(V2)
@@ -368,61 +357,62 @@ dplot
 
 
 # --------INDEL TIMINGS -------
-
+maxes <- maxes[!is.na(maxes)]
+interval <- 100
+mx <- 4000
 # ---- INSERTIONS ----
-ibins <- lapply(imid, function(dates){
+ibins <- lapply(1:length(imid), function(x){
   res <- c()
-  for (i in 1:15){
-    res[i] <- sum(dates > (i-1)*500 & dates < i*500)
+  for (i in 1:(mx/interval)){
+    res[i] <- sum(imid[[x]] > (i-1)*interval & imid[[x]] < i*interval)
   }
-  as.data.frame(t(res))
+  cbind(pat=strsplit(names(imid)[x],"-")[[1]][1], as.data.frame(t(res)))
 })
 
 ibin.df <- as.data.frame(rbindlist(ibins))
-colnames(ibin.df) <- as.character(seq(0,7500,500)[-1])
-ifreq <- apply(ibin.df, 2, mean)
+colnames(ibin.df) <- c("pat",as.character(seq(0,mx,interval)[-1]))
+ifreq <- apply(ibin.df[,2:ncol(ibin.df)], 2, mean)
 
-imaxes <- imaxes[!is.na(imaxes)]
+
 # adjust the means for the number of patients
 iadj.means <- mapply(function(bin, mean){
   # this is a calculation of how many data sets are still active, decreasing as less data is available
-  adj.factor <- (length(imaxes) - sum(imaxes <= (bin - 500))) / length(imaxes)
+  adj.factor <- (length(maxes) - sum(maxes <= (bin - interval))) / length(maxes)
   print(adj.factor)
   mean / adj.factor
-}, as.numeric(colnames(ibin.df)), ifreq)
+}, as.numeric(colnames(ibin.df[-1])), ifreq)
 
-dbins <- lapply(dmid, function(dates){
+dbins <- lapply(1:length(dmid), function(x){
   res <- c()
-  for (i in 1:15){
-    res[i] <- sum(dates > (i-1)*500 & dates < i*500)
+  for (i in 1:(mx/interval)){
+    res[i] <- sum(dmid[[x]] > (i-1)*interval & dmid[[x]] < i*interval)
   }
-  as.data.frame(t(res))
+  cbind(pat=names(dmid)[x], as.data.frame(t(res)))
 })
 
 dbin.df <- as.data.frame(rbindlist(dbins))
-colnames(dbin.df) <- as.character(seq(0,7500,500)[-1])
-dfreq <- apply(dbin.df, 2, mean)
+colnames(dbin.df) <- c("pat",as.character(seq(0,mx,interval)[-1]))
+dfreq <- apply(dbin.df[,2:ncol(dbin.df)], 2, mean)
 
 dmaxes <- dmaxes[!is.na(dmaxes)]
 # adjust the means for the number of patients
 dadj.means <- mapply(function(bin, mean){
-  adj.factor <- (length(dmaxes) - sum(dmaxes <= (bin - 500))) / length(dmaxes)
+  adj.factor <- (length(maxes) - sum(maxes <= (bin - interval))) / length(maxes)
   print(adj.factor)
   mean / adj.factor
-}, as.numeric(colnames(dbin.df)), dfreq)
+}, as.numeric(colnames(dbin.df)[-1]), dfreq)
 
 
 
 #cairo_pdf("~/vindels/Figures/within-host/finalized/ins-timings.pdf",height=8, width=12)
-par(xpd=NA, mar=c(0,6,6,1), mfrow=c(2,1))
+par(xpd=NA, mar=c(0,6,6.5,1), mfrow=c(2,1))
 barplot(iadj.means, col="dodgerblue", space=0, xaxt = "n",
-        ylab="Average Insertion Count \n Per Patient",
-        main="Indel Timings",
-        cex.lab=1.4,
-        cex.axis=1.1,
+        ylab="      Average Insertion Count \n Per Patient",
+        cex.lab=1.3,
+        cex.axis=1.2,
         cex.main=1.7,
         las=1,
-        ylim=c(0,40))
+        ylim=c(0,6))
         #ylim=c(0,20))
 #axis(1, seq(0,15), labels=F, tick=T, line=0.5)
 #text(0:15,rep(-0.7,16), labels=seq(0,7500,500), srt=25, cex=1.1)
@@ -430,18 +420,17 @@ barplot(iadj.means, col="dodgerblue", space=0, xaxt = "n",
 # ---- DELETIONS ----
 
 #cairo_pdf("~/vindels/Figures/within-host/finalized/del-timings.pdf",height=8, width=12)
-par(xpd=NA, mar=c(6,6,0,1))
+par(xpd=NA, mar=c(6.5,6,0,1))
 barplot(dadj.means, col="red", space=0, xaxt = "n",
         ylab="Average Deletion Count  \n Per Patient",
         #main="Deletion Timings",
-        cex.lab=1.4,
+        cex.lab=1.3,
         cex.axis=1.1,
         cex.main=1.7,
-        las=1, 
-        ylim=c(40,0))
-axis(1, seq(0,15), labels=F, tick=T, line=0.5)
-text(0:15,rep(46.5,16), labels=seq(0,7500,500), srt=25, cex=1.1)
-title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=4.5, cex.lab=1.4)
+        las=1, ylim=c(6,0))
+axis(1, seq(0,40,2), labels=F, tick=T, line=01.0)
+text(seq(0,40,2),rep(7.5,21), labels=seq(0,4000,200), srt=25, cex=1.2)
+title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=4.75, cex.lab=1.4)
 #dev.off()
 
 # --------- HISTOGRAMS (used for counts) -------------

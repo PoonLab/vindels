@@ -8,7 +8,7 @@ insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq==""
 
 # CASE: remove instances with insertion position 0
 insertions <- insertions[-c(which(insertions$Pos==0)),]
-res <- as.data.frame(t(unname(mapply(restoreDel,insertions$Vseq, insertions$Anc, insertions$Seq, insertions$Pos))))
+res <- as.data.frame(t(unname(mapply(restoreTipDel,insertions$Vseq, insertions$Anc, insertions$Seq, insertions$Pos))))
 insertions$Vseq <- as.character(res[,1])
 insertions$Pos <- as.numeric(as.character(res[,2]))
 
@@ -16,7 +16,7 @@ insertions$Pos <- as.numeric(as.character(res[,2]))
 # slips <- c(rep(0,121000))
 # slips[sample(121000,100)] <- sample(3,100,replace = T) * 3
 slips <- nchar(insertions[insertions$Count!=0, "Seq"])
-slips <- slips[-167]
+#slips <- slips[-167]
 slips <- c(slips, rep(0, sum(nchar(insertions$Vseq))))
 
 # randomly shuffle all the entries
@@ -57,7 +57,7 @@ prior <- function(param){
   p.stay  <- param[2]
   
   prior.pe <- dunif(p.enter, min=1e-6, max=5e-3, log=T)
-  prior.ps <- dunif(p.stay, min=0.3, max=0.9, log=T)
+  prior.ps <- dunif(p.stay, min=0.6, max=0.97, log=T)
   
   return(prior.pe + prior.ps)
 }
@@ -124,21 +124,22 @@ hist(chain[-(1:burnin),1],
      main="Posterior of Enter", 
      xlab="Prob(Enter)",
      ylab="Frequency",
-     col="lightskyblue",
-     xlim=c(0.00005, 0.0008))
-lines(density(rlnorm(2000,meanlog=-10,sdlog=2)), xlim=c(0,0.001), col="red", lwd=1.2)
+     col="dodgerblue")
+     #xlim=c(0.00001, 0.001), freq=F)
+#arrows(1e-6, 1001.001, 1e-3, 1001.001, col="red", lwd=1.2, length=0)
 
 #abline(v = med1, col='red',lwd=2)
-text(0.000168, 70000, paste0("Median = ", med1))
-text(0.000168, 60000, paste0("Acceptance = ", as.character(acceptance)))
+#text(0.000168, 70000, paste0("Median = ", med1))
+#text(0.000168, 60000, paste0("Acceptance = ", as.character(acceptance)))
 hist(chain[-(1:burnin),2],
      nclass=30, 
      main="Posterior of Stay", 
      xlab="Prob(Stay)", 
      ylab="Frequency",
-     col="lightskyblue",
-     xlim=c(0.75,0.95))
-lines(density(rlnorm(2000,meanlog=-0.15,sdlog=0.05)), col="red", lwd=1.2)
+     col="dodgerblue")
+     #xlim=c(0.5,0.99), freq=F)
+#arrows(0.5, 2.12766, 0.97, 2.12766, col="red", lwd=1.2, length=0)
+#lines(density(rlnorm(2000,meanlog=-0.15,sdlog=0.05)), col="red", lwd=1.2)
 text(0.905, 70000, paste0("Median = ", med2))
 #abline(v = med2, col='red',lwd=2)
 #text(0.00017, 400, paste0("Acceptance = ",as.character(acceptance)))
