@@ -16,7 +16,7 @@ tru <- c(0.00016, 0.75, 0.00001, 0.12)
 #png(file="~/vindels/Figures/within-host/finalized/slippage-trace2.png", width=600, height=800)
 par(mar=c(2.5,5,3,1), mfrow=c(3,1))
 plot(csv[-(1:burnin)
-         ,1], type = "l", xlab="MCMC Steps (x10)" , ylab="Prob(Enter)",
+         ,1], type = "l", xlab="MCMC Steps (x10)" , ylab="P(Enter)",
      main = "Chain values of Enter", cex.axis=1.3, cex.lab=1.4, cex.main=1.7)#, ylim=c(0.00015, 0.00025))
 abline(h=tru[1],col='red',lwd=2)
 plot(csv[-(1:burnin)
