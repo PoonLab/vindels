@@ -39,7 +39,7 @@ for (file in 1:length(ifolder)){
     dCSV$del <- ""
   }
   
-  print("10% complete")
+  #print("10% complete")
   # retrieving subtype field from the header
   iCSV$Subtype <- unname(sapply(iCSV$header, getSubtype))
   dCSV$Subtype <- unname(sapply(dCSV$header, getSubtype))
@@ -84,7 +84,7 @@ for (file in 1:length(ifolder)){
   dCSV$Vseq <- dfull$var
   iCSV$Anc <- ifull$anc
   dCSV$Anc <- dfull$anc
-  print("50% complete")
+  #print("50% complete")
   iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
   dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
   
@@ -145,7 +145,7 @@ for (file in 1:length(ifolder)){
 
     }
   }
-  print("80% complete")
+  #print("80% complete")
   
   new.ins[is.na(new.ins$Pos),"Pos"] <- ""
   new.del[is.na(new.del$Pos),"Pos"] <- ""
@@ -208,6 +208,8 @@ for (n in c(1,2,4,5)){
 }
 total.ins$len <- sapply(total.ins$Seq, nchar)
 total.del$len <- sapply(total.del$Seq, nchar)
+
+
 write.csv(total.ins, paste0(path,"10_nucleotide/total-ins.csv"))
 write.csv(total.del, paste0(path,"10_nucleotide/total-del.csv"))
 
@@ -390,7 +392,8 @@ upper.y <- con.int[which(!grepl("v",names(con.int)) & grepl("97.5",names(con.int
 # broken down by variable loop and nucleotide
 # -------------------------------------
 require(RColorBrewer)
-colors <- c("green", "dodgerblue", "red", "purple")
+#colors <- brewer.pal(4, 'Set1')
+colors <- c( "limegreen","dodgerblue","red", "magenta")
 
 cex=1
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
@@ -401,15 +404,19 @@ ypos <- c(0.15, 0.21, 0.26, 0.39)
 lim = c(0.14,0.42)
 plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.08*sqrt(indel.nt$counts),
      cex.lab=1.3, cex.axis=1.2,cex.main=1.8,lwd=5, ylab='', xlab='', main="Nucleotide Proportions")
-title(ylab="Proportion Inside Indels", line=3,cex.lab=1.3)
+title(ylab="Proportion In Indels", line=3,cex.lab=1.3)
 title(xlab="Proportion in Variable Loops", line=3,cex.lab=1.3)
 arrows(indel.nt[1:8,3], lower.y[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,3], upper.y[c(seq(1,8,2),seq(1,8,2)+1)], length=0, angle=90, code=3,lwd=1.5)
 arrows(lower.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], upper.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], length=0, angle=90, code=3,lwd=1.5)
 #legend(0.38,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-text(xpos, ypos, cex=1.2, labels=c("C", "G", "T", "A"))
-legend(0.14,0.42,legend=c("Insertions", "Deletions"), pch=c(1,2),cex=1.3, col="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
+text(xpos, ypos, cex=1.3, labels=c("C", "G", "T", "A"))
+#legend(0.14,0.42,legend=c("Insertions", "Deletions"), pch=c(1,2),cex=1.3, lwd=2, col="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 par(xpd=F)
 abline(0,1)
+rect(0.14,0.35,0.21,0.42)
+text(0.19, 0.40, labels="Ins", cex=1.5)
+text(0.19, 0.37, labels="Del", cex=1.5)
+points(c(0.16,0.16), c(0.40, 0.37), pch=c(1,2), cex=3, lwd=5, col='black', bg='black')
 
 
 
