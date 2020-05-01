@@ -1,17 +1,44 @@
-require(bbmle)
+# require(bbmle)
+# 
+# insertions <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-nosep-all.csv",row.names=1, stringsAsFactors = F)
+# 
+# # #slips <- matrix(rep(rep(0,121),10), nrow=10,ncol=121)
+# # slips <- c(rep(0,121000))
+# # slips[sample(121000,100)] <- sample(3,100,replace = T) * 3
+# counts <- nchar(insertions[insertions$Count!=0, "Seq"])
+# counts <- counts[-167]
+# counts <- c(counts, rep(0, sum(nchar(insertions$Vseq))))
+# 
+# # randomly shuffle all the entries
+# rnd <- sample(length(counts),length(counts))
+# counts <- counts[rnd]
 
-insertions <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/ins-nosep-all.csv",row.names=1, stringsAsFactors = F)
+source("~/vindels/2_within-host/utils.r")
+path <- "~/PycharmProjects/hiv-withinhost/"
+#path <- "~/Lio/"
+insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
+
+# PROBLEMATIC CASE: remove instances with gaps in the ancestor but NO INSERTION
+insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq=="")),]
+
+# CASE: remove instances with insertion position 0
+insertions <- insertions[-c(which(insertions$Pos==0)),]
+res <- as.data.frame(t(unname(mapply(restoreTipDel,insertions$Vseq, insertions$Anc, insertions$Seq, insertions$Pos))))
+insertions$Vseq <- as.character(res[,1])
+insertions$Pos <- as.numeric(as.character(res[,2]))
 
 # #slips <- matrix(rep(rep(0,121),10), nrow=10,ncol=121)
 # slips <- c(rep(0,121000))
 # slips[sample(121000,100)] <- sample(3,100,replace = T) * 3
-counts <- nchar(insertions[insertions$Count!=0, "Seq"])
-counts <- counts[-167]
-counts <- c(counts, rep(0, sum(nchar(insertions$Vseq))))
+slips <- nchar(insertions[insertions$Count!=0, "Seq"])
+#slips <- slips[-167]
+slips <- c(slips, rep(0, sum(nchar(insertions$Vseq))))
 
 # randomly shuffle all the entries
-rnd <- sample(length(counts),length(counts))
-counts <- counts[rnd]
+rnd <- sample(length(slips),length(slips))
+slips <- slips[rnd]
+counts <- slips
+rm(slips)
 
 # 
 # objf <- function(p.slip, p.stay){
@@ -33,15 +60,15 @@ counts <- counts[rnd]
 
 likelihood <- function(slip){
   if (slip <= 0){
-    return(0)
+    return(-Inf)
   }else if (slip > 1){
-    return(0)
+    return(-Inf)
   }
-  sum(dgeom(counts,prob=slip, log=T))
+  sum(dgeom(counts,prob=(1-slip), log=T))
 }
 
 prior <- function(slip){
-  prior <- dunif(slip, log = T)
+  prior <- dunif(slip, min=0, max=1, log = T)
   
   return(prior)
 }
@@ -52,29 +79,31 @@ posterior <- function(slip){
 }
 
 proposalFunction <- function(slip){
-  return(rnorm(1,mean=slip, sd=0.01))
+  return(rnorm(1,mean=slip, sd=0.001))
 }
 
 
 runMCMC <- function(startvalue, iterations){
-  chain <- array(dim = c(iterations+1,1))
-  chain[1,] <- startvalue
-  
+  chain <- array(dim = c(iterations+1,2))
+  chain[1,1] <- startvalue
+  chain[1,2] <- posterior(startvalue)
   
   for (i in 1:iterations){
-
-    proposal <- proposalFunction(chain[i,])
-    prop <- exp(posterior(proposal) - posterior(chain[i,]))
+    p.current <- posterior(chain[i,1])
+    
+    proposal <- proposalFunction(chain[i,1])
+    p.next <- posterior(proposal) 
+    prop <- exp(p.next - p.current)
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
     if (runif(1) < prop) {
-      chain[i+1,] <- proposal
+      chain[i+1,] <- c(proposal, p.next)
       
     # if the proportion is less than the random uniform sample, REJCECT the proposed value stick with current 
     } else {
       chain[i+1,] <- chain[i,]
     }
     if (i %% 100 == 0){
-      print(paste0("STATE ",i,": ", chain[i,1]))
+      print(paste(c("STATE ",i,": ", chain[i,]), collapse=" "))
     }
   }
   return(chain)
@@ -82,12 +111,12 @@ runMCMC <- function(startvalue, iterations){
 }
 
 # RUN MCMC
-startvalue <- 0.5
-chain <- runMCMC(startvalue, 2000)
+startvalue <- 0.1
+chain <- runMCMC(startvalue, 25000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
-burnin <- 200
+burnin <- ceiling((nrow(chain)-1)*0.1)
 acceptance <- 1 - mean(duplicated(chain[-(1:burnin),]))
 print(paste0("Acceptance: ", acceptance))
 
