@@ -277,16 +277,22 @@ all.rates <- lapply(1:4, function(x){
 })
 
 
+require(plyr)
+compact <- function(x){
+  if (!is.null(x)){
+    x
+  }
+}
 vloop <- lapply(1:5, function(w){
   lapply(1:4, function(x){
-    compact(lapply(all.rates[[x]], function(y){
+    out <- lapply(all.rates[[x]], function(y){
       nas <- sum(is.na(y[,w+2]))
-      if (nas > 100){
-        NULL
-      }else{
+      if (nas < 100){
         y[,w+2]
       }
-    }))
+    })
+    out[sapply(out, is.null)] <- NULL
+    out
   })
 })
 
@@ -319,13 +325,27 @@ vloop.mat <- lapply(1:5, function(w){
 
 # remove NAs from matrix
 
+# ANOVA 
 
-require(plyr)
-V1 <- compact(V1)
-V2 <- compact(V2)
-V3 <- compact(V3)
-V4 <- compact(V4)
-V5 <- compact(V5)
+vloop.data <- sapply(vloop, function(x){unname(unlist(x[[3]]))})
+vloop.data <- lapply(vloop.data, function(x){x[!is.na(x)]})
+# determine the minimum number of data points 
+sapply(vloop.data, length)
+vloop.data <- vloop.data[-3]
+
+vloop.data2 <- lapply(vloop.data, function(x){x[sample(1:length(x), 2998)]})
+
+vloop.df <- as.data.frame(sapply(1:4, function(x){
+  vloop.data2[[x]]
+}))
+
+vloop.melt <- melt(vloop.df)
+aov.obj <- aov(value ~ variable, data=vloop.melt)
+TukeyHSD(aov.obj)
+
+
+# TUKEY 
+
 
 comb1 <- data.frame(rate=irates, vloop=c("V1","V2","V3","V4","V5"), id=rep("Interior",5))
   
