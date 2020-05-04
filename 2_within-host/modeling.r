@@ -113,7 +113,7 @@ runMCMC <- function(startvalue, iterations){
 
 # RUN MCMC
 startvalue <- 0.5
-chain <- runMCMC(startvalue, 25000)
+chain <- runMCMC(startvalue, 100000)
 
 
 # sets the burnin size, removes all rows from the chain that are associated with the burnin 
