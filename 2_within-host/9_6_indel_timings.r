@@ -247,11 +247,6 @@ for (i in 1:length(iint)){
     for (x in 1:4){
       rate.list[[x]][j] <- rates[x]
     }
-
-    
-    # in.rates[j] <- exp(coef(in.fit)[[1]])*365/vlengths[i]
-    # dt.rates[j] <- exp(coef(dt.fit)[[1]])*365/vlengths[i]
-    # dn.rates[j] <- exp(coef(dn.fit)[[1]])*365/vlengths[i]
     
   }
   rate.list <- lapply(rate.list, function(x){

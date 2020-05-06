@@ -28,7 +28,7 @@ parameters {
 // 'y' to be normally distributed with mean 'mu'
 // and standard deviation 'sigma'.
 model {
-  pat_rate ~ uniform(0, 10);  // --> after running, posterior is normally distributed; 
+  pat_rate ~ uniform(0,50);  // --> after running, posterior is normally distributed; 
   pat_sd ~ uniform(0,10);           // this shows the prior distribution and the
   
   for (i in 1:npat){
