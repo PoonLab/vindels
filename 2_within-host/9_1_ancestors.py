@@ -294,7 +294,7 @@ for f in folder:
     trefile = filename.split("_recon")[0] + ".tree"
     tree = Tree(tpath+trefile)
     csvfile = filename.split('-')[0] + ".csv"
-    #root = t.get_tree_root()
+    
     root, rootseq = cdata[len(cdata)-1]
     #print(root)
     infile.close()
