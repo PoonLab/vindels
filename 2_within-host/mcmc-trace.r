@@ -1,5 +1,5 @@
 # ----- SLIPPAGE MODEL -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_lmodeling/slip-9-fix2.csv", stringsAsFactors = F, comment.char="#")#, skip=1, header=F)
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-14-perfect3.csv", stringsAsFactors = F, skip=7, header=F)
 csv2 <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-10-fix3.csv", stringsAsFactors = F, comment.char="#")
 
 csv 
@@ -11,7 +11,7 @@ csv
 # }))
 burnin <- ceiling(0.1*nrow(csv))
 tru <- c(0.00016, 0.75, 0.00001, 0.12)
-#colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'fix','fix-sd', 'slip.changed', 'accept', 'time')
+colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'fix','likelihood', 'slip.changed', 'accept', 'time')
 # colnames(csv) <- c('p.enter', 'slope','int', 'rate', 'slip.changed', 'accept', 'time')
 #png(file="~/vindels/Figures/within-host/finalized/slippage-trace2.png", width=600, height=800)
 par(mar=c(2.5,5,3,1), mfrow=c(2,2))

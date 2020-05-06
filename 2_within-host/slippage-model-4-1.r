@@ -67,6 +67,15 @@ setup <- function(tip, anc, len, pos, branches, shuffle){
   }
   # needed for use in the CHANGESLIP function
   idx <<- which(unname(lapply(slip.list,sum))>0)
+  
+  totals <- unlist(lapply(slip.list, sum))
+  totals <- totals[totals != 0]
+  a <<- sum(totals %% 3 == 0)
+  b <<- sum(totals %% 3 != 0)
+  
+  total <<- a / 0.244
+  est.fix <<- b / (total - a)
+  
 }
 
 getSlipVector <- function(locs, length){
@@ -204,10 +213,6 @@ pairllh <- function(anc, newtip, rate, branch){
     return(log(final.llh))
   }, achars, tchars)
   
-  # if (class(result) == "list"){
-  #   print(anc)
-  #   print(newtip)
-  # }
   sum(result)
 }
 
@@ -231,14 +236,11 @@ likelihood<- function(param, slip.list, llh.list){
   p.enter <- param[1]
   p.stay  <- param[2]
   
-  # this calculates the observed probability of seeing non3 indels 
-  totals <- unlist(lapply(slip.list, sum))
-  totals <- totals[totals != 0]
-  est.non3 <- (sum(totals %% 3 == 0) / 0.276) - sum(totals %% 3 == 0)
-  est.fix <- sum(totals %% 3 != 0) / est.non3 
-  
-  llh.fix <- dnorm(est.fix, mean=param[4], sd=0.05)
-  
+  # this calculates the observed probability of seeing non3 indels
+  llh.fix <- dnorm(param[4], mean=est.fix, sd=0.05, log=T)
+
+  adj.enter <- p.enter * ((a + b) / total)
+
   # affine gap likelihood
   # utilizes both p.enter + p.stay
   slips <- unname(unlist(slip.list))
@@ -249,7 +251,7 @@ likelihood<- function(param, slip.list, llh.list){
   if (any(is.na(slips))){
     slipllh <- log(0)
   }else{
-    slipllh <-  x*log(1-p.enter) + y*log(p.enter) + y*log(1-p.stay) + z*log(p.stay)
+    slipllh <-  x*log(1-adj.enter) + y*log(adj.enter) + y*log(1-p.stay) + z*log(p.stay)
   }
   slipllh + sum(llh.list) + llh.fix
 }
@@ -258,7 +260,7 @@ prior <- function(param){
   prior.pe <- dunif(param[1], min=1e-6, max=1e-2, log=T) 
   prior.ps <- dunif(param[2], min=0.4, max=0.9, log=T) 
   prior.rate <- dunif(param[3], min=1e-7, max=1e-3, log=T)
-  prior.fix <- dbeta(param[4], shape1=4, shape2=16, log=T)
+  prior.fix <- dbeta(param[4], shape1=3, shape2=20, log=T)
   #prior.fixsd <- dexp(param[5], rate=1, log=T)
   #prior.pe <- dlnorm(p.enter,meanlog=log(0.00015),sdlog=1.2, log=T)
   #prior.ps <- dlnorm(p.stay,meanlog=log(0.75),sdlog=0.1,log=T)
@@ -273,7 +275,7 @@ posterior <- function(param, slip, llh){
   if (any(param > 1)){
     return(log(0))
   }else{
-    return(prior(param) + likelihood(param, slip, llh))
+    return(c(prior(param) , likelihood(param, slip, llh)))
   }
 }
 
@@ -342,7 +344,7 @@ runMCMC <- function(startvalue, iterations, runno, notes){
   notes <- gsub("^", "#",notes)
   notes <- gsub("\n", "\n#", notes)
   write(notes, file=logfile)
-  write("p(Enter), p(Stay), Rate, Likelihood, Slip-changed, Accept, Time", file=logfile, append=T)
+  write("p(Enter), p(Stay), Rate, Fix, Likelihood, Posterior, Slip-changed, Accept, Time", file=logfile, append=T)
   
   for (i in 1:iterations){
     # calculate posterior of current position
@@ -360,14 +362,7 @@ runMCMC <- function(startvalue, iterations, runno, notes){
     s.change <- any(unname(unlist(slip_current))!=unname(unlist(proposal[[2]])))
     #print(paste0("Sliplist change proposed: ", s.change))
     
-    # to catch problematic posterior calculations 
-    if(is.na(p.current) || is.na(p.next)){
-      print("ERROR: Posterior could not be calculated")
-      print(paste("Chain value:", chain[i,1], chain[i,2], chain[i,3], sep=" "))
-      break
-    }
-    
-    prop <- exp(p.next - p.current)
+    prop <- exp(sum(p.next) - sum(p.current))
     #print(prop)
     
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
@@ -375,7 +370,7 @@ runMCMC <- function(startvalue, iterations, runno, notes){
       chain[i+1,] <- proposal[[1]]
       slip_current <- proposal[[2]]
       llh_current <- proposal[[3]]
-      llh <- likelihood(proposal[[1]], proposal[[2]],proposal[[3]])
+      llh <- p.next[2]
       #print("Accept")
       accept <- T
       # if the proportion is less than the random uniform sample, REJECT the proposed value stick with current 
@@ -383,12 +378,12 @@ runMCMC <- function(startvalue, iterations, runno, notes){
       chain[i+1,] <- chain[i,]
       #print("Reject")
       accept <- F
-      llh <- likelihood(chain[i,], slip_current, llh_current)
+      llh <- p.current[2]
     }
     
     if (i %% 100 == 0){
-      print(paste(c("STATE",i,":", chain[i,], p.current), collapse=" "))
-      write(paste(c(chain[i,], llh, as.numeric(s.change), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
+      print(paste(c("STATE",i,":", chain[i,], sum(p.current)), collapse=" "))
+      write(paste(c(chain[i,], llh, sum(p.current), as.numeric(s.change), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
     }
     if (i %% 50000 == 0){
       slip_current <<- slip_current

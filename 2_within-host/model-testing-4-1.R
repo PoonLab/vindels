@@ -43,7 +43,7 @@ nt <- c("A", "C", "G", "T")
 # res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
 # sum(res!=0)
 #lens <- c(10,20,20,30,30)
-simPair <- function(p.enter, p.stay, rate){
+simPair <- function(p.enter, p.stay, rate, fix){
   vlen <- lens[sample(1:5, 1)]
   anc <- genSeq(vlen)
   
@@ -63,9 +63,9 @@ simPair <- function(p.enter, p.stay, rate){
     
     if (rand < probs[1]){
       "A"
-    }else if (rand > probs[1] && rand < probs[2]){
+    }else if (rand > probs[1] && rand < (probs[1]+probs[2])){
       "C"
-    }else if (rand > (probs[1]+probs[2]) && rand < probs[3]){
+    }else if (rand > (probs[1]+probs[2]) && rand < (probs[1]+probs[2]+probs[3])){
       "G"
     }else{
       "T"
@@ -75,30 +75,48 @@ simPair <- function(p.enter, p.stay, rate){
   # ------ INDELS -------
   # determine the number of insertions that occur 
   count <- sum(runif(vlen) < p.enter)
-  
+  noFilter <- 0
   if (count > 0){
     
+    # generate a vector of insertion lengths 
+    lens <- c()
     for (n in 1:count){
       len <- 0
-      exit <- 0
-      while(exit < p.stay ){
+      p.exit <- 0
+      while(p.exit < p.stay){
         len <- len + 1
-        exit <- runif(1)
+        p.exit <- runif(1)
       }
-      
-      # add the length and choose a random location for the slip event 
-      idx <- sample(1:vlen,1)
-      
-      # generate the sequence to insert / delete 
-      indel <- genSeq(len)
-      
-      # generate the tip and ancestor sequence by adding / removing sequence 
-      tip <- insert(tip, indel, idx)
-      anc <- insert(anc, rep("-",len), idx)
+      lens[n] <- len
+    }
+    noFilter <- length(lens)
+    # apply a boolean filter to remove 91% of non-3 insertions 
+    toRemove <- sapply(1:length(lens), function(x){
+      if (lens[x] %% 3 != 0){
+        runif(1) < fix
+      }else{
+        T
+      }
+    })
+    lens <- lens[toRemove]
+    
+    # add any indels that make it through the filtering 
+    if (length(lens) > 0){
+      for (n in lens){
+        # add the length and choose a random location for the slip event 
+        idx <- sample(1:vlen,1)
+        
+        # generate the sequence to insert / delete 
+        indel <- genSeq(n)
+        
+        # generate the tip and ancestor sequence by adding / removing sequence 
+        tip <- insert(tip, indel, idx)
+        anc <- insert(anc, rep("-",n), idx)
+      }
     }
   }
   #print("finished indels")
-  return(list(tip=tip,anc=anc,branch=branch))
+  return(list(tip=tip,anc=anc,branch=branch, count=noFilter))
   # to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
   # algorithm:
   # probability of enter is chosen
@@ -109,21 +127,24 @@ simPair <- function(p.enter, p.stay, rate){
   # there's a low probability that it will be kept (penalty)
   
 }
-
-# vec <- c()
-# for (i in 1:50){
+# avec <- c()
+# bvec <- c()
+# total <- c()
+# for (i in 1:500){
 # SIMULATE TIP + ANCESTOR SEQUENCES
 all.seqs <- sapply(1:25000, function(n){
-  #print(n)
-  pair <- simPair(0.00016, 0.75, 0.00001)
+  if (n %% 1000 == 0 ){
+    print(n)
+  }
+  pair <- simPair(0.00052, 0.80, 0.00001, 0.09)
   # VALUE 1 = Tip, VALUE 2 = Ancestor, VALUE 3 = Branch length
-  return(c(pair[[1]], pair[[2]], pair[[3]]))
+  return(c(pair[[1]], pair[[2]], pair[[3]], pair[[4]]))
 })
 
 
 
 insertions <- as.data.frame(t(all.seqs), stringsAsFactors = F)
-colnames(insertions) <- c("tip", "anc", "branch")
+colnames(insertions) <- c("tip", "anc", "branch", 'no.filter')
 
 # Generate the length and position columns
 data <- t(unname(sapply(insertions$anc, function(x){
@@ -139,52 +160,54 @@ data <- t(unname(sapply(insertions$anc, function(x){
 insertions$len <- data[,1]
 insertions$pos <- data[,2]
 
-# vec <- c()
-# for (i in 1:1000){
-#   x <- round(rgeom(1000, 0.17))
-#   x <- x[x>0]
-#   vec[i] <- sum(x%%3==0) / 1000
-# }
-# median(vec)   # this number is used to calibrate the MCMC
-# rm(vec)
+# ----- Fixation Parameter Testing -----
+t <- sum(as.numeric(insertions$no.filter))
 
-# VERSION 4:
-# generate a vector of T/F values to remove non3 values from the data
-toInclude <- sapply(insertions$len, function(len){
-  if (is.na(len)){
-    T
-  }else if (len %% 3 != 0){
-    runif(1) < 0.12
-  }else{
-    T
-  }
-})
+all.len <- insertions[!is.na(insertions$len), 'len']
+a <- sum(all.len %% 3 == 0)
+b <- sum(all.len %% 3 != 0)
 
-# filter out insertions based on the fixation parameter
-insertions <- insertions[toInclude,]
-#rm(insertions)
-setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, F)
+#prop[i] <- a / (b / 0.09 + a) 
+total[i] <- t
+avec[i] <- a
+bvec[i] <- b
+#}
 
-# ----- algorithm testing ---
-
-# all.len <- insertions[!is.na(insertions$len), 'len']
-# filt.len <- new.ins[!is.na(new.ins$len), 'len']
-# sum(all.len %% 3 == 0)
-# sum(all.len %% 3 != 0)
-# x <- sum(filt.len %% 3 == 0)
-# vec[i] <- sum(filt.len %% 3 != 0) / ((x / 0.276) - x)
+all.len <- insertions[!is.na(insertions$len), 'len']
+#filt.len <- new.ins[!is.na(new.ins$len), 'len']
+sum(all.len %% 3 == 0)
+sum(all.len %% 3 != 0)
+x <- sum(filt.len %% 3 == 0)
+vec[i] <- sum(filt.len %% 3 != 0) / ((x / 0.276) - x)
 #}
 
 
-# RUN MCMC
-startvalue <- c(0.01, 0.55, 0.000001, 0.25)
-notes <- "perfect slip test with the new fixation parameter
-truevalues:(0.00016, 0.75, 0.00001, 0.12)
-startvalues:(0.01, 0.55, 0.000001, 0.25)
-priors: all uninformative, uniform, broad
+
+# ---- Geometric Distribution Calibration -----
+calib <- c()
+values <- seq(0.05, 0.25, 0.01)
+for (n in 1:length(values)){
+  vec <- c()
+  for (i in 1:500){
+    x <- round(rgeom(1000, values[n]))
+    x <- x[x>0]
+    vec[i] <- sum(x%%3==0) / 1000
+  }
+  calib[n] <- median(vec)
+}
+rm(vec)
+
+#  ---- Start MCMC ----
+setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, F)
+startvalue <- c(0.001, 0.55, 0.000001, 0.25)
+notes <- "Test # 15 for fixation parameter
+changes made to p.enter and rate llh calculations
+truevalues:(0.00052, 0.80, 0.00001, 0.09)
+startvalues:(0.001, 0.55, 0.000001, 0.25)
+priors: all uninformative, uniform, broad, except fixation
 shuffle: off
 "
-chain <- runMCMC(startvalue, 200000, '14-perfect3', notes)
+chain <- runMCMC(startvalue, 200000, '15-fix-perfect', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE
@@ -208,8 +231,8 @@ chain <- runMCMC(startvalue, 200000, '14-perfect3', notes)
 #   unname(sapply(strsplit(x, "")[[1]], as.numeric))
 # }))
 
-# ----- For checking -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/slip-model-v4-1.csv", stringsAsFactors = F, skip=1, header=F)
+# ----- For checking ------
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-14-perfect3.csv", stringsAsFactors = F, skip=1, header=F)
 colnames(csv) <- c('p.enter', 'p.stay', "rate" ,'slip.changed', 'accept', 'time')
 
 # -----IDEA TO IMPLEMENT ------
