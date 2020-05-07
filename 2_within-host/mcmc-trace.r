@@ -1,6 +1,6 @@
 # ----- SLIPPAGE MODEL -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-14-perfect3.csv", stringsAsFactors = F, skip=7, header=F)
-csv2 <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-10-fix3.csv", stringsAsFactors = F, comment.char="#")
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-15-fix-perfect.csv", stringsAsFactors = F, comment.char="#")
+csv2 <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-16-fix-perfect.csv", stringsAsFactors = F, comment.char="#")
 
 csv 
 
@@ -10,14 +10,14 @@ csv
 #   })
 # }))
 burnin <- ceiling(0.1*nrow(csv))
-tru <- c(0.00016, 0.75, 0.00001, 0.12)
-colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'fix','likelihood', 'slip.changed', 'accept', 'time')
+tru <- c(0.00052, 0.80, 0.00001, 0.09)
+#colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'fix','likelihood', 'slip.changed', 'accept', 'time')
 # colnames(csv) <- c('p.enter', 'slope','int', 'rate', 'slip.changed', 'accept', 'time')
 #png(file="~/vindels/Figures/within-host/finalized/slippage-trace2.png", width=600, height=800)
 par(mar=c(2.5,5,3,1), mfrow=c(2,2))
 plot(csv[-(1:burnin)
          ,1], type = "l", xlab="MCMC Steps (x10)" , ylab="P(Enter)",
-     main = "Chain values of Enter", cex.axis=1.3, cex.lab=1.4, cex.main=1.7)#, ylim=c(0.00015, 0.00025))
+     main = "Chain values of Enter", cex.axis=1.3, cex.lab=1.4, cex.main=1.7)#, ylim=c(0.0005, 0.0012))
 abline(h=tru[1],col='red',lwd=2)
 plot(csv[-(1:burnin)
          ,2], type = "l", xlab="MCMC Steps (x10)" , ylab="P(Stay)",
@@ -25,11 +25,11 @@ plot(csv[-(1:burnin)
 abline(h=tru[2],col='red',lwd=2)
 plot(csv[-(1:burnin)
          ,3], type = "l", xlab="MCMC Steps (x10)" , ylab="Rate",
-     main = "Chain values of Rate",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)#, ylim=c(0.0001,0.00015))
+     main = "Chain values of Rate",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)#, ylim=c(0.00001,0.000018))
 abline(h=tru[3],col='red',lwd=2)
 plot(csv[-(1:burnin)
          ,4], type = "l", xlab="MCMC Steps (x10)" , ylab="Fix",
-     main = "Chain values of Fix",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7, ylim=c(0.1,0.25))
+     main = "Chain values of Fix",  cex.axis=1.3, cex.lab=1.4, cex.main=1.)#,ylim=c(0.1,0.25))
 abline(h=tru[4],col='red',lwd=2)
 plot(csv[-(1:burnin)
          ,'fix-sd'], type = "l", xlab="MCMC Steps (x10)" , ylab="Fix - SD",

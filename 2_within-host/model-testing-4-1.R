@@ -198,16 +198,15 @@ for (n in 1:length(values)){
 rm(vec)
 
 #  ---- Start MCMC ----
-setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, F)
+setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
 startvalue <- c(0.001, 0.55, 0.000001, 0.25)
-notes <- "Test # 15 for fixation parameter
-changes made to p.enter and rate llh calculations
+notes <- "Test # 16 for fixation parameter
 truevalues:(0.00052, 0.80, 0.00001, 0.09)
 startvalues:(0.001, 0.55, 0.000001, 0.25)
 priors: all uninformative, uniform, broad, except fixation
-shuffle: off
+shuffle: on
 "
-chain <- runMCMC(startvalue, 200000, '15-fix-perfect', notes)
+chain <- runMCMC(startvalue, 200000, '16-fix-perfect', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE
