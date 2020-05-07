@@ -13,26 +13,27 @@
 data {
   int<lower=0> npat;
   int<lower=0> ndata;
-  vector[npat] mat[ndata];
+  matrix[ndata,npat] mat;
 }
 
 // The parameters accepted by the model. Our model
 // accepts two parameters 'mu' and 'sigma'.
 parameters {
-  //real sub_rate;
-  real pat_rate;
-  real<lower=0, upper=7> pat_sd;
+  real sub_rate;
+  real<lower=0> sub_sd;
+
+  vector[npat] pat_rate;
+  real<lower=0> pat_sd;
 }
 
 // The model to be estimated. We model the output
 // 'y' to be normally distributed with mean 'mu'
 // and standard deviation 'sigma'.
 model {
-  pat_rate ~ uniform(0,50);  // --> after running, posterior is normally distributed; 
-  pat_sd ~ uniform(0,10);           // this shows the prior distribution and the
+  pat_rate ~ normal(sub_rate, sub_sd);  // --> after running, posterior is normally distributed;           // this shows the prior distribution and the
   
   for (i in 1:npat){
-    mat[i] ~ normal(pat_rate, pat_sd); // within patient distribution 
+    mat[i] ~ normal(pat_rate[i], pat_sd); // within patient distribution 
   }
 }
 

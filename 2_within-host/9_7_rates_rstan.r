@@ -19,40 +19,70 @@ for (i in 1:num.pat){
 }
 
 # ----- Real Data ----
-for (i in 1:5){
-  data <- vloop.mat[[i]][[4]]
-  num.pat <- ncol(data)
-  num.data <- 200
-  rstan_options(auto_write=T)
-  options(mc.cores = parallel::detectCores()-2)
-  
-  
-  
-  # ----- Stan Model ----
-  data.stan <- list(npat = num.pat,
-                    ndata = num.data,
-                    mat = data)
-  
-  stan.fit <- stan("~/vindels/2_within-host/rates.stan",
-                   data= data.stan, 
-                   chains=1,
-                   iter=1000000)
-  
-  #stan_dens(stan.fit)
-  summary(stan.fit)$summary
-  #irates <- data.frame()
-  # irates <- rbind(irates, data.frame(rate=summary(stan.fit)$summary[1,6],
-  #                                    vloop=i,id="node",
-  #                                    lower=summary(stan.fit)$summary[1,4],
-  #                                    upper=summary(stan.fit)$summary[1,8]
-  #                                    ))
-  drates<- rbind(drates, data.frame(rate=summary(stan.fit)$summary[1,6],
-                                    vloop=i,id="node",
-                                    lower=summary(stan.fit)$summary[1,4],
-                                    upper=summary(stan.fit)$summary[1,8]
-  ))
-}
+type <- c("tip","node")
+rstan_options(auto_write=T)
+options(mc.cores = parallel::detectCores()-2)
+irates <- data.frame()
+drates <- data.frame()
 
+for (t in 1:2){ 
+  for (i in 1:5){
+    data <- vloop.mat[[i]][[t]]
+    num.pat <- ncol(data)
+    num.data <- nrow(data)
+    if (!is.na(data)){
+      # ----- Stan Model ----
+      data.stan <- list(npat = num.pat,
+                        ndata = num.data,
+                        mat = data)
+      
+      stan.fit <- stan("~/vindels/2_within-host/rates.stan",
+                       data= data.stan, 
+                       chains=1,
+                       iter=500000)
+                       #control = list(adapt_delta = 0.99))
+      
+      irates <- rbind(irates, data.frame(rate=summary(stan.fit)$summary[1,6],
+                                         vloop=i,id=type[t],
+                                         lower=summary(stan.fit)$summary[1,4],
+                                         upper=summary(stan.fit)$summary[1,8]
+      ))
+    }else{
+      irates <- rbind(irates, data.frame(rate=NA,
+                                         vloop=i,id=type[t],
+                                         lower=NA,
+                                         upper=NA))
+    }
+
+    
+    data <- vloop.mat[[i]][[t+2]]
+    num.pat <- ncol(data)
+    num.data <- nrow(data)
+    if (!is.na(data)){
+      # ----- Stan Model ----
+      data.stan <- list(npat = num.pat,
+                        ndata = num.data,
+                        mat = data)
+      
+      stan.fit <- stan("~/vindels/2_within-host/rates.stan",
+                       data= data.stan, 
+                       chains=1,
+                       iter=500000)
+                       #control = list(adapt_delta = 0.99))
+      
+      drates<- rbind(drates, data.frame(rate=summary(stan.fit)$summary[1,6],
+                                        vloop=i,id=type[t],
+                                        lower=summary(stan.fit)$summary[1,4],
+                                        upper=summary(stan.fit)$summary[1,8]
+      ))
+    }else{
+      drates <- rbind(drates, data.frame(rate=NA,
+                                         vloop=i,id=type[t],
+                                         lower=NA,
+                                         upper=NA))
+    }
+  }
+}
 # # --- bootstraps --- 
 # not useful; give CIs that are far too narrow
 # bs <- c()
@@ -70,6 +100,7 @@ iplot <- ggplot() +
   geom_errorbar(aes(x=irates$vloop, fill=irates$id, ymax = irates$upper, ymin = irates$lower),
                 width = 0.25, size=0.8,
                 position = position_dodge(0.9)) +
+  scale_y_continuous(lim=c(0,25)) + 
   labs(x="Variable Loop", 
        y=expression(paste("      Insertion Rate \n (Events/Nt/Year x  ",10^-3 ,")", sep = "")), 
        title="Indel Rates",
@@ -101,7 +132,7 @@ dplot <- ggplot() +
                 position = position_dodge(0.9)) +
   labs(x="Variable Loop", 
        y="Deletion Rate") +
-  scale_y_reverse(lim=c(10,0)) + 
+  scale_y_reverse(lim=c(35,0)) + 
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank(),

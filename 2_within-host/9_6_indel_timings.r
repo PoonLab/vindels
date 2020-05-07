@@ -228,9 +228,6 @@ for (i in 1:length(iint)){
           return(NA)
         })
     })
-    # in.fit <- glm(ins.node[,i] ~ 1, offset=log(ins.node[,"length"]), family="poisson")
-    # dt.fit <- glm(del.tip[,i] ~ 1, offset=log(del.tip[,"length"]), family="poisson")
-    # dn.fit <- glm(del.node[,i] ~ 1, offset=log(del.node[,"length"]), family="poisson")
     
     rates <- unname(sapply(fit.list, function(x){
       if (all(is.na(x))){
@@ -245,13 +242,11 @@ for (i in 1:length(iint)){
     }))
     
     for (x in 1:4){
-      rate.list[[x]][j] <- rates[x]
+      rate.list[[x]][j] <- rates[x] * 10^3
     }
     
   }
-  rate.list <- lapply(rate.list, function(x){
-    x * 10^3
-  })
+  
   patid <- strsplit(names(iint)[i], "-")[[1]][1]
   runno <- strsplit(names(iint)[i], "-")[[1]][2]
   
@@ -272,12 +267,12 @@ all.rates <- lapply(1:4, function(x){
 })
 
 
-require(plyr)
-compact <- function(x){
-  if (!is.null(x)){
-    x
-  }
-}
+# require(plyr)
+# compact <- function(x){
+#   if (!is.null(x)){
+#     x
+#   }
+# }
 vloop <- lapply(1:5, function(w){
   lapply(1:4, function(x){
     out <- lapply(all.rates[[x]], function(y){
@@ -300,20 +295,29 @@ vloop.mat <- lapply(1:5, function(w){
       mat <- matrix(nrow=200, ncol=length(data))
       
       # load the matrix 
+      na.vec <- c()
       for (i in 1:ncol(mat)){
         mat[,i] <- data[[i]]
-      }
-      toRemove <- c()
-      for (j in 1:ncol(mat)){
-        if (any(is.na(mat[,j]))){
-          toRemove <- c(toRemove, j)
+        nas <- sum(is.na(mat[,i]))
+        if (nas > 50){
+          na.vec[i] <- NA
+        }else{
+          na.vec[i] <- nas
         }
       }
-      if (length(toRemove) > 0){
-        mat[,-toRemove]
-      }else{
-        mat
+      
+      if (any(is.na(na.vec))){
+        mat <- mat[,-c(which(is.na(na.vec)))]
       }
+      #print(dim(mat))
+      new.mat <- matrix(nrow=(200-max(na.vec,na.rm=T)), ncol=ncol(mat))
+      
+      for (j in 1:ncol(mat)){
+        idx <- which(!is.na(mat[,j]))
+        new.mat[,j] <- mat[idx[sample(1:(200-max(na.vec,na.rm=T)))],j]
+      }
+      
+      new.mat
     }
   })
 })
