@@ -78,8 +78,10 @@ require(RColorBrewer)
 pal <- c("gray28", "blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
 pal <- pal[length(pal):1]
 
-data <- ddf
+data <- idf
 
+
+png(filename="~/vindels/Figures/within-host/finalized/ins-length-v2", width=1200, height=800)
 par(mar=c(5,5,2,1))
 plot(NA, xlim=c(0,5), 
      ylim=c(0,300), 
@@ -109,7 +111,7 @@ for (i in seq(0.5,4.5)){
     pos <- pos + n
   }
 }
-
+dev.off()
 
 require(ggplot2)
 iplot <- ggplot() + 
