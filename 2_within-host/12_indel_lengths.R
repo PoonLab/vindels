@@ -78,11 +78,11 @@ require(RColorBrewer)
 pal <- c("gray28", "blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
 pal <- pal[length(pal):1]
 
-data <- idf 
+data <- ddf
 
 par(mar=c(5,5,2,1))
 plot(NA, xlim=c(0,5), 
-     ylim=c(0,150), 
+     ylim=c(0,250), 
      xaxt="n",
      xaxs="i",
      yaxs="i",
