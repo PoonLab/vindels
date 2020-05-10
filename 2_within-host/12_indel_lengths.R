@@ -82,7 +82,7 @@ data <- ddf
 
 par(mar=c(5,5,2,1))
 plot(NA, xlim=c(0,5), 
-     ylim=c(0,250), 
+     ylim=c(0,300), 
      xaxt="n",
      xaxs="i",
      yaxs="i",
