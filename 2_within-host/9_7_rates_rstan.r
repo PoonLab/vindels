@@ -100,7 +100,7 @@ require(Rmisc)
 require(ggplot2)
 iplot <- ggplot() + 
   geom_bar(aes(vloop, rate, fill=id), data=irates, stat='identity', position="dodge") + 
-  scale_fill_manual(values=c("red","blue"), name="Subset", labels=c("Tip Sequences","Internal Nodes")) +
+  scale_fill_manual(values=c("red","dodgerblue"), name="Subset", labels=c("Tip Sequences","Internal Nodes")) +
   coord_flip() + geom_errorbar(aes(x=irates$vloop, fill=irates$id, ymax = irates$upper, ymin = irates$lower),
                 width = 0.25, size=0.8,
                 position = position_dodge(0.9)) +
@@ -134,7 +134,7 @@ iplot <- ggplot() +
 iplot
 dplot <- ggplot() + 
   geom_bar(aes(x=vloop, y=rate, fill=id), data=drates, stat='identity', position="dodge") + 
-  coord_flip() + scale_fill_manual(values=c("red","blue"))+
+  coord_flip() + scale_fill_manual(values=c("red","dodgerblue"))+
   geom_errorbar(aes(x=drates$vloop, fill=drates$id, ymax = drates$upper, ymin = drates$lower),
                 width = 0.25, size=0.8,
                 position = position_dodge(0.9)) +
