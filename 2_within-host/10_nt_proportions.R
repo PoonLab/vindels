@@ -7,8 +7,8 @@ source("~/vindels/2_within-host/utils.r")
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
  
-ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.csv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.csv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/mcc/tips/ins/*.csv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/mcc/tips/del/*.csv"))
 
 # INSERTION PARSING ----------
 #ifolder <- Sys.glob("~/PycharmProjects/hiv-withinhost/9Indels/ins_mcc/*.csv")

@@ -48,8 +48,11 @@ dLength$Bin <- sapply(dLength$Seq,categorize)
 "," %in% dLength$Seq
 
 # order the iLength and dLength dataframes 
-iLength$Bin <- factor(iLength$Bin,levels=c(">9","9","7-8", "6", "4-5","3", "1-2"))
-dLength$Bin <- factor(dLength$Bin,levels=c(">9","9","7-8", "6", "4-5","3", "1-2"))
+l <- c(">9","9","7-8", "6", "4-5","3", "1-2")
+l <- l[length(l):1]  # TO REVERSE THE ORDER 
+
+iLength$Bin <- factor(iLength$Bin,levels=l)
+dLength$Bin <- factor(dLength$Bin,levels=l)
 
 # table manipulation for data display
 itab <- table(iLength$Bin, iLength$Vloop)
@@ -58,13 +61,56 @@ dtab <- table(dLength$Bin, dLength$Vloop)
 idf <- as.data.frame(itab)
 ddf <- as.data.frame(dtab)
 
-colnames(idf) <- c("Bin", "Vloop", "Count")
+# add in the significance level column
+idf$Sign <- rep(2,35)
+idf$Sign[c(1,11,15,23,28,30,31,35)] <- c(1,3,3,1,3,3,3,1)
+
+ddf$Sign <- rep(2,35)
+ddf$Sign[c(7,11,13,14,15,29,30,31,35)] <- c(3,3,3,1,3,1,3,3,1)
+
+
+colnames(idf) <- c("Bin", "Vloop", "Count", "Sign")
 colnames(ddf) <- colnames(idf)
 
 # STACK BAR PLOT 
 # -------------------------------------------
 require(RColorBrewer)
 pal <- c("gray28", "blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
+pal <- pal[length(pal):1]
+
+data <- idf 
+
+par(mar=c(5,5,2,1))
+plot(NA, xlim=c(0,5), 
+     ylim=c(0,150), 
+     xaxt="n",
+     xaxs="i",
+     yaxs="i",
+     xlab="Variable Loop",
+     ylab="Frequency",
+     cex.lab=1.4, cex.axis=1.2, las=1)
+axis(1,at=seq(0.5,4.5), 
+     labels=c("V1", "V2", "V3", "V4", "V5"),
+     cex.axis=1.2)
+abline(v=seq(0.5,4.5)-0.3, lty=1, col="gray68")
+abline(v=seq(0.5,4.5)+0.3, lty=1, col="gray68")
+#abline(h=seq(0,150,50), col="gray68")
+
+for (i in seq(0.5,4.5)){
+  pos <- 0
+  d <- data[data$Vloop==i+0.5,]
+  #data <- data[nrow(data):1,]
+  
+  for (j in 1:7){
+    s <- d[j,"Sign"]
+    n <- d[j,"Count"]
+    
+    rect(i-0.15*s, pos, i+0.15*s, pos+n, col=pal[j])
+    pos <- pos + n
+  }
+}
+
+
 require(ggplot2)
 iplot <- ggplot() + 
   geom_bar(aes(x=Vloop, y=Count, fill=Bin), data=idf, stat='identity') + 
@@ -110,7 +156,7 @@ dplot <- ggplot() +
 dplot
 
 # --- Mosaic Plot -----
-data <- ddf
+data <- idf
 df <- data.frame(bin=factor(rep(data$Bin, data$Count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(data$Vloop, data$Count))
 
 # reorder the data frame 
