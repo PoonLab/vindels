@@ -52,7 +52,7 @@ setup <- function(tip, anc, len, pos, branches, shuffle){
   # all non-3 insertion lengths
   b <<- sum(lens %% 3 != 0)
   
-  est.total <<- a / 0.244
+  est.total <<- a / 0.29
   est.fix <<- b / (est.total - a)
   
 }

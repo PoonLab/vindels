@@ -130,13 +130,13 @@ simPair <- function(p.enter, p.stay, rate, fix){
 # avec <- c()
 # bvec <- c()
 # total <- c()
-# for (i in 1:500){
+# for (i in 1:50){
 # SIMULATE TIP + ANCESTOR SEQUENCES
 all.seqs <- sapply(1:25000, function(n){
   if (n %% 1000 == 0 ){
     print(n)
   }
-  pair <- simPair(0.00052, 0.80, 0.00001, 0.09)
+  pair <- simPair(0.00052, 0.89, 0.00001, 0.09)
   # VALUE 1 = Tip, VALUE 2 = Ancestor, VALUE 3 = Branch length
   return(c(pair[[1]], pair[[2]], pair[[3]], pair[[4]]))
 })
@@ -198,15 +198,15 @@ for (n in 1:length(values)){
 rm(vec)
 
 #  ---- Start MCMC ----
-setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
-startvalue <- c(0.001, 0.55, 0.000001, 0.25)
-notes <- "Test # 16 for fixation parameter
-truevalues:(0.00052, 0.80, 0.00001, 0.09)
-startvalues:(0.001, 0.55, 0.000001, 0.25)
+setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, F)
+startvalue <- c(0.001, 0.65, 0.000001, 0.25)
+notes <- "Test # 17 for fixation parameter
+truevalues:(0.00052, 0.89, 0.00001, 0.09)
+startvalues:(0.001, 0.65, 0.000001, 0.25)
 priors: all uninformative, uniform, broad, except fixation
-shuffle: on
+shuffle: off
 "
-chain <- runMCMC(startvalue, 200000, '16-fix-perfect', notes)
+chain <- runMCMC(startvalue, 500000, '17-fix-perfect', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE
