@@ -437,17 +437,23 @@ translate <- function(dna) {
     extra <- nchar(dna) %% 3
     dna <- substr(dna,1, nchar(dna)-extra)
   }
+    
   dnabin <- as.DNAbin(DNAString(dna))
   aabin <- trans(dnabin)[[1]]
   aaseq <- paste(as.character(aabin),collapse="")
+  aaseq <- gsub("X", "-", aaseq)
   truncate(aaseq)
 }
 
 # takes in an amino acid sequence and returns the locations of all Nglycs
-extractGlycs <- function(aaseq){
+extractGlycs <- function(aaseq, vect=F){
   aaseq <- truncate(aaseq)
   result <- gregexpr("N[^P][ST][^P]", aaseq)[[1]]  # used for 0 indexing these position values for analysis in python 
-  paste(result, collapse=",")
+  if(!vect){
+    paste(result, collapse=",")
+  }else{
+    result
+  }
 }
 
 countGlycs <- function(field){

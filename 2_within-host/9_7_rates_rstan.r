@@ -39,7 +39,7 @@ for (t in 1:2){
       stan.fit <- stan("~/vindels/2_within-host/rates.stan",
                        data= data.stan, 
                        chains=1,
-                       iter=500000)
+                       iter=1000000)
                        #control = list(adapt_delta = 0.99))
       
       irates <- rbind(irates, data.frame(rate=summary(stan.fit)$summary[1,6],
@@ -67,7 +67,7 @@ for (t in 1:2){
       stan.fit <- stan("~/vindels/2_within-host/rates.stan",
                        data= data.stan, 
                        chains=1,
-                       iter=500000)
+                       iter=1000000)
                        #control = list(adapt_delta = 0.99))
       
       drates<- rbind(drates, data.frame(rate=summary(stan.fit)$summary[1,6],
