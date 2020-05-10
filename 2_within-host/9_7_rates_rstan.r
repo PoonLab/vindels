@@ -160,8 +160,9 @@ dplot <- ggplot() +
         legend.position="none") + geom_text(aes(y=1.7,x= 3.25),label="N/A", size=6)
 dplot
 
+png(filename="~/vindels/Figures/within-host/finalized/indel-rates-v2", width=1200,height=800)
 multiplot(dplot,iplot, cols=2)
-
+dev.off()
 pdf()
 traceplot()
 dev.off()
