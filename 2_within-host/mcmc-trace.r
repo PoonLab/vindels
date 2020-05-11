@@ -1,6 +1,6 @@
 # ----- SLIPPAGE MODEL -----
 csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-17-fix-perfect.csv", stringsAsFactors = F, comment.char="#")
-csv2 <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-15-fix-perfect.csv", stringsAsFactors = F, comment.char="#")
+csv2 <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-13-ratetest2.csv", stringsAsFactors = F, comment.char="#")
 
 csv 
 
@@ -10,7 +10,7 @@ csv
 #   })
 # }))
 burnin <- ceiling(0.1*nrow(csv))
-tru <- c(0.00052, 0.80, 0.00001, 0.09)
+tru <- c(0.00052, 0.75, 0.00001, 0.09)
 #colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'fix','likelihood', 'slip.changed', 'accept', 'time')
 # colnames(csv) <- c('p.enter', 'slope','int', 'rate', 'slip.changed', 'accept', 'time')
 #png(file="~/vindels/Figures/within-host/finalized/slippage-trace2.png", width=600, height=800)
@@ -41,7 +41,7 @@ main <- 2.3
 lab <- 2.0
 ax <- 1.7
 
-par(mar=c(6,5,6,0.5),mfrow=c(1,4),las=1,scipen=10000)
+par(mar=c(6,5,6,0.5),mfrow=c(1,3),las=1,scipen=10000)
 hist(csv[-(1:burnin),1], 
      freq=F,
      col="dodgerblue", 
@@ -51,8 +51,8 @@ hist(csv[-(1:burnin),1],
      xlab="P(Enter)", cex.axis=ax, cex.lab=lab, cex.main=main)
 abline(v=tru[1],col='black',lwd=2,lty=2)
 lines(xy.coords(x=c(1e-6,1e-2), y=c(100,100)),col="red",lwd=2.5)
-axis(2, 
-     labels=c("0","5e3", "1e4", "1.5e4"), 
+axis(2,
+     labels=c("0","5e3", "1e4", "1.5e4"),
      at=c(0,5000,10000,15000),
      cex.axis=ax)
 hist(rep(csv2[-(1:burnin),2],3), 
