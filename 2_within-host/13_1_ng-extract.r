@@ -233,7 +233,7 @@ points(data[,c("exp","obs")], pch=21, col=colors, cex=sizes,lwd=1, bg=colors )
 arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
 arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
 
-legend(0.25,-0.3,legend=vloops, pch=21,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.5)
+legend(0.25,-0.3,legend=vloops, pch=21,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.8)
 #legend(0.45,0.2,legend=c("Ins", "Del"), pch=c(21,1),cex=1.3, pt.bg=colors[1],col=colors[1], x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 rect(0.25,-0.25,0.48,-0.03)
 text(0.4, -0.09, labels="Ins", cex=1.3)
