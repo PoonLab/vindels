@@ -215,10 +215,10 @@ data <- del.data
 sizes <- 0.4*sqrt(data$counts)
 sizes[3] <- 1.2
 
-lim = c(-0.8,0.8)
+lim = c(-0.8,0.5)
 
 plot(data[,c('exp','obs')], pch=1, cex=sizes, lwd=10, col=colors,xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='', main="N-linked Glycosylation Site Interactions")
+     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='', main="N-linked Glycosylation Site Changes")
 abline(0,1)
 title(ylab="Observed Net Change in N-Glyc Sites", line=3,cex.lab=1.4)
 title(xlab="Expected Net Change in N-Glyc Sites", line=3,cex.lab=1.4)
@@ -233,18 +233,18 @@ points(data[,c("exp","obs")], pch=21, col=colors, cex=sizes,lwd=1, bg=colors )
 arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
 arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
 
-legend(0.45,-0.2,legend=vloops, pch=21,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.5)
+legend(0.25,-0.3,legend=vloops, pch=21,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.5)
 #legend(0.45,0.2,legend=c("Ins", "Del"), pch=c(21,1),cex=1.3, pt.bg=colors[1],col=colors[1], x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
-rect(0.45,-0.15,0.76,0.2)
-text(0.67, 0.09, labels="Ins", cex=1.5)
-text(0.67, -0.05, labels="Del", cex=1.5)
-points(c(0.53,0.53), c(0.09, -0.05), pch=c(21,1), cex=3, lwd=7, col='black', bg='black')
+rect(0.25,-0.25,0.48,-0.03)
+text(0.4, -0.09, labels="Ins", cex=1.3)
+text(0.4, -0.19, labels="Del", cex=1.3)
+points(c(0.30,0.30), c(-0.09, -0.18), pch=c(21,1), cex=2.5, lwd=7, col='black', bg='black')
 # positions for V1,V2,V3,V4,V5 (top set first )
-xposi <- c(-0.44, -0.18, -0.2, -0.73, 0)
-yposi <- c(0.35, 0.3, 0.05, 0.35, 0.30)
+xposi <- c(-0.42, -0.18, -0.2, -0.70, 0)
+yposi <- c(0.35, 0.3, 0.05, 0.32, 0.30)
 
 xposd <- c(-0.55, -0.4, -0.1, -0.75, -0.1)
-yposd <- c(-0.30, -0.2, -0.22,-0.35, -0.03)
+yposd <- c(-0.32, -0.22, -0.22,-0.37, -0.03)
 
 text(xposi, yposi, labels=c("V1","V2","V3","V4","V5"))
 text(xposd, yposd, labels=c("V1","V2","V3","V4","V5"))
