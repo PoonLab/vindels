@@ -78,22 +78,26 @@ require(RColorBrewer)
 pal <- c("gray28", "blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
 pal <- pal[length(pal):1]
 
-data <- idf
+data <- ddf
 
 
-png(filename="~/vindels/Figures/within-host/finalized/ins-length-v2", width=1200, height=800)
-par(mar=c(5,5,2,1))
+png(filename="~/vindels/Figures/within-host/finalized/del-length-v2", width=1200, height=700)
+par(mar=c(6,7,2,1))
+ax <- 1.9
+lab <- 2.3
 plot(NA, xlim=c(0,5), 
-     ylim=c(0,300), 
+     ylim=c(0,250), 
      xaxt="n",
      xaxs="i",
      yaxs="i",
-     xlab="Variable Loop",
-     ylab="Frequency",
-     cex.lab=1.4, cex.axis=1.2, las=1)
+     xlab="",
+     ylab="",
+     cex.lab=lab, cex.axis=ax, las=1)
 axis(1,at=seq(0.5,4.5), 
      labels=c("V1", "V2", "V3", "V4", "V5"),
-     cex.axis=1.2)
+     cex.axis=ax)
+title(ylab="Frequency", cex.lab=lab, line=4.8)
+title(xlab="Variable Loop", cex.lab=lab, line=3.5)
 abline(v=seq(0.5,4.5)-0.3, lty=1, col="gray68")
 abline(v=seq(0.5,4.5)+0.3, lty=1, col="gray68")
 #abline(h=seq(0,150,50), col="gray68")

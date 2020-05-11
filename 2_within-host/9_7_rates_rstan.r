@@ -104,7 +104,7 @@ iplot <- ggplot() +
   coord_flip() + geom_errorbar(aes(x=irates$vloop, fill=irates$id, ymax = irates$upper, ymin = irates$lower),
                 width = 0.25, size=0.8,
                 position = position_dodge(0.9)) +
-  scale_y_continuous(lim=c(0,30), expand=c(0,0)) + 
+  scale_y_continuous(lim=c(0,35), expand=c(0,0)) + 
   scale_x_discrete(limits = rev(levels(irates$vloop))) +
   labs(#x="Variable Loop", 
        y=expression(paste("      Insertion Rate \n (Events/Nt/Year x",10^-3 ,")", sep = ""))) + 
@@ -121,16 +121,16 @@ iplot <- ggplot() +
         #axis.line.x = element_line(colour = "black"), 
         #axis.line.y.left=element_line(colour="black"),
         axis.title.y=element_blank(),
-        axis.title.x=element_text(size=18,margin=margin(t = 22, r = 3, b = 0, l = 22)),
-        axis.text.y = element_text(size=16, colour="black", margin=margin(t = 0, r = 6, b = 2, l = 2)),
-        axis.text.x=element_text(size=16, colour="black"),
+        axis.title.x=element_text(size=24,margin=margin(t = 22, r = 3, b = 0, l = 22)),
+        axis.text.y = element_text(size=22, colour="black", margin=margin(t = 0, r = 6, b = 2, l = 2)),
+        axis.text.x=element_text(size=22, colour="black"),
         #plot.title = element_text(size=22, hjust = 0.5),
-        legend.position=c(0.8,0.85),
-        legend.text=element_text(size=16), 
+        legend.position=c(0.73,0.85),
+        legend.text=element_text(size=22), 
         legend.background=element_rect(colour="black"),
-        legend.title=element_text(size=18),
+        legend.title=element_text(size=24),
         legend.spacing.y = unit(2, "mm")
-        ) + geom_text(aes(y=c(1.3,1.3),x=c(3.25,2.75)),label="N/A", size=6)
+        ) + geom_text(aes(y=c(1.7,1.7),x=c(3.25,2.75)),label="N/A", size=8)
 iplot
 dplot <- ggplot() + 
   geom_bar(aes(x=vloop, y=rate, fill=id), data=drates, stat='identity', position="dodge") + 
@@ -153,14 +153,15 @@ dplot <- ggplot() +
         plot.margin =margin(t = 4, r = 2, b = 13.5, l = 12, unit = "mm"),
         #axis.line.y = element_line(colour = "black"), 
         axis.text.y = element_blank(),
-        axis.title.y=element_text(size=18),
-        axis.title.x=element_text(size=18,margin=margin(t = 7, r = 3, b = 0, l = 12)),
-        axis.text = element_text(size=16, colour="black"),
-        plot.title = element_text(size=22, hjust = 0.5),
-        legend.position="none") + geom_text(aes(y=1.7,x= 3.25),label="N/A", size=6)
+        axis.title.y=element_text(size=22),
+        axis.title.x=element_text(size=24,margin=margin(t = 7, r = 3, b = 0, l = 12)),
+        axis.text = element_text(size=22, colour="black"),
+        plot.title = element_text(size=28, hjust = 0.5),
+        legend.position="none") + geom_text(aes(y=2.2,x= 3.25),label="N/A", size=8)
 dplot
+multiplot(dplot,iplot, cols=2)
 
-png(filename="~/vindels/Figures/within-host/finalized/indel-rates-v2", width=1200,height=800)
+png(filename="~/vindels/Figures/within-host/finalized/indel-rates-v2", width=1000,height=700)
 multiplot(dplot,iplot, cols=2)
 dev.off()
 pdf()
