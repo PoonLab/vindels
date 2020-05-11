@@ -1,6 +1,6 @@
 # ----- SLIPPAGE MODEL -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-15-fix-perfect.csv", stringsAsFactors = F, comment.char="#")
-csv2 <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-16-fix-perfect.csv", stringsAsFactors = F, comment.char="#")
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-17-fix-perfect.csv", stringsAsFactors = F, comment.char="#")
+csv2 <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-15-fix-perfect.csv", stringsAsFactors = F, comment.char="#")
 
 csv 
 
@@ -35,25 +35,60 @@ plot(csv[-(1:burnin)
          ,'fix-sd'], type = "l", xlab="MCMC Steps (x10)" , ylab="Fix - SD",
      main = "Chain values of Fix SD",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)#, ylim=c(0.0001,0.00015))
 
-par(mar=c(6,5.5,6,1),mfrow=c(1,3))
+
+# ---- Pretty Blue Histograms ----
+main <- 2.3
+lab <- 2.0
+ax <- 1.7
+
+par(mar=c(6,5,6,0.5),mfrow=c(1,4),las=1,scipen=10000)
 hist(csv[-(1:burnin),1], 
+     freq=F,
      col="dodgerblue", 
      breaks=15, 
      main="Posterior of 'Enter'", 
-     xlab="P(Enter)", cex.axis=1.3, cex.lab=1.5, cex.main=1.8)
-abline(v=tru[1],col='red',lwd=2)
-hist(csv[-(1:burnin),2], 
+     yaxt="n",
+     xlab="P(Enter)", cex.axis=ax, cex.lab=lab, cex.main=main)
+abline(v=tru[1],col='black',lwd=2,lty=2)
+lines(xy.coords(x=c(1e-6,1e-2), y=c(100,100)),col="red",lwd=2.5)
+axis(2, 
+     labels=c("0","5e3", "1e4", "1.5e4"), 
+     at=c(0,5000,10000,15000),
+     cex.axis=ax)
+hist(rep(csv2[-(1:burnin),2],3), 
+     freq=F,
      col="dodgerblue", 
      breaks=15, 
      main="Posterior of 'Stay'", 
-     xlab="P(Stay)", cex.axis=1.3, cex.lab=1.5, cex.main=1.8)
-abline(v=tru[2],col='red',lwd=2)
+     xlab="P(Stay)", 
+     ylab="",
+     cex.axis=ax, cex.lab=lab, cex.main=main)
+abline(v=tru[2],col='black',lwd=2, lty=2)
+lines(xy.coords(x=c(0.4,0.9), y=c(2,2)),col="red",lwd=2.5)
+options(scipen=100)
 hist(csv[-(1:burnin),3], 
+     freq=F,
      col="dodgerblue", 
      breaks=15, 
+     ylab="",
+     yaxt="n",
      main="Posterior of 'Rate'", 
-     xlab="Rate", cex.axis=1.3, cex.lab=1.5, cex.main=1.8)
-abline(v=tru[3],col='red',lwd=2)
+     xlab="Rate", cex.axis=ax, cex.lab=lab, cex.main=main)
+abline(v=tru[3],col='black',lwd=2, lty=2)
+lines(xy.coords(x=c(1e-3,1e-7), y=c(1000,1000)),col="red",lwd=2.5)
+axis(2, 
+     labels=c("0","4e5", "8e5", "1.2e6"), 
+     at=c(0,4e5,8e5,1.2e6),
+     cex.axis=ax)
+hist(csv[-(1:burnin),4], 
+     freq=F,
+     col="dodgerblue", 
+     breaks=15, 
+     ylab="",
+     main="Posterior of 'Fixation'", 
+     xlab="P(Fixation)", cex.axis=ax, cex.lab=lab, cex.main=main)
+abline(v=tru[4],col='black',lwd=2, lty=2)
+lines(density(rbeta(10000,3,20)),col="red",lwd=2.5)
 med1 <- median(csv$p.enter)
 med2 <- median(csv$p.stay)
 med3 <- median(csv$rate)
