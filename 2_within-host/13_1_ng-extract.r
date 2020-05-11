@@ -212,7 +212,7 @@ par(pty="s", xpd=F, mar=c(6,8,4,1),las=0)
 
 # Deletion data points 
 data <- del.data
-sizes <- 0.4*sqrt(data$counts)
+sizes <- 0.5*sqrt(data$counts)
 sizes[3] <- 1.2
 
 lim = c(-0.8,0.5)
