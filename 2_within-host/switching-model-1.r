@@ -1,6 +1,6 @@
-# SLIP MODEL 
-# CURRENT VERSION : #4-1
-# 4-1 :  Addition of fixation parameter
+# SWITCH MODEL 
+# CURRENT VERSION : #1
+
 # This parameter will selectively remove non3 indel sequences 
 # from analysis using a beta distribution prior
 source("~/vindels/2_within-host/slip-model-utils.r")
@@ -52,10 +52,9 @@ setup <- function(tip, anc, len, pos, branches, shuffle){
   # all non-3 insertion lengths
   b <<- sum(lens %% 3 != 0)
   
-  # REMOVE:  est.total <<- a / 0.29
-  # REMOVE: est.fix <<- b / (est.total - a)
-  non3 <- 1:100
-  non3 <<- non3[-which(non3%%3==0)]
+  est.total <<- a / 0.29
+  est.fix <<- b / (est.total - a)
+  
 }
 
 likelihood<- function(param, slip.list, llh.list){
@@ -66,12 +65,9 @@ likelihood<- function(param, slip.list, llh.list){
   # this determines the likelihood of the fixation parameter 
   # mean determined by calculated 'est.fix' value
   # param[4] is the proposed 'fix' value
+  llh.fix <- dnorm(param[4], mean=est.fix, sd=0.005, log=T)
   
-  est.non3 <- round((a / (1 - sum(dgeom(non3-1, (1-p.stay))))) - a)
-   
-  llh.fix <- dbinom(b, est.non3, param[4])    # mean=est.fix, sd=0.005, log=T)
-  
-  adj.enter <- p.enter * ((a+b) / (a + est.non3))
+  adj.enter <- p.enter * ((a + b) / est.total)
   
   # ---- Affine Likelihood ---- 
   # utilizes both adj.enter + p.stay
@@ -90,8 +86,8 @@ likelihood<- function(param, slip.list, llh.list){
 }
 
 prior <- function(param){
-  prior.pe <- dunif(param[1], min=1e-7, max=1e-2, log=T) 
-  prior.ps <- dunif(param[2], min=0.4, max=0.95, log=T) 
+  prior.pe <- dunif(param[1], min=1e-6, max=1e-2, log=T) 
+  prior.ps <- dunif(param[2], min=0.4, max=0.9, log=T) 
   prior.rate <- dunif(param[3], min=1e-7, max=1e-3, log=T)
   prior.fix <- dbeta(param[4], shape1=3, shape2=20, log=T)
   #prior.fixsd <- dexp(param[5], rate=1, log=T)
@@ -125,7 +121,7 @@ proposalFunction <- function(param, slip_current, llh_current){
       param[2] <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
       llh_proposed <- llh_current   # stays the same
     }else if(num > 5/10 && num < 8/10){
-      param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
+      param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.05)
       llh_proposed <- seqllh(param[3], slip_current)  # recalcuate using the new rate
     }else{
       param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.05)

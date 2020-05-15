@@ -43,7 +43,13 @@ nt <- c("A", "C", "G", "T")
 # res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
 # sum(res!=0)
 #lens <- c(10,20,20,30,30)
-simPair <- function(p.enter, p.stay, rate, fix){
+simPair <- function(param){
+  
+  p.enter <- param[1]
+  p.stay <- param[2]
+  rate <- param[3]
+  fix <- param[4]
+  
   vlen <- lens[sample(1:5, 1)]
   anc <- genSeq(vlen)
   
@@ -132,33 +138,37 @@ simPair <- function(p.enter, p.stay, rate, fix){
 # total <- c()
 # for (i in 1:50){
 # SIMULATE TIP + ANCESTOR SEQUENCES
-all.seqs <- sapply(1:25000, function(n){
-  if (n %% 1000 == 0 ){
-    print(n)
-  }
-  pair <- simPair(0.00052, 0.89, 0.00001, 0.09)
-  # VALUE 1 = Tip, VALUE 2 = Ancestor, VALUE 3 = Branch length
-  return(c(pair[[1]], pair[[2]], pair[[3]], pair[[4]]))
-})
 
+simSeqs <- function(iter, param){
+  all.seqs <- sapply(1:iter, function(n){
+    if (n %% 1000 == 0 ){
+      print(n)
+    }
+    pair <- simPair(param)
+    # VALUE 1 = Tip, VALUE 2 = Ancestor, VALUE 3 = Branch length
+    return(c(pair[[1]], pair[[2]], pair[[3]], pair[[4]]))
+  })
+  
+  
+  insertions <- as.data.frame(t(all.seqs), stringsAsFactors = F)
+  colnames(insertions) <- c("tip", "anc", "branch", 'no.filter')
+  
+  # Generate the length and position columns
+  data <- t(unname(sapply(insertions$anc, function(x){
+    # returns c(length, position) of insertion events
+    gaps <- gregexpr("-",x)[[1]]
+    if (length(gaps) == 1 && gaps == -1){
+      return (c(NA, NA))
+    }else{
+      return (c(length(gaps), max(gaps)))
+    }
+  })))
+  
+  insertions$len <- data[,1]
+  insertions$pos <- data[,2]
+  return(insertions)
+}
 
-
-insertions <- as.data.frame(t(all.seqs), stringsAsFactors = F)
-colnames(insertions) <- c("tip", "anc", "branch", 'no.filter')
-
-# Generate the length and position columns
-data <- t(unname(sapply(insertions$anc, function(x){
-  # returns c(length, position) of insertion events
-  gaps <- gregexpr("-",x)[[1]]
-  if (length(gaps) == 1 && gaps == -1){
-    return (c(NA, NA))
-  }else{
-    return (c(length(gaps), max(gaps)))
-  }
-})))
-
-insertions$len <- data[,1]
-insertions$pos <- data[,2]
 
 # ----- Fixation Parameter Testing -----
 t <- sum(as.numeric(insertions$no.filter))
@@ -183,6 +193,8 @@ vec[i] <- sum(filt.len %% 3 != 0) / ((x / 0.276) - x)
 
 
 
+
+
 # ---- Geometric Distribution Calibration -----
 calib <- c()
 values <- seq(0.05, 0.25, 0.01)
@@ -197,16 +209,21 @@ for (n in 1:length(values)){
 }
 rm(vec)
 
+
+
 #  ---- Start MCMC ----
+param <- c(0.00052,0.85, 0.00001, 0.09)
+insertions <- simSeqs(25000, param)
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, F)
-startvalue <- c(0.001, 0.65, 0.000001, 0.25)
-notes <- "Test # 17 for fixation parameter
-truevalues:(0.00052, 0.89, 0.00001, 0.09)
-startvalues:(0.001, 0.65, 0.000001, 0.25)
+startvalue <- c(0.0008, 0.65, 0.000001, 0.25)
+notes <- "Test # 18 
+Added in binomial likelihood function to describe the fixation parameter
+truevalues:(0.00052, 0.85, 0.00001, 0.09)
+startvalues:(0.0008, 0.65, 0.000001, 0.25)
 priors: all uninformative, uniform, broad, except fixation
 shuffle: off
 "
-chain <- runMCMC(startvalue, 500000, '17-fix-perfect', notes)
+chain <- runMCMC(startvalue, 200000, '18-fix-perfect', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE
