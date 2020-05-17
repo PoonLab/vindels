@@ -10,7 +10,7 @@ csv
 #   })
 # }))
 burnin <- ceiling(0.1*nrow(csv))
-tru <- c(0.00052, 0.75, 0.00001, 0.09)
+tru <- c(0.00052, 0.89, 0.00001, 0.09)
 #colnames(csv) <- c('p.enter', 'p.stay', 'rate', 'fix','likelihood', 'slip.changed', 'accept', 'time')
 # colnames(csv) <- c('p.enter', 'slope','int', 'rate', 'slip.changed', 'accept', 'time')
 #png(file="~/vindels/Figures/within-host/finalized/slippage-trace2.png", width=600, height=800)
@@ -55,7 +55,7 @@ axis(2,
      labels=c("0","5e3", "1e4", "1.5e4"),
      at=c(0,5000,10000,15000),
      cex.axis=ax)
-hist(rep(csv2[-(1:burnin),2],3), 
+hist(rep(csv[-(1:burnin),2],3), 
      freq=F,
      col="dodgerblue", 
      breaks=15, 
