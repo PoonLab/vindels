@@ -214,16 +214,16 @@ rm(vec)
 #  ---- Start MCMC ----
 param <- c(0.00052,0.85, 0.00001, 0.09)
 insertions <- simSeqs(25000, param)
-setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, F)
+setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
 startvalue <- c(0.0008, 0.65, 0.000001, 0.25)
 notes <- "Test # 18 
-Added in binomial likelihood function to describe the fixation parameter
+Four parameter model test on data with shuffle turned on 
 truevalues:(0.00052, 0.85, 0.00001, 0.09)
 startvalues:(0.0008, 0.65, 0.000001, 0.25)
 priors: all uninformative, uniform, broad, except fixation
 shuffle: off
 "
-chain <- runMCMC(startvalue, 200000, '18-fix-perfect', notes)
+chain <- runMCMC(startvalue, 600000, '19-fix-shuffle', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE

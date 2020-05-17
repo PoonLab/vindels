@@ -128,7 +128,7 @@ proposalFunction <- function(param, slip_current, llh_current){
       param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
       llh_proposed <- seqllh(param[3], slip_current)  # recalcuate using the new rate
     }else{
-      param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.05)
+      param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.02)
       llh_proposed <- llh_current
     }
     slip_proposed <- slip_current    # stays the same
