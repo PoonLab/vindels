@@ -69,7 +69,7 @@ likelihood<- function(param, slip.list, llh.list){
   
   est.non3 <- round((a / (1 - sum(dgeom(non3-1, (1-p.stay))))) - a)
    
-  llh.fix <- dbinom(b, est.non3, param[4])    # mean=est.fix, sd=0.005, log=T)
+  llh.fix <- dbinom(b, est.non3, param[4], log=T)    # mean=est.fix, sd=0.005, log=T)
   
   adj.enter <- p.enter * ((a+b) / (a + est.non3))
   
