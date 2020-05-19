@@ -76,11 +76,11 @@ likelihood<- function(param, slip.list, llh.list){
   y <- sum(slips != 0)
   z <- sum(slips[which(slips!=0)] - 1)
   
-  if (any(is.na(slips))){
-    aff.llh <- log(0)
-  }else{
-    aff.llh <-  x*log(1-adj.enter) + y*log(adj.enter) + y*log(1-p.stay) + z*log(p.stay)
-  }
+  llh.switch <- dbinom(y, length(slips), param[1])
+  llh.len <- 
+  
+  # affine gap parameters will get replaced with a binomial likelihood 
+  # describing the 
   
   aff.llh + sum(llh.list) + llh.fix
 }
