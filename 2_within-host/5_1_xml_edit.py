@@ -63,9 +63,12 @@ for infile in xmlFolder:
     removelist = []
     #tempremove = []
     dates = []
+    
     for element in root.iter():
         #print(element.tag)
-                
+        
+
+        break    # used to avoid fixing the tree for BEAST run 53
         #if element.tag == "date":
         #   dates.append(float(element.get("value")))
         # POP SIZE = 5 
@@ -92,7 +95,7 @@ for infile in xmlFolder:
                 seq.text="???"'''
                 
 
-
+        
         # FIXING THE GUIDE TREE 
         # -----------------------------------------------
         # sets guide tree and removes all operators responsible for modifying the tree 
@@ -181,8 +184,6 @@ for infile in xmlFolder:
     xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/"+run_id+"/"+outname)    
 
 
-# For editing the SkyGrid
-
 
 '''# for editing the output folder path  
 # ------------------------------------------------       
@@ -192,7 +193,6 @@ if element.get('id') == "mcmc":
     #print(element.get('operatorAnalysis'))
 '''
 
-# For Bayesian Skygrid Coalescent
 
 
 

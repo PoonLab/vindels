@@ -15,7 +15,7 @@ if len(sys.argv) != 3:
 template_id = sys.argv[1]
 run_id = sys.argv[2]
 
-if not os.path.isfile('/home/jpalmer/vindels/2_within-host/templates/' + template_id):
+if not os.path.isfile(template_id):
     print("ERROR: Template file not found" + '/home/jpalmer/vindels/2_within-host/templates/' + template_id)
     sys.exit()
 
@@ -26,10 +26,10 @@ else:
     os.mkdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/' + run_id + "/")
     
 
-template_file = '/home/jpalmer/vindels/2_within-host/templates/'+ template_id
+template_file = template_id
 
 #parse(template_file=args.template, fasta_file=args.fasta, stem=args.stem, outfile=args.out, nreps=args.nreps)
-files = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/hm-screen/*.fasta')
+files = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/final/*.fasta')
 subtypes = {}
 for f in files:
     with open(f, "r") as handle: 
