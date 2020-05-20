@@ -21,7 +21,15 @@ def convert_fasta (handle):
     result.append([h,sequence]) # handle last entry
     return result
 
-
+def alignIndex(seq):
+    ai = 0
+    index = {}
+    for n, char in enumerate(seq):
+        if char != '-':
+            index.update({ai:n})
+            ai += 1
+    return index
+            
 def parse_fasta(handle):
     """
     Parse open file as FASTA, return dictionary of 
