@@ -1,5 +1,5 @@
 # ----- SLIPPAGE MODEL -----
-csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-18-fix-perfect.csv", stringsAsFactors = F, comment.char="#")
+csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-20-fix-long.csv", stringsAsFactors = F, comment.char="#")
 csv2 <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-13-ratetest2.csv", stringsAsFactors = F, comment.char="#")
 
 csv 

@@ -37,12 +37,15 @@ bootstrap <- function(vector, replicates){
 
 # specifically handles fields containing a comma
 # and copies their data so they can be split into individual rows in a data frame
-splitRows <- function(row,colnum){
+splitRows <- function(row,col.idx){
   row <- data.frame(t(row),stringsAsFactors = F)
-  seqs <- str_split(row[1,6], ",")[[1]]
-  pos <- str_split(row[1,7],",")[[1]]
+  seqs <- str_split(row[1,col.idx[1]], ",")[[1]]
+  pos <- str_split(row[1,col.idx[2]],",")[[1]]
   len <- length(seqs)
-  data.frame(row[rep(1,len),1:5], Seq=seqs, Pos=pos, row[rep(1,len),8:colnum])
+  data.frame(row[rep(1,len),1:(min(col.idx)-1)], 
+             indel=seqs, 
+             pos=pos, 
+             row[rep(1,len),(max(col.idx)+1):ncol(row)])
 }
 
 
@@ -56,9 +59,9 @@ addX <- function(seq,pos){
 }
 
 
-labels <- function(header, patient, vloop){
+labels <- function(header, patient ){
   letter <- strsplit(patient, "-")[[1]][2]
-  paste0(header,"_", letter, "_", vloop)
+  paste(header,letter,sep="_")
 }
 
 
@@ -362,11 +365,11 @@ csvcount <- function(input,delim=","){
 
 # general
 # used for extracting condensed CSV information 
-extractInfo <- function(input){
-  if (length(input)==1 && input == ""){
-    return(c("",""))
+extractInfo <- function(input, delim=":"){
+  if (is.na(input)){
+    return(c(NA,NA))
   }else{
-    insertions <- strsplit(input, ":")
+    insertions <- strsplit(input, delim)
   }
   seq <- c()
   pos <- c()

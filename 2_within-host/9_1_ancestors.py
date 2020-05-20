@@ -12,6 +12,7 @@ from ete2 import *
 from seqUtils import * 
 from glob import * 
 from ancestors import *
+from os.path import expanduser
 
 def getVRegions(vSeqFile):
 
@@ -204,7 +205,7 @@ def extractIndels(tip, anc, vregion):
             #print(extract_anc)
             #print(csvSeq)'''
 
-    return insertions, deletions, newvar, newanc
+    return [insertions, deletions, newvar, newanc]
     
 def addList(total, toAdd):
     for i in len(total):
@@ -243,10 +244,10 @@ def treeIndelExtract(node, vregion, data):
         aseqs.update({child1:output[3]})
     else:       
         below = treeIndelExtract(child1, vregion, data)
-        insertions.update({child1:below[0]})
-        deletions.update({child1:below[1]})
-        vseqs.update({child1:below[2]})
-        aseqs.update({child1:below[3]})
+        insertions.update(below[0])
+        deletions.update(below[1])
+        vseqs.update(below[2])
+        aseqs.update(below[3])
 
         # 
         output = extractIndels(data[child1], data[node], vregion)
@@ -256,17 +257,17 @@ def treeIndelExtract(node, vregion, data):
         aseqs.update({child1:output[3]})
 
     if isLeaf(child2):
-        output = extractIndels(data[child2], data[node],vregion)
+        output = extractIndels(data[child2], data[node], vregion)
         insertions.update({child2:output[0]})
         deletions.update({child2:output[1]})
         vseqs.update({child2:output[2]})
         aseqs.update({child2:output[3]})
     else:
         below = treeIndelExtract(child2, vregion, data)
-        insertions.update({child2:below[0]})
-        deletions.update({child2:below[1]})
-        vseqs.update({child2:below[2]})
-        aseqs.update({child2:below[3]})
+        insertions.update(below[0])
+        deletions.update(below[1])
+        vseqs.update(below[2])
+        aseqs.update(below[3])
 
         output = extractIndels(data[child2], data[node], vregion)
         insertions.update({child2:output[0]})
@@ -276,7 +277,7 @@ def treeIndelExtract(node, vregion, data):
     
     #rootData = extractIndels(data[node], "", node, vregion)
     #print(rootData)
-    return (insertions, deletions, vseqs, aseqs)
+    return [insertions, deletions, vseqs, aseqs]
     
     #------------------
     
@@ -290,7 +291,8 @@ for i in range(len(sys.argv)):
         sys.argv[i] += "/"
 
 folder = glob(sys.argv[1]+"*.fasta") #/rep/*.fasta
-vpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
+home = expanduser("~")
+vpath = home+'/PycharmProjects/hiv-withinhost/3RegionSequences/variable/'
 tpath = sys.argv[2]              
 opath = sys.argv[3]
 
@@ -298,6 +300,7 @@ if not os.path.isdir(opath+"ins"):
     os.mkdir(opath+'ins')
 if not os.path.isdir(opath+"del"):
     os.mkdir(opath+'del')
+
 
 for f in folder:
     infile = open(f, "rU")
@@ -344,14 +347,16 @@ for f in folder:
 
     result = treeIndelExtract(root, vidx, pdata)
 
-    csvout = filename.split("_recon")[0] + ".csv"   #.tsv
-    ioutput = open(opath+'ins/'+csvout, 'w+')
-    doutput = open(opath+'del/'+csvout,'w+') 
-    header = "header,indel,vloop,vlen,tip,anc\n"
+    
+    tsvout = filename.split("_recon")[0] + ".tsv"   #.tsv
+    ioutput = open(opath+'ins/'+tsvout, 'w+')
+    doutput = open(opath+'del/'+tsvout,'w+') 
+    header = "header\tindel\tvloop\tvlen\ttip\tanc\n"
     ioutput.write(header)
     doutput.write(header)
     #fastaout = open(opath+csvout,"w+")
     #sys.exit()
+    
     for accno in result[0]:
         i = result[0][accno]
         d = result[1][accno]
@@ -363,16 +368,17 @@ for f in folder:
             if inslist == "":
                 inslist = ""
             newaccno = accno + "_" + str(x+1)
-            ioutput.write(",".join([newaccno, inslist, str(x+1), str(len(v[x])), v[x], a[x]]) + "\n")
+            ioutput.write("\t".join([newaccno, inslist, str(x+1), str(len(v[x])), v[x], a[x]]) + "\n")
 
             dellist = ":".join(d[x])
             if dellist == "":
                 dellist = ""
             newaccno = accno + "_" + str(x+1)
-            doutput.write(",".join([newaccno, dellist, str(x+1), str(len(v[x])), v[x], a[x]]) + "\n")
+            doutput.write("\t".join([newaccno, dellist, str(x+1), str(len(v[x])), v[x], a[x]]) + "\n")
 
     ioutput.close()
     doutput.close()
+   
     
 
 

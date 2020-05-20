@@ -1,233 +1,213 @@
 require(bbmle)
 require(stringr)
 require(ape)
-
+require(phangorn)
+require(data.table)
 source("~/vindels/2_within-host/utils.r")
 # Lio
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
  
-ifolder <- Sys.glob(paste0(path,"9Indels/mcc/wholetree/ins/*.csv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/mcc/wholetree/del/*.csv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/mcc/wholetree/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/mcc/wholetree/del/*.tsv"))
 
-all.ins <- data.frame()
-all.del <- data.frame()
-iTotal <- list()
-dTotal <- list()
+all.ins <-list()
+all.del <- list()
 count <- 0
-ifull <- list()
-dfull <- list()
 
-ins.glycs <- data.frame(stringsAsFactors = F)
-del.glycs <- data.frame(stringsAsFactors = F)
+ins.nosep <- list()
+del.nosep <- list()
 
 for (file in 1:length(ifolder)){
   print(file)
   filename <- basename(ifolder[file])
   
-  iCSV <- read.csv(ifolder[file], stringsAsFactors = F)
-  dCSV <- read.csv(dfolder[file], stringsAsFactors = F)
-  
-  # used for handling cases where there are no indels
-  if (all(is.na(iCSV$ins))){
-    iCSV$ins <- ""
-  }
-  if (all(is.na(dCSV$del))){
-    dCSV$del <- ""
-  }
-  
-  #print("10% complete")
-  # retrieving subtype field from the header
-  iCSV$Subtype <- unname(sapply(iCSV$header, getSubtype))
-  dCSV$Subtype <- unname(sapply(dCSV$header, getSubtype))
-  
-  
-  # store the sequences from these two data frames for nucleotide analysis
-  # remove them as they arent needed for this analysis
-  ifull$var <- as.character(iCSV$Vseq)
-  dfull$var <- as.character(dCSV$Vseq)
-  ifull$anc <- as.character(dCSV$anc)
-  dfull$anc <- as.character(dCSV$anc)
-  
-  dCSV$Vseq <- NULL
-  iCSV$Vseq <- NULL
-  dCSV$anc <- NULL
-  iCSV$anc <- NULL
-  
-  # creates the counts column
-  iCSV$Count <- sapply(iCSV$ins, csvcount) 
-  dCSV$Count <- sapply(dCSV$del, csvcount)
-  
+  iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep="\t")
+  dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep="\t")
+
   # extracts info from the indel column and puts it into two separate columns
-  insInfo <- sapply(iCSV$ins, extractInfo)
+  insInfo <- sapply(iCSV$indel, extractInfo)
   insInfo <- unname(insInfo)
   insInfo <- t(insInfo)
   insInfo <- as.data.frame(insInfo)
   insInfo$V1 <- as.character(insInfo$V1)
   insInfo$V2 <- as.character(insInfo$V2)
   iCSV <- cbind(iCSV, insInfo)
-  iCSV$ins <- NULL
+  iCSV$indel <- NULL
   
-  delInfo <- sapply(dCSV$del, extractInfo)
+  delInfo <- sapply(dCSV$indel, extractInfo)
   delInfo <- unname(delInfo)
   delInfo <- t(delInfo)
   delInfo <- as.data.frame(delInfo)
   delInfo$V1 <- as.character(delInfo$V1)
   delInfo$V2 <- as.character(delInfo$V2)
   dCSV <- cbind(dCSV, delInfo)
-  dCSV$del <- NULL
+  dCSV$indel <- NULL
   
-  iCSV$Vseq <- ifull$var
-  dCSV$Vseq <- dfull$var
-  iCSV$Anc <- ifull$anc
-  dCSV$Anc <- dfull$anc
-  #print("50% complete")
   iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
   dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
   
-  colnames(iCSV) <- c("Header","Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Anc","Pat")
-  colnames(dCSV) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq","Anc","Pat")
-
-  # ************************
-  # Retrieve variable loop positions from file 
-  treename <- strsplit(filename, "\\.csv")[[1]]
-  
   # Load time-based branch lengths from the time-scaled trees
-  tre <- read.nexus(paste0(path,"7_5_MCC/prelim/", treename, ".tree"))
-  branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]  
+  tre <- read.tree(paste0(path,"7_5_MCC/prelim/", strsplit(filename, "\\.tsv")[[1]], ".tree"))
+
+  # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
+  #lens <- lens[-(Ntip(tre)+1)]
+  res <- unname(sapply(iCSV$header, function(x){
+    # this expression will return results for NODES ONLY
+    # second column provides the CAPTURED TIP LABELS from within the node label
+    x <- substr(x, 1, nchar(x)-2)
+    tips <- str_match_all(x,"([^\\)\\(,\n:]+):")[[1]][,2]
+    if (length(tips) == 0){
+      # no colons; this means its a TIP 
+      # the index in the tre$tip.label vector is the final result
+      index <- match(x, tre$tip.label)
+    }else{
+      # retreive all descendants of every node and tip in the tree
+      desc <- Descendants(tre)
+      
+      # find the numeric labels of all extracted tips 
+      matches <- match(tips, tre$tip.label)
+      
+      # find the SINGLE node in the descendants list that contains the exact same subset of tips
+      index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
+    }
+    if (length(index)!=1){
+      return(paste0("PROBLEM:",as.character(index)))
+    }
+    return(c(index))
+  }))
   
-  iCSV$Date <- branches[match(gsub("_\\d$","",iCSV$Header), tre$tip.label)]
-  dCSV$Date <- branches[match(gsub("_\\d$","",dCSV$Header), tre$tip.label)]
+  iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
+  dCSV$length <- iCSV$length
   
-  # Load subs/site branch lengths from the rescaled trees
-  tre <- read.tree(paste0(path,"7_5_MCC/final/",treename , ".tree"))
-  branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]  
+  # lens <- node.depth.edgelength(tre)
+  # iCSV$rtt.mid <- (lens[res] + lens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
+  # dCSV$rtt.mid <- iCSV$rtt.mid 
   
-  iCSV$length <- branches[match(gsub("_\\d$","",iCSV$Header), tre$tip.label)]
-  dCSV$length <- branches[match(gsub("_\\d$","",dCSV$Header), tre$tip.label)]
+  iCSV$count <- unname(sapply(iCSV$V1, csvcount))
+  dCSV$count <- unname(sapply(dCSV$V1, csvcount))
   
-  iCSV$Header <- unname(mapply(labels, iCSV$Header, iCSV$Pat, iCSV$Vloop))
-  dCSV$Header <- unname(mapply(labels, dCSV$Header, dCSV$Pat, dCSV$Vloop))
+  iCSV$header <- unname(mapply(labels, iCSV$header, iCSV$pat))
+  dCSV$header <- unname(mapply(labels, dCSV$header, dCSV$pat))
   
-  ins.glycs <- rbind(ins.glycs, iCSV)
-  del.glycs <- rbind(del.glycs, dCSV)
+  iCSV <- iCSV[,c(1,2,3,9,10,6,7,4,5,8)]
+  dCSV <- dCSV[,c(1,2,3,9,10,6,7,4,5,8)]
+  
+  colnames(iCSV) <- c("header","vloop", "vlen", "length","count", "indel", "pos", "tip","anc","pat")
+  colnames(dCSV) <- c("header", "vloop", "vlen", "length","count",  "indel", "pos", "tip","anc","pat")
+  
+  ins.nosep[[file]] <-  iCSV
+  del.nosep[[file]] <-  dCSV
   # COMMA SEPARATION FIX
   # make a new data.frame for each CSV df
   # transport over all rows which do NOT contain a comma
-  new.ins <- iCSV[!grepl(",",iCSV$Seq),]
-  new.del <- dCSV[!grepl(",",dCSV$Seq),]
+  ins.sep <- iCSV[!grepl(",",iCSV$indel),]
+  del.sep <- dCSV[!grepl(",",dCSV$indel),]
   
   # handle comma rows separately with a function
-  iCommas <- iCSV[grepl(",",iCSV$Seq),]
-  dCommas <- dCSV[grepl(",",dCSV$Seq),]
+  iCommas <- iCSV[grepl(",",iCSV$indel),]
+  dCommas <- dCSV[grepl(",",dCSV$indel),]
   # APPLY THE SPLIT ROWS TO GET ONE INDEL PER ROW
   if (nrow(iCommas) > 0){
-    newrows <- apply(iCommas,1,splitRows, colnum=12)
+    newrows <- apply(iCommas,1,splitRows, c(6,7))
     for (i in 1:length(newrows)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
       rownames(newrows[[i]]) <- seq(0,0.1*(len-1),length=len) + idx
-      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc", "Pat", "Date","length")
-      new.ins <- rbind(new.ins, newrows[[i]])
+      ins.sep <- rbind(ins.sep, newrows[[i]])
     }
   }
   if (nrow(dCommas) > 0){
-    newrows <- apply(dCommas,1,splitRows, colnum=12)
+    newrows <- apply(dCommas,1,splitRows, c(6,7))
     for (i in 1:length(newrows)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
-      rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-      colnames(newrows[[i]]) <- c("Header", "Vloop", "Vlength","Subtype", "Count", "Seq", "Pos", "Vseq", "Anc","Pat", "Date","length")
-      newnew.del <- rbind(new.del, newrows[[i]])
-
+      rownames(newrows[[i]]) <- seq(0,0.1*(len-1),length=len) + idx
+      del.sep <- rbind(del.sep, newrows[[i]])
     }
   }
-  #print("80% complete")
   
-  new.ins[is.na(new.ins$Pos),"Pos"] <- ""
-  new.del[is.na(new.del$Pos),"Pos"] <- ""
+  ins.sep[is.na(ins.sep$pos),"pos"] <- ""
+  del.sep[is.na(del.sep$pos),"pos"] <- ""
   
   # Add the V position column into the two final data frames 
-  new.ins$Vpos <- as.numeric(unname(mapply(addPos, pos=new.ins$Pos, header=new.ins$Header, vloop=new.ins$Vloop)))
-  new.del$Vpos <- as.numeric(unname(mapply(addPos, pos=new.del$Pos, header=new.del$Header, vloop=new.del$Vloop)))
-  
-  # # ADJUST POSITIONS TO MATCH THE PLACE WHERE THE INSERTION WAS
-  # new.ins$Pos <- as.numeric(new.ins$Pos) - nchar(new.ins$Seq)
-  # new.ins$Vpos <- new.ins$Vpos - nchar(new.ins$Seq)
-  
-  # no adjustment needed for deletions
-  # new.del$Pos <- as.numeric(new.del$Pos)
+  #ins.sep$vpos <- as.numeric(unname(mapply(addPos, pos=ins.sep$pos, header=ins.sep$header, vloop=ins.sep$vloop)))
+  #del.sep$vpos <- as.numeric(unname(mapply(addPos, pos=del.sep$pos, header=del.sep$header, vloop=del.sep$vloop)))
   
   
+
   # OUTPUT 
   # for other analyses
   # -----------------------------
-  all.ins <- rbind(all.ins, new.ins)
-  all.del <- rbind(all.del, new.del)
+  all.ins[[file]] <- ins.sep
+  all.del[[file]] <- del.sep
 
 }
-ins <- all.ins[all.ins$Seq!="",]
-del <- all.del[all.del$Seq!="",]
+all.ins <- as.data.frame(rbindlist(all.ins))
+all.del <- as.data.frame(rbindlist(all.del))
+
+ins.nosep <- as.data.frame(rbindlist(ins.nosep))
+del.nosep <- as.data.frame(rbindlist(del.nosep))
+
+ins <- all.ins[all.ins$indel!="",]
+del <- all.del[all.del$indel!="",]
 
 # N - GLYC SITE OUTPUTS 
 # ---------------------------------------------
-ins.glycs2 <- ins.glycs[ins.glycs$Seq!="",-c(3,4,5)]
-del.glycs2 <- del.glycs[del.glycs$Seq!="",-c(3,4,5)]
-write.table(ins,paste0(path, "13_nglycs/ins-sep.csv"), row.names=F, sep="\t", quote=F)
-write.table(del,paste0(path, "13_nglycs/del-sep.csv"), row.names=F, sep="\t", quote=F)
+write.table(ins,paste0(path, "13_nglycs/all/ins-sep.csv"), row.names=F, sep="\t", quote=F)
+write.table(del,paste0(path, "13_nglycs/all/del-sep.csv"), row.names=F, sep="\t", quote=F)
 
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
 
-write.csv(all.ins[,c(1,2,4,5,6)], paste0(path,"12_lengths/ins-full.csv"))
-write.csv(all.del[,c(1,2,4,5,6)], paste0(path,"12_lengths/del-full.csv"))
+write.csv(all.ins[,c(1,2,5,6)], paste0(path,"12_lengths/all/ins-all.csv"))
+write.csv(all.del[,c(1,2,5,6)], paste0(path,"12_lengths/all/del-all.csv"))
 
 
 
 nucleotides <- c("A","C","G","T")
-ntcount <- c()
 total.ins <- data.frame()
 total.del <- data.frame()
 # Read through every CSV file in the ins and del folders 
 for (n in c(1,2,4,5)){
-  ins.df <- all.ins[all.ins$Vloop==n,c(1,2,6,8)]
-  del.df <- all.del[all.del$Vloop==n,c(1,2,6,8)]
+  ins.df <- all.ins[all.ins$vloop==n,c(1,2,6,8)]
+  del.df <- all.del[all.del$vloop==n,c(1,2,6,8)]
   # if the csv is not entirely blank with NAs 
-  if (all(!is.na(ins.df$Seq))){
-    ins.df$Seq <- sapply(ins.df$Seq, removeNA)
-    del.df$Seq <- sapply(del.df$Seq, removeNA)
-    #colnames(ins.df) <- c("Accno", "Vloop", "Seq", "VSeq", "Run")
-    #colnames(del.df) <- c("Accno", "Vloop", "Seq", "VSeq", "Run")
+  if (all(!is.na(ins.df$indel))){
+    ins.df$indel <- sapply(ins.df$indel, removeNA)
+    del.df$indel <- sapply(del.df$indel, removeNA)
+    #colnames(ins.df) <- c("Accno", "vloop", "indel", "VSeq", "Run")
+    #colnames(del.df) <- c("Accno", "vloop", "indel", "VSeq", "Run")
     
-    total.ins <- rbind(total.ins, ins.df[ins.df$Seq!="",])
-    total.del <- rbind(total.del, del.df[del.df$Seq!="",])
+    total.ins <- rbind(total.ins, ins.df[ins.df$indel!="",])
+    total.del <- rbind(total.del, del.df[del.df$indel!="",])
   }
 }
-total.ins$len <- sapply(total.ins$Seq, nchar)
-total.del$len <- sapply(total.del$Seq, nchar)
+total.ins$len <- sapply(total.ins$indel, nchar)
+total.del$len <- sapply(total.del$indel, nchar)
 
 
-write.csv(total.ins, paste0(path,"10_nucleotide/total-ins.csv"))
-write.csv(total.del, paste0(path,"10_nucleotide/total-del.csv"))
+write.csv(total.ins, paste0(path,"10_nucleotide/all/total-ins.csv"))
+write.csv(total.del, paste0(path,"10_nucleotide/all/total-del.csv"))
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
 total.ins2 <- total.ins[total.ins$len>1, ]
 total.del2 <- total.del[total.del$len>1, ]
-write.csv(total.ins2, paste0(path,"10_nucleotide/total-ins2.csv"))
-write.csv(total.del2, paste0(path,"10_nucleotide/total-del2.csv"))
+write.csv(total.ins2, paste0(path,"10_nucleotide/all/total-ins2.csv"))
+write.csv(total.del2, paste0(path,"10_nucleotide/all/total-del2.csv"))
 
 # FLANKING INSERTIONS (14) OUTPUT 
 # ------------------------------------
-write.csv(ins, paste0(path,"/10_nucleotide/ins-sep.csv"))
-write.csv(del, paste0(path,"/10_nucleotide/del-sep.csv"))
+write.csv(ins, paste0(path,"/10_nucleotide/all/ins-sep.csv"))
+write.csv(del, paste0(path,"/10_nucleotide/all/del-sep.csv"))
 
-write.csv(ins.glycs, paste0(path,"/10_nucleotide/ins-nosep-all.csv"))
-write.csv(del.glycs, paste0(path,"/10_nucleotide/del-nosep-all.csv"))
+write.csv(ins.nosep, paste0(path,"/10_nucleotide/all/ins-nosep-all.csv"))
+write.csv(del.nosep, paste0(path,"/10_nucleotide/all/del-nosep-all.csv"))
 
 # --- Modeling 2 ----
-write.csv(all.ins, paste0(path,"/10_nucleotide/ins-sep-all.csv"))
-write.csv(all.ins, paste0(path,"/10_nucleotide/del-sep-all.csv"))
+write.csv(all.ins, paste0(path,"/10_nucleotide/all/ins-sep-all.csv"))
+write.csv(all.ins, paste0(path,"/10_nucleotide/all/del-sep-all.csv"))
 
 
 
@@ -238,19 +218,19 @@ dProps <- c()
 iVProps <- c()
 dVProps <- c()
 counts <- data.frame()
-iTotals <- c(sum(unname(sapply(total.ins$Seq, nchar))), sum(unname(sapply(total.ins$Vseq, nchar))))
-dTotals <- c(sum(unname(sapply(total.del$Seq, nchar))),sum(unname(sapply(total.del$Vseq, nchar))))
+iTotals <- c(sum(unname(sapply(total.ins$indel, nchar))), sum(unname(sapply(total.ins$tip, nchar))))
+dTotals <- c(sum(unname(sapply(total.del$indel, nchar))),sum(unname(sapply(total.del$tip, nchar))))
 
 for (nuc in nucleotides){
-  icount <- sum(str_count(total.ins$Seq, nuc))
-  dcount <- sum(str_count(total.del$Seq, nuc))
+  icount <- sum(str_count(total.ins$indel, nuc))
+  dcount <- sum(str_count(total.del$indel, nuc))
   counts <- rbind(counts, data.frame(nucl=nuc, ins=icount, del=dcount))
   
   iProps <- c(iProps, icount / iTotals[1])
   dProps <- c(dProps, dcount / dTotals[1])
   
-  iVProps <- c(iVProps, sum(str_count(total.ins$Vseq, nuc)) / iTotals[2])
-  dVProps <- c(dVProps, sum(str_count(total.del$Vseq, nuc)) / dTotals[2])
+  iVProps <- c(iVProps, sum(str_count(total.ins$tip, nuc)) / iTotals[2])
+  dVProps <- c(dVProps, sum(str_count(total.del$tip, nuc)) / dTotals[2])
 }
 require(reshape)
 counts2 <- reshape2::melt(counts)
@@ -280,13 +260,13 @@ iSample <- list(c(),c(),c(),c())
 dSample <- list(c(),c(),c(),c())
 # generates the randomly sampled substrings for each indel
 for (row in 1:nrow(total.ins)){
-  itemp <- sampleString(total.ins[row,"len"], total.ins[row,"Vseq"])
+  itemp <- sampleString(total.ins[row,"len"], total.ins[row,"tip"])
   for (i in 1:4){
     iSample[[i]] <- c(iSample[[i]], itemp[[i]])
   }
 }
 for (row in 1:nrow(total.del)){
-  dtemp <- sampleString(total.del[row,"len"], total.del[row,"Vseq"])
+  dtemp <- sampleString(total.del[row,"len"], total.del[row,"tip"])
   for (i in 1:4){
     dSample[[i]] <- c(dSample[[i]], dtemp[[i]])
   }
@@ -341,18 +321,18 @@ for (n in 1:1000){
   sam1 <- sample(nrow(df1), nrow(df1), replace=T)
   sam2 <- sample(nrow(df2), nrow(df2), replace=T)
   
-  df1.bs <- df1[sam1,c('Seq','Vseq')]
-  df2.bs <- df2[sam2,c('Seq','Vseq')]
+  df1.bs <- df1[sam1,c('indel','tip')]
+  df2.bs <- df2[sam2,c('indel','tip')]
   
-  total1 <- c(sum(unname(sapply(df1.bs[,"Seq"], nchar))), sum(unname(sapply(df1.bs[,"Vseq"], nchar))))
-  total2 <- c(sum(unname(sapply(df2.bs[,"Seq"], nchar))), sum(unname(sapply(df2.bs[,"Vseq"], nchar))))
+  total1 <- c(sum(unname(sapply(df1.bs[,"indel"], nchar))), sum(unname(sapply(df1.bs[,"tip"], nchar))))
+  total2 <- c(sum(unname(sapply(df2.bs[,"indel"], nchar))), sum(unname(sapply(df2.bs[,"tip"], nchar))))
   
   props <- sapply(nucleotides, function(nuc){
-    iProps <-  sum(str_count(df1.bs$Seq, nuc)) / total1[1]
-    dProps <-  sum(str_count(df2.bs$Seq, nuc)) / total2[1]
+    iProps <-  sum(str_count(df1.bs$indel, nuc)) / total1[1]
+    dProps <-  sum(str_count(df2.bs$indel, nuc)) / total2[1]
     
-    iVProps <-  sum(str_count(df1$Vseq, nuc)) / total1[2]
-    dVProps <-  sum(str_count(df2$Vseq, nuc)) / total2[2]
+    iVProps <-  sum(str_count(df1$tip, nuc)) / total1[2]
+    dVProps <-  sum(str_count(df2$tip, nuc)) / total2[2]
     
     return(c(iProps, dProps, iVProps, dVProps))
   })
@@ -428,8 +408,8 @@ ins.props <- data.frame()
 del.props <- data.frame()
 
 for (i in c(1,2,4,5)){
-  iTemp <- total.ins[total.ins$Vloop==i,]
-  dTemp <- total.del[total.del$Vloop==i,]
+  iTemp <- total.ins[total.ins$vloop==i,]
+  dTemp <- total.del[total.del$vloop==i,]
 
   iProps <- c()
   dProps <- c()
@@ -440,15 +420,15 @@ for (i in c(1,2,4,5)){
   # a vector of two totals
   # iTotals[1] = total number of nucleotides in insertion sequences
   # iTotals[2] = total nuimebr of nucleotides in the vloops associated with insertion sequences
-  iTotals <- c(sum(unname(sapply(iTemp$Seq, nchar))), sum(unname(sapply(iTemp$Vseq, nchar))))
-  dTotals <- c(sum(unname(sapply(dTemp$Seq, nchar))),sum(unname(sapply(dTemp$Vseq, nchar))))
+  iTotals <- c(sum(unname(sapply(iTemp$indel, nchar))), sum(unname(sapply(iTemp$tip, nchar))))
+  dTotals <- c(sum(unname(sapply(dTemp$indel, nchar))),sum(unname(sapply(dTemp$tip, nchar))))
   
   for (nuc in nucleotides){
-    iProps <- c(iProps, sum(str_count(iTemp$Seq, nuc)) / iTotals[1])
-    dProps <- c(dProps, sum(str_count(dTemp$Seq, nuc)) / dTotals[1])
+    iProps <- c(iProps, sum(str_count(iTemp$indel, nuc)) / iTotals[1])
+    dProps <- c(dProps, sum(str_count(dTemp$indel, nuc)) / dTotals[1])
     
-    iVProps <- c(iVProps, sum(str_count(iTemp$Vseq, nuc)) / iTotals[2])
-    dVProps <- c(dVProps, sum(str_count(dTemp$Vseq, nuc)) / dTotals[2])
+    iVProps <- c(iVProps, sum(str_count(iTemp$tip, nuc)) / iTotals[2])
+    dVProps <- c(dVProps, sum(str_count(dTemp$tip, nuc)) / dTotals[2])
   }
   ins.props <- rbind(ins.props, data.frame(nt=nucleotides, iprops=iProps, vprops=iVProps, vloop=rep(vloops[i],4)))
   del.props <- rbind(del.props, data.frame(nt=nucleotides, dprops=dProps, vprops=dVProps, vloop=rep(vloops[i],4)))
