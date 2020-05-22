@@ -17,14 +17,11 @@ all.del <- c()
 count <- 0
 
 maxes <- c()
-itotal <- 0
-dtotal <- 0
 
 iint <- list()
 itip <- list()
 dint <- list()
 dtip <- list()
-
 imid <- list()
 dmid <- list()
 
@@ -35,26 +32,43 @@ for (i in 1:5){
 
 for (file in 1:length(ifolder)){
   print(file)
-  filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
-  full.id <- gsub("_\\d+$","",filename)
+  filename <- basename(ifolder[file])
+  full.id <- gsub("_\\d+\\.tsv$","",filename)
 
-  count <- count + 1
-  iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep='\t')
-  dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep='\t')
+  iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep="\t")
+  dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep="\t")
   
-  # if (grepl("B.+$", filename) || grepl("OS.+$", filename) || grepl("G.+$", filename) || grepl("56549.+$", filename)){
-  #   next
-  # }
+  # extracts info from the indel column and puts it into two separate columns
+  insInfo <- sapply(iCSV$indel, extractInfo)
+  insInfo <- unname(insInfo)
+  insInfo <- t(insInfo)
+  insInfo <- as.data.frame(insInfo)
+  insInfo$V1 <- as.character(insInfo$V1)
+  insInfo$V2 <- as.character(insInfo$V2)
+  iCSV <- cbind(iCSV, insInfo)
+  iCSV$indel <- NULL
   
-  for (i in 2:6){
-    res <- unname(sapply(iCSV[,i], function(x){csvcount(x,":")}))
-    iCSV[,i] <- res
-    res <- unname(sapply(dCSV[,i], function(x){csvcount(x,":")}))
-    dCSV[,i] <- res
-  }
+  delInfo <- sapply(dCSV$indel, extractInfo)
+  delInfo <- unname(delInfo)
+  delInfo <- t(delInfo)
+  delInfo <- as.data.frame(delInfo)
+  delInfo$V1 <- as.character(delInfo$V1)
+  delInfo$V2 <- as.character(delInfo$V2)
+  dCSV <- cbind(dCSV, delInfo)
+  dCSV$indel <- NULL
+  
+  iCSV$count <- unname(sapply(iCSV$V1, csvcount))
+  dCSV$count <- unname(sapply(dCSV$V1, csvcount))
+  
+  iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
+  dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
+  
+  iCSV$header <- unname(mapply(labels, iCSV$header, iCSV$pat))
+  dCSV$header <- unname(mapply(labels, dCSV$header, dCSV$pat))
   
   # reads in the tree
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim200/",filename,".tree.sample")))
+  treename <- strsplit(filename, "\\.")[[1]][1]
+  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim200/",treename,".tree.sample")))
       # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
   
   # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
@@ -62,6 +76,7 @@ for (file in 1:length(ifolder)){
   res <- unname(sapply(iCSV$header, function(x){
     # this expression will return results for NODES ONLY
     # second column provides the CAPTURED TIP LABELS from within the node label
+    x <- substr(x, 1, nchar(x)-2)
     tips <- str_match_all(x,"([^\\)\\(,\n:]+):")[[1]][,2]
     if (length(tips) == 0){
       # no colons; this means its a TIP 
@@ -82,9 +97,7 @@ for (file in 1:length(ifolder)){
     }
     return(c(index))
   }))
-  
-  
-  
+
   iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
   dCSV$length <- iCSV$length
   
@@ -92,72 +105,74 @@ for (file in 1:length(ifolder)){
   iCSV$rtt.mid <- (lens[res] + lens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
   dCSV$rtt.mid <- iCSV$rtt.mid
   
-  icounts <- rowSums(iCSV[,2:6])
-  dcounts <- rowSums(dCSV[,2:6])
-  
-  if (sum(icounts)==0){
-    next
-  }
-  if (sum(dcounts)==0){
-    next
-  }
-  
-  # ----- INDEL TIMINGS ---
-  
-  idates <- rep(iCSV$rtt.mid, icounts)
-  ddates <- rep(dCSV$rtt.mid, dcounts)
-  
-  if (is.na(max(idates))){
-    print(idates)
-  }
-  if (is.na(max(ddates))){
-    print(ddates)
-  }
-
-  imid[[full.id]] <- idates
-  dmid[[full.id]] <- ddates
-  
   # these remain 'lengths' and not 'rtt.mid's because I need to use the full tree length as the maximum cutoff
   maxes[count] <- max(lens,na.rm=T)
   
-  # load the all.ins and all.del vectors (more efficient algorithm)
-  #all.ins[iseqcount:(iseqcount+sum(icounts)-1)] <- idates
-  #all.del[dseqcount:(dseqcount+sum(dcounts)-1)] <- ddates
-  # used to maintain the vector loading algorithm above 
-  #iseqcount <- iseqcount + sum(icounts)
-  #dseqcount <- dseqcount + sum(dcounts)
+  iCSV <- iCSV[,c(2,3,10,11,8,6,7,9)]
+  dCSV <- dCSV[,c(2,3,10,11,8,6,7,9)]
+  
+  colnames(iCSV) <- c("vloop", "vlen", "length","rtt.mid", "count", "indel", "pos", "pat")
+  colnames(dCSV) <- c("vloop", "vlen", "length","rtt.mid", "count",  "indel", "pos", "pat")
   
   # ----- TIP + INTERIOR INDEL COUNTS ---
   # Cumulative data frame split by interior vs tip
   id <- gsub("[ab]_","",full.id)   # 16362-100
   
+  # this regexp matches TIP SEQUENCES (NOT CONTAINING LEFT AND RIGHT BRACKETS)
   tips <-  which(grepl("^[^\\(\\):\n]+$", iCSV$header))
   nodes <- which(!grepl("^[^\\(\\):\n]+$", iCSV$header))
   if (is.null(iint[[id]])){
-    iint[[id]] <- iCSV[nodes,2:8]
-    itip[[id]]  <- iCSV[tips,2:8]
-    dint[[id]]  <- dCSV[nodes,2:8]
-    dtip[[id]]  <- dCSV[tips,2:8]
+    iint[[id]] <- iCSV[nodes,]
+    itip[[id]]  <- iCSV[tips,]
+    dint[[id]]  <- dCSV[nodes,]
+    dtip[[id]]  <- dCSV[tips,]
   }else{
-    iint[[id]] <- rbind(iint[[id]], iCSV[nodes,2:8])
-    itip[[id]]  <- rbind(itip[[id]], iCSV[tips,2:8])
-    dint[[id]]  <- rbind(dint[[id]] , dCSV[nodes,2:8])
-    dtip[[id]]  <- rbind(dtip[[id]], dCSV[tips,2:8])
+    iint[[id]] <- rbind(iint[[id]], iCSV[nodes,])
+    itip[[id]]  <- rbind(itip[[id]], iCSV[tips,])
+    dint[[id]]  <- rbind(dint[[id]] , dCSV[nodes,])
+    dtip[[id]]  <- rbind(dtip[[id]], dCSV[tips,])
   }
-  
-  itotal <- itotal + nrow(iCSV)
-  dtotal <- dtotal + nrow(dCSV)
-  
 }
 # determine which patients did not complete fully 
 pat.idx <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
 table(pat.idx)
-toRemove <- which(pat.idx == "F" | pat.idx == "H" | pat.idx == "QJ" | pat.idx == "56552")
+toRemove <- which(pat.idx == "56552")
 
 iint <- iint[-toRemove]
 itip <- itip[-toRemove]
 dint <- dint[-toRemove]
 dtip <- dtip[-toRemove]
+
+all.data <- list(iint,itip,dint,dtip)
+
+
+
+## ---- Indel Timings ---- 
+# needs to be rewritten for new algorithm
+
+icounts <- rowSums(iCSV[,2:6])
+dcounts <- rowSums(dCSV[,2:6])
+
+if (sum(icounts)==0){
+  next
+}
+if (sum(dcounts)==0){
+  next
+}
+
+idates <- rep(iCSV$rtt.mid, icounts)
+ddates <- rep(dCSV$rtt.mid, dcounts)
+
+if (is.na(max(idates))){
+  print(idates)
+}
+if (is.na(max(ddates))){
+  print(ddates)
+}
+
+imid[[full.id]] <- idates
+dmid[[full.id]] <- ddates
+
 
 
 # require(data.table)
@@ -200,64 +215,32 @@ axis(1, labels=T,at=seq(0, 7000, 1000), line=3)
 
 
 
-
-# NEED TO FIX THIS 
-vlengths <- c(72,126,105,87,33)
-
 # COMPARISON OF INSERTION RATES INTERIOR VS TIP
-
-all.rates <- list('1'=list(),'2'=list(),'3'=list(),'4'=list())
-
-
-for (i in 1:length(iint)){
-  print(i)
-  rate.list <- list('1'=c(),'2'=c(),'3'=c(),'4'=c())
+patnames <- unname(sapply(names(iint), function(x){strsplit(x,"-")[[1]][1]}))
+all.rates <- list()
+for (a in 1:4){
+  all.rates[[a]] <- list()
   
-  data.list <- list(ins.tip = itip[[i]], 
-                    ins.node = iint[[i]], 
-                    del.tip = dtip[[i]],
-                    del.node = dint[[i]])
-  for (j in 1:5){
-
-    fit.list <- lapply(data.list, function(list){
-      tryCatch(
-        {
-          glm(list[,j] ~ 1, offset=log(list[,"length"]), family="poisson")
-        },
-        error=function(cond) {
-          return(NA)
-        })
-    })
-    
-    rates <- unname(sapply(fit.list, function(x){
-      if (all(is.na(x))){
-        return(NA)
-      }
-      rate <- exp(coef(x)[[1]])*365/vlengths[j]
-      if (rate > 10^-8){
-        rate
-      }else{
-        NA
-      }
-    }))
-    
-    for (x in 1:4){
-      rate.list[[x]][j] <- rates[x] * 10^3
-    }
-    
+  for (b in 1:5){
+    all.rates[[a]][[b]] <- list()
   }
-  
-  patid <- strsplit(names(iint)[i], "-")[[1]][1]
-  runno <- strsplit(names(iint)[i], "-")[[1]][2]
-  
-  for (y in 1:4){
-    all.rates[[y]][[i]] <- data.frame(pat=patid, 
-                                 runno=runno, 
-                                 V1=rate.list[[y]][1],
-                                 V2=rate.list[[y]][2],
-                                 V3=rate.list[[y]][3],
-                                 V4=rate.list[[y]][4],
-                                 V5=rate.list[[y]][5])
+}
+
+
+
+
+for (i in 1:4){
+  for (j in 1:length(unique(patnames))){
+    idx <- which(patnames == unique(patnames)[j])
+    for (k in 1:5){
+
+      mat <- sapply(idx, function(df){
+        x <- all.data[[i]][[df]]
+        x[x$vloop == k,"count"]
+      })
+      
+      all.rates[[i]][[k]][[j]] <- mat
+    }
   }
 }
 

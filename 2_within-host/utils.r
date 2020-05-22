@@ -59,8 +59,8 @@ addX <- function(seq,pos){
 }
 
 
-labels <- function(header, patient ){
-  letter <- strsplit(patient, "-")[[1]][2]
+labels <- function(header, patient){
+  letter <- str_match(patient , "-([ab])")[1,2]
   paste(header,letter,sep="_")
 }
 
