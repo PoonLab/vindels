@@ -127,9 +127,6 @@ for (file in 1:length(ifolder)){
     }
   }
   
-  ins.sep[is.na(ins.sep$pos),"pos"] <- ""
-  del.sep[is.na(del.sep$pos),"pos"] <- ""
-  
   # Add the V position column into the two final data frames 
   #ins.sep$vpos <- as.numeric(unname(mapply(addPos, pos=ins.sep$pos, header=ins.sep$header, vloop=ins.sep$vloop)))
   #del.sep$vpos <- as.numeric(unname(mapply(addPos, pos=del.sep$pos, header=del.sep$header, vloop=del.sep$vloop)))
@@ -164,25 +161,12 @@ write.csv(all.ins[,c(1,2,5,6)], paste0(path,"12_lengths/all/ins-all.csv"))
 write.csv(all.del[,c(1,2,5,6)], paste0(path,"12_lengths/all/del-all.csv"))
 
 
+# ---- Indel Nucleotide Analysis ----
+# focus on only the columns needed 
+total.ins <- ins[,c(1,2,6,8)]
+total.del <- del[,c(1,2,6,8)]
 
-nucleotides <- c("A","C","G","T")
-total.ins <- data.frame()
-total.del <- data.frame()
-# Read through every CSV file in the ins and del folders 
-for (n in c(1,2,4,5)){
-  ins.df <- all.ins[all.ins$vloop==n,c(1,2,6,8)]
-  del.df <- all.del[all.del$vloop==n,c(1,2,6,8)]
-  # if the csv is not entirely blank with NAs 
-  if (all(!is.na(ins.df$indel))){
-    ins.df$indel <- sapply(ins.df$indel, removeNA)
-    del.df$indel <- sapply(del.df$indel, removeNA)
-    #colnames(ins.df) <- c("Accno", "vloop", "indel", "VSeq", "Run")
-    #colnames(del.df) <- c("Accno", "vloop", "indel", "VSeq", "Run")
-    
-    total.ins <- rbind(total.ins, ins.df[ins.df$indel!="",])
-    total.del <- rbind(total.del, del.df[del.df$indel!="",])
-  }
-}
+
 total.ins$len <- sapply(total.ins$indel, nchar)
 total.del$len <- sapply(total.del$indel, nchar)
 
@@ -212,7 +196,9 @@ write.csv(all.ins, paste0(path,"/10_nucleotide/all/del-sep-all.csv"))
 
 
 # NT PROPORTIONS -- ALL
-# ---------------------------------------------
+# --------------------------------------------
+
+nucleotides <- c("A","C","G","T")
 iProps <- c()
 dProps <- c()
 iVProps <- c()
