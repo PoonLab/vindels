@@ -88,7 +88,9 @@ def findChildren(node):
         i += 1
     return(None)
 
-def extractIndels(tip, anc, vregion):
+def extractIndels(tip, anc, vidx):
+    vregion, pos = vidx
+
     iTemp = ''
     dTemp = ''
     #print(accno)
@@ -103,6 +105,8 @@ def extractIndels(tip, anc, vregion):
 
     vSeq = {}
     aSeq = {}
+   
+    
     # case for retrieving the v-loops of the root node
     #if anc == "":
     #    for n, char in enumerate(tip):
@@ -112,8 +116,11 @@ def extractIndels(tip, anc, vregion):
     #    return (vSeq, aSeq)
     # ai will count the number of nucleotides, skipping gaps 
     
+    current = -1
+    pidx = -1
+    
     saved = 0
-    # iterate through every character in the main sequence 
+    # iterate through every character in the main sequence
     for n, schar in enumerate(tip):
 
         achar = anc[n]
@@ -121,13 +128,25 @@ def extractIndels(tip, anc, vregion):
         #following code only runs if inside a variable loop
         #if saved != vregion[n]:
             #print(n)
-        saved = vregion[n]
+        
         # vregion is a list of numbers indicating what variable region the index belongs to 
         # [-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1]
-
         if vregion[n] != -1:
-            #print(n)
             
+            # will run when entering new loop for first time 
+            if vregion[n] != current:
+                # start a count from zero 
+                pidx = 0
+                
+                # update the current to the current loop number
+                current = vregion[n]
+
+            else:
+                if achar != "-" or schar != "-":
+                    pidx += 1
+
+            print(pidx)    
+
             #sanity check to ensure the code is covering the variable regions 
             aseqs[vregion[n]] += achar
             vseqs[vregion[n]] += schar
@@ -144,17 +163,17 @@ def extractIndels(tip, anc, vregion):
                     
                     #clear the dTemp 
                     if dTemp:
-                        deletions[vregion[n]].append(dTemp+"-"+str(pos[n]))
+                        deletions[vregion[n]].append(dTemp+"-"+str(pidx))
                         dTemp = ''
             
                 #nothing -- both gaps 
                 else:
                     #clear iTemp and dTemp
                     if iTemp:
-                        insertions[vregion[n]].append(iTemp+"-"+str(pos[n]))
+                        insertions[vregion[n]].append(iTemp+"-"+str(pidx))
                         iTemp = ''
                     if dTemp:
-                        deletions[vregion[n]].append(dTemp+"-"+str(pos[n]))
+                        deletions[vregion[n]].append(dTemp+"-"+str(pidx))
                         dTemp = ''
                     
             elif achar != "-":
@@ -164,18 +183,19 @@ def extractIndels(tip, anc, vregion):
     
                     #clear iTemp
                     if iTemp:
-                        insertions[vregion[n]].append(iTemp+"-"+str(pos[n]))
+                        insertions[vregion[n]].append(iTemp+"-"+str(pidx))
                         iTemp = ''
                     
                 #nothing -- both have character
                 else:
                     #clear iTemp and dTemp
                     if iTemp:
-                        insertions[vregion[n]].append(iTemp+"-"+str(pos[n]))
+                        insertions[vregion[n]].append(iTemp+"-"+str(pidx))
                         iTemp = ''
                     if dTemp:
-                        deletions[vregion[n]].append(dTemp+"-"+str(pos[n]))
+                        deletions[vregion[n]].append(dTemp+"-"+str(pidx))
                         dTemp = ''
+
     newvar = ['','','','','']
     newanc = ['','','','','']
     for n in range(5):
@@ -183,7 +203,7 @@ def extractIndels(tip, anc, vregion):
             if a != "-" or b != "-":
                 newvar[n] += a
                 newanc[n] += b
-    #print(vLen)
+    print(newanc)
         
     #SANITY CHECK 
     #ensures that the iterated sequences are the proper variable loops and that they are identical to the one found in the csv file 
@@ -219,7 +239,7 @@ def isLeaf(header):
     res = re.search('^[^\(^\),\n]+$',header)
     return res != None
 
-def treeIndelExtract(node, vregion, data):
+def treeIndelExtract(node, vidx, data):
     
     insertions = {}
     deletions = {}
@@ -237,39 +257,41 @@ def treeIndelExtract(node, vregion, data):
     #print(data[node])
 
     if isLeaf(child1):
-        output = extractIndels(data[child1], data[node], vregion)
+        output = extractIndels(data[child1], data[node], vidx)
+        sys.exit()
         insertions.update({child1:output[0]})
         deletions.update({child1:output[1]})
         vseqs.update({child1:output[2]})
         aseqs.update({child1:output[3]})
     else:       
-        below = treeIndelExtract(child1, vregion, data)
+        below = treeIndelExtract(child1, vidx, data)
         insertions.update(below[0])
         deletions.update(below[1])
         vseqs.update(below[2])
         aseqs.update(below[3])
 
         # 
-        output = extractIndels(data[child1], data[node], vregion)
+        output = extractIndels(data[child1], data[node], vidx)
         insertions.update({child1:output[0]})
         deletions.update({child1:output[1]})
         vseqs.update({child1:output[2]})
         aseqs.update({child1:output[3]})
 
     if isLeaf(child2):
-        output = extractIndels(data[child2], data[node], vregion)
+        output = extractIndels(data[child2], data[node], vidx)
+        sys.exit()
         insertions.update({child2:output[0]})
         deletions.update({child2:output[1]})
         vseqs.update({child2:output[2]})
         aseqs.update({child2:output[3]})
     else:
-        below = treeIndelExtract(child2, vregion, data)
+        below = treeIndelExtract(child2, vidx, data)
         insertions.update(below[0])
         deletions.update(below[1])
         vseqs.update(below[2])
         aseqs.update(below[3])
 
-        output = extractIndels(data[child2], data[node], vregion)
+        output = extractIndels(data[child2], data[node], vidx)
         insertions.update({child2:output[0]})
         deletions.update({child2:output[1]})
         vseqs.update({child2:output[2]})
@@ -282,13 +304,16 @@ def treeIndelExtract(node, vregion, data):
     #------------------
     
 
-#print(folder)
+'''#print(folder)
 if len(sys.argv) != 4:
     print("USAGE: python 9_1_ancestors.py [input Historian folder] [tree folder] [output folder]")
     quit() 
 for i in range(len(sys.argv)):
     if not sys.argv[i].endswith("/"):
         sys.argv[i] += "/"
+'''
+
+sys.argv = ['',"8Historian/mcc/",'7_5_MCC/final/','9Indels/mcc/wholetree/']
 
 folder = glob(sys.argv[1]+"*.fasta") #/rep/*.fasta
 home = expanduser("~")
@@ -327,15 +352,16 @@ for f in folder:
     # previous = []  # sanity check to ensure that all vregion and pos lists are identical 
     
     # CALIBRATION -- use an arbitrary sequence to calibrate the vregion list and the pos list
-    vidx = []
+    vregions = []
     pos = []
     header, seq = cdata[0]
+    
     ai = 0
     for n, char in enumerate(seq):
         #retrieves a numeric value (0,1,2,3,4) to indicate which variable region the nucleotide is in, and -1 if outside of a vloop
         #pos counts your position WITHIN the current variable loop 
         vr, p = vrSwitch(ai, boundaries[header])
-        vidx.append(vr)
+        vregions.append(vr)
         pos.append(p)
         if char != '-':
             ai += 1
@@ -345,8 +371,10 @@ for f in folder:
     infile = open(f, "rU")
     pdata = parse_fasta(infile)
 
-    result = treeIndelExtract(root, vidx, pdata)
-
+    result = treeIndelExtract(root, (vregions, pos), pdata)
+    
+    #print(vregions)
+    break 
     
     tsvout = filename.split("_recon")[0] + ".tsv"   #.tsv
     ioutput = open(opath+'ins/'+tsvout, 'w+')
@@ -378,7 +406,6 @@ for f in folder:
 
     ioutput.close()
     doutput.close()
-   
     
 
 
