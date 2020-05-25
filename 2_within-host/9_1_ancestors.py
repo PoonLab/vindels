@@ -14,6 +14,7 @@ from glob import *
 from ancestors import *
 from os.path import expanduser
 
+
 def getVRegions(vSeqFile):
 
     with open(vSeqFile) as handle:
@@ -145,7 +146,7 @@ def extractIndels(tip, anc, vidx):
                 if achar != "-" or schar != "-":
                     pidx += 1
 
-            print(pidx)    
+            print(pidx, end="")    
 
             #sanity check to ensure the code is covering the variable regions 
             aseqs[vregion[n]] += achar

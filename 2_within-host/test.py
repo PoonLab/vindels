@@ -1,7 +1,7 @@
 from glob import *
 from seqUtils import *
 
-folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/*.fasta")
+'''folder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/*.fasta")
 
 
 #for file in folder:
@@ -28,6 +28,14 @@ for i in range(len(str1)):
         print(i)
         print(str1[i])
         print(str2[i])
+'''
+
+import numpy as np
+
+l = [1,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,-1,-1,-1,-1,-1,-1,-1]
+l = np.array(l)
+
+print(np.where(l==2))
 
 
 
