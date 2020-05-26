@@ -14,7 +14,7 @@ data {
   int<lower=0> ntree;
   int<lower=0> nbranch;
   matrix[nbranch,ntree] counts;
-  matrix[nbranch,ntree] offset;
+  matrix[nbranch,ntree] times;
 }
 
 // The parameters accepted by the model. Our model
@@ -33,7 +33,7 @@ model {
   tre_rate ~ normal(pat_rate, pat_sd);
   
   for (i in 1:ntree){
-    counts[i] ~ poisson_log(tre_rate[i] + offset[i]); //+ offset[i]); // within patient distribution 
+    counts[i] ~ poisson(tre_rate[i] + log(times[i])); //+ offset[i]); // within patient distribution 
   }
 }
 

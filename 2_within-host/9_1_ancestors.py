@@ -306,16 +306,16 @@ def treeIndelExtract(node, vidx, data):
     #------------------
     
 
-'''#print(folder)
+
 if len(sys.argv) != 4:
     print("USAGE: python 9_1_ancestors.py [input Historian folder] [tree folder] [output folder]")
     quit() 
 for i in range(len(sys.argv)):
     if not sys.argv[i].endswith("/"):
         sys.argv[i] += "/"
-'''
 
-sys.argv = ['',"8Historian/mcc/",'7_5_MCC/final/','9Indels/mcc/wholetree/']
+
+#sys.argv = ['',"8Historian/mcc/",'7_5_MCC/final/','9Indels/mcc/wholetree/']
 
 folder = glob(sys.argv[1]+"*.fasta") #/rep/*.fasta
 home = expanduser("~")

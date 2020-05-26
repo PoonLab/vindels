@@ -38,27 +38,8 @@ for (file in 1:length(ifolder)){
   iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep="\t")
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep="\t")
   
-  # extracts info from the indel column and puts it into two separate columns
-  insInfo <- sapply(iCSV$indel, extractInfo)
-  insInfo <- unname(insInfo)
-  insInfo <- t(insInfo)
-  insInfo <- as.data.frame(insInfo)
-  insInfo$V1 <- as.character(insInfo$V1)
-  insInfo$V2 <- as.character(insInfo$V2)
-  iCSV <- cbind(iCSV, insInfo)
-  iCSV$indel <- NULL
-  
-  delInfo <- sapply(dCSV$indel, extractInfo)
-  delInfo <- unname(delInfo)
-  delInfo <- t(delInfo)
-  delInfo <- as.data.frame(delInfo)
-  delInfo$V1 <- as.character(delInfo$V1)
-  delInfo$V2 <- as.character(delInfo$V2)
-  dCSV <- cbind(dCSV, delInfo)
-  dCSV$indel <- NULL
-  
-  iCSV$count <- unname(sapply(iCSV$V1, csvcount))
-  dCSV$count <- unname(sapply(dCSV$V1, csvcount))
+  iCSV$count <- unname(sapply(iCSV$indel, csvcount, delim=":"))
+  dCSV$count <- unname(sapply(iCSV$indel, csvcount, delim=":"))
   
   iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
   dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
@@ -76,7 +57,7 @@ for (file in 1:length(ifolder)){
   res <- unname(sapply(iCSV$header, function(x){
     # this expression will return results for NODES ONLY
     # second column provides the CAPTURED TIP LABELS from within the node label
-    x <- substr(x, 1, nchar(x)-2)
+    x <- substr(x, 1, nchar(x)-4)
     tips <- str_match_all(x,"([^\\)\\(,\n:]+):")[[1]][,2]
     if (length(tips) == 0){
       # no colons; this means its a TIP 
@@ -95,7 +76,7 @@ for (file in 1:length(ifolder)){
     if (length(index)!=1){
       return(paste0("PROBLEM:",as.character(index)))
     }
-    return(c(index))
+    return(index)
   }))
 
   iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
@@ -108,11 +89,11 @@ for (file in 1:length(ifolder)){
   # these remain 'lengths' and not 'rtt.mid's because I need to use the full tree length as the maximum cutoff
   maxes[count] <- max(lens,na.rm=T)
   
-  iCSV <- iCSV[,c(2,3,10,11,8,6,7,9)]
-  dCSV <- dCSV[,c(2,3,10,11,8,6,7,9)]
+  #iCSV <- iCSV[,c(1,2,3,10,11,8,6,7,9)]
+  #dCSV <- dCSV[,c(1,2,3,10,11,8,6,7,9)]
   
-  colnames(iCSV) <- c("vloop", "vlen", "length","rtt.mid", "count", "indel", "pos", "pat")
-  colnames(dCSV) <- c("vloop", "vlen", "length","rtt.mid", "count",  "indel", "pos", "pat")
+  #colnames(iCSV) <- c('header',"vloop", "vlen", "length","rtt.mid", "count", "indel", "pos", "pat")
+  #colnames(dCSV) <- c('header',"vloop", "vlen", "length","rtt.mid", "count",  "indel", "pos", "pat")
   
   # ----- TIP + INTERIOR INDEL COUNTS ---
   # Cumulative data frame split by interior vs tip
@@ -121,6 +102,10 @@ for (file in 1:length(ifolder)){
   # this regexp matches TIP SEQUENCES (NOT CONTAINING LEFT AND RIGHT BRACKETS)
   tips <-  which(grepl("^[^\\(\\):\n]+$", iCSV$header))
   nodes <- which(!grepl("^[^\\(\\):\n]+$", iCSV$header))
+  
+  iCSV <- iCSV[,-c(1,2,5,6)]
+  dCSV <- dCSV[,-c(1,2,5,6)]
+  
   if (is.null(iint[[id]])){
     iint[[id]] <- iCSV[nodes,]
     itip[[id]]  <- iCSV[tips,]
@@ -143,7 +128,7 @@ itip <- itip[-toRemove]
 dint <- dint[-toRemove]
 dtip <- dtip[-toRemove]
 
-all.data <- list(iint,itip,dint,dtip)
+all.data <- list(itip,iint,dtip,dint)
 
 
 
@@ -225,9 +210,6 @@ for (a in 1:4){
     all.rates[[a]][[b]] <- list()
   }
 }
-
-
-
 
 for (i in 1:4){
   for (j in 1:length(unique(patnames))){
