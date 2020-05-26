@@ -44,6 +44,12 @@ for (file in 1:length(ifolder)){
   dCSV <- cbind(dCSV, delInfo)
   dCSV$indel <- NULL
   
+  if(all(is.na(iCSV$V1))){
+    iCSV$V1 <- ""
+    iCSV$V2 <- ""
+  }
+  
+  
   iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
   dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
   

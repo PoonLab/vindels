@@ -119,13 +119,12 @@ def extractIndels(tip, anc, vidx):
     
     current = -1
     pidx = -1
-    
+    plist = []
     saved = 0
     # iterate through every character in the main sequence
     for n, schar in enumerate(tip):
 
         achar = anc[n]
-
         #following code only runs if inside a variable loop
         #if saved != vregion[n]:
             #print(n)
@@ -137,16 +136,16 @@ def extractIndels(tip, anc, vidx):
             # will run when entering new loop for first time 
             if vregion[n] != current:
                 # start a count from zero 
-                pidx = 0
+                if achar != "-" or schar != "-":
+                    pidx = 0
                 
-                # update the current to the current loop number
-                current = vregion[n]
+                    # update the current to the current loop number
+                    current = vregion[n]
 
             else:
                 if achar != "-" or schar != "-":
                     pidx += 1
 
-            print(pidx, end="")    
 
             #sanity check to ensure the code is covering the variable regions 
             aseqs[vregion[n]] += achar
@@ -204,8 +203,12 @@ def extractIndels(tip, anc, vidx):
             if a != "-" or b != "-":
                 newvar[n] += a
                 newanc[n] += b
-    print(newanc)
-        
+    '''if any(insertions): 
+        print(newvar)
+        print(newanc)
+        print(plist)
+        print(insertions)
+    '''    
     #SANITY CHECK 
     #ensures that the iterated sequences are the proper variable loops and that they are identical to the one found in the csv file 
     # for n, vr in enumerate(vseqs):
@@ -259,7 +262,6 @@ def treeIndelExtract(node, vidx, data):
 
     if isLeaf(child1):
         output = extractIndels(data[child1], data[node], vidx)
-        sys.exit()
         insertions.update({child1:output[0]})
         deletions.update({child1:output[1]})
         vseqs.update({child1:output[2]})
@@ -279,8 +281,7 @@ def treeIndelExtract(node, vidx, data):
         aseqs.update({child1:output[3]})
 
     if isLeaf(child2):
-        output = extractIndels(data[child2], data[node], vidx)
-        sys.exit()
+        output = extractIndels(data[child2], data[node], vidx)       
         insertions.update({child2:output[0]})
         deletions.update({child2:output[1]})
         vseqs.update({child2:output[2]})
@@ -332,7 +333,7 @@ for f in folder:
     infile = open(f, "rU")
     filename = os.path.basename(f)
     print(filename)
-
+    
     # retrieved the converted fasta 
     cdata = convert_fasta(infile)
     infile.close()
@@ -375,7 +376,6 @@ for f in folder:
     result = treeIndelExtract(root, (vregions, pos), pdata)
     
     #print(vregions)
-    break 
     
     tsvout = filename.split("_recon")[0] + ".tsv"   #.tsv
     ioutput = open(opath+'ins/'+tsvout, 'w+')

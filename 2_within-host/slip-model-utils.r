@@ -124,12 +124,31 @@ getMat <- function(rate, branch){
 changeSlip <- function(slip.list){
   slip.idx <- getSlipLocations(slip.list)
   
+  tab <- table(slip.idx[[1]])
+  
   # choose a slip event to change
   toEdit <- sample(length(slip.idx[[1]]),1)
   
+  stack <- tab[as.character(slip.idx[[1]][toEdit])]
+  if (stack > 1){   # have a set probability of moving the entire stack instead of individual events 
+    
+    all.idx <- which(slip.idx[[1]] == as.numeric(names(stack[1])))
+    rnum <- runif(1)
+    if (rnum < 0.9){
+      # rewrite the toEdit variable with all indices in the stack
+      toEdit <- all.idx 
+    }else if(rnum > 0.9 && rnum < 0.95){
+      if (runif(1) < 0.5){
+        toEdit <- sample(all.idx, floor(length(all.idx) * 0.5))
+      }else{
+        toEdit <- sample(all.idx, ceiling(length(all.idx) * 0.5))
+      }
+    } 
+  }
+  
   # this is to ensure that the proposed change is never outside the slip region
-  proposal <- 0
-  while(proposal <= 0 || proposal > length(slip.list)){
+  proposal <- slip.idx[[1]][toEdit]
+  while(any(proposal) <= 0 || any(proposal) > length(slip.list)){
     proposal <- slip.idx[[1]][toEdit] + delta()
   }
   # save the change to the slip list
