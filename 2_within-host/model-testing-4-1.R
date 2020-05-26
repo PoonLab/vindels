@@ -170,60 +170,19 @@ simSeqs <- function(iter, param){
 }
 
 
-# ----- Fixation Parameter Testing -----
-t <- sum(as.numeric(insertions$no.filter))
-
-all.len <- insertions[!is.na(insertions$len), 'len']
-a <- sum(all.len %% 3 == 0)
-b <- sum(all.len %% 3 != 0)
-
-#prop[i] <- a / (b / 0.09 + a) 
-total[i] <- t
-avec[i] <- a
-bvec[i] <- b
-#}
-
-all.len <- insertions[!is.na(insertions$len), 'len']
-#filt.len <- new.ins[!is.na(new.ins$len), 'len']
-sum(all.len %% 3 == 0)
-sum(all.len %% 3 != 0)
-x <- sum(filt.len %% 3 == 0)
-vec[i] <- sum(filt.len %% 3 != 0) / ((x / 0.276) - x)
-#}
-
-
-
-
-
-# ---- Geometric Distribution Calibration -----
-calib <- c()
-values <- seq(0.05, 0.25, 0.01)
-for (n in 1:length(values)){
-  vec <- c()
-  for (i in 1:500){
-    x <- round(rgeom(1000, values[n]))
-    x <- x[x>0]
-    vec[i] <- sum(x%%3==0) / 1000
-  }
-  calib[n] <- median(vec)
-}
-rm(vec)
-
-
-
 #  ---- Start MCMC ----
 param <- c(0.00052,0.85, 0.00001, 0.09)
 insertions <- simSeqs(25000, param)
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
 startvalue <- c(0.0008, 0.65, 0.000001, 0.25)
-notes <- "Test #20
-Four parameter model test on data with shuffle turned on 
+notes <- "Test #21
+New: slippage shuffle mechanism changed to allow movement of full stacks and half stacks 
 truevalues:(0.00052, 0.85, 0.00001, 0.09)
 startvalues:(0.0008, 0.65, 0.000001, 0.25)
-priors: all uninformative, uniform, broad, except fixation
+priors: all uninformative, uniform, broad; except beta on fixation
 shuffle: on
 "
-chain <- runMCMC(startvalue, 4000000, '20-fix-long', notes)
+chain <- runMCMC(startvalue, 400000, '21-full-stacks', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE

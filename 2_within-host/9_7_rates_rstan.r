@@ -27,7 +27,7 @@ drates <- data.frame()
 
 for (t in 1:2){ 
   for (i in 1:5){
-    data <- vloop.mat[[i]][[t]]
+    data <- all.rates[[t]][[i]]
     num.pat <- ncol(data)
     num.data <- nrow(data)
     if (!is.na(data)){
