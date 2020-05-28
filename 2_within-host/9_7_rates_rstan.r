@@ -1,22 +1,56 @@
 # stan model for indel rates 
 library(rstan)
 
-
-# will receive data in from 9_5 indel rates 
-
-
+num.pat <- 20
+num.trees <- 100
 
 # ---- Simulated Data ----
-t.rate <- 2.5
-sub.rate <- rlnorm(num.pat, meanlog=log(t.rate), sdlog=0.3)
+tru.rate <- 0.3
+tru.sd <- 0.01
+pat.rate <- rnorm(num.pat, mean=tru.rate, sd=tru.sd)
+pat.sd <- 0.01
 
-hist(sub.rate, breaks=5, col="grey")
 
-mat <- matrix(nrow=num.data, ncol=num.pat)
 
+hist(pat.rate, breaks=5, col="grey")
+
+lns <- sample(50:250, num.pat)
+counts <- matrix(nrow=sum(lns), ncol=num.trees)
+lens <- matrix(nrow=sum(lns), ncol=num.trees)
+pos <- 1
+toCheck <- c()
 for (i in 1:num.pat){
-  mat[,i] <- rnorm(num.data, mean=sub.rate[i], sd=0.5)
+  idx <- pos:lns[i]
+  tre.rate <- rnorm(num.trees, mean=pat.rate[i], sd=pat.sd)
+  toCheck[idx] <- tre.rate
+  for (j in 1:num.trees){
+    len.temp <- rexp(diff(range(idx))+1, 0.017)
+    lens[idx, j] <- len.temp
+    c <- rpois(diff(range(idx))+1, lambda=tre.rate[j]*len.temp)
+    if(any(is.na(c))){
+      print(tre.rate[j])
+      print(len.temp)
+    }
+    counts[idx,j] <- c
+  }
+  pos <- pos + lns[i]
 }
+
+rstan_options(auto_write=T)
+options(mc.cores = parallel::detectCores()-2)
+
+# Data import
+data.stan <- list(npat= num.pat,
+                  ntree = num.trees,
+                  sizes = lns,
+                  counts = counts,
+                  times = lens)
+
+# Stan modeling 
+stan.fit <- stan("~/vindels/2_within-host/rate-perpat.stan",
+                 data= data.stan, 
+                 chains=1,
+                 iter=1000000)
 
 # ----- Real Data ----
 type <- c("tip","node")
@@ -27,27 +61,41 @@ drates <- data.frame()
 
 for (t in 1:2){ 
   for (i in 1:5){
-    data <- all.rates[[t]][[i]]
-    num.pat <- ncol(data)
-    num.data <- nrow(data)
-    if (!is.na(data)){
-      # ----- Stan Model ----
-      data.stan <- list(npat = num.pat,
-                        ndata = num.data,
-                        mat = data)
+    clist <- all.counts[[t]][[i]]
+    tlist <- all.times[[t]][[i]]
+    
+    for (j in 1:length(cdata)){
+      cdata <- clist[[j]]
+      tdata <- tlist[[j]]
       
-      stan.fit <- stan("~/vindels/2_within-host/rates.stan",
+      num.tree <- ncol(cdata)
+      num.branch <- nrow(cdata)
+      
+      # Data import
+      data.stan <- list(ntree = num.tree,
+                        nbranch = num.branch,
+                        counts = rdata,
+                        times = tdata)
+      
+      # Stan modeling 
+      stan.fit <- stan("~/vindels/2_within-host/rates-perpat.stan",
                        data= data.stan, 
                        chains=1,
                        iter=1000000)
-                       #control = list(adapt_delta = 0.99))
+      #control = list(adapt_delta = 0.99))
       
+      # export results to a data frame 
       irates <- rbind(irates, data.frame(rate=summary(stan.fit)$summary[1,6],
                                          vloop=paste0("V",as.character(i)),
                                          id=type[t],
                                          lower=summary(stan.fit)$summary[1,4],
                                          upper=summary(stan.fit)$summary[1,8]
       ))
+    }
+
+
+      # ----- Stan Model ----
+      
     }else{
       irates <- rbind(irates, data.frame(rate=NA,
                                          vloop=paste0("V",as.character(i)),

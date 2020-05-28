@@ -200,14 +200,16 @@ axis(1, labels=T,at=seq(0, 7000, 1000), line=3)
 
 
 
-# COMPARISON OF INSERTION RATES INTERIOR VS TIP
+# ----- Indel Rates ----- 
 patnames <- unname(sapply(names(iint), function(x){strsplit(x,"-")[[1]][1]}))
-all.rates <- list()
+all.counts <- list()
+all.times <- list()
 for (a in 1:4){
-  all.rates[[a]] <- list()
-  
+  all.counts[[a]] <- list()
+  all.times[[a]] <- list()
   for (b in 1:5){
-    all.rates[[a]][[b]] <- list()
+    all.counts[[a]][[b]] <- list()
+    all.times[[a]][[b]] <- list()
   }
 }
 
@@ -216,20 +218,24 @@ for (i in 1:4){
     idx <- which(patnames == unique(patnames)[j])
     for (k in 1:5){
 
-      mat <- sapply(idx, function(df){
+      mat.counts <- sapply(idx, function(df){
         x <- all.data[[i]][[df]]
         x[x$vloop == k,"count"]
       })
       
-      all.rates[[i]][[k]][[j]] <- mat
+      all.counts[[i]][[k]][[j]] <- mat.counts
+      
+      mat.time <- sapply(idx, function(df){
+        x <- all.data[[i]][[df]]
+        x[x$vloop == k, "length"]
+      })
+      
+      all.times[[i]][[k]][[j]] <- mat.time
+      
     }
   }
 }
 
-all.rates <- lapply(1:4, function(x){
-  df <- as.data.frame(rbindlist(all.rates[[x]]))
-  split(df, df[,"pat"])
-})
 
 
 # require(plyr)

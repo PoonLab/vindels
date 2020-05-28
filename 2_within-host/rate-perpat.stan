@@ -11,29 +11,37 @@
 
 // The input data is a vector 'y' of length 'N'.
 data {
-  int<lower=0> ntree;
-  int<lower=0> nbranch;
-  matrix[nbranch,ntree] counts;
-  matrix[nbranch,ntree] times;
+  int<lower=0> npat;
+  int<lower=0> ntree;                // Number of columns
+  int sizes[npat];                   // Number of rows
+  int counts[sum(sizes),ntree];         // Count data
+  matrix[sum(sizes),ntree] lengths;     // Time data
 }
 
-// The parameters accepted by the model. Our model
-// accepts two parameters 'mu' and 'sigma'.
 parameters {
-  real pat_rate;
+  real<lower=0> sub_rate;
+  real<lower=0> sub_sd;
+  real<lower=0> pat_rates[npat];
   real<lower=0> pat_sd;
-
-  vector[ntree] tre_rate;
+  real<lower=0> tre_rates[ntree];
 }
 
-// The model to be estimated. We model the output
-// 'y' to be normally distributed with mean 'mu'
-// and standard deviation 'sigma'.
 model {
-  tre_rate ~ normal(pat_rate, pat_sd);
+  int pos;
   
-  for (i in 1:ntree){
-    counts[i] ~ poisson(tre_rate[i] + log(times[i])); //+ offset[i]); // within patient distribution 
+  pat_rates ~ normal(sub_rate, sub_sd);
+  
+  pos = 1;
+  for (i in 1:npat){
+    tre_rates ~ normal(pat_rates[i], pat_sd);
+    
+    for (j in 1:ntree){
+      segment(counts[j], pos, sizes[i]) ~ poisson(exp(tre_rates[j] * segment(lengths[j], pos, sizes[i])));  
+    }
+    pos = pos + sizes[i];
+    
   }
+  
+
 }
 
