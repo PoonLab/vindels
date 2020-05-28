@@ -89,7 +89,7 @@ getSlipLocations <- function(slip){
   return (list(loc=locations,len=length(slip)))
 }
 
-delta <- function(sd=3){
+delta <- function(sd=2){
   # chooses a normally distributed discrete value above 0
   x <- rnorm(1,mean=0,sd=sd)
   if (x < 0){
@@ -147,8 +147,8 @@ changeSlip <- function(slip.list){
   }
   
   # this is to ensure that the proposed change is never outside the slip region
-  proposal <- slip.idx[[1]][toEdit]
-  while(any(proposal) <= 0 || any(proposal) > length(slip.list)){
+  proposal <- slip.idx[[1]][toEdit] + delta()
+  while(any(proposal <= 0) || any(proposal > length(slip.list))){
     proposal <- slip.idx[[1]][toEdit] + delta()
   }
   # save the change to the slip list
