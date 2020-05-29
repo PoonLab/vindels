@@ -182,7 +182,7 @@ startvalues:(0.0008, 0.65, 0.000001, 0.25)
 priors: all uninformative, uniform, broad; except beta on fixation
 shuffle: on
 "
-chain <- runMCMC(startvalue, 400000, '21-full-stacks', notes)
+chain <- runMCMC(startvalue, 500000, '21-full-stacks', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE

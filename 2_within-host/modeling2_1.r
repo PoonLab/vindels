@@ -11,10 +11,10 @@ source("~/vindels/2_within-host/slippage-model.r")
 
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
-insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
+insertions <- read.csv(paste0(path,"10_nucleotide/all/ins-sep-all2.csv"),row.names=1, stringsAsFactors = F)
 
 # FIX HEADERS
-insertions$Header <- gsub("_\\d$","",insertions$Header)
+#insertions$Header <- gsub("_\\d$","",insertions$Header)
 
 # CASE: remove instances missing ancestor and tip 
 insertions <- insertions[-c(which(insertions$Anc == "")),]

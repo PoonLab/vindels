@@ -147,9 +147,9 @@ changeSlip <- function(slip.list){
   }
   
   # this is to ensure that the proposed change is never outside the slip region
-  proposal <- slip.idx[[1]][toEdit] + delta()
+  proposal <- slip.idx[[1]][toEdit] + delta(0.5)
   while(any(proposal <= 0) || any(proposal > length(slip.list))){
-    proposal <- slip.idx[[1]][toEdit] + delta()
+    proposal <- slip.idx[[1]][toEdit] + delta(0.5)
   }
   # save the change to the slip list
   slip.idx[[1]][toEdit] <- proposal
