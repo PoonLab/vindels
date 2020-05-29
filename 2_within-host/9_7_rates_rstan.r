@@ -6,9 +6,9 @@ num.trees <- 100
 
 # ---- Simulated Data ----
 tru.rate <- 0.3
-tru.sd <- 0.01
+tru.sd <- 0.02
 pat.rate <- rnorm(num.pat, mean=tru.rate, sd=tru.sd)
-pat.sd <- 0.01
+pat.sd <- 0.05
 
 
 
@@ -20,7 +20,8 @@ lens <- matrix(nrow=sum(lns), ncol=num.trees)
 pos <- 1
 toCheck <- c()
 for (i in 1:num.pat){
-  idx <- pos:lns[i]
+  idx <- pos:(pos+lns[i]-1)
+  print(range(idx))
   tre.rate <- rnorm(num.trees, mean=pat.rate[i], sd=pat.sd)
   toCheck[idx] <- tre.rate
   for (j in 1:num.trees){
@@ -44,13 +45,13 @@ data.stan <- list(npat= num.pat,
                   ntree = num.trees,
                   sizes = lns,
                   counts = counts,
-                  times = lens)
+                  lengths = lens)
 
 # Stan modeling 
 stan.fit <- stan("~/vindels/2_within-host/rate-perpat.stan",
                  data= data.stan, 
                  chains=1,
-                 iter=1000000)
+                 iter=2000000)
 
 # ----- Real Data ----
 type <- c("tip","node")
@@ -81,7 +82,8 @@ for (t in 1:2){
       stan.fit <- stan("~/vindels/2_within-host/rates-perpat.stan",
                        data= data.stan, 
                        chains=1,
-                       iter=1000000)
+                       iter=1000000,
+                       )
       #control = list(adapt_delta = 0.99))
       
       # export results to a data frame 

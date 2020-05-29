@@ -12,36 +12,34 @@
 // The input data is a vector 'y' of length 'N'.
 data {
   int<lower=0> npat;
-  int<lower=0> ntree;                // Number of columns
+  int<lower=0> ntree;                  // Number of columns           // Number of branches 
   int sizes[npat];                   // Number of rows
-  int counts[sum(sizes),ntree];         // Count data
-  matrix[sum(sizes),ntree] lengths;     // Time data
+  int<lower=0> counts[sum(sizes),ntree];         // Count data
+  matrix<lower=0>[sum(sizes),ntree] lengths;     // Time data
 }
 
 parameters {
   real<lower=0> sub_rate;
-  real<lower=0> sub_sd;
+  //real<lower=0> sub_sd;
   real<lower=0> pat_rates[npat];
-  real<lower=0> pat_sd;
+  //<lower=0> pat_sd;
   real<lower=0> tre_rates[ntree];
 }
 
 model {
   int pos;
   
-  pat_rates ~ normal(sub_rate, sub_sd);
+  pat_rates ~ normal(sub_rate, 0.03);
   
   pos = 1;
   for (i in 1:npat){
-    tre_rates ~ normal(pat_rates[i], pat_sd);
-    
+    tre_rates ~ normal(pat_rates[i], 0.06);
     for (j in 1:ntree){
-      segment(counts[j], pos, sizes[i]) ~ poisson(exp(tre_rates[j] * segment(lengths[j], pos, sizes[i])));  
+      //print(pos);
+      //print(pos+sizes[i]-1);
+      print(counts[pos:(pos+sizes[i]-1), j]) // ~ poisson(exp(tre_rates[j] * lengths[pos:(pos+sizes[i]-1), j]));  
     }
     pos = pos + sizes[i];
-    
   }
-  
-
 }
 
