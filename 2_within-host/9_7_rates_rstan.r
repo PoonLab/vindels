@@ -2,7 +2,7 @@
 library(rstan)
 
 num.pat <- 20
-num.trees <- 100
+num.trees <- 30
 
 # ---- Simulated Data ----
 tru.rate <- 0.3
@@ -51,7 +51,7 @@ data.stan <- list(npat= num.pat,
 stan.fit <- stan("~/vindels/2_within-host/rate-perpat.stan",
                  data= data.stan, 
                  chains=1,
-                 iter=2000000)
+                 iter=10000)
 
 # ----- Real Data ----
 type <- c("tip","node")

@@ -28,16 +28,18 @@ parameters {
 
 model {
   int pos;
+  int lim;
   
   pat_rates ~ normal(sub_rate, 0.03);
   
   pos = 1;
   for (i in 1:npat){
     tre_rates ~ normal(pat_rates[i], 0.06);
+    
+    lim = pos+sizes[i]-1;
     for (j in 1:ntree){
-      //print(pos);
-      //print(pos+sizes[i]-1);
-      print(counts[pos:(pos+sizes[i]-1), j]) // ~ poisson(exp(tre_rates[j] * lengths[pos:(pos+sizes[i]-1), j]));  
+      counts[pos:lim, j]  ~ poisson(tre_rates[j] * lengths[pos:lim, j]);  
+      // Alternative format:  segment(counts[j], pos, sizes[i]) ~ poisson(exp(tre_rates[j] * segment(lengths, pos, sizes[i]))); 
     }
     pos = pos + sizes[i];
   }
