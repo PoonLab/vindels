@@ -276,7 +276,7 @@ slip <- function(seq, pos, p.exit){
 removeOtherGaps <- function(anc, tip, indel, pos){
   # find the location of all gap characters in tip/anc
   gaps <- gregexpr("-",anc)[[1]]
-  if (length(gaps) && gaps != -1){
+  if (length(gaps) > 1 || gaps != -1){
     # create a vector of positions to be copied over
     idx <- rep(F, nchar(tip))
     idx[gaps] <- T
@@ -307,19 +307,19 @@ restoreTipDel <- function(tip, anc, indel, pos){
   # Any and all gaps in the tip sequence are deletions and need to be restored
   
   if(!grepl("-",tip)){
-    return(c(tip,pos))
+    return(tip)
   }else{
     tip.chars <- strsplit(tip, "")[[1]]
     anc.chars <- strsplit(anc, "")[[1]]
     idx <- which(tip.chars=="-")
     
     # perform a readjustment of the position (for insertions only 
-    if (!is.na(pos)){
-      pos <- gregexpr("[ACTG]", tip)[[1]][pos]
-    }
+    # if (!is.na(pos)){
+    #   pos <- gregexpr("[ACTG]", tip)[[1]][pos]
+    # }
     tip.chars[idx] <- anc.chars[idx]
     tip <- paste0(tip.chars,collapse="")
-    return(c(tip, pos))
+    return(tip)
   }
 }
 

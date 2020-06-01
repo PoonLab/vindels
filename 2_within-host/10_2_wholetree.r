@@ -207,8 +207,8 @@ write.csv(ins.nosep, paste0(path,"/10_nucleotide/all/ins-nosep-all.csv"))
 write.csv(del.nosep, paste0(path,"/10_nucleotide/all/del-nosep-all.csv"))
 
 # --- Modeling 2 ----
-write.csv(ins.sep, paste0(path,"/10_nucleotide/all/ins-sep-all2.csv"))
-write.csv(del.sep, paste0(path,"/10_nucleotide/all/del-sep-all2.csv"))
+write.csv(ins.sep, paste0(path,"/10_nucleotide/all/ins-sep-all.csv"))
+write.csv(del.sep, paste0(path,"/10_nucleotide/all/del-sep-all.csv"))
 
 
 
