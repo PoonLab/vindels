@@ -1,19 +1,7 @@
-//
-// This Stan program defines a simple model, with a
-// vector of values 'y' modeled as normally distributed
-// with mean 'mu' and standard deviation 'sigma'.
-//
-// Learn more about model development with Stan at:
-//
-//    http://mc-stan.org/users/interfaces/rstan.html
-//    https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started
-//
-
-// The input data is a vector 'y' of length 'N'.
 data {
-  int<lower=0> npat;
-  int<lower=0> ntree;                  // Number of columns           // Number of branches 
-  int sizes[npat];                   // Number of rows
+  int<lower=0> npat;                        // Number of patients
+  int<lower=0> ntree;                         // Number of columns    
+  int sizes[npat];                            // Number of rows
   int<lower=0> counts[sum(sizes),ntree];         // Count data
   matrix<lower=0>[sum(sizes),ntree] lengths;     // Time data
 }
@@ -37,9 +25,9 @@ model {
     tre_rates ~ normal(pat_rates[i], 0.06);
     
     lim = pos+sizes[i]-1;
-    for (j in 1:ntree){
-      counts[pos:lim, j]  ~ poisson(tre_rates[j] * lengths[pos:lim, j]);  
-      // Alternative format:  segment(counts[j], pos, sizes[i]) ~ poisson(exp(tre_rates[j] * segment(lengths, pos, sizes[i]))); 
+    for (j in 1:ntree){      //  1 - #Columns
+      counts[pos:lim, j]  ~ poisson(exp(tre_rates[j] * lengths[pos:lim, j]));  
+      // Alternate format:  segment(counts[j], pos, sizes[i]) ~ poisson(exp(tre_rates[j] * segment(lengths, pos, sizes[i]))); 
     }
     pos = pos + sizes[i];
   }
