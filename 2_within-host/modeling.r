@@ -16,7 +16,7 @@
 source("~/vindels/2_within-host/utils.r")
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
-insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
+insertions <- read.csv(paste0(path,"10_nucleotide/tips/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
 
 # PROBLEMATIC CASE: remove instances with gaps in the ancestor but NO INSERTION
 insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq=="")),]
