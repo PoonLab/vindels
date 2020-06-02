@@ -24,7 +24,7 @@ plot(data[-(1:burnin)
 abline(h=tru[2],col='red',lwd=2)
 plot(data[-(1:burnin)
          ,3], type = "l", xlab="MCMC Steps (x10)" , ylab="Rate",
-     main = "Chain values of Rate",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7)#, ylim=c(0.00001,0.000018))
+     main = "Chain values of Rate",  cex.axis=1.3, cex.lab=1.4, cex.main=1.7, ylim=c(0.00001,0.000013))
 abline(h=tru[3],col='red',lwd=2)
 plot(data[-(1:burnin)
          ,4], type = "l", xlab="MCMC Steps (x10)" , ylab="Fix",
@@ -38,11 +38,11 @@ plot(csv[-(1:burnin)
 
 
 # ---- Pretty Blue Histograms ----
-main <- 2.3
-lab <- 2.0
-ax <- 1.7
+main <- 1.7
+lab <- 1.6
+ax <- 1.25
 
-par(mar=c(6,5,6,0.5),mfrow=c(1,3),las=1,scipen=10000)
+par(mar=c(6,5,5,0.5),mfrow=c(2,2),las=1)
 hist(csv[-(1:burnin),1], 
      freq=F,
      col="dodgerblue", 
@@ -71,9 +71,10 @@ hist(csv[-(1:burnin),3],
      freq=F,
      col="dodgerblue", 
      breaks=15, 
-     ylab="",
+     ylab="Density",
      yaxt="n",
      main="Posterior of 'Rate'", 
+     xlim=c(0.00001,0.000013),
      xlab="Rate", cex.axis=ax, cex.lab=lab, cex.main=main)
 abline(v=tru[3],col='black',lwd=2, lty=2)
 lines(xy.coords(x=c(1e-3,1e-7), y=c(1000,1000)),col="red",lwd=2.5)
