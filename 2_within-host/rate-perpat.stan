@@ -1,7 +1,7 @@
 data {
   int<lower=0> npat;                        // Number of patients
   int<lower=0> ntree;                         // Number of columns    
-  int sizes[npat];                            // Number of rows
+  int sizes[npat];                            // Vector describing the number of rows belonging to each patient
   int<lower=0> counts[sum(sizes),ntree];         // Count data
   matrix<lower=0>[sum(sizes),ntree] lengths;     // Time data
 }
