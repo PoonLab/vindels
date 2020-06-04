@@ -175,14 +175,14 @@ param <- c(0.00052,0.88, 0.00001, 0.09)
 insertions <- simSeqs(25000, param)
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
 startvalue <- c(0.0008, 0.65, 0.000001, 0.25)
-notes <- "Test #21
-New: slippage shuffle mechanism changed to allow movement of full stacks and half stacks 
-truevalues:(0.00052, 0.85, 0.00001, 0.09)
+notes <- "Test #22
+Same as 21, just with modified priors and proposal
+truevalues:(0.00052, 0.88, 0.00001, 0.09)
 startvalues:(0.0008, 0.65, 0.000001, 0.25)
 priors: all uninformative, uniform, broad; except beta on fixation
 shuffle: on
 "
-chain <- runMCMC(startvalue, 500000, '21-full-stacks', notes)
+chain <- runMCMC(startvalue, 200000, '22-test', notes)
 
 # fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
 # fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE
