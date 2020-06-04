@@ -80,7 +80,7 @@ simPair <- function(param){
   
   # ------ INDELS -------
   # determine the number of insertions that occur 
-  count <- sum(runif(vlen) < p.enter)
+  count <- sum(rbinom(1,vlen,p.enter))
   noFilter <- 0
   if (count > 0){
     
@@ -171,7 +171,7 @@ simSeqs <- function(iter, param){
 
 
 #  ---- Start MCMC ----
-param <- c(0.00052,0.85, 0.00001, 0.09)
+param <- c(0.00052,0.88, 0.00001, 0.09)
 insertions <- simSeqs(25000, param)
 setup(insertions$tip, insertions$anc, insertions$len, insertions$pos, insertions$branch, T)
 startvalue <- c(0.0008, 0.65, 0.000001, 0.25)

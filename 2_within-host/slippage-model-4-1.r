@@ -90,10 +90,10 @@ likelihood<- function(param, slip.list, llh.list){
 }
 
 prior <- function(param){
-  prior.pe <- dunif(param[1], min=1e-7, max=1e-2, log=T) 
-  prior.ps <- dunif(param[2], min=0.4, max=0.95, log=T) 
-  prior.rate <- dunif(param[3], min=1e-7, max=1e-3, log=T)
-  prior.fix <- dbeta(param[4], shape1=3, shape2=20, log=T)
+  prior.pe <- dunif(param[1], min=1e-7, max=1e-3, log=T) 
+  prior.ps <- dunif(param[2], min=0.55, max=0.99, log=T) 
+  prior.rate <- dlnorm(param[3],meanlog=log(0.00001),sdlog=1.1,log=T) #dunif(param[3], min=1e-7, max=1e-3, log=T)
+  prior.fix <- dbeta(param[4], shape1=3, shape2=27, log=T)
   #prior.fixsd <- dexp(param[5], rate=1, log=T)
   #prior.pe <- dlnorm(p.enter,meanlog=log(0.00015),sdlog=1.2, log=T)
   #prior.ps <- dlnorm(p.stay,meanlog=log(0.75),sdlog=0.1,log=T)
@@ -113,7 +113,7 @@ posterior <- function(param, slip, llh){
 proposalFunction <- function(param, slip_current, llh_current){
 
   num <- runif(1)
-  s2p <- 0.97
+  s2p <- 0.96
   
   # CHANGE PARAMETERS 
   if (num > s2p){
@@ -128,7 +128,7 @@ proposalFunction <- function(param, slip_current, llh_current){
       param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
       llh_proposed <- seqllh(param[3], slip_current)  # recalcuate using the new rate
     }else{
-      param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.02)
+      param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.008)
       llh_proposed <- llh_current
     }
     slip_proposed <- slip_current    # stays the same
