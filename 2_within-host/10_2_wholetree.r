@@ -260,7 +260,7 @@ sampleString <- function(len, vloop){
 
 # generates the randomly sampled substrings for each indel
 ires <- mapply(sampleString, total.ins[,"len"], total.ins[,"tip"])
-dres <- mapply(sampleString, total.del[,"len"], total.del[,"tip"])
+dres <- mapply(sampleString, total.del[,"len"], total.del[,"anc"])
 
 
 # compares the observed proportion to the overall distribution of each nucleotide 
@@ -311,18 +311,16 @@ del.nt$sign <- dsign
 # BOOTSTRAPS
 # ----------------
 
-df1 <- total.ins
-df2 <- total.del
 bs.props <- list()
 
 for (n in 1:1000){
   
   # create the bootstrap sample 
-  sam1 <- sample(nrow(df1), nrow(df1), replace=T)
-  sam2 <- sample(nrow(df2), nrow(df2), replace=T)
+  sam1 <- sample(nrow(total.ins), nrow(total.ins), replace=T)
+  sam2 <- sample(nrow(total.del), nrow(total.del), replace=T)
   
-  df1.bs <- df1[sam1,]
-  df2.bs <- df2[sam2,]
+  df1.bs <- total.ins[sam1,]
+  df2.bs <- total.del[sam2,]
   
   total1 <- c(sum(df1.bs[,'len']), sum(df1.bs[,'vlen']))
   total2 <- c(sum(df2.bs[,'len']), sum(df2.bs[,'vlen']))
@@ -331,8 +329,8 @@ for (n in 1:1000){
     iProps <-  sum(str_count(df1.bs$indel, nuc)) / total1[1]
     dProps <-  sum(str_count(df2.bs$indel, nuc)) / total2[1]
     
-    iVProps <-  sum(str_count(df1$tip, nuc)) / total1[2]
-    dVProps <-  sum(str_count(df2$tip, nuc)) / total2[2]
+    iVProps <-  sum(str_count(df1.bs$tip, nuc)) / total1[2]
+    dVProps <-  sum(str_count(df2.bs$anc, nuc)) / total2[2]
     
     return(c(iProps, dProps, iVProps, dVProps))
   })
@@ -370,23 +368,28 @@ upper.y <- con.int[which(!grepl("v",names(con.int)) & grepl("97.5",names(con.int
 # -------------------------------------
 require(RColorBrewer)
 #colors <- brewer.pal(4, 'Set1')
-colors <- c( "limegreen","dodgerblue","red", "magenta")
+colors <- c( "limegreen","darkturquoise","red", "purple")
 
 cex=1
 par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
-xpos <- c(0.17,0.155,0.24,0.37)
+xpos <- c(0.17,0.155,0.24,0.375)
 ypos <- c(0.15, 0.21, 0.26, 0.39)
 
-lim = c(0.14,0.42)
-plot(indel.nt[,c(3,2)], pch=indel.nt[,4]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.08*sqrt(indel.nt$counts),
+lim = c(0.14,0.43)
+plot(x=med.x, y=med.y, pch=indel.nt[,4]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.07*sqrt(indel.nt$counts),
      cex.lab=1.3, cex.axis=1.2,cex.main=1.8,lwd=5, ylab='', xlab='', main="Nucleotide Proportions")
 title(ylab="Proportion In Indels", line=3,cex.lab=1.3)
 title(xlab="Proportion in Variable Loops", line=3,cex.lab=1.3)
-arrows(indel.nt[1:8,3], lower.y[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,3], upper.y[c(seq(1,8,2),seq(1,8,2)+1)], length=0, angle=90, code=3,lwd=1.5)
-arrows(lower.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], upper.x[c(seq(1,8,2),seq(1,8,2)+1)], indel.nt[1:8,2], length=0, angle=90, code=3,lwd=1.5)
+
+sqn <- c(seq(1,8,2),seq(1,8,2)+1)
+# y error bars 
+arrows(med.x, lower.y[sqn], med.x, upper.y[sqn], length=0, angle=90, code=3,lwd=1.5)
+
+# x error bars 
+arrows(lower.x[sqn], med.y, upper.x[sqn], med.y, length=0, angle=90, code=3,lwd=1.5)
 #legend(0.38,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-text(xpos, ypos, cex=1.3, labels=c("C", "G", "T", "A"))
+text(xpos, ypos, cex=1.4, labels=c("C", "G", "T", "A"))
 #legend(0.14,0.42,legend=c("Insertions", "Deletions"), pch=c(1,2),cex=1.3, lwd=2, col="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 par(xpd=F)
 abline(0,1)

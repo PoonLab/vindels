@@ -42,16 +42,18 @@ main <- 1.7
 lab <- 1.6
 ax <- 1.25
 
-par(mar=c(6,5,5,0.5),mfrow=c(2,2),las=1)
-hist(csv[-(1:burnin),1], 
+par(mar=c(6,7,5,2),las=1)#,mfrow=c(2,2))
+hist(data[-(1:burnin),1], 
      freq=F,
      col="dodgerblue", 
      breaks=15, 
      main="Posterior of 'Enter'", 
-     yaxt="n",
+     ylab="",
+     #yaxt="n",
      xlab="P(Enter)", cex.axis=ax, cex.lab=lab, cex.main=main)
 abline(v=tru[1],col='black',lwd=2,lty=2)
 lines(xy.coords(x=c(1e-6,1e-2), y=c(100,100)),col="red",lwd=2.5)
+title(ylab="Density", line=4.5, cex.lab=lab)
 axis(2,
      labels=c("0","5e3", "1e4", "1.5e4"),
      at=c(0,5000,10000,15000),

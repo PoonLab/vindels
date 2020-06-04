@@ -14,7 +14,7 @@ pat.sd <- 0.05
 
 hist(pat.rate, breaks=5, col="grey")
 
-lns <- sample(50:250, num.pat)
+lns <- sample(70:200, num.pat)
 counts <- matrix(nrow=sum(lns), ncol=num.trees)
 lens <- matrix(nrow=sum(lns), ncol=num.trees)
 pos <- 1

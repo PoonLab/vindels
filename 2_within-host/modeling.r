@@ -55,6 +55,106 @@ rm(slips)
 # }
 
 
+genSeq <- function(len){
+  seq <- c()
+  for (n in 1:len){
+    num <- runif(1)
+    if (num < f[1]){
+      nucl <- "A"
+    }else if (num > f[1] && num < (f[2]+f[1])){
+      nucl <- "C"
+    }else if (num > (f[2]+f[1]) && num < (f[3]+f[2]+f[1])){
+      nucl <- "G"
+    }else{
+      nucl <- "T"
+    }
+    seq[n] <- nucl
+  }
+  paste(seq, collapse="")
+}
+
+
+nt <- c("A", "C", "G", "T")
+
+lens <- c(75, 126, 105,  90 , 33)
+f <- c(0.4158261, 0.1649874, 0.1761463, 0.2423612 )
+names(f) <- nt
+
+simPair <- function(rate){
+  vlen <- lens[sample(1:5, 1)]
+  anc <- genSeq(vlen)
+  
+  # pick a branch rate value from a distribution 
+  branch <- rlnorm(1, meanlog=4, sdlog=1.05)
+  
+  # ----SUBSTITUTIONS--------
+  # add in substitutions based on the rate value 
+  
+  anc.chars <- strsplit(anc, "")[[1]]
+  tmat <- getMat(rate, branch)
+  
+  # generate the tip sequence based on the transition rate matrix 
+  tip <- paste(sapply(1:nchar(anc), function(n){
+    rand <- runif(1)
+    probs <- tmat[anc.chars[n],]
+    
+    if (rand < probs[1]){
+      "A"
+    }else if (rand > probs[1] && rand < (probs[1]+probs[2])){
+      "C"
+    }else if (rand > (probs[1]+probs[2]) && rand < (probs[1]+probs[2]+probs[3])){
+      "G"
+    }else{
+      "T"
+    }
+  }), collapse="")
+  
+  # ------ INDELS -------
+  # determine the number of insertions that occur 
+  count <- sum(rpois(vlen,< p.enter)
+  noFilter <- 0
+  if (count > 0){
+    
+    # generate a vector of insertion lengths 
+    lens <- c()
+    for (n in 1:count){
+      len <- 0
+      p.exit <- 0
+      while(p.exit < p.stay){
+        len <- len + 1
+        p.exit <- runif(1)
+      }
+      lens[n] <- len
+    }
+    noFilter <- length(lens)
+    # apply a boolean filter to remove 91% of non-3 insertions 
+    toRemove <- sapply(1:length(lens), function(x){
+      if (lens[x] %% 3 != 0){
+        runif(1) < fix
+      }else{
+        T
+      }
+    })
+    lens <- lens[toRemove]
+    
+    # add any indels that make it through the filtering 
+    if (length(lens) > 0){
+      for (n in lens){
+        # add the length and choose a random location for the slip event 
+        idx <- sample(1:vlen,1)
+        
+        # generate the sequence to insert / delete 
+        indel <- genSeq(n)
+        
+        # generate the tip and ancestor sequence by adding / removing sequence 
+        tip <- insert(tip, indel, idx)
+        anc <- insert(anc, rep("-",n), idx)
+      }
+    }
+  }
+  return(list(tip=tip,anc=anc,branch=branch, count=noFilter))
+}
+
 # CUSTOM MCMC IN R
 
 
