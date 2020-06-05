@@ -61,9 +61,7 @@ simPair <- function(rate){
 
   # ------ INDELS -------
   # determine the number of insertions that occur 
-  counts <- rpois(vlen,lambda=rate)
-
-
+  counts <- rgeom(vlen,prob=(1-rate))
   return(counts)
 }
 
@@ -89,7 +87,7 @@ likelihood <- function(slip){
     return(-Inf)
   }
   #sum(dgeom(counts,prob=(1-slip), log=T))
-  sum(dpois(counts,lambda=slip, log=T))
+  sum(dgeom(counts,prob=slip, log=T))
 }
 
 prior <- function(slip){
