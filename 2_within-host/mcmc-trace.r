@@ -52,7 +52,7 @@ hist(data[-(1:burnin),1],
      #yaxt="n",
      xlab="P(Enter)", cex.axis=ax, cex.lab=lab, cex.main=main)
 abline(v=tru[1],col='black',lwd=2,lty=2)
-lines(xy.coords(x=c(1e-6,1e-2), y=c(100,100)),col="red",lwd=2.5)
+lines(xy.coords(x=c(0,1), y=c(1,1)),col="red",lwd=2.5)
 title(ylab="Density", line=4.5, cex.lab=lab)
 axis(2,
      labels=c("0","5e3", "1e4", "1.5e4"),
