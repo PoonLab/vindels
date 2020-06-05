@@ -87,7 +87,7 @@ likelihood <- function(slip){
     return(-Inf)
   }
   #sum(dgeom(counts,prob=(1-slip), log=T))
-  sum(dgeom(counts,prob=slip, log=T))
+  sum(dgeom(counts,prob=(1-slip), log=T))
 }
 
 prior <- function(slip){
