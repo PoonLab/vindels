@@ -96,4 +96,23 @@ lines(density(rbeta(10000,3,20)),col="red",lwd=2.5)
 med1 <- median(csv$p.enter)
 med2 <- median(csv$p.stay)
 med3 <- median(csv$rate)
+
+
+# single parameter
+par(mar=c(6,7,5,2),las=1)#,mfrow=c(2,2))
+hist(chain[-(1:burnin),1], 
+     freq=F,
+     col="dodgerblue", 
+     breaks=15, 
+     main="Posterior of 'Slip'", 
+     ylab="",
+     #yaxt="n",
+     xlab="P(Slip)", cex.axis=ax, cex.lab=lab, cex.main=main)
+abline(v=0.001,col='black',lwd=2,lty=2)
+lines(xy.coords(x=c(0,1), y=c(1,1)),col="red",lwd=2.5)
+title(ylab="Density", line=4.5, cex.lab=lab)
+
+
+
+
 #dev.off()
