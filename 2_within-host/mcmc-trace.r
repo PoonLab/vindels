@@ -38,22 +38,22 @@ plot(csv[-(1:burnin)
 
 
 # ---- Pretty Blue Histograms ----
-main <- 1.7
-lab <- 1.6
-ax <- 1.25
+main <- 2
+lab <- 1.8
+ax <- 1.5
 
-par(mar=c(6,7,5,2),las=1)#,mfrow=c(2,2))
+par(mar=c(6,5,5,0.5),las=1,mfrow=c(1,4))
 hist(data[-(1:burnin),1], 
      freq=F,
      col="dodgerblue", 
      breaks=15, 
      main="Posterior of 'Enter'", 
      ylab="",
-     #yaxt="n",
+     yaxt="n",
      xlab="P(Enter)", cex.axis=ax, cex.lab=lab, cex.main=main)
 abline(v=tru[1],col='black',lwd=2,lty=2)
 lines(xy.coords(x=c(0,1), y=c(1,1)),col="red",lwd=2.5)
-title(ylab="Density", line=4.5, cex.lab=lab)
+#title(ylab="Density", line=3, cex.lab=lab)
 axis(2,
      labels=c("0","5e3", "1e4", "1.5e4"),
      at=c(0,5000,10000,15000),
@@ -73,7 +73,7 @@ hist(csv[-(1:burnin),3],
      freq=F,
      col="dodgerblue", 
      breaks=15, 
-     ylab="Density",
+     ylab="",
      yaxt="n",
      main="Posterior of 'Rate'", 
      xlim=c(0.00001,0.000013),
