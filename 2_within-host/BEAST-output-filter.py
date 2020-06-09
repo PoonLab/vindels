@@ -9,6 +9,7 @@ import shutil
 import subprocess
 
 inFolder = sys.argv[1]
+itr = float(sys.argv[2])
 
 if not inFolder.endswith("/"):
     inFolder += "/"
@@ -44,7 +45,7 @@ for f in files:
 
         if len(trace) > 0:
 
-            if trace[0] != "100000000":
+            if float(trace[0]) != itr:
                 os.rename(f, inFolder+"unfinished/"+base)
                 if os.path.isfile(inFolder+tree):
                     os.rename(inFolder+tree, inFolder+"unfinished/"+tree)
