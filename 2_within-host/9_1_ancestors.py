@@ -133,19 +133,6 @@ def extractIndels(tip, anc, vidx):
         # [-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1]
         if vregion[n] != -1:
             
-            # will run when entering new loop for first time 
-            if vregion[n] != current:
-                # start a count from zero 
-                if achar != "-" or schar != "-":
-                    pidx = 0
-                
-                    # update the current to the current loop number
-                    current = vregion[n]
-
-            else:
-                if achar != "-" or schar != "-":
-                    pidx += 1
-
 
             #sanity check to ensure the code is covering the variable regions 
             aseqs[vregion[n]] += achar
@@ -195,6 +182,29 @@ def extractIndels(tip, anc, vidx):
                     if dTemp:
                         deletions[vregion[n]].append(dTemp+"-"+str(pidx))
                         dTemp = ''
+
+            # pidx will be 1 behind index n until this code has run (catch up after)
+            if vregion[n] != current:
+                # start a count from zero 
+                if achar != "-" or schar != "-":
+                    pidx = 1
+                
+                    # update the current to the current loop number
+                    current = vregion[n]
+
+            else:
+                if achar != "-" or schar != "-":
+                    pidx += 1
+
+
+        # else:
+        #     if iTemp:
+        #         insertions[vregion[n]].append(iTemp+"-"+str(pidx))
+        #         iTemp = ''
+        #     if dTemp:
+        #         deletions[vregion[n]].append(dTemp+"-"+str(pidx))
+        #         dTemp = ''
+
 
     newvar = ['','','','','']
     newanc = ['','','','','']
