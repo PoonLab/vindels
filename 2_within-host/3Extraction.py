@@ -121,12 +121,13 @@ for infile in folder:
 
 
 total = 0
-patcount = 0
+patcount = {}
 seqcount = 0
+subcount = {}
 for pat in full.keys():
     print(pat)
-    delcount = 0
 
+    delcount = 0
     # FILTER OUT PATIENT DATA SETS 
     # =========================================
     if not pat.isalpha():
@@ -182,7 +183,8 @@ for pat in full.keys():
         hasNeg = False
         lowest = 0
         chosenDates = []
-        for n, header in enumerate(full[pat][:]):
+        #print(type(full[pat].keys()))
+        for n, header in enumerate(list(full[pat].keys())[:]):
             fields = header.split(".")
             date = fields[bestIdx]
             
@@ -258,20 +260,22 @@ for pat in full.keys():
 
     # SUCCESS IF REACHED THIS POINT 
     # ======================================
-    '''patcount += 1
+    
     print(pat)
-
-    outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta","w")
-    outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv", "w")
-    outputv.write("header,V1,start.1,stop.1,V2,start.2,stop.2,V3,start.3,stop.3,V4,start.4,stop.4,V5,start.5,stop.5\n")
+    
+    # outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta","w")
+    # outputv = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/variable/" + pat + ".csv", "w")
+    # outputv.write("header,V1,start.1,stop.1,V2,start.2,stop.2,V3,start.3,stop.3,V4,start.4,stop.4,V5,start.5,stop.5\n")
     
     for n, header in enumerate(full[pat].keys()):
 
+        # LANL sequence data sets 
         if not pat.isalpha():
             fields = header.split(".")
+
             date = fields[bestIdx]
             #skips the sequences that do not contain a proper date 
-            if date in ("-", "2222", None):
+            if date in ("-", "2222", '8888',None):
                 print("SOMETHINGS WRONG")
                 print(pat)
                 print(date)
@@ -280,19 +284,27 @@ for pat in full.keys():
             # fields[0:5] . number of time points . which time scale was chosen .  time
             newheader = ".".join(fields[0:5]) + "." + fields[9] + "." + str(bestIdx-5) + "_" + str(fields[bestIdx])
             
-            # CONDENSE HEADER
-            #fields[4] +"_" + date
-            outputfull.write(">" + newheader + "\n" + full[pat][header] + "\n")
-            outputv.write(newheader + "," + vseqdict[pat][header] + "\n")
+
+            subcount[fields[0]] = subcount.get(fields[0], 0) + 1
+            patcount[pat] = patcount.get(pat, 0) + 1
+
+            
+
+            #outputfull.write(">" + newheader + "\n" + full[pat][header] + "\n")
+            #outputv.write(newheader + "," + vseqdict[pat][header] + "\n")
             seqcount += 1
         else:
-            #newheader = ".".join(["C","-","-",fields[0], fields[2], "-","-"]) + "_" + fields[1]
-            outputfull.write(">"+ header + "\n" + full[pat][header] + "\n")
-            outputv.write(header + "," + vseqdict[pat][header] + "\n")
+            subcount["C"] = subcount.get("C", 0) + 1
+            patcount[pat] = patcount.get(pat, 0) + 1
+            
+
+            #outputfull.write(">"+ header + "\n" + full[pat][header] + "\n")
+            #outputv.write(header + "," + vseqdict[pat][header] + "\n")
             seqcount += 1
 
-    outputfull.close()
-    outputv.close()
-    '''
-#print(seqcount)
-#print(patcount)
+    #outputfull.close()
+    #outputv.close()
+    
+print(seqcount)
+print(subcount)
+print(len(patcount))
