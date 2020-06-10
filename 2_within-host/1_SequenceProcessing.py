@@ -42,7 +42,7 @@ for infile in folder:
     for x in byStudy:
         if x == "C":
             Cstudies.append(filename)
-    print(filter.keys())
+    #print(filter.keys())
 print(minlen)
 print(total)
 print(subtypes)

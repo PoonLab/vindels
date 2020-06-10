@@ -124,7 +124,7 @@ total = 0
 patcount = 0
 seqcount = 0
 for pat in full.keys():
-    #print(pat)
+    print(pat)
     delcount = 0
 
     # FILTER OUT PATIENT DATA SETS 
@@ -164,8 +164,10 @@ for pat in full.keys():
         #completes the bestIdx variable with the date field containing the most unique timepoints 
         bestIdx = -1
         for n, x in enumerate(unique):
-            if x > 1 and x > bestIdx:
-                bestIdx = n
+            if x > 1:
+                print(n)
+                if x > bestIdx:
+                    bestIdx = n
         bestIdx = bestIdx + 5
 
         #ensure that the patient has 5 time points or more 
@@ -180,7 +182,7 @@ for pat in full.keys():
         hasNeg = False
         lowest = 0
         chosenDates = []
-        for n, header in enumerate(full[pat].keys()):
+        for n, header in enumerate(full[pat][:]):
             fields = header.split(".")
             date = fields[bestIdx]
             
@@ -256,7 +258,7 @@ for pat in full.keys():
 
     # SUCCESS IF REACHED THIS POINT 
     # ======================================
-    patcount += 1
+    '''patcount += 1
     print(pat)
 
     outputfull = open("/home/jpalmer/PycharmProjects/hiv-withinhost/3RegionSequences/full_length/" + pat + ".fasta","w")
@@ -291,22 +293,6 @@ for pat in full.keys():
 
     outputfull.close()
     outputv.close()
-print(seqcount)
-print(patcount)
-
-'''
-cseq = ""
-for c1, c2 in c_regions:
-    cseq += query[index[c1]:index[c2]].replace("-","")'''
-#------------
-#used for generated concatenated conserved sequences for MSAs
-'''if patid in unique.keys():
-    #add sequence to the existing list
-    if cseq in unique[patid].keys():
-        unique[patid][cseq].append(header)
-
-    #initialize new sequence as a list
-    else:
-        unique[patid][cseq] = [header]
-else:
-    unique[patid] = {cseq:[header]}'''
+    '''
+#print(seqcount)
+#print(patcount)
