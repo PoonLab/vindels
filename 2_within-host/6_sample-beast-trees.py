@@ -24,30 +24,33 @@ def sample_beast(infile, outdir, numsample=5):
     for line in input:
         data = line.split()
         if len(data) == 6:
-            states.append(data[1].lstrip("STATE_"))
+            states.append(int(data[1].lstrip("STATE_")))
     input.close()
-    total = len(states) - 1
+    total = len(states) * 2 - 1
     #print(total)
-    start = int(total*0.1) + 1
+    start = int(total*0.1) + 2
     #print(start)
     rsample = []
 
-    randpool = list(range(start, total))
-    
-    for x in range(numsample):
+    #print(states)
+    rsample = random.sample(states, numsample)
+    rsample = [str(x) for x in rsample]
+    '''for x in range(numsample):
         #chose 101 just in case (left 101 states for the burn in and sampled from last 900 states out of 1001)
         random.shuffle(randpool)
         x = randpool.pop()
         rsample.append(str(x*int(states[1])))
+    '''
     sample_count = 0
-
+    
+    #print(rsample)
     input2 = open(infile,'rU')
 
     seqDict = {}
 
 
     #d = open(outdir+"dict/"+name+".dictionary", "w")
-
+    
     for line in input2:
 
         #locates the translate table 
@@ -62,7 +65,6 @@ def sample_beast(infile, outdir, numsample=5):
             #print(line[0])
             #print(date)
             
-            #NEW SEQUENCE HEADER FORMAT
             seqDict[line[0]] = header
         
         # this finds and processes each tree state in the rsample
@@ -84,31 +86,21 @@ def sample_beast(infile, outdir, numsample=5):
 
             for tip in tree.get_terminals():
                 tip.name = seqDict[tip.name]
-                
+            
             Phylo.write(tree, outdir+name+"_"+str(sample_count)+"_"+str(state)+".tree.sample", 'newick')
             #print(tree)
+    
 
 
-    # used for making dictionaries to convert sequences back to full header (bc i messed up)
-    #for num in seqDict.keys():
-    #    d.write(seqDict[num].split(".")[4]+","+seqDict[num]+"\n")
-    #print(seqDict)
-
-
-'''if sys.argv[1][-1] != "/":
-    sys.argv[1] += "/"
-if sys.argv[2][-1] != "/":
-    sys.argv[2] += "/"
-'''
 def main():
     
 
     if len(sys.argv) != 3: #and len(sys.argv) != 4:
         print("USAGE: python 6_sample-beast-trees.py [input trees folder] [output trees folder] [optional comma-delimiter exclusion]")
         quit()
-    #for i in range(len(sys.argv)):
-    #    if not sys.argv[i].endswith("/"):
-    #        sys.argv[i] += "/"
+    for i in range(len(sys.argv)):
+        if not sys.argv[i].endswith("/"):
+            sys.argv[i] += "/"
 
     #if len(sys.argv) == 4:
     #    exclude = sys.argv[4].split(",")
@@ -122,17 +114,7 @@ def main():
         #for item in exclude:
         #    if re.search(item, infile) != None:
         #        skip = True
-        
-        #if skip:
-        #    continue
-        '''
-        patfolder = outfolder + filename + "/"
-        if not os.path.isdir(patfolder):
-            os.makedirs(patfolder)
-        else:
-            shutil.rmtree(patfolder,ignore_errors=False)
-            os.makedirs(patfolder)
-        '''
+        print(os.path.basename(infile))
         sample_beast(infile,outfolder, 200)
 
 
@@ -140,15 +122,3 @@ def main():
 if __name__ == '__main__': 
     main()
 
-
-
-
-
-'''
-nwk = line.split()[-1]
-handle = StringIO(nwk)
-tree = Phylo.read(handle, 'newick')
-for tip in tree.get_terminals():
-    tip.name = dictionary[tip.name]
-
-Phylo.write(tree, infile="")'''
