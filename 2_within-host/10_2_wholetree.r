@@ -193,10 +193,9 @@ write.csv(total.del, paste0(path,"10_nucleotide/all/total-del.csv"))
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
-total.ins2 <- total.ins[total.ins$len>1, ]
-total.del2 <- total.del[total.del$len>1, ]
-write.csv(total.ins2, paste0(path,"10_nucleotide/all/total-ins2.csv"))
-write.csv(total.del2, paste0(path,"10_nucleotide/all/total-del2.csv"))
+
+write.csv(total.ins[total.ins$len>1,], paste0(path,"10_nucleotide/all/dinucl-ins.csv"))
+write.csv(total.del[total.del$len>1,], paste0(path,"10_nucleotide/all/dinucl-del.csv"))
 
 # FLANKING INSERTIONS (14) OUTPUT 
 # ------------------------------------
