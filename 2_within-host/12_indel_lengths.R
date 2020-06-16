@@ -31,21 +31,21 @@ categorize <- function(seqList){
 
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
-iLength <- read.csv(paste0(path,"12_lengths/ins-full.csv"), row.names=1, stringsAsFactors = F)
-dLength <- read.csv(paste0(path,"12_lengths/del-full.csv"), row.names=1, stringsAsFactors = F)
+iLength <- read.csv(paste0(path,"12_lengths/all/ins-all.csv"), row.names=1, stringsAsFactors = F)
+dLength <- read.csv(paste0(path,"12_lengths/all/del-all.csv"), row.names=1, stringsAsFactors = F)
  
-iLength <- iLength[iLength$Count>0,]
-dLength <- dLength[dLength$Count>0,]
+iLength <- iLength[iLength$count>0,]
+dLength <- dLength[dLength$count>0,]
 
-iLength$Len <- sapply(iLength$Seq, nchar)
-dLength$Len <- sapply(dLength$Seq, nchar)
+iLength$Len <- sapply(iLength$indel, nchar)
+dLength$Len <- sapply(dLength$indel, nchar)
 
-iLength$Bin <- sapply(iLength$Seq,categorize)
-dLength$Bin <- sapply(dLength$Seq,categorize)
+iLength$Bin <- sapply(iLength$indel,categorize)
+dLength$Bin <- sapply(dLength$indel,categorize)
 
 # verify that  no commas are found within the iLength and dLength data frames 
-"," %in% iLength$Seq
-"," %in% dLength$Seq
+"," %in% iLength$indel
+"," %in% dLength$indel
 
 # order the iLength and dLength dataframes 
 l <- c(">9","9","7-8", "6", "4-5","3", "1-2")
@@ -69,7 +69,7 @@ ddf$Sign <- rep(2,35)
 ddf$Sign[c(7,11,13,14,15,29,30,31,35)] <- c(3,3,3,1,3,1,3,3,1)
 
 
-colnames(idf) <- c("Bin", "Vloop", "Count", "Sign")
+colnames(idf) <- c("Bin", "Vloop", "count", "Sign")
 colnames(ddf) <- colnames(idf)
 
 # STACK BAR PLOT 
@@ -109,7 +109,7 @@ for (i in seq(0.5,4.5)){
   
   for (j in 1:7){
     s <- d[j,"Sign"]
-    n <- d[j,"Count"]
+    n <- d[j,"count"]
     
     rect(i-0.15*s, pos, i+0.15*s, pos+n, col=pal[j])
     pos <- pos + n
@@ -119,7 +119,7 @@ dev.off()
 
 require(ggplot2)
 iplot <- ggplot() + 
-  geom_bar(aes(x=Vloop, y=Count, fill=Bin), data=idf, stat='identity') + 
+  geom_bar(aes(x=Vloop, y=count, fill=Bin), data=idf, stat='identity') + 
   scale_fill_manual(values=rep(pal,4)) + 
   labs(x="Variable Loop", 
        y="Frequency", title="Insertion Lengths") +
@@ -141,7 +141,7 @@ iplot
 
 
 dplot <- ggplot() + 
-  geom_bar(aes(x=Vloop, y=Count, fill=Bin), data=ddf, stat='identity') + 
+  geom_bar(aes(x=Vloop, y=count, fill=Bin), data=ddf, stat='identity') + 
   scale_fill_manual(values=rep(pal,4)) + 
   labs(x="Variable Loop", 
        y="Frequency", title="Deletion Lengths") +
@@ -163,7 +163,7 @@ dplot
 
 # --- Mosaic Plot -----
 data <- idf
-df <- data.frame(bin=factor(rep(data$Bin, data$Count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(data$Vloop, data$Count))
+df <- data.frame(bin=factor(rep(data$Bin, data$count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(data$Vloop, data$count))
 
 # reorder the data frame 
 df$bin <- factor(df$bin, levels=c("1-2","3","4-5","6","7-8","9",">9"))
@@ -195,8 +195,8 @@ mosaic(~ bin + vloop,
 
 # TEST : ALLUVIAL PLOT
 # ----------------------------------------
-iplot <- ggplot(idf, aes(y=Count, axis1=)) + 
-  geom_bar(aes(x=Vloop, y=Count, fill=Bin), data=idf, stat='identity') + 
+iplot <- ggplot(idf, aes(y=count, axis1=)) + 
+  geom_bar(aes(x=Vloop, y=count, fill=Bin), data=idf, stat='identity') + 
 
 
 
@@ -244,4 +244,4 @@ mosaic(~Vloop + Bin, data=dLength,
 
 
 ggplot()
-ggplot(all.df, aes(x=Date, y=Count, group=Count)) + geom_density_ridges(colour="white", fill="blue", scale=1, bandwidth=5)
+ggplot(all.df, aes(x=Date, y=count, group=count)) + geom_density_ridges(colour="white", fill="blue", scale=1, bandwidth=5)

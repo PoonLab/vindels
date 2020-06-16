@@ -3,8 +3,8 @@ source("~/vindels/2_within-host/utils.r")
 # INSERTION PARSING ----------
 path <- "~/Lio/"
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree-test/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree-test/del/*.tsv"))
 
 require(stringr)
 require(phangorn)
@@ -201,34 +201,53 @@ axis(1, labels=T,at=seq(0, 7000, 1000), line=3)
 
 
 # COMPARISON OF INSERTION RATES INTERIOR VS TIP
-patnames <- unname(sapply(names(iint), function(x){strsplit(x,"-")[[1]][1]}))
-all.rates <- list()
+patnames <- unname(sapply(names(all.data[[1]]), function(x){strsplit(x,"-")[[1]][1]}))
+all.counts <- list()
+all.times <- list()
+sizes <- list()
 for (a in 1:4){
-  all.rates[[a]] <- list()
-  
+  all.counts[[a]] <- list()
+  all.times[[a]] <- list()
+  sizes[[a]] <- double()
   for (b in 1:5){
-    all.rates[[a]][[b]] <- list()
+    all.counts[[a]][[b]] <- list()
+    all.times[[a]][[b]] <- list()
   }
 }
+
 
 for (i in 1:4){
   for (j in 1:length(unique(patnames))){
     idx <- which(patnames == unique(patnames)[j])
     for (k in 1:5){
-
       mat <- sapply(idx, function(df){
         x <- all.data[[i]][[df]]
         x[x$vloop == k,"count"]
       })
+      all.counts[[i]][[k]][[j]] <- mat
       
-      all.rates[[i]][[k]][[j]] <- mat
+      if (k == 1){
+        sizes[[i]] <- c(sizes[[i]],nrow(mat))
+      }
+      
+      
+      all.times[[i]][[k]][[j]] <- sapply(idx, function(df){
+        x <- all.data[[i]][[df]]
+        x[x$vloop == k, "length"]
+      })
     }
   }
 }
 
-all.rates <- lapply(1:4, function(x){
-  df <- as.data.frame(rbindlist(all.rates[[x]]))
-  split(df, df[,"pat"])
+all.counts <- lapply(1:4, function(x){
+  lapply(1:5, function(y){
+    do.call(rbind, all.counts[[x]][[y]])
+  })
+})
+all.times <- lapply(1:4, function(x){
+  lapply(1:5, function(y){
+    do.call(rbind, all.times[[x]][[y]])
+  })
 })
 
 

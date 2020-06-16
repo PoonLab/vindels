@@ -53,58 +53,77 @@ stan.fit <- stan("~/vindels/2_within-host/rate-perpat.stan",
                  chains=1,
                  iter=10000)
 
+
+# TESTING
+nrows <- 100
+tre.rate <- rnorm(num.trees, mean=0.02, sd=0.005)
+counts <- matrix(nrow=nrows, ncol=num.trees)
+lens <- matrix(nrow=nrows, ncol=num.trees)
+for (j in 1:num.trees){
+  len.temp <- rexp(nrows, 1.4)
+  lens[, j] <- len.temp
+  c <- rpois(nrows, lambda=tre.rate[j]*len.temp)
+  counts[,j] <- c
+}
+
+data.stan <- list(ntree = num.trees,
+                  nrow=nrows,
+                  counts = counts,
+                  lengths = lens)
+
+ 
+stan.fit <- stan("~/vindels/2_within-host/rate-test.stan",
+                 data= data.stan, 
+                 chains=1,
+                 iter=100000)    
+
+
+
 # ----- Real Data ----
 type <- c("tip","node")
 rstan_options(auto_write=T)
 options(mc.cores = parallel::detectCores()-2)
-irates <- data.frame()
-drates <- data.frame()
 
 for (t in 1:2){ 
   for (i in 1:5){
-    clist <- all.counts[[t]][[i]]
-    tlist <- all.times[[t]][[i]]
+    cmat <- all.counts[[t]][[i]]
+    tmat <- all.times[[t]][[i]]
     
-    for (j in 1:length(cdata)){
-      cdata <- clist[[j]]
-      tdata <- tlist[[j]]
-      
-      num.tree <- ncol(cdata)
-      num.branch <- nrow(cdata)
-      
-      # Data import
-      data.stan <- list(ntree = num.tree,
-                        nbranch = num.branch,
-                        counts = rdata,
-                        times = tdata)
-      
-      # Stan modeling 
-      stan.fit <- stan("~/vindels/2_within-host/rates-perpat.stan",
-                       data= data.stan, 
-                       chains=1,
-                       iter=1000000,
-                       )
-      #control = list(adapt_delta = 0.99))
-      
-      # export results to a data frame 
-      irates <- rbind(irates, data.frame(rate=summary(stan.fit)$summary[1,6],
-                                         vloop=paste0("V",as.character(i)),
-                                         id=type[t],
-                                         lower=summary(stan.fit)$summary[1,4],
-                                         upper=summary(stan.fit)$summary[1,8]
-      ))
-    }
+    s <- sizes[[t]]
+    
+    num.pat <- length(s)
+    num.tree <- ncol(cmat)
 
-
-      # ----- Stan Model ----
       
-    }else{
-      irates <- rbind(irates, data.frame(rate=NA,
-                                         vloop=paste0("V",as.character(i)),
-                                         id=type[t],
-                                         lower=NA,
-                                         upper=NA))
-    }
+    # Data import
+    data.stan <- list(npat=num.pat,
+                      ntree = num.tree,
+                      sizes= s,
+                      counts = cmat,
+                      lengths = tmat)
+      
+    # Stan modeling 
+    stan.fit <- stan("~/Desktop/rate-perpat-dc.stan",
+                     data= data.stan, 
+                     chains=1,
+                     iter=10000,
+                     )
+    #control = list(adapt_delta = 0.99))
+    
+    # export results to a data frame 
+    irates <- rbind(irates, data.frame(rate=summary(stan.fit)$summary[1,6],
+                                       vloop=paste0("V",as.character(i)),
+                                       id=type[t],
+                                       lower=summary(stan.fit)$summary[1,4],
+                                       upper=summary(stan.fit)$summary[1,8]
+    ))      # ----- Stan Model ----
+    # }else{
+    #   irates <- rbind(irates, data.frame(rate=NA,
+    #                                      vloop=paste0("V",as.character(i)),
+    #                                      id=type[t],
+    #                                      lower=NA,
+    #                                      upper=NA))
+    # }
 
     
     data <- vloop.mat[[i]][[t+2]]
