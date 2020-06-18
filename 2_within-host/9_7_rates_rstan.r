@@ -13,8 +13,8 @@ pat.sd <- 0.05
 
 
 hist(pat.rate, breaks=5, col="grey")
-
-lns <- sample(70:200, num.pat)
+vlens <- c(75, 126, 105,  90 , 33)
+lns <- sample(70:200, num.pat, replace=T)
 counts <- matrix(nrow=sum(lns), ncol=num.trees)
 lens <- matrix(nrow=sum(lns), ncol=num.trees)
 pos <- 1
@@ -25,9 +25,9 @@ for (i in 1:num.pat){
   tre.rate <- rnorm(num.trees, mean=pat.rate[i], sd=pat.sd)
   toCheck[idx] <- tre.rate
   for (j in 1:num.trees){
-    len.temp <- rexp(diff(range(idx))+1, 0.017)
+    len.temp <- rexp(diff(range(idx))+1, 0.1)
     lens[idx, j] <- len.temp
-    c <- rpois(diff(range(idx))+1, lambda=tre.rate[j]*len.temp)
+    c <- rpois(diff(range(idx))+1,sizes=85, mu=tre.rate[j]*len.temp)
     if(any(is.na(c))){
       print(tre.rate[j])
       print(len.temp)
@@ -48,7 +48,7 @@ data.stan <- list(npat= num.pat,
                   lengths = lens)
 
 # Stan modeling 
-stan.fit <- stan("~/vindels/2_within-host/rate-perpat.stan",
+stan.fit <- stan("~/Desktop/rate-perpat-dc.stan",
                  data= data.stan, 
                  chains=1,
                  iter=10000)

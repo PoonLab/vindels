@@ -215,10 +215,13 @@ for (a in 1:4){
   }
 }
 
-
+names <- c()
 for (i in 1:4){
   for (j in 1:length(unique(patnames))){
     idx <- which(patnames == unique(patnames)[j])
+    if (i == 1){
+      names[j] <- unique(patnames)[j] 
+    }
     for (k in 1:5){
       mat <- sapply(idx, function(df){
         x <- all.data[[i]][[df]]
