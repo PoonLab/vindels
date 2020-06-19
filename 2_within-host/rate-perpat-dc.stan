@@ -8,11 +8,11 @@ data {
 
 parameters {
   real<lower=0.001, upper=1.0> sub_rate;
-  real<lower=0, upper=20> sub_sd;
+  //real<lower=0, upper=20> sub_sd;
   real<lower=0.001, upper=1.0> pat_rates[npat];
   real<lower=0, upper=20> pat_sd;
   real<lower=0.001, upper=1.0> tre_rates[ntree];
-  real<lower=0.001> disp[ntree]; 
+  real<lower=0.001, upper=150> disp[ntree]; 
 }
 
 model {
