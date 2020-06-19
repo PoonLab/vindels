@@ -27,7 +27,7 @@ for (i in 1:num.pat){
   for (j in 1:num.trees){
     len.temp <- rexp(diff(range(idx))+1, 0.1)
     lens[idx, j] <- len.temp
-    c <- rnbinom(diff(range(idx))+1,size=85, mu=tre.rate[j]*len.temp)
+    c <- rpois(diff(range(idx))+1, lambda=tre.rate[j]*len.temp)
     if(any(is.na(c))){
       print(tre.rate[j])
       print(len.temp)
@@ -103,7 +103,7 @@ for (t in 1:2){
                       lengths = tmat)
       
     # Stan modeling 
-    stan.fit <- stan("~/Desktop/rate-perpat-dc.stan",
+    stan.fit <- stan("rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
                      iter=10000,

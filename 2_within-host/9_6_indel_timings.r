@@ -222,6 +222,7 @@ for (i in 1:4){
     if (i == 1){
       names[j] <- unique(patnames)[j] 
     }
+    print(j)
     for (k in 1:5){
       mat <- sapply(idx, function(df){
         x <- all.data[[i]][[df]]
@@ -229,15 +230,16 @@ for (i in 1:4){
       })
       all.counts[[i]][[k]][[j]] <- mat
       
-      if (k == 1){
-        sizes[[i]] <- c(sizes[[i]],nrow(mat))
-      }
-      
-      
-      all.times[[i]][[k]][[j]] <- sapply(idx, function(df){
+      mat2 <- sapply(idx, function(df){
         x <- all.data[[i]][[df]]
         x[x$vloop == k, "length"]
       })
+      all.times[[i]][[k]][[j]] <- mat2 
+      
+      if (k == 1){
+        sizes[[i]] <- c(sizes[[i]],nrow(mat2))
+        print(sizes[[i]])
+      }
     }
   }
 }
