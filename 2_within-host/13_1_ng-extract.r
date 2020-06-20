@@ -74,10 +74,10 @@ glycCount <- function(seq){
 #PycharmProjects/hiv-withinhost/
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
-ins <- read.csv(paste0(path, "13_nglycs/ins-sep.csv"),  sep="\t", stringsAsFactors = F)
-del <- read.csv(paste0(path,"13_nglycs/del-sep.csv"), sep="\t", stringsAsFactors = F)
+ins <- read.csv(paste0(path, "13_nglycs/all/ins-sep.csv"),  sep="\t", stringsAsFactors = F)
+del <- read.csv(paste0(path,"13_nglycs/all/del-sep.csv"), sep="\t", stringsAsFactors = F)
 
-ins <- ins[-c(which(ins$Pos ==0)),]
+ins <- ins[-c(which(ins$pos ==0)),]
 
 ins <- ins[,-c(3,4)]
 del <- del[,-c(3,4)]
@@ -86,22 +86,22 @@ ins$Vpos <- NULL
 del$Vpos <- NULL
 
 # apply an adjust to the deletion locations to make them the same as insertions 
-del$Pos <- as.numeric(del$Pos) + nchar(del$Seq)
+del$pos <- as.numeric(del$pos) + nchar(del$Seq)
 
 # Insertions : fill in gaps found in the tip sequences 
-res <- as.data.frame(t(unname(mapply(restoreTipDel,ins$Vseq, ins$Anc, ins$Seq,ins$Pos))))
-ins$Vseq <- as.character(res[,1])
-ins$Pos <- as.numeric(as.character(res[,2]))
+res <- as.data.frame(t(unname(mapply(restoreTipDel,ins$tip, ins$anc, ins$Seq,ins$pos))))
+ins$tip <- as.character(res[,1])
+ins$pos <- as.numeric(as.character(res[,2]))
 
 
 # Deletions : fill in gaps found in the ancestral sequences 
-del$Anc <- unname(mapply(restoreAncIns, del$Anc, del$Vseq, del$Seq))
+del$anc <- unname(mapply(restoreAncIns, del$anc, del$tip, del$Seq))
 
 # Insertions : 
-ins$Anc <- unname(mapply(removeOtherGaps, ins$Anc,ins$Vseq, ins$Seq, ins$Pos))
-ins$Anc <- gsub("-","",ins$Anc)
+ins$anc <- unname(mapply(removeOtherGaps, ins$anc,ins$tip, ins$Seq, ins$pos))
+ins$anc <- gsub("-","",ins$anc)
 # not needed for deletions because no sequences contain more than 1 deletion
-#ins$Anc <- unname(mapply(removeOtherGaps, del$Vseq,del$Anc, del$Seq, del$Pos))
+#ins$anc <- unname(mapply(removeOtherGaps, del$tip,del$anc, del$Seq, del$pos))
 
 
 ins.v <- split(ins, ins$Vloop)
@@ -120,14 +120,14 @@ for (n in 1:5){
   icounts <- nrow(ins.v[[n]])
   dcounts <- nrow(del.v[[n]])
   
-  iTemp$glycs <- unname(sapply(iTemp$Anc, glycCount))
-  dTemp$glycs <- unname(sapply(dTemp$Anc, glycCount))
+  iTemp$glycs <- unname(sapply(iTemp$anc, glycCount))
+  dTemp$glycs <- unname(sapply(dTemp$anc, glycCount))
   
   
   # EXPECTED GLYC CHANGES (RANDOMIZATION TEST)
   # ---------------
   # Insertions
-  ires <- t(unname(mapply(insRandTest, iTemp$Anc,iTemp$Seq, iTemp$glycs)))
+  ires <- t(unname(mapply(insRandTest, iTemp$anc,iTemp$Seq, iTemp$glycs)))
   ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
   
   iedist <- unname(unlist(lapply(ires, mean)))
@@ -143,7 +143,7 @@ for (n in 1:5){
   iequantiles <- quantile(bs.means, c(0.025,0.975))
   
   # Deletions
-  dres <- t(unname(mapply(delRandTest, dTemp$Anc,dTemp$Seq, dTemp$glycs)))
+  dres <- t(unname(mapply(delRandTest, dTemp$anc,dTemp$Seq, dTemp$glycs)))
   dres <- split(dres, rep(1:nrow(dres), each=ncol(dres)))
 
   dedist <- unname(unlist(lapply(dres, mean)))
@@ -161,7 +161,7 @@ for (n in 1:5){
   
   # OBSERVED GLYCOSYLATION SITE CHANGES (from the data)
   # ----------------------
-  iobs <- unname(mapply(observedGlycChange, iTemp$Anc, iTemp$Seq, iTemp$Pos, "i"))
+  iobs <- unname(mapply(observedGlycChange, iTemp$anc, iTemp$Seq, iTemp$pos, "i"))
   
   iomean <- mean(iobs)
   # Boostraps for observed insertions
@@ -173,7 +173,7 @@ for (n in 1:5){
   }
   ioquantiles <- quantile(bs.means, c(0.025,0.975))
   
-  dobs <- unname(mapply(observedGlycChange, dTemp$Anc, dTemp$Seq, dTemp$Pos, "d"))
+  dobs <- unname(mapply(observedGlycChange, dTemp$anc, dTemp$Seq, dTemp$pos, "d"))
   
   domean <- mean(dobs)
   # Boostraps for observed deletions
@@ -349,7 +349,7 @@ ins[which(isign=="higher"),]
 dres <- t(unname(mapply(randomizationTest, del$Tip,del$Seq)))
 dres <- split(dres, rep(1:nrow(dres), each=ncol(dres)))
 
-iobs <- unname(sapply(ins$Anc, glycCount))
+iobs <- unname(sapply(ins$anc, glycCount))
 
 isign <- c()
 for (n in 1:length(iobs)){
@@ -386,11 +386,11 @@ new.del <- del[,c(1,3,4,5)]
 # new.del$anc <- del$anc
 # new.del$tip <- unname(mapply(delAlign, del$seq, del$pos, del$anc, del$tip))
 
-new.ins$tip <- sapply(ins$Vseq, translate)
-new.del$tip <- sapply(del$Vseq, translate)
+new.ins$tip <- sapply(ins$tip, translate)
+new.del$tip <- sapply(del$tip, translate)
 
-new.ins$anc <- sapply(ins$Anc, translate)
-new.del$anc <- sapply(del$Anc, translate)
+new.ins$anc <- sapply(ins$anc, translate)
+new.del$anc <- sapply(del$anc, translate)
 
 new.ins$tip.glycs <- unlist(sapply(new.ins$tip, extractGlycs))
 new.del$tip.glycs <- unlist(sapply(new.del$tip, extractGlycs))
@@ -409,8 +409,8 @@ write.table(new.del, paste0(path,"13_nglycs/del-edit.csv"), sep="\t", quote=F, r
 ins$aaseq <- NULL
 del$aaseq <- NULL
 
-ins$original <- mapply(insOriginal, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq)
-del$original <- mapply(delOriginal, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq)
+ins$original <- mapply(insOriginal, indel=ins$Seq, pos=ins$pos, vseq=ins$tip)
+del$original <- mapply(delOriginal, indel=ins$Seq, pos=ins$pos, vseq=ins$tip)
 # for both: 
 # determine the start and stop of all nglycs 
 # collect them in one column separated by "-", comma separated
