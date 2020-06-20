@@ -22,13 +22,12 @@ iint <- list()
 itip <- list()
 dint <- list()
 dtip <- list()
-imid <- list()
-dmid <- list()
 
-for (i in 1:5){
-  imid[[i]] <- numeric()
-  dmid[[i]] <- numeric()
+indel.mid <- list()
+for (i in 1:4){
+  indel.mid[[i]] <- double()
 }
+idx <- c(1,1,1,1)
 
 for (file in 1:length(ifolder)){
   print(file)
@@ -86,6 +85,8 @@ for (file in 1:length(ifolder)){
   iCSV$rtt.mid <- (lens[res] + lens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
   dCSV$rtt.mid <- iCSV$rtt.mid
   
+
+  
   # these remain 'lengths' and not 'rtt.mid's because I need to use the full tree length as the maximum cutoff
   maxes[count] <- max(lens,na.rm=T)
   
@@ -106,6 +107,29 @@ for (file in 1:length(ifolder)){
   iCSV <- iCSV[,-c(1,2,5,6)]
   dCSV <- dCSV[,-c(1,2,5,6)]
   
+  
+  
+  if (sum(iCSV[tips,'count']) > 0){
+    data <- iCSV[tips,'count']
+    indel.mid[[1]][idx[1]:(idx[1]+sum(data)-1)] <- rep(iCSV[tips,'rtt.mid'], data)
+    idx[1] <- idx[1] + sum(data)
+  }
+  if (sum(iCSV[nodes,'count']) > 0){
+    data <- iCSV[nodes,'count']
+    indel.mid[[2]][idx[2]:(idx[2]+sum(data)-1)] <- rep(iCSV[nodes,'rtt.mid'], data)
+    idx[2] <- idx[2] + sum(data)
+  }
+  if (sum(dCSV[tips,'count']) > 0){
+    data <- dCSV[tips,'count']
+    indel.mid[[3]][idx[3]:(idx[3]+sum(data)-1)] <- rep(dCSV[tips,'rtt.mid'], data)
+    idx[3] <- idx[3] + sum(data)
+  }
+  if (sum(dCSV[nodes,'count']) > 0){
+    data <- dCSV[nodes,'count']
+    indel.mid[[4]][idx[4]:(idx[4]+sum(data)-1)] <- rep(dCSV[nodes,'rtt.mid'], data)
+    idx[4] <- idx[4] + sum(data)
+  }
+  
   if (is.null(iint[[id]])){
     iint[[id]] <- iCSV[nodes,]
     itip[[id]]  <- iCSV[tips,]
@@ -121,6 +145,9 @@ for (file in 1:length(ifolder)){
 # determine which patients did not complete fully 
 pat.idx <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
 table(pat.idx)
+table(sapply(ifolder, function(x){
+   strsplit(basename(x), "-")[[1]][1]
+}))
 toRemove <- which(pat.idx == "56552")
 
 iint <- iint[-toRemove]
