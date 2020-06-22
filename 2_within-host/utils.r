@@ -119,12 +119,12 @@ insert <- function(str, indel,pos ){
 delete <- function(str, indel, pos){
   vect <- rep(T, nchar(str))
   
-  if (pos > (nchar(str) - nchar(indel) + 1)){
+  if (pos > (nchar(str))){
     return (NA)
   }
   
-  start <- pos
-  end <- pos + nchar(indel) - 1
+  start <- pos - nchar(indel) + 1
+  end <- pos
   
   vect[start:end] <- F
   
@@ -273,7 +273,7 @@ slip <- function(seq, pos, p.exit){
 }
 
 # 13_1 nglycs and modeling
-removeOtherGaps <- function(anc, tip, indel, pos){
+restoreInsAnc <- function(anc, tip, indel, pos){
   # find the location of all gap characters in tip/anc
   gaps <- gregexpr("-",anc)[[1]]
   if (length(gaps) > 1 || gaps != -1){
@@ -294,12 +294,13 @@ removeOtherGaps <- function(anc, tip, indel, pos){
     tip.chars <- strsplit(tip, "")[[1]]
     anc.chars[idx] <- tip.chars[idx]
     anc <- paste0(anc.chars, collapse="")
+    return(anc)
+    
   }
-  
   return(anc)
 }
 
-restoreTipDel <- function(tip, anc, indel, pos){
+restoreOtherSeq <- function(tip, anc){
   # this is used to restore any deletion gaps in tip sequences containing insertions 
   # Reasoning:
   # I need to restore the tip sequence to its ORIGINAL STATE where no deletions have occurred
@@ -321,30 +322,13 @@ restoreTipDel <- function(tip, anc, indel, pos){
     tip <- paste0(tip.chars,collapse="")
     return(tip)
   }
-}
-
-# 13_1 nglycs and modeling
-restoreAncIns <- function(tip, anc, indel){
   # this is used to restore any insertion gaps in ancestor sequences containing deletions
   # Reasoning:
   # I need to restore the ancestor sequence to its ORIGINAL STATE where no insertions have occurred
   # want to focus on investigating specific insertions at one time
   # Any and all gaps in the tip sequence are deletions and need to be restored
   
-  if(!grepl("-",anc)){
-    return(anc)
-  }else{
-    tip.chars <- strsplit(tip, "")[[1]]
-    anc.chars <- strsplit(anc, "")[[1]]
-    idx <- which(anc.chars=="-")
-    
-    anc.chars[idx] <- tip.chars[idx]
-    anc <- paste0(anc.chars,collapse="")
-    return(anc)
-  }
 }
-
-
 
 
 # general

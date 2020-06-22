@@ -133,7 +133,17 @@ def extractIndels(tip, anc, vidx):
         # [-1,-1,-1,-1,-1,-1,2,2,2,2,2,2,-1,-1,-1,-1]
         if vregion[n] != -1:
             
+            # added in the loopstart switch to handle improper alignments of start of V5
+            # this will run at the beginning of a new variable loop 
+            if vregion[n] != current:
+                if vregion[n] == 5: 
+                    loopstart = False
+                else: 
+                    loopstart = True
 
+            if not loopstart: 
+                if achar != "-" and schar != "-":
+                    loopstart = True
             #sanity check to ensure the code is covering the variable regions 
             aseqs[vregion[n]] += achar
             vseqs[vregion[n]] += schar
@@ -142,59 +152,59 @@ def extractIndels(tip, anc, vidx):
             #2 : ancestral gap, sequence char = insertion 
             #3 : ancestral char, sequence gap  = deletion 
             #4 : ancestral char, sequence char  = nothing 
-            
-            if achar == "-":
-                #insertion in seq 1 
-                if schar != '-':
-                    iTemp += schar
-                    
-                    #clear the dTemp 
-                    if dTemp:
-                        deletions[vregion[n]].append(dTemp+"-"+str(pidx))
-                        dTemp = ''
-            
-                #nothing -- both gaps 
-                else:
-                    #clear iTemp and dTemp
-                    if iTemp:
-                        insertions[vregion[n]].append(iTemp+"-"+str(pidx))
-                        iTemp = ''
-                    if dTemp:
-                        deletions[vregion[n]].append(dTemp+"-"+str(pidx))
-                        dTemp = ''
-                    
-            elif achar != "-":
-                #deletion in seq 1
-                if schar == "-":
-                    dTemp += achar
-    
-                    #clear iTemp
-                    if iTemp:
-                        insertions[vregion[n]].append(iTemp+"-"+str(pidx))
-                        iTemp = ''
-                    
-                #nothing -- both have character
-                else:
-                    #clear iTemp and dTemp
-                    if iTemp:
-                        insertions[vregion[n]].append(iTemp+"-"+str(pidx))
-                        iTemp = ''
-                    if dTemp:
-                        deletions[vregion[n]].append(dTemp+"-"+str(pidx))
-                        dTemp = ''
-
-            # pidx will be 1 behind index n until this code has run (catch up after)
-            if vregion[n] != current:
-                # start a count from zero 
-                if achar != "-" or schar != "-":
-                    pidx = 1
+            if loopstart: 
+                if achar == "-":
+                    #insertion in seq 1 
+                    if schar != '-':
+                        iTemp += schar
+                        
+                        #clear the dTemp 
+                        if dTemp:
+                            deletions[vregion[n]].append(dTemp+"-"+str(pidx))
+                            dTemp = ''
                 
-                    # update the current to the current loop number
-                    current = vregion[n]
+                    #nothing -- both gaps 
+                    else:
+                        #clear iTemp and dTemp
+                        if iTemp:
+                            insertions[vregion[n]].append(iTemp+"-"+str(pidx))
+                            iTemp = ''
+                        if dTemp:
+                            deletions[vregion[n]].append(dTemp+"-"+str(pidx))
+                            dTemp = ''
+                        
+                elif achar != "-":
+                    #deletion in seq 1
+                    if schar == "-":
+                        dTemp += achar
+        
+                        #clear iTemp
+                        if iTemp:
+                            insertions[vregion[n]].append(iTemp+"-"+str(pidx))
+                            iTemp = ''
+                        
+                    #nothing -- both have character
+                    else:
+                        #clear iTemp and dTemp
+                        if iTemp:
+                            insertions[vregion[n]].append(iTemp+"-"+str(pidx))
+                            iTemp = ''
+                        if dTemp:
+                            deletions[vregion[n]].append(dTemp+"-"+str(pidx))
+                            dTemp = ''
 
-            else:
-                if achar != "-" or schar != "-":
-                    pidx += 1
+                # pidx will be 1 behind index n until this code has run (catch up after)
+                if vregion[n] != current:
+                    # start a count from zero 
+                    if achar != "-" or schar != "-":
+                        pidx = 1
+                    
+                        # update the current to the current loop number
+                        current = vregion[n]
+
+                else:
+                    if achar != "-" or schar != "-":
+                        pidx += 1
 
 
         # else:
