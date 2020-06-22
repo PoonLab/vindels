@@ -101,7 +101,11 @@ for (t in 1:2){
                       sizes= s,
                       counts = cmat,
                       lengths = tmat)
-      
+    rm(all.data)
+    rm(iint)
+    rm(itip)
+    rm(dtip)
+    rm(dint)
     # Stan modeling 
     stan.fit <- stan("rate-perpat-dc.stan",
                      data= data.stan, 
