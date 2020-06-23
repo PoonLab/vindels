@@ -25,7 +25,7 @@ dtip <- list()
 
 indel.mid <- list()
 for (i in 1:4){
-  indel.mid[[i]] <- double()
+  indel.mid[[i]] <- list()
 }
 idx <- c(1,1,1,1)
 
@@ -110,24 +110,16 @@ for (file in 1:length(ifolder)){
   
   
   if (sum(iCSV[tips,'count']) > 0){
-    data <- iCSV[tips,'count']
-    indel.mid[[1]][idx[1]:(idx[1]+sum(data)-1)] <- rep(iCSV[tips,'rtt.mid'], data)
-    idx[1] <- idx[1] + sum(data)
+    indel.mid[[1]][[full.id]] <- rep(iCSV[tips,'rtt.mid'], iCSV[tips,'count'])
   }
   if (sum(iCSV[nodes,'count']) > 0){
-    data <- iCSV[nodes,'count']
-    indel.mid[[2]][idx[2]:(idx[2]+sum(data)-1)] <- rep(iCSV[nodes,'rtt.mid'], data)
-    idx[2] <- idx[2] + sum(data)
+    indel.mid[[2]][[full.id]] <- rep(iCSV[nodes,'rtt.mid'], iCSV[nodes,'count'])
   }
   if (sum(dCSV[tips,'count']) > 0){
-    data <- dCSV[tips,'count']
-    indel.mid[[3]][idx[3]:(idx[3]+sum(data)-1)] <- rep(dCSV[tips,'rtt.mid'], data)
-    idx[3] <- idx[3] + sum(data)
+    indel.mid[[3]][[full.id]] <- rep(dCSV[tips,'rtt.mid'], dCSV[tips,'count'])
   }
   if (sum(dCSV[nodes,'count']) > 0){
-    data <- dCSV[nodes,'count']
-    indel.mid[[4]][idx[4]:(idx[4]+sum(data)-1)] <- rep(dCSV[nodes,'rtt.mid'], data)
-    idx[4] <- idx[4] + sum(data)
+    indel.mid[[4]][[full.id]] <- rep(dCSV[nodes,'rtt.mid'], dCSV[nodes,'count'])
   }
   
   if (is.null(iint[[id]])){
