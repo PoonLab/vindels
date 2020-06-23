@@ -8,8 +8,8 @@ source("~/vindels/2_within-host/utils.r")
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
  
-ifolder <- Sys.glob(paste0(path,"9Indels/mcc/wholetree/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/mcc/wholetree/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/mcc/wholetree-new/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/mcc/wholetree-new/del/*.tsv"))
 
 ins.sep <-list()
 del.sep <- list()
@@ -159,6 +159,10 @@ del.nosep <- as.data.frame(rbindlist(del.nosep))
 
 ins <- ins.sep[ins.sep$indel!="",]
 del <- del.sep[del.sep$indel!="",]
+
+
+
+
 
 # N - GLYC SITE OUTPUTS 
 # ---------------------------------------------

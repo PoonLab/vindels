@@ -55,22 +55,35 @@ iLength$Bin <- factor(iLength$Bin,levels=l)
 dLength$Bin <- factor(dLength$Bin,levels=l)
 
 # table manipulation for data display
-itab <- table(iLength$Bin, iLength$Vloop)
-dtab <- table(dLength$Bin, dLength$Vloop)
+itab <- table(iLength$Bin, iLength$vloop)
+dtab <- table(dLength$Bin, dLength$vloop)
+
+require(vcd)
 
 idf <- as.data.frame(itab)
 ddf <- as.data.frame(dtab)
 
+
+colnames(idf) <- c("Bin", "vloop", "count")
+colnames(ddf) <- colnames(idf)
+
 # add in the significance level column
 idf$Sign <- rep(2,35)
-idf$Sign[c(1,11,15,23,28,30,31,35)] <- c(1,3,3,1,3,3,3,1)
-
+#idf$Sign[c(1,11,15,23,28,30,31,35)] <- c(2,3,3,1,3,3,3,1)
+idf$Sign[c(2,5,8,11,12,18,24,26,27,28,29,30,31,34,35)] <- c(1,3,1,3,1,3,1,1,3,3,3,3,3,1,1)
 ddf$Sign <- rep(2,35)
-ddf$Sign[c(7,11,13,14,15,29,30,31,35)] <- c(3,3,3,1,3,1,3,3,1)
+#ddf$Sign[c(7,11,13,14,15,29,30,31,35)] <- c(3,3,3,1,3,1,3,3,1)
+ddf$Sign[c(2,8,10,13,14,15,22,24,25,26,28,29,30,33,35)] <- c(1,1,3,3,1,3,1,1,3,3,3,3,3,1,1)
+
+# Proportion of frameshift indels 
+x <- nchar(iLength$indel)
+sum(x[x%%3 != 0]) / sum(x)
+
+x <- nchar(dLength$indel)
+sum(x[x%%3 != 0]) / sum(x)
 
 
-colnames(idf) <- c("Bin", "Vloop", "count", "Sign")
-colnames(ddf) <- colnames(idf)
+
 
 # STACK BAR PLOT 
 # -------------------------------------------
@@ -81,12 +94,12 @@ pal <- pal[length(pal):1]
 data <- ddf
 
 
-png(filename="~/vindels/Figures/within-host/finalized/del-length-v2", width=1200, height=700)
+#png(filename="~/vindels/Figures/within-host/finalized/del-length-v2", width=1200, height=700)
 par(mar=c(6,7,2,1))
 ax <- 1.9
 lab <- 2.3
 plot(NA, xlim=c(0,5), 
-     ylim=c(0,250), 
+     ylim=c(0,1500), 
      xaxt="n",
      xaxs="i",
      yaxs="i",
@@ -104,7 +117,7 @@ abline(v=seq(0.5,4.5)+0.3, lty=1, col="gray68")
 
 for (i in seq(0.5,4.5)){
   pos <- 0
-  d <- data[data$Vloop==i+0.5,]
+  d <- data[data$vloop==i+0.5,]
   #data <- data[nrow(data):1,]
   
   for (j in 1:7){
@@ -119,7 +132,7 @@ dev.off()
 
 require(ggplot2)
 iplot <- ggplot() + 
-  geom_bar(aes(x=Vloop, y=count, fill=Bin), data=idf, stat='identity') + 
+  geom_bar(aes(x=vloop, y=count, fill=Bin), data=idf, stat='identity') + 
   scale_fill_manual(values=rep(pal,4)) + 
   labs(x="Variable Loop", 
        y="Frequency", title="Insertion Lengths") +
@@ -141,7 +154,7 @@ iplot
 
 
 dplot <- ggplot() + 
-  geom_bar(aes(x=Vloop, y=count, fill=Bin), data=ddf, stat='identity') + 
+  geom_bar(aes(x=vloop, y=count, fill=Bin), data=ddf, stat='identity') + 
   scale_fill_manual(values=rep(pal,4)) + 
   labs(x="Variable Loop", 
        y="Frequency", title="Deletion Lengths") +
@@ -162,8 +175,8 @@ dplot <- ggplot() +
 dplot
 
 # --- Mosaic Plot -----
-data <- idf
-df <- data.frame(bin=factor(rep(data$Bin, data$count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(data$Vloop, data$count))
+data <- ddf
+df <- data.frame(bin=factor(rep(data$Bin, data$count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(data$vloop, data$count))
 
 # reorder the data frame 
 df$bin <- factor(df$bin, levels=c("1-2","3","4-5","6","7-8","9",">9"))
@@ -196,7 +209,7 @@ mosaic(~ bin + vloop,
 # TEST : ALLUVIAL PLOT
 # ----------------------------------------
 iplot <- ggplot(idf, aes(y=count, axis1=)) + 
-  geom_bar(aes(x=Vloop, y=count, fill=Bin), data=idf, stat='identity') + 
+  geom_bar(aes(x=vloop, y=count, fill=Bin), data=idf, stat='identity') + 
 
 
 
@@ -204,7 +217,7 @@ iplot <- ggplot(idf, aes(y=count, axis1=)) +
 
 
 
-mosaic(~Vloop + Bin, data=iLength,
+mosaic(~vloop + Bin, data=iLength,
        shade=T, main=NULL, direction="v",
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",
@@ -213,17 +226,17 @@ mosaic(~Vloop + Bin, data=iLength,
                             tl_varnames=c(F,T),
                             gp_labels=gpar(fontsize=20),
                             gp_varnames=gpar(fontsize=26),
-                            set_varnames = c(Vloop="Variable Loop", 
+                            set_varnames = c(vloop="Variable Loop", 
                                              Bin="Insertion Length (nt)"),
                             offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
        legend=legend_resbased(fontsize = 20, fontfamily = "",
                               x = unit(0.5, "lines"), y = unit(2,"lines"),
                               height = unit(0.8, "npc"),
                               width = unit(1, "lines"), range=c(-10,10)),
-       set_labels=list(Vloop=c("V1","V2","V4","V5")))
+       set_labels=list(vloop=c("V1","V2","V4","V5")))
 
 
-mosaic(~Vloop + Bin, data=dLength,
+mosaic(~vloop + Bin, data=dLength,
        shade=T, main=NULL, direction="v",
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",
@@ -232,14 +245,14 @@ mosaic(~Vloop + Bin, data=dLength,
                             tl_varnames=c(F,T),
                             gp_labels=gpar(fontsize=20),
                             gp_varnames=gpar(fontsize=26),
-                            set_varnames = c(Vloop="Variable Loop", 
+                            set_varnames = c(vloop="Variable Loop", 
                                              Bin="Deletion Length (nt)"),
                             offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
        legend=legend_resbased(fontsize = 20, fontfamily = "",
                               x = unit(0.5, "lines"), y = unit(2,"lines"),
                               height = unit(0.8, "npc"),
                               width = unit(1, "lines"), range=c(-10,10)),
-       set_labels=list(Vloop=c("V1","V2","V4","V5")))
+       set_labels=list(vloop=c("V1","V2","V4","V5")))
 
 
 
