@@ -7,6 +7,32 @@ import os
 import sys
 import shutil
 
+
+def getSeqDict(infile):
+    #locates the translate table 
+    
+    seqDict = {}
+    lines = open(infile, "rU")
+
+    for line in lines:
+        search = re.search("\d*[^\S\t\n\r]'.*'", line)
+        data = line.split()
+
+        # this will load the translate dictionary (when search has been found)
+        if search != None:
+            line = line.strip("\t\n,").split()
+            header = line[1].strip("'")
+            seqDict[line[0]] = header
+    return seqDict
+
+def replaceHeaders(infile, tree):
+    seqDict = getSeqDict(infile)
+
+    for tip in tree.get_terminals():
+        tip.name = seqDict[tip.name]
+
+
+
 def sample_beast(infile, outdir, numsample=5):
     
     
@@ -43,32 +69,16 @@ def sample_beast(infile, outdir, numsample=5):
     '''
     sample_count = 0
     
-    #print(rsample)
+    seqDict = getSeqDict(infile)
+
     input2 = open(infile,'rU')
-
-    seqDict = {}
-
 
     #d = open(outdir+"dict/"+name+".dictionary", "w")
     
     for line in input2:
 
-        #locates the translate table 
-        search = re.search("\d*[^\S\t\n\r]'.*'", line)
-        data = line.split()
-
-        # this will load the translate dictionary (when search has been found)
-        if search != None:
-            line = line.strip("\t\n,").split()
-            header = line[1].strip("'")
-            #date = line[1].strip("'").split("_")[1]
-            #print(line[0])
-            #print(date)
-            
-            seqDict[line[0]] = header
-        
         # this finds and processes each tree state in the rsample
-        elif len(data) == 6 and data[1].lstrip("STATE_") in rsample:
+        if len(data) == 6 and data[1].lstrip("STATE_") in rsample:
             sample_count += 1
             state = data[1].lstrip("STATE_")
             if len(state) >1:
