@@ -7,19 +7,19 @@ data {
 }
 
 parameters {
-  real<lower=0.001, upper=1.0> sub_rate;
-  //real<lower=0, upper=20> sub_sd;
-  real<lower=0.001, upper=1.0> pat_rates[npat];
-  real<lower=0, upper=100> pat_sd;
-  real<lower=0.001, upper=1.0> tre_rates[ntree];
-  real<lower=0.001, upper=150> disp[ntree]; 
+  real<lower=0.0001, upper=1> sub_rate;
+  real<lower=0, upper=50> sub_sd;
+  real<lower=0.0001, upper=0.1> pat_rates[npat];
+  real<lower=0, upper=50> pat_sd;
+  real<lower=0.000001, upper=0.01> tre_rates[ntree];
+  //real<lower=0.01, upper=50> disp; 
 }
 
 model {
   int pos;
   int lim;
   
-  pat_rates ~ normal(sub_rate, 0.3);  // 0.2 is arbitrary
+  pat_rates ~ normal(sub_rate, sub_sd);  // 0.2 is arbitrary
   
   pos = 1;
   for (i in 1:npat){
@@ -27,7 +27,7 @@ model {
     
     lim = pos+sizes[i]-1;
     for (j in 1:ntree){      
-      counts[pos:lim, j] ~ neg_binomial_2(tre_rates[j] * lengths[pos:lim, j], disp[j]);  
+      counts[pos:lim, j] ~ poisson(tre_rates[j] * lengths[pos:lim, j]);  
     }
     pos = pos + sizes[i];
   }

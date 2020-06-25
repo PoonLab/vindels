@@ -110,7 +110,7 @@ for (t in 1:2){
     stan.fit <- stan("rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
-                     iter=1000,
+                     iter=10000,
                      )
     #control = list(adapt_delta = 0.99))
     
