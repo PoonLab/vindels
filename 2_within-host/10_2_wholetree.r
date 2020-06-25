@@ -146,6 +146,11 @@ for (file in 1:length(ifolder)){
   del.sep[[file]] <- dTemp
 
 }
+
+
+
+
+
 rm(iTemp)
 rm(dTemp)
 rm(iCSV)
@@ -166,14 +171,14 @@ del <- del.sep[del.sep$indel!="",]
 
 # N - GLYC SITE OUTPUTS 
 # ---------------------------------------------
-write.table(ins,paste0(path, "13_nglycs/all/ins-sep.csv"), row.names=F, sep="\t", quote=F)
-write.table(del,paste0(path, "13_nglycs/all/del-sep.csv"), row.names=F, sep="\t", quote=F)
+write.table(ins,paste0(path, "13_nglycs/all/ins-sep-new.csv"), row.names=F, sep="\t", quote=F)
+write.table(del,paste0(path, "13_nglycs/all/del-sep-new.csv"), row.names=F, sep="\t", quote=F)
 
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
 
-write.csv(ins.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/ins-all.csv"))
-write.csv(del.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/del-all.csv"))
+write.csv(ins.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/ins-new.csv"))
+write.csv(del.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/del-new.csv"))
 
 
 # ---- Indel Nucleotide Analysis ----

@@ -31,8 +31,8 @@ categorize <- function(seqList){
 
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
-iLength <- read.csv(paste0(path,"12_lengths/all/ins-all.csv"), row.names=1, stringsAsFactors = F)
-dLength <- read.csv(paste0(path,"12_lengths/all/del-all.csv"), row.names=1, stringsAsFactors = F)
+iLength <- read.csv(paste0(path,"12_lengths/all/ins-new.csv"), row.names=1, stringsAsFactors = F)
+dLength <- read.csv(paste0(path,"12_lengths/all/del-new.csv"), row.names=1, stringsAsFactors = F)
  
 iLength <- iLength[iLength$count>0,]
 dLength <- dLength[dLength$count>0,]
@@ -70,10 +70,10 @@ colnames(ddf) <- colnames(idf)
 # add in the significance level column
 idf$Sign <- rep(2,35)
 #idf$Sign[c(1,11,15,23,28,30,31,35)] <- c(2,3,3,1,3,3,3,1)
-idf$Sign[c(2,5,8,11,12,18,24,26,27,28,29,30,31,34,35)] <- c(1,3,1,3,1,3,1,1,3,3,3,3,3,1,1)
+idf$Sign[c(5,8,9,11,12,18,24,26,28,29,30,31,35)] <- c(3,1,3,3,1,3,1,1,3,3,3,3,1)
 ddf$Sign <- rep(2,35)
 #ddf$Sign[c(7,11,13,14,15,29,30,31,35)] <- c(3,3,3,1,3,1,3,3,1)
-ddf$Sign[c(2,8,10,13,14,15,22,24,25,26,28,29,30,33,35)] <- c(1,1,3,3,1,3,1,1,3,3,3,3,3,1,1)
+ddf$Sign[c(1,2,8,10,13,14,15,22,24,25,26,28,30,33,34,35)] <- c(3,1,1,3,3,1,3,1,1,3,3,3,3,1,1,1)
 
 # Proportion of frameshift indels 
 x <- nchar(iLength$indel)
@@ -91,7 +91,9 @@ require(RColorBrewer)
 pal <- c("gray28", "blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
 pal <- pal[length(pal):1]
 
-data <- ddf
+data <- idf
+ymx <- 550
+ymx <- 1500
 
 
 #png(filename="~/vindels/Figures/within-host/finalized/del-length-v2", width=1200, height=700)
@@ -99,7 +101,7 @@ par(mar=c(6,7,2,1))
 ax <- 1.9
 lab <- 2.3
 plot(NA, xlim=c(0,5), 
-     ylim=c(0,1500), 
+     ylim=c(0,ymx), 
      xaxt="n",
      xaxs="i",
      yaxs="i",
