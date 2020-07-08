@@ -31,7 +31,7 @@ st <- c()
 seqcount <- 0
 r.vec <- c()
 for (i in 1:length(treefiles)){
-  tre <- read.nexus(treefiles[i])
+  tre <- read.tree(treefiles[i])
   
   print("INPUT")
   print(treefiles[i])
@@ -41,12 +41,12 @@ for (i in 1:length(treefiles)){
   # uses log file name to find and read BEAST log file
   logfile <- read.csv(paste0(logfolder,inlog), sep="\t", skip=4)
   
-  print("LOGFILE")
-  print(inlog)
+  #print("LOGFILE")
+  #print(inlog)
   
   #counts the number of MCMC steps
   loglen <- nrow(logfile) -1
-  print(loglen)
+  #print(loglen)
   
   if (loglen != 10000){
     print(status="INCOMPLETE FILE")
@@ -54,8 +54,8 @@ for (i in 1:length(treefiles)){
   }
   
   # calculates the start and end interval of MCMC steps AFTER the burn in (assuming last 90%)
-  interval <- c(loglen*0.1+1,loglen+1)
-  print(interval)
+  interval <- c(loglen*0.1+2,loglen+1)
+  #print(interval)
 
   # calculates the rescale factor using the median of the UCLD.MEAN column (can check that this matches UCLD.MEDIAN on tracer)
   means <- logfile$ucld.mean[interval[1]:interval[2]]
@@ -68,12 +68,12 @@ for (i in 1:length(treefiles)){
   # rescales all the edge lengths of the tree
   tre$edge.length <- (tre$edge.length * rescale.factor)
   seqcount <- seqcount + Ntip(tre)
-  print(Ntip(tre))
+  #print(Ntip(tre))
 
   st <- c(st, sapply(tre$tip.label, function(x){strsplit(x,"\\.")[[1]][1]}))
   
   # writes the rescaled tree to a new folder called "final"
-  #write.tree(tre,paste0(treefolder,"final/",name))
+  write.tree(tre,paste0(treefolder,"final/",name))
 }
 print(seqcount)
 print(table(st))
