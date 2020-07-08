@@ -25,11 +25,20 @@ def getSeqDict(infile):
             seqDict[line[0]] = header
     return seqDict
 
-def replaceHeaders(infile, tree):
+def replaceHeaders(infile, tree, outdir):
     seqDict = getSeqDict(infile)
+
+    fixed = re.sub("\[&rate[^\]]*\]", "", tree)
+
+    handle = cStringIO.StringIO(fixed)
+    #print(type(handle))
+            #read the tree as a newick phylo object
+    tree = Phylo.read(handle, 'newick')
+            #convert all the tip names using the seqDict dictionary
 
     for tip in tree.get_terminals():
         tip.name = seqDict[tip.name]
+    Phylo.write(tree, outdir+os.path.basename(infile))
 
 
 
