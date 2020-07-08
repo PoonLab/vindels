@@ -82,12 +82,22 @@ stan.fit <- stan("~/vindels/2_within-host/rate-test.stan",
 # ----- Real Data ----
 type <- c("tip","node")
 rstan_options(auto_write=T)
+set.seed(1423)
 options(mc.cores = parallel::detectCores()-2)
-
+# rm(all.data)
+# rm(iint)
+# rm(itip)
+# rm(dtip)
+# rm(dint)
+irates <- data.frame(stringsAsFactors = F)
+drates <- data.frame(stringsAsFactors =F)
 for (t in 1:2){ 
-  for (i in 1:5){
+  for (i in c(1,2,4,5)){
     cmat <- all.counts[[t]][[i]]
     tmat <- all.times[[t]][[i]]
+    
+    #cmat <- cmat[,1:100]
+    #tmat <- tmat[,1:100]
     
     s <- sizes[[t]]
     
@@ -101,17 +111,17 @@ for (t in 1:2){
                       sizes= s,
                       counts = cmat,
                       lengths = tmat)
-    rm(all.data)
-    rm(iint)
-    rm(itip)
-    rm(dtip)
-    rm(dint)
+
     # Stan modeling 
     stan.fit <- stan("rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
-                     iter=10000,
-                     )
+                     control=list(
+                       max_treedepth=10,
+                       adapt_delta=0.7),
+                     init_r=0.2,
+                     iter=10000)
+    # 100 columns, adapt_delta = 0.7, maxtree = 7, 404s per iter, 5400s total
     #control = list(adapt_delta = 0.99))
     
     # export results to a data frame 
@@ -128,36 +138,46 @@ for (t in 1:2){
     #                                      lower=NA,
     #                                      upper=NA))
     # }
-
+    cmat <- all.counts[[t+2]][[i]]
+    tmat <- all.times[[t+2]][[i]]
     
-    data <- vloop.mat[[i]][[t+2]]
-    num.pat <- ncol(data)
-    num.data <- nrow(data)
-    if (!is.na(data)){
-      # ----- Stan Model ----
-      data.stan <- list(npat = num.pat,
-                        ndata = num.data,
-                        mat = data)
-      
-      stan.fit <- stan("~/vindels/2_within-host/rates.stan",
-                       data= data.stan, 
-                       chains=1,
-                       iter=1000000)
-                       #control = list(adapt_delta = 0.99))
-      
-      drates<- rbind(drates, data.frame(rate=summary(stan.fit)$summary[1,6],
-                                        vloop=paste0("V",as.character(i)),
-                                        id=type[t],
-                                        lower=summary(stan.fit)$summary[1,4],
-                                        upper=summary(stan.fit)$summary[1,8]
-      ))
-    }else{
-      drates <- rbind(drates, data.frame(rate=NA,
-                                         vloop=paste0("V",as.character(i)),
-                                         id=type[t],
-                                         lower=NA,
-                                         upper=NA))
-    }
+    #cmat <- cmat[,1:100]
+    #tmat <- tmat[,1:100]
+    
+    s <- sizes[[t+2]]
+    
+    num.pat <- length(s)
+    num.tree <- ncol(cmat)
+    
+    
+    # Data import
+    data.stan <- list(npat=num.pat,
+                      ntree = num.tree,
+                      sizes= s,
+                      counts = cmat,
+                      lengths = tmat)
+    
+    # Stan modeling 
+    stan.fit <- stan("rate-perpat-dc.stan",
+                     data= data.stan, 
+                     chains=1,
+                     control=list(
+                       max_treedepth=7,
+                       adapt_delta=0.7),
+                     iter=10000)
+    drates<- rbind(drates, data.frame(rate=summary(stan.fit)$summary[1,6],
+                                      vloop=paste0("V",as.character(i)),
+                                      id=type[t],
+                                      lower=summary(stan.fit)$summary[1,4],
+                                      upper=summary(stan.fit)$summary[1,8]
+    ))
+    # }else{
+    #   drates <- rbind(drates, data.frame(rate=NA,
+    #                                      vloop=paste0("V",as.character(i)),
+    #                                      id=type[t],
+    #                                      lower=NA,
+    #                                      upper=NA))
+    # }
   }
 }
 # # --- bootstraps --- 

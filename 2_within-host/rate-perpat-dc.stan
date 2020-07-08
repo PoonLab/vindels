@@ -1,18 +1,17 @@
 data {
   int<lower=0> npat;                        // Number of patients
   int<lower=0> ntree;                         // Number of columns    
-  int sizes[npat];                            // Vector describing the number of rows belonging to each patient
+  int <lower=0> sizes[npat];                            // Vector describing the number of rows belonging to each patient
   int<lower=0> counts[sum(sizes),ntree];         // Count data
   matrix<lower=0>[sum(sizes),ntree] lengths;     // Time data
 }
 
 parameters {
-  real<lower=0.0001, upper=1> sub_rate;
-  real<lower=0, upper=50> sub_sd;
-  real<lower=0.0001, upper=0.1> pat_rates[npat];
-  real<lower=0, upper=50> pat_sd;
-  real<lower=0.000001, upper=0.01> tre_rates[ntree];
-  //real<lower=0.01, upper=50> disp; 
+  real<lower=0.000001, upper=0.1> sub_rate;
+  real<lower=0.00001, upper=1> sub_sd;
+  real<lower=0.00001, upper=0.1> pat_rates[npat];
+  real<lower=0.00001, upper=1> pat_sd;
+  real<lower=0.00001, upper=0.1> tre_rates[ntree];
 }
 
 model {
@@ -27,7 +26,8 @@ model {
     
     lim = pos+sizes[i]-1;
     for (j in 1:ntree){      
-      counts[pos:lim, j] ~ poisson(tre_rates[j] * lengths[pos:lim, j]);  
+      counts[pos:lim, j] ~ poisson(tre_rates[j] * lengths[pos:lim, j]); 
+      print(target())
     }
     pos = pos + sizes[i];
   }
