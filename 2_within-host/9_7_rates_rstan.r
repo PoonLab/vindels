@@ -82,7 +82,7 @@ stan.fit <- stan("~/vindels/2_within-host/rate-test.stan",
 # ----- Real Data ----
 type <- c("tip","node")
 rstan_options(auto_write=T)
-set.seed(1423)
+set.seed(231)
 options(mc.cores = parallel::detectCores()-2)
 # rm(all.data)
 # rm(iint)
@@ -111,15 +111,20 @@ for (t in 1:2){
                       sizes= s,
                       counts = cmat,
                       lengths = tmat)
-
+    init.param <- function() list(sub_rate=0.01, 
+                            sub_sd=0.01,
+                            pat_rates=rep(0.01,num.pat),
+                            pat_sd=0.01,
+                            tre_rates=rep(0.01,num.tree))
     # Stan modeling 
     stan.fit <- stan("rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
-                     control=list(
-                       max_treedepth=10,
-                       adapt_delta=0.7),
-                     init_r=0.2,
+                     init=init.param,
+                     #control=list(
+                     #  max_treedepth=10,
+                     #  adapt_delta=0.7),
+                     #init_r=0.2,
                      iter=10000)
     # 100 columns, adapt_delta = 0.7, maxtree = 7, 404s per iter, 5400s total
     #control = list(adapt_delta = 0.99))
