@@ -216,48 +216,81 @@ hist(data[[5]],
 axis(1, labels=T,at=seq(0, 7000, 1000), line=3)
 
 
-
-
+rm(iint)
+rm(itip)
+rm(dtip)
+rm(dint)
+rm(iCSV)
+rm(dCSV)
 
 # COMPARISON OF INSERTION RATES INTERIOR VS TIP
 patnames <- unname(sapply(names(all.data[[1]]), function(x){strsplit(x,"-")[[1]][1]}))
 all.counts <- list()
 all.times <- list()
+all.lens <- list()
 sizes <- list()
 for (a in 1:4){
   all.counts[[a]] <- list()
   all.times[[a]] <- list()
+  all.lens[[a]] <- list()
   sizes[[a]] <- double()
   for (b in 1:5){
     all.counts[[a]][[b]] <- list()
     all.times[[a]][[b]] <- list()
+    all.lens[[a]][[b]] <- double()
   }
 }
 
-names <- c()
+names <- list()
+pos <- 1
+# iterate through 4 lists 
 for (i in 1:4){
+  # each list has 5200 entries 
   for (j in 1:length(unique(patnames))){
+    # get the indexes associated with one patient run 
     idx <- which(patnames == unique(patnames)[j])
+    
+    # save the name of the patient
     if (i == 1){
       names[j] <- unique(patnames)[j] 
     }
-    print(j)
+    #print(j)
+    
+    # filter out any branches containing zeroes 
+    selectRows <- 1:nrow(all.data[[i]][[idx[1]]])
+    
+    nas <- unique(unlist(sapply(idx, function(df){
+      which(all.data[[i]][[df]]$length <= 0)
+    })))
+    
+    if (length(nas) > 0){
+      selectRows <- selectRows[-nas]
+    }
+    
+    # iterate through 5 vloops 
     for (k in 1:5){
-      mat <- sapply(idx, function(df){
-        x <- all.data[[i]][[df]]
+
+      all.counts[[i]][[k]][[j]] <- sapply(idx, function(df){
+        x <- all.data[[i]][[df]][selectRows,]
         x[x$vloop == k,"count"]
       })
-      all.counts[[i]][[k]][[j]] <- mat
       
-      mat2 <- sapply(idx, function(df){
-        x <- all.data[[i]][[df]]
+      all.times[[i]][[k]][[j]] <- sapply(idx, function(df){
+        x <- all.data[[i]][[df]][selectRows,]
         x[x$vloop == k, "length"]
+      }) 
+      mat <- sapply(idx, function(df){
+        x <- all.data[[i]][[df]][selectRows,]
+        x[x$vloop == k, "vlen"]
       })
-      all.times[[i]][[k]][[j]] <- mat2 
-      
+      if(is.null(dim(mat))){
+        print(sapply(mat, length))
+      }
+      all.lens[[i]][[k]] <- as.vector(mat)
+      #pos <- pos + nrow(mat)
       if (k == 1){
-        sizes[[i]] <- c(sizes[[i]],nrow(mat2))
-        print(sizes[[i]])
+        sizes[[i]] <- c(sizes[[i]],nrow(mat))
+        #print(sizes[[i]])
       }
     }
   }

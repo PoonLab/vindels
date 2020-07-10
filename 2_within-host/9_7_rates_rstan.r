@@ -82,8 +82,8 @@ stan.fit <- stan("~/vindels/2_within-host/rate-test.stan",
 # ----- Real Data ----
 type <- c("tip","node")
 rstan_options(auto_write=T)
-set.seed(231)
-options(mc.cores = parallel::detectCores()-2)
+set.seed(1153)
+options(mc.cores = parallel::detectCores()-1)
 # rm(all.data)
 # rm(iint)
 # rm(itip)
