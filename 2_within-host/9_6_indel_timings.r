@@ -11,10 +11,8 @@ require(phangorn)
 require(data.table)
 require(bbmle)
 
-vlist <- list(V1=numeric(),V2=numeric(),V3=numeric(),V4=numeric(),V5=numeric())
 all.ins <- c()
 all.del <- c()
-count <- 0
 
 maxes <- c()
 
@@ -23,11 +21,6 @@ itip <- list()
 dint <- list()
 dtip <- list()
 
-indel.mid <- list()
-for (i in 1:4){
-  indel.mid[[i]] <- list()
-}
-idx <- c(1,1,1,1)
 
 for (file in 1:length(ifolder)){
   print(file)
@@ -38,7 +31,7 @@ for (file in 1:length(ifolder)){
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep="\t")
   
   iCSV$count <- unname(sapply(iCSV$indel, csvcount, delim=":"))
-  dCSV$count <- unname(sapply(iCSV$indel, csvcount, delim=":"))
+  dCSV$count <- unname(sapply(dCSV$indel, csvcount, delim=":"))
   
   iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
   dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
@@ -82,13 +75,14 @@ for (file in 1:length(ifolder)){
   dCSV$length <- iCSV$length
   
   lens <- node.depth.edgelength(tre)
+  # midpoint = (rtt length of tip) + (rtt length of ancestor) / 2
   iCSV$rtt.mid <- (lens[res] + lens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
   dCSV$rtt.mid <- iCSV$rtt.mid
   
 
   
   # these remain 'lengths' and not 'rtt.mid's because I need to use the full tree length as the maximum cutoff
-  maxes[count] <- max(lens,na.rm=T)
+  maxes[file] <- max(lens,na.rm=T)
   
   #iCSV <- iCSV[,c(1,2,3,10,11,8,6,7,9)]
   #dCSV <- dCSV[,c(1,2,3,10,11,8,6,7,9)]
@@ -106,21 +100,7 @@ for (file in 1:length(ifolder)){
   
   iCSV <- iCSV[,-c(1,2,5,6)]
   dCSV <- dCSV[,-c(1,2,5,6)]
-  
-  
-  
-  if (sum(iCSV[tips,'count']) > 0){
-    indel.mid[[1]][[full.id]] <- rep(iCSV[tips,'rtt.mid'], iCSV[tips,'count'])
-  }
-  if (sum(iCSV[nodes,'count']) > 0){
-    indel.mid[[2]][[full.id]] <- rep(iCSV[nodes,'rtt.mid'], iCSV[nodes,'count'])
-  }
-  if (sum(dCSV[tips,'count']) > 0){
-    indel.mid[[3]][[full.id]] <- rep(dCSV[tips,'rtt.mid'], dCSV[tips,'count'])
-  }
-  if (sum(dCSV[nodes,'count']) > 0){
-    indel.mid[[4]][[full.id]] <- rep(dCSV[nodes,'rtt.mid'], dCSV[nodes,'count'])
-  }
+
   
   if (is.null(iint[[id]])){
     iint[[id]] <- iCSV[nodes,]
@@ -135,12 +115,12 @@ for (file in 1:length(ifolder)){
   }
 }
 # determine which patients did not complete fully 
-pat.idx <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
+patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
 table(pat.idx)
-table(sapply(ifolder, function(x){
+pat.idx <- table(sapply(ifolder, function(x){
    strsplit(basename(x), "-")[[1]][1]
 }))
-toRemove <- which(pat.idx == "56552")
+toRemove <- which(patnames == names(pat.idx)[which(pat.idx != 400)])
 
 iint <- iint[-toRemove]
 itip <- itip[-toRemove]
@@ -149,73 +129,6 @@ dtip <- dtip[-toRemove]
 
 all.data <- list(itip,iint,dtip,dint)
 
-
-
-## ---- Indel Timings ---- 
-# needs to be rewritten for new algorithm
-
-icounts <- rowSums(iCSV[,2:6])
-dcounts <- rowSums(dCSV[,2:6])
-
-if (sum(icounts)==0){
-  next
-}
-if (sum(dcounts)==0){
-  next
-}
-
-idates <- rep(iCSV$rtt.mid, icounts)
-ddates <- rep(dCSV$rtt.mid, dcounts)
-
-if (is.na(max(idates))){
-  print(idates)
-}
-if (is.na(max(ddates))){
-  print(ddates)
-}
-
-imid[[full.id]] <- idates
-dmid[[full.id]] <- ddates
-
-
-
-# require(data.table)
-# iint <- as.data.frame(rbindlist(iint))
-# itip <- as.data.frame(rbindlist(itip))
-# dint <- as.data.frame(rbindlist(dint))
-# dtip <- as.data.frame(rbindlist(dtip))
-
-
-
-# ---- RIDGES PLOT FOR INDEL TIMINGS --------
-library(ggplot2)
-library(ggridges)
-
-data <- dmid
-par(mfrow=c(5,1), mar=c(3,5,1,1))
-for (i in 1:4){
-  hist(data[[i]], 
-       breaks=30, 
-       col="red", 
-       xaxt='n',
-       xlab="",
-       main=paste0("Variable Loop ",i), 
-       cex.lab=1.4,
-       cex.axis=1.2,
-       cex.main=1.4)
-}
-par(mar=c(4,5,1,1))
-hist(data[[5]], 
-     breaks=30, 
-     col="red",
-     main=paste0("Variable Loop ",5), 
-     xlab="Days",
-     cex.lab=1.4,
-     cex.axis=1.2,
-     cex.main=1.4)
-axis(1, labels=T,at=seq(0, 7000, 1000), line=3)
-
-
 rm(iint)
 rm(itip)
 rm(dtip)
@@ -223,11 +136,13 @@ rm(dint)
 rm(iCSV)
 rm(dCSV)
 
+
 # COMPARISON OF INSERTION RATES INTERIOR VS TIP
 patnames <- unname(sapply(names(all.data[[1]]), function(x){strsplit(x,"-")[[1]][1]}))
 all.counts <- list()
 all.times <- list()
 all.lens <- list()
+all.mid <- list(list(),list())
 sizes <- list()
 for (a in 1:4){
   all.counts[[a]] <- list()
@@ -254,18 +169,29 @@ for (i in 1:4){
     if (i == 1){
       names[j] <- unique(patnames)[j] 
     }
-    #print(j)
-    
+    print(j)
+  
     # filter out any branches containing zeroes 
     selectRows <- 1:nrow(all.data[[i]][[idx[1]]])
     
     nas <- unique(unlist(sapply(idx, function(df){
-      which(all.data[[i]][[df]]$length <= 0)
+      x <- all.data[[i]][[df]]
+      which(x$length <=0 | x$rtt.mid <=0)
     })))
     
     if (length(nas) > 0){
       selectRows <- selectRows[-nas]
     }
+    
+    if (i < 3){
+      ind <- 1
+    }else{
+      ind <- 2
+    }
+    all.mid[[ind]][[j]] <- sapply(idx, function(df){
+      x <- all.data[[i]][[df]]
+      rep(x$rtt.mid, x$count)
+    })
     
     # iterate through 5 vloops 
     for (k in 1:5){
@@ -306,173 +232,51 @@ all.times <- lapply(1:4, function(x){
     do.call(rbind, all.times[[x]][[y]])
   })
 })
-
-
-# require(plyr)
-# compact <- function(x){
-#   if (!is.null(x)){
-#     x
-#   }
-# }
-vloop <- lapply(1:5, function(w){
-  lapply(1:4, function(x){
-    out <- lapply(all.rates[[x]], function(y){
-      nas <- sum(is.na(y[,w+2]))
-      if (nas < 100){
-        y[,w+2]
-      }
-    })
-    out[sapply(out, is.null)] <- NULL
-    out
-  })
+all.mid <- lapply(1:2, function(x){
+  unlist(all.mid[[x]])
 })
-
-vloop.mat <- lapply(1:5, function(w){
-  lapply(1:4, function(x){
-    data <- vloop[[w]][[x]]
-    if (length(data) == 0){
-      return(NA)
-    }else{
-      mat <- matrix(nrow=200, ncol=length(data))
-      
-      # load the matrix 
-      na.vec <- c()
-      for (i in 1:ncol(mat)){
-        mat[,i] <- data[[i]]
-        nas <- sum(is.na(mat[,i]))
-        if (nas > 50){
-          na.vec[i] <- NA
-        }else{
-          na.vec[i] <- nas
-        }
-      }
-      
-      if (any(is.na(na.vec))){
-        mat <- mat[,-c(which(is.na(na.vec)))]
-      }
-      #print(dim(mat))
-      new.mat <- matrix(nrow=(200-max(na.vec,na.rm=T)), ncol=ncol(mat))
-      
-      for (j in 1:ncol(mat)){
-        idx <- which(!is.na(mat[,j]))
-        new.mat[,j] <- mat[idx[sample(1:(200-max(na.vec,na.rm=T)))],j]
-      }
-      
-      new.mat
-    }
-  })
-})
-
-# remove NAs from matrix
-
-# ANOVA 
-
-vloop.data <- sapply(vloop, function(x){unname(unlist(x[[3]]))})
-vloop.data <- lapply(vloop.data, function(x){x[!is.na(x)]})
-# determine the minimum number of data points 
-sapply(vloop.data, length)
-vloop.data <- vloop.data[-3]
-
-vloop.data2 <- lapply(vloop.data, function(x){x[sample(1:length(x), 2998)]})
-
-vloop.df <- as.data.frame(sapply(1:4, function(x){
-  vloop.data2[[x]]
-}))
-
-vloop.melt <- melt(vloop.df)
-aov.obj <- aov(value ~ variable, data=vloop.melt)
-TukeyHSD(aov.obj)
-
-
-# TUKEY 
-
-
-comb1 <- data.frame(rate=irates, vloop=c("V1","V2","V3","V4","V5"), id=rep("Interior",5))
-  
-require(RColorBrewer)
-#pal <- c("gray28", "blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
-
-require(ggplot2)
-dplot <- ggplot() + 
-  geom_bar(aes(x=vloop, y=rate, fill=id), data=comb2, stat='identity', position="dodge") + 
-  scale_fill_manual(values=c("red","blue"))+
-  labs(x="Variable Loop", 
-       y="Deletion Rate (Events/Nt/Year)", title="Deletion Rates") +
-  theme(panel.grid.major.y = element_line(color="black",size=0.3),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.spacing=unit(1, "mm"),
-        #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 1.3, r = 1, b = 0.7, l = 1.5, unit = "cm"),
-        axis.line = element_line(colour = "black"), 
-        axis.title=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
-        axis.text = element_text(size=16, colour="black"),
-        plot.title = element_text(size=22, hjust = 0.5),
-        legend.text=element_text(size=16), 
-        legend.background=element_rect(colour="black"),
-        legend.title=element_text(size=18))
-dplot
 
 
 
 # --------INDEL TIMINGS -------
 maxes <- maxes[!is.na(maxes)]
-interval <- 100
-mx <- 4000
+interval <- 200
+mx <- 4800
 # ---- INSERTIONS ----
-ibins <- lapply(1:length(imid), function(x){
+
+counts <- lapply(1:2, function(a){
   res <- c()
   for (i in 1:(mx/interval)){
-    res[i] <- sum(imid[[x]] > (i-1)*interval & imid[[x]] < i*interval)
+    res[i] <- sum(all.mid[[a]] > (i-1)*interval & all.mid[[a]] < i*interval)
   }
-  cbind(pat=strsplit(names(imid)[x],"-")[[1]][1], as.data.frame(t(res)))
+  names(res) <- as.character(seq(interval,mx,interval))
+  return(res / 400 / 26)
 })
-
-ibin.df <- as.data.frame(rbindlist(ibins))
-colnames(ibin.df) <- c("pat",as.character(seq(0,mx,interval)[-1]))
-ifreq <- apply(ibin.df[,2:ncol(ibin.df)], 2, mean)
 
 
 # adjust the means for the number of patients
-iadj.means <- mapply(function(bin, mean){
-  # this is a calculation of how many data sets are still active, decreasing as less data is available
-  adj.factor <- (length(maxes) - sum(maxes <= (bin - interval))) / length(maxes)
-  print(adj.factor)
-  mean / adj.factor
-}, as.numeric(colnames(ibin.df[-1])), ifreq)
-
-dbins <- lapply(1:length(dmid), function(x){
-  res <- c()
-  for (i in 1:(mx/interval)){
-    res[i] <- sum(dmid[[x]] > (i-1)*interval & dmid[[x]] < i*interval)
-  }
-  cbind(pat=names(dmid)[x], as.data.frame(t(res)))
+means <- lapply(1:2, function(x){
+    mapply(function(bin, mean){
+    # this is a calculation of how many data sets are still active, decreasing as less data is available
+    adj.factor <- sum(maxes > (bin - interval))/ length(maxes)
+    print(adj.factor)
+    mean / adj.factor
+  }, as.numeric(names(counts[[x]])), counts[[x]])
 })
-
-dbin.df <- as.data.frame(rbindlist(dbins))
-colnames(dbin.df) <- c("pat",as.character(seq(0,mx,interval)[-1]))
-dfreq <- apply(dbin.df[,2:ncol(dbin.df)], 2, mean)
-
-dmaxes <- dmaxes[!is.na(dmaxes)]
-# adjust the means for the number of patients
-dadj.means <- mapply(function(bin, mean){
-  adj.factor <- (length(maxes) - sum(maxes <= (bin - interval))) / length(maxes)
-  print(adj.factor)
-  mean / adj.factor
-}, as.numeric(colnames(dbin.df)[-1]), dfreq)
-
 
 
 #cairo_pdf("~/vindels/Figures/within-host/finalized/ins-timings.pdf",height=8, width=12)
 par(xpd=NA, mar=c(0,6,6.5,1), mfrow=c(2,1))
-barplot(iadj.means, col="dodgerblue", space=0, xaxt = "n",
-        ylab="      Average Insertion Count \n Per Patient",
+barplot(means[[1]], col="dodgerblue", space=0, xaxt = "n",
+        ylab="",
+        yaxt="n",
         cex.lab=1.3,
         cex.axis=1.2,
         cex.main=1.7,
         las=1,
-        ylim=c(0,6))
+        ylim=c(0,4))
+axis(2, 0:4, labels=c("",1:4), tick=T,cex.axis=1.2)
+title(ylab=" Average Insertion Count \nPer Patient", cex.lab=1.4, line=2.2)
         #ylim=c(0,20))
 #axis(1, seq(0,15), labels=F, tick=T, line=0.5)
 #text(0:15,rep(-0.7,16), labels=seq(0,7500,500), srt=25, cex=1.1)
@@ -481,16 +285,17 @@ barplot(iadj.means, col="dodgerblue", space=0, xaxt = "n",
 
 #cairo_pdf("~/vindels/Figures/within-host/finalized/del-timings.pdf",height=8, width=12)
 par(xpd=NA, mar=c(6.5,6,0,1))
-barplot(dadj.means, col="red", space=0, xaxt = "n",
-        ylab="Average Deletion Count  \n Per Patient",
+barplot(means[[2]], col="red", space=0, xaxt = "n",
+        ylab="",
         #main="Deletion Timings",
         cex.lab=1.3,
         cex.axis=1.1,
         cex.main=1.7,
-        las=1, ylim=c(6,0))
-axis(1, seq(0,40,2), labels=F, tick=T, line=01.0)
-text(seq(0,40,2),rep(7.5,21), labels=seq(0,4000,200), srt=25, cex=1.2)
+        las=1, ylim=c(4,0))
+axis(1, seq(0,25,2), labels=F, tick=T, line=0.5)
+text(seq(0,40,2),rep(4.5,21), labels=seq(0,4800,400), srt=25, cex=1.2)
 title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=4.75, cex.lab=1.4)
+title(ylab="Average Deletion Count \nPer Patient", cex.lab=1.4, line=2.2)
 #dev.off()
 
 # --------- HISTOGRAMS (used for counts) -------------
