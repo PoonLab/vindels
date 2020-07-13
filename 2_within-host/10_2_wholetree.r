@@ -179,7 +179,7 @@ write.csv(del.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/del-all.csv"))
 
 # ---- Indel Nucleotide Analysis ----
 # focus on only the columns needed 
-total.ins <- ins[,c(2,3,6,8)]
+total.ins <- ins[,c(2,3,6,9)]
 total.del <- del[,c(2,3,6,9)]
 
 
@@ -189,7 +189,7 @@ total.del$len <- sapply(total.del$indel, nchar)
 total.ins$vlen <- as.numeric(total.ins$vlen)
 total.del$vlen <- as.numeric(total.del$vlen)
 
-total.ins$tip <- gsub("-","",total.ins$tip)
+total.ins$anc <- gsub("-","",total.ins$anc)
 total.del$anc <- gsub("-","",total.del$anc)
 
 
@@ -225,7 +225,7 @@ dProps <- c()
 iVProps <- c()
 dVProps <- c()
 counts <- data.frame()
-iTotals <- c(sum(unname(sapply(total.ins$indel, nchar))), sum(unname(sapply(total.ins$tip, nchar))))
+iTotals <- c(sum(unname(sapply(total.ins$indel, nchar))), sum(unname(sapply(total.ins$anc, nchar))))
 dTotals <- c(sum(unname(sapply(total.del$indel, nchar))),sum(unname(sapply(total.del$anc, nchar))))
 
 for (n in 1:4){
@@ -236,7 +236,7 @@ for (n in 1:4){
   iProps[n] <- icount / iTotals[1]
   dProps[n] <- dcount / dTotals[1]
   
-  iVProps[n] <- sum(str_count(total.ins$tip, nucl[n])) / iTotals[2]
+  iVProps[n] <- sum(str_count(total.ins$anc, nucl[n])) / iTotals[2]
   dVProps[n] <- sum(str_count(total.del$anc, nucl[n])) / dTotals[2]
 }
 require(reshape)
@@ -254,18 +254,16 @@ sampleString <- function(len, vloop){
   len <- len-1
   idx <- sample(1:(nchar(vloop)-len),100, replace=TRUE)
   strings <- sapply(idx, function(x){substr(vloop, x, x+len)})
-  # a <- unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)}))
-  # c <- unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)}))
-  # g <- unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)}))
-  # t <- unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)}))
-  lapply(nucl, function(n){ 
-    unname(sapply(strings, function(x){str_count(x, n)}))
-  })
+  a <- unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)}))
+  c <- unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)}))
+  g <- unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)}))
+  t <- unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)}))
+  list(a,c,g,t)
 }
 
 
 # generates the randomly sampled substrings for each indel
-ires <- mapply(sampleString, total.ins[,"len"], total.ins[,"tip"])
+ires <- mapply(sampleString, total.ins[,"len"], total.ins[,"anc"])
 dres <- mapply(sampleString, total.del[,"len"], total.del[,"anc"])
 
 
@@ -329,14 +327,14 @@ for (n in 1:1000){
   df1.bs <- total.ins[sam1,]
   df2.bs <- total.del[sam2,]
   
-  total1 <- c(sum(df1.bs[,'len']), sum(df1.bs[,'vlen']))
-  total2 <- c(sum(df2.bs[,'len']), sum(df2.bs[,'vlen']))
+  total1 <- c(sum(nchar(df1.bs[,'indel'])), sum(nchar(df1.bs[,'anc'])))
+  total2 <- c(sum(nchar(df2.bs[,'indel'])), sum(nchar(df2.bs[,'anc'])))
   
   props <- sapply(nucl, function(nuc){
     iProps <-  sum(str_count(df1.bs$indel, nuc)) / total1[1]
     dProps <-  sum(str_count(df2.bs$indel, nuc)) / total2[1]
     
-    iVProps <-  sum(str_count(df1.bs$tip, nuc)) / total1[2]
+    iVProps <-  sum(str_count(df1.bs$anc, nuc)) / total1[2]
     dVProps <-  sum(str_count(df2.bs$anc, nuc)) / total2[2]
     
     return(c(iProps, dProps, iVProps, dVProps))
@@ -381,8 +379,8 @@ colors <- c( "limegreen","dodgerblue","red", "purple")
 par(pty="s", xpd=NA, mar=c(6,8,2,1),las=0)
 clab = 1.9
 ctext = 1.9
-xpos <- c(0.18,0.162,0.24,0.375)
-ypos <- c(0.147, 0.22, 0.26, 0.39)
+xpos <- c(0.18,0.162,0.245,0.38)
+ypos <- c(0.147, 0.22, 0.26, 0.395)
 
 lim = c(0.14,0.42)
 plot(x=med.x, y=med.y, pch=indel.nt[,4]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.10*sqrt(indel.nt$counts),

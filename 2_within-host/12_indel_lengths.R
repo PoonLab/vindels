@@ -31,8 +31,8 @@ categorize <- function(seqList){
 
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
-iLength <- read.csv(paste0(path,"12_lengths/all/ins-new.csv"), row.names=1, stringsAsFactors = F)
-dLength <- read.csv(paste0(path,"12_lengths/all/del-new.csv"), row.names=1, stringsAsFactors = F)
+iLength <- read.csv(paste0(path,"12_lengths/all/ins-all.csv"), row.names=1, stringsAsFactors = F)
+dLength <- read.csv(paste0(path,"12_lengths/all/del-all.csv"), row.names=1, stringsAsFactors = F)
  
 iLength <- iLength[iLength$count>0,]
 dLength <- dLength[dLength$count>0,]
@@ -67,13 +67,43 @@ ddf <- as.data.frame(dtab)
 colnames(idf) <- c("Bin", "vloop", "count")
 colnames(ddf) <- colnames(idf)
 
+
+# --- Mosaic Plot -----
+data <- ddf
+df <- data.frame(bin=factor(rep(data$Bin, data$count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(data$vloop, data$count))
+
+# reorder the data frame 
+df$bin <- factor(df$bin, levels=c("1-2","3","4-5","6","7-8","9",">9"))
+df <- df[order(df$bin),]
+
+require(vcd)
+mosaic(~ bin + vloop,
+       data = df,
+       shade=T, main=NULL,
+       spacing=spacing_equal(sp = unit(0.7, "lines")),
+       residuals_type="Pearson", direction="v",
+       margins=c(2,2,6,2),
+       labeling_args = list(tl_labels = c(F,T), 
+                            tl_varnames=c(F,T),
+                            gp_labels=gpar(fontsize=24),
+                            gp_varnames=gpar(fontsize=28),
+                            set_varnames = c(vloop="Variable Loop", 
+                                             bin="Indel Length (nt)"),
+                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
+       legend=legend_resbased(fontsize = 20, fontfamily = "",
+                              x = unit(0.5, "lines"), y = unit(2,"lines"),
+                              height = unit(0.8, "npc"),
+                              width = unit(1, "lines"), range=c(-10,10)),
+       set_labels=list(Variable.Loop=c("V1","V2","V3","V4","V5")))
+
+# ---- Significance ---- 
 # add in the significance level column
 idf$Sign <- rep(2,35)
 #idf$Sign[c(1,11,15,23,28,30,31,35)] <- c(2,3,3,1,3,3,3,1)
-idf$Sign[c(5,8,9,11,12,18,24,26,28,29,30,31,35)] <- c(3,1,3,3,1,3,1,1,3,3,3,3,1)
+idf$Sign[c(1,7,11,15,18,28,29,30,32,35)] <- c(1,3,3,3,3,3,3,3,3,1)
 ddf$Sign <- rep(2,35)
 #ddf$Sign[c(7,11,13,14,15,29,30,31,35)] <- c(3,3,3,1,3,1,3,3,1)
-ddf$Sign[c(1,2,8,10,13,14,15,22,24,25,26,28,30,33,34,35)] <- c(3,1,1,3,3,1,3,1,1,3,3,3,3,1,1,1)
+ddf$Sign[c(1,4,7,9,11,13,14,15,16,30,31,34,35)] <- c(1,1,3,1,3,3,1,3,1,3,3,1,1)
 
 # Proportion of frameshift indels 
 x <- nchar(iLength$indel)
@@ -84,6 +114,7 @@ sum(x[x%%3 != 0]) / sum(x)
 
 
 
+l <- l[length(l):1]
 
 # STACK BAR PLOT 
 # -------------------------------------------
@@ -91,15 +122,15 @@ require(RColorBrewer)
 pal <- c("gray28", "blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
 pal <- pal[length(pal):1]
 
-data <- idf
-ymx <- 550
-ymx <- 1500
+data <- ddf
+
+ymx <- 650
 
 
 #png(filename="~/vindels/Figures/within-host/finalized/del-length-v2", width=1200, height=700)
-par(mar=c(6,7,2,1))
-ax <- 1.9
-lab <- 2.3
+par(mar=c(6,7,2,5.5), xpd=F)
+ax <- 1.7
+lab <- 2.1
 plot(NA, xlim=c(0,5), 
      ylim=c(0,ymx), 
      xaxt="n",
@@ -111,11 +142,12 @@ plot(NA, xlim=c(0,5),
 axis(1,at=seq(0.5,4.5), 
      labels=c("V1", "V2", "V3", "V4", "V5"),
      cex.axis=ax)
-title(ylab="Frequency", cex.lab=lab, line=4.8)
+title(ylab="Deletion Counts", cex.lab=lab, line=4.2)
 title(xlab="Variable Loop", cex.lab=lab, line=3.5)
 abline(v=seq(0.5,4.5)-0.3, lty=1, col="gray68")
 abline(v=seq(0.5,4.5)+0.3, lty=1, col="gray68")
 #abline(h=seq(0,150,50), col="gray68")
+
 
 for (i in seq(0.5,4.5)){
   pos <- 0
@@ -130,7 +162,15 @@ for (i in seq(0.5,4.5)){
     pos <- pos + n
   }
 }
-dev.off()
+par(xpd=NA)
+text(-0.5,650,"b)",cex=2)
+pal <- pal[length(pal):1]
+legend(5.05,450,
+       legend=l,cex=1.5, 
+       pch=22,pt.cex=3,pt.bg=pal,
+       y.intersp=1,
+       title="Lengths")
+
 
 require(ggplot2)
 iplot <- ggplot() + 
@@ -175,35 +215,6 @@ dplot <- ggplot() +
         legend.background=element_rect(colour="black"),
         legend.title=element_text(size=18))
 dplot
-
-# --- Mosaic Plot -----
-data <- ddf
-df <- data.frame(bin=factor(rep(data$Bin, data$count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(data$vloop, data$count))
-
-# reorder the data frame 
-df$bin <- factor(df$bin, levels=c("1-2","3","4-5","6","7-8","9",">9"))
-df <- df[order(df$bin),]
-
-require(vcd)
-mosaic(~ bin + vloop,
-       data = df,
-       shade=T, main=NULL,
-       spacing=spacing_equal(sp = unit(0.7, "lines")),
-       residuals_type="Pearson", direction="v",
-       margins=c(2,2,6,2),
-       labeling_args = list(tl_labels = c(F,T), 
-                            tl_varnames=c(F,T),
-                            gp_labels=gpar(fontsize=24),
-                            gp_varnames=gpar(fontsize=28),
-                            set_varnames = c(vloop="Variable Loop", 
-                                            bin="Indel Length (nt)"),
-                            offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
-       legend=legend_resbased(fontsize = 20, fontfamily = "",
-                              x = unit(0.5, "lines"), y = unit(2,"lines"),
-                              height = unit(0.8, "npc"),
-                              width = unit(1, "lines"), range=c(-10,10)),
-       set_labels=list(Variable.Loop=c("V1","V2","V3","V4","V5")))
-
 
 
 
