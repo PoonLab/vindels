@@ -5,10 +5,10 @@ num.pat <- 20
 num.trees <- 30
 
 # ---- Simulated Data ----
-tru.rate <- 0.3
-tru.sd <- 0.02
+tru.rate <- 0.03
+tru.sd <- 0.002
 pat.rate <- rnorm(num.pat, mean=tru.rate, sd=tru.sd)
-pat.sd <- 0.05
+pat.sd <- 0.008
 
 
 
@@ -23,14 +23,14 @@ for (i in 1:num.pat){
   idx <- pos:(pos+lns[i]-1)
   print(range(idx))
   tre.rate <- rnorm(num.trees, mean=pat.rate[i], sd=pat.sd)
-  toCheck[idx] <- tre.rate
+  toCheck[((i-1)*30+1):(i*30)] <- tre.rate
   for (j in 1:num.trees){
     len.temp <- rexp(diff(range(idx))+1, 0.1)
     lens[idx, j] <- len.temp
     c <- rpois(diff(range(idx))+1, lambda=tre.rate[j]*len.temp)
     if(any(is.na(c))){
       print(tre.rate[j])
-      print(len.temp)
+      #print(len.temp)
     }
     counts[idx,j] <- c
   }
@@ -51,7 +51,23 @@ data.stan <- list(npat= num.pat,
 stan.fit <- stan("rate-perpat-dc.stan",
                  data= data.stan, 
                  chains=1,
-                 iter=10000)
+                 iter=100000)
+# ---- Figure for simulated data ----
+par(mar=c(5,6.5,3,2))
+hist(w$sub_rate, freq=F, 
+     col="dodgerblue",
+     xlab="Posterior of Indel Rate",
+     las=1,
+     cex.axis=1.3,
+     cex.lab=1.7, 
+     main="",
+     ylab="")
+abline(h=0.2000004, col="red", lwd=3)
+abline(v=0.03, lwd=3)
+title(ylab="Density", line=4.2, cex.lab=1.7)
+
+
+
 
 
 # TESTING
