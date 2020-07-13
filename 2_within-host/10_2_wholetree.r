@@ -8,8 +8,8 @@ source("~/vindels/2_within-host/utils.r")
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
  
-ifolder <- Sys.glob(paste0(path,"9Indels/mcc/wholetree-new/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/mcc/wholetree-new/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.tsv"))
 
 ins.sep <-list()
 del.sep <- list()
@@ -147,10 +147,6 @@ for (file in 1:length(ifolder)){
 
 }
 
-
-
-
-
 rm(iTemp)
 rm(dTemp)
 rm(iCSV)
@@ -171,14 +167,14 @@ del <- del.sep[del.sep$indel!="",]
 
 # N - GLYC SITE OUTPUTS 
 # ---------------------------------------------
-write.table(ins,paste0(path, "13_nglycs/all/ins-sep-new.csv"), row.names=F, sep="\t", quote=F)
-write.table(del,paste0(path, "13_nglycs/all/del-sep-new.csv"), row.names=F, sep="\t", quote=F)
+write.table(ins,paste0(path, "13_nglycs/all/ins-sep.csv"), row.names=F, sep="\t", quote=F)
+write.table(del,paste0(path, "13_nglycs/all/del-sep.csv"), row.names=F, sep="\t", quote=F)
 
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
 
-write.csv(ins.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/ins-new.csv"))
-write.csv(del.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/del-new.csv"))
+write.csv(ins.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/ins-all.csv"))
+write.csv(del.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/del-all.csv"))
 
 
 # ---- Indel Nucleotide Analysis ----
@@ -208,15 +204,15 @@ write.csv(total.del[total.del$len>1,], paste0(path,"10_nucleotide/all/dinucl-del
 
 # FLANKING INSERTIONS (14) OUTPUT 
 # ------------------------------------
-write.csv(ins, paste0(path,"/10_nucleotide/all/ins-sep.csv"))
-write.csv(del, paste0(path,"/10_nucleotide/all/del-sep.csv"))
+write.csv(ins, paste0(path,"/10_nucleotide/all/flanking/ins-sep.csv"))
+write.csv(del, paste0(path,"/10_nucleotide/all/flanking/del-sep.csv"))
 
-write.csv(ins.nosep, paste0(path,"/10_nucleotide/all/ins-nosep-all.csv"))
-write.csv(del.nosep, paste0(path,"/10_nucleotide/all/del-nosep-all.csv"))
+write.csv(ins.nosep, paste0(path,"/10_nucleotide/all/flanking/ins-nosep-all.csv"))
+write.csv(del.nosep, paste0(path,"/10_nucleotide/all/flanking/del-nosep-all.csv"))
 
 # --- Modeling 2 ----
-write.csv(ins.sep, paste0(path,"/10_nucleotide/all/ins-sep-all.csv"))
-write.csv(del.sep, paste0(path,"/10_nucleotide/all/del-sep-all.csv"))
+write.csv(ins.sep, paste0(path,"/10_nucleotide/all/flanking/ins-sep-all.csv"))
+write.csv(del.sep, paste0(path,"/10_nucleotide/all/flanking/del-sep-all.csv"))
 
 
 
@@ -258,11 +254,13 @@ sampleString <- function(len, vloop){
   len <- len-1
   idx <- sample(1:(nchar(vloop)-len),100, replace=TRUE)
   strings <- sapply(idx, function(x){substr(vloop, x, x+len)})
-  a <- unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)}))
-  c <- unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)}))
-  g <- unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)}))
-  t <- unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)}))
-  list(a,c,g,t)
+  # a <- unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)}))
+  # c <- unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)}))
+  # g <- unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)}))
+  # t <- unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)}))
+  lapply(nucl, function(n){ 
+    unname(sapply(strings, function(x){str_count(x, n)}))
+  })
 }
 
 
@@ -310,7 +308,8 @@ for (i in 1:4){
   }else{
     dsign <- c(dsign, "")
   }
-  
+  print(iQT[[1]])
+  print(dQT[[1]])
 }
 
 ins.nt$sign <- isign
@@ -343,11 +342,11 @@ for (n in 1:1000){
     return(c(iProps, dProps, iVProps, dVProps))
   })
  
-  for (n in nucl){
-    bs.props[[paste0("ins-",n)]] <- c(bs.props[[paste0("ins-",n)]], unname(props[1,n]))
-    bs.props[[paste0("del-",n)]] <- c(bs.props[[paste0("del-",n)]], unname(props[2,n]))
-    bs.props[[paste0("v-ins-",n)]] <- c(bs.props[[paste0("v-ins-",n)]], unname(props[3,n]))
-    bs.props[[paste0("v-del-",n)]] <- c(bs.props[[paste0("v-del-",n)]], unname(props[4,n]))
+  for (nuc in nucl){
+    bs.props[[paste0("ins-",nuc)]] <- c(bs.props[[paste0("ins-",nuc)]], unname(props[1,nuc]))
+    bs.props[[paste0("del-",nuc)]] <- c(bs.props[[paste0("del-",nuc)]], unname(props[2,nuc]))
+    bs.props[[paste0("v-ins-",nuc)]] <- c(bs.props[[paste0("v-ins-",nuc)]], unname(props[3,nuc]))
+    bs.props[[paste0("v-del-",nuc)]] <- c(bs.props[[paste0("v-del-",nuc)]], unname(props[4,nuc]))
   }
 }
 medians <- unlist(lapply(bs.props,median))
@@ -376,35 +375,36 @@ upper.y <- con.int[which(!grepl("v",names(con.int)) & grepl("97.5",names(con.int
 # -------------------------------------
 require(RColorBrewer)
 #colors <- brewer.pal(4, 'Set1')
-colors <- c( "limegreen","darkturquoise","red", "purple")
+colors <- c( "limegreen","dodgerblue","red", "purple")
 
-cex=1
-par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
 
-xpos <- c(0.17,0.155,0.24,0.375)
-ypos <- c(0.15, 0.21, 0.26, 0.39)
+par(pty="s", xpd=NA, mar=c(6,8,2,1),las=0)
+clab = 1.9
+ctext = 1.9
+xpos <- c(0.18,0.162,0.24,0.375)
+ypos <- c(0.147, 0.22, 0.26, 0.39)
 
-lim = c(0.14,0.43)
-plot(x=med.x, y=med.y, pch=indel.nt[,4]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.07*sqrt(indel.nt$counts),
-     cex.lab=1.3, cex.axis=1.2,cex.main=1.8,lwd=5, ylab='', xlab='', main="Nucleotide Proportions")
-title(ylab="Proportion In Indels", line=3,cex.lab=1.3)
-title(xlab="Proportion in Variable Loops", line=3,cex.lab=1.3)
+lim = c(0.14,0.42)
+plot(x=med.x, y=med.y, pch=indel.nt[,4]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.10*sqrt(indel.nt$counts),
+     cex.lab=clab, cex.axis=1.6,lwd=6, ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
+title(ylab="Proportion In Indels", line=5,cex.lab=clab)
+title(xlab="Proportion in Variable Loops", line=4,cex.lab=clab)
 
 sqn <- c(seq(1,8,2),seq(1,8,2)+1)
 # y error bars 
 arrows(med.x, lower.y[sqn], med.x, upper.y[sqn], length=0, angle=90, code=3,lwd=1.5)
-
+arrows(0.175,0.153,0.167,0.162, length=0, lwd=1.2)
 # x error bars 
 arrows(lower.x[sqn], med.y, upper.x[sqn], med.y, length=0, angle=90, code=3,lwd=1.5)
 #legend(0.38,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-text(xpos, ypos, cex=1.4, labels=c("C", "G", "T", "A"))
+text(xpos, ypos, cex=ctext, labels=c("C", "G", "T", "A"))
 #legend(0.14,0.42,legend=c("Insertions", "Deletions"), pch=c(1,2),cex=1.3, lwd=2, col="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 par(xpd=F)
 abline(0,1)
-rect(0.14,0.35,0.21,0.42)
-text(0.19, 0.40, labels="Ins", cex=1.5)
-text(0.19, 0.37, labels="Del", cex=1.5)
-points(c(0.16,0.16), c(0.40, 0.37), pch=c(1,2), cex=3, lwd=5, col='black', bg='black')
+rect(0.145,0.36,0.206,0.415)
+text(0.19, 0.40, labels="Ins", cex=ctext)
+text(0.19, 0.376, labels="Del", cex=ctext)
+points(c(0.16,0.16), c(0.40, 0.376), pch=c(1,2), cex=4, lwd=5, col='black', bg='black')
 
 
 
