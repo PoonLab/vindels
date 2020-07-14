@@ -412,11 +412,11 @@ points(c(0.16,0.16), c(0.40, 0.376), pch=c(1,2), cex=4, lwd=5, col='black', bg='
 # NT PROPORTIONS BY VARIABLE LOOP 
 # --------------------------------------------
 vloops <- c(1, 2,3,4,5)
-vloops2 <- c("V1","V2","V4","V5")
+vloops2 <- c("V1","V2","V3","V4","V5")
 ins.props <- data.frame()
 del.props <- data.frame()
 
-for (i in c(1,2,4,5)){
+for (i in c(1,2,3,4,5)){
   iTemp <- total.ins[total.ins$vloop==i,]
   dTemp <- total.del[total.del$vloop==i,]
 
@@ -429,15 +429,15 @@ for (i in c(1,2,4,5)){
   # a vector of two totals
   # iTotals[1] = total number of nucleotides in insertion sequences
   # iTotals[2] = total nuimebr of nucleotides in the vloops associated with insertion sequences
-  iTotals <- c(sum(unname(sapply(iTemp$indel, nchar))), sum(unname(sapply(iTemp$tip, nchar))))
-  dTotals <- c(sum(unname(sapply(dTemp$indel, nchar))),sum(unname(sapply(dTemp$tip, nchar))))
+  iTotals <- c(sum(unname(sapply(iTemp$indel, nchar))), sum(unname(sapply(iTemp$anc, nchar))))
+  dTotals <- c(sum(unname(sapply(dTemp$indel, nchar))),sum(unname(sapply(dTemp$anc, nchar))))
   
   for (nuc in nucl){
     iProps <- c(iProps, sum(str_count(iTemp$indel, nuc)) / iTotals[1])
     dProps <- c(dProps, sum(str_count(dTemp$indel, nuc)) / dTotals[1])
     
-    iVProps <- c(iVProps, sum(str_count(iTemp$tip, nuc)) / iTotals[2])
-    dVProps <- c(dVProps, sum(str_count(dTemp$tip, nuc)) / dTotals[2])
+    iVProps <- c(iVProps, sum(str_count(iTemp$anc, nuc)) / iTotals[2])
+    dVProps <- c(dVProps, sum(str_count(dTemp$anc, nuc)) / dTotals[2])
   }
   ins.props <- rbind(ins.props, data.frame(nt=nucl, iprops=iProps, vprops=iVProps, vloop=rep(vloops[i],4)))
   del.props <- rbind(del.props, data.frame(nt=nucl, dprops=dProps, vprops=dVProps, vloop=rep(vloops[i],4)))
@@ -453,42 +453,45 @@ require(RColorBrewer)
 colors <- brewer.pal(4, "Set1")
 
 cex=2
-par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
+par(pty="s", xpd=F, mar=c(6,6,2,1),las=1)
 
-lim = c(0,0.5)
-plot(ins.props[,c(3,2)], pch=ins.props[,4]+20, bg=ins.props[,1],xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.5, main="Insertions")
+lim = c(0,0.55)
+plot(NA,xlim=lim,ylim=lim,
+     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='')
 #text(0.187,0.475,labels="a)", cex=1.5)
 #text(0.245,0.452,labels="A", cex=1.5)
-title(ylab="Proportion Inside Insertions", line=3.5,cex.lab=1.75)
-title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.43,0.18,legend=nucl, pch=21,cex=1.5, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.33,0.18,legend=vloops2, pch=c(21,22,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-par(xpd=F)
 abline(0,1)
+points(ins.props[,c(3,2)], pch=ins.props[,4]+20, bg=ins.props[,1],cex=3.5)
+title(ylab="Proportion In Insertions", line=3.5,cex.lab=1.75)
+title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
+legend(0.47,0.20,legend=nucl, pch=21,cex=1.5, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.36,0.20,legend=vloops2, pch=c(21,22,23,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+par(xpd=NA)
+text(-0.135, 0.55, labels="a)",cex=2)
 
 
-# NT PROP DELETIONS PLOT 
-# broken down by variable loop and nucleotide
-# -------------------------------------
+
 require(RColorBrewer)
 colors <- brewer.pal(4, "Set1")
+colors[1] <- 'white'
 
-#A
 cex=2
-par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
+par(pty="s", xpd=F, mar=c(6,6,2,1),las=1)
 
-lim = c(0.1,0.50)
-plot(del.props[,c(3,2)], pch=del.props[,4]+20, bg=del.props[,1],xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.5, main="Deletions")
+lim = c(0.1,0.5)
+plot(NA,xlim=lim,ylim=lim,
+     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='')
 #text(0.187,0.475,labels="a)", cex=1.5)
 #text(0.245,0.452,labels="A", cex=1.5)
-title(ylab="Proportion Inside Deletions", line=3.5,cex.lab=1.75)
-title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.44,0.24,legend=nucl, pch=21,cex=1.5, pt.bg=del.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.35,0.24,legend=vloops2, pch=c(21,22,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-par(xpd=F)
 abline(0,1)
+points(del.props[,c(3,2)], pch=del.props[,4]+20, bg=del.props[,1],cex=3.5)
+title(ylab="Proportion In Deletions", line=3.5,cex.lab=1.75)
+title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
+legend(0.44,0.25,legend=nucl, pch=21,cex=1.5, pt.bg=del.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.36,0.25,legend=vloops2, pch=c(21,22,23,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+par(xpd=NA)
+text(0, 0.5, labels="b)",cex=2)
+
 
 
 

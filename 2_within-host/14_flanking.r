@@ -19,8 +19,6 @@ fixHeader <- function(header, pat){
   paste0(header,"_",rep)
 }
 
-
-
 slips <- function(vseq, pos, len){
   pos <- as.numeric(pos)+1
   len <- as.numeric(len)
@@ -29,13 +27,124 @@ slips <- function(vseq, pos, len){
   
 }
 
-path <- '~/PycharmProjects/hiv-withinhost/'
-path <- "~/Lio/"
-ins <- read.csv(paste0(path,"10_nucleotide/ins-sep-only.csv"), stringsAsFactors = F, row.names = 1)
-del <- read.csv(paste0(path,"10_nucleotide/del-sep-only.csv"), stringsAsFactors = F, row.names = 1)
-del <- del[-c(which(nchar(del$Seq) > 50)),]
-ins <- ins[-c(which(nchar(ins$Seq) > 50)),]
-lens <- nchar(ins$Seq)
+
+# 14_flanking 
+flankCheck <- function(indel,pos,vseq,wobble=1/12, offset=0){
+  len <- nchar(indel)
+  pos <- as.numeric(pos)
+  
+  beforeBool <- F
+  afterBool <- F
+  
+  beforeIdx <- NaN
+  afterIdx <- NaN
+  
+  beforeDiff <- NaN
+  afterDiff <- NaN
+  
+  beforeSeq <- ""
+  afterSeq <- ""
+  
+  # BEFORE (5')
+  # find the best matching position from 0 to offset 
+  lowest <- 1000
+  bestIdx <- -1
+  
+  for (idx in 0:offset){
+    # subtract length to get the start of the sequence 
+    # needs to be enough nucleotides to check
+    if ((pos - len - idx) >= 0){
+      before <- substr(vseq, pos-2*len-idx+1, pos-idx-len)
+      #print(before)
+      diffs <- checkDiff(indel, before)
+      if (length(diffs) < lowest){
+        lowest <- length(diffs)
+        bestIdx <- idx
+      }
+    }
+  }
+  
+  if (bestIdx != -1 & lowest <= round(wobble*len)){
+    beforeBool <- T
+    beforeIdx <- bestIdx
+    beforeDiff <- lowest
+    beforeSeq <- substr(vseq,pos-len-bestIdx+1, pos-bestIdx)
+  }
+  
+  # AFTER 
+  # find the best matching position from 0 to offset 
+  lowest <- 1000
+  bestIdx <- -1
+  for (idx in 0:offset){
+    if ((pos + len + idx) <= nchar(vseq)){
+      # then the PRECEDING position can be checked
+      after <- substr(vseq, pos+idx+1, pos+len+idx)
+      #print(after)
+      diffs <- checkDiff(indel, after)
+      if (length(diffs) < lowest){
+        lowest <- length(diffs)
+        bestIdx <- idx
+      }
+    }
+  }
+  
+  if (bestIdx != -1 & lowest <= round(wobble*len)){
+    afterBool <- T
+    afterIdx <- bestIdx
+    afterDiff <- lowest
+    afterSeq <- substr(vseq,pos+bestIdx+1, pos+len+bestIdx)
+  }
+  
+  c(indel, vseq, as.logical(beforeBool),  as.numeric(beforeIdx),  as.numeric(beforeDiff), beforeSeq, as.logical(afterBool), as.numeric(afterIdx), as.numeric(afterDiff),afterSeq)
+}
+
+# 14_flanking
+flankProps <- function(indel, pos, vseq){
+  len <- nchar(indel)
+  pos <- as.numeric(pos)
+  
+  if ((pos - len - idx) >= 0){
+    before <- substr(vseq, pos-len-idx+1, pos-idx)
+    #print(before)
+    diffs <- checkDiff(indel, before)
+    if (length(diffs) < lowest){
+      lowest <- length(diffs)
+      bestIdx <- idx
+    }
+  }
+  
+}
+
+ins <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/all/flanking/ins-sep.csv", stringsAsFactors = F, row.names = 1)
+del <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/all/flanking/del-sep.csv", stringsAsFactors = F, row.names = 1)
+del <- del[-c(which(nchar(del$indel) > 50)),]
+ins <- ins[-c(which(nchar(ins$indel) > 50)),]
+lens <- nchar(ins$indel)
+
+
+
+# apply an adjust to the deletion locations to make them the same as insertions 
+#del$pos <- as.numeric(del$pos) + nchar(del$indel)
+
+# Insertions : fill in gaps found in the tip sequences 
+ins$tip <- unname(mapply(restoreOtherSeq,ins$tip, ins$anc))
+
+# Deletions : fill in gaps found in the ancestral sequences 
+# this is to include any insertions in the ancestor 
+del$anc <- unname(mapply(restoreOtherSeq,del$anc, del$tip))
+
+del <- del[-which(nchar(del$indel) > nchar(del$anc)),]
+del <- del[-which(del$pos > nchar(del$anc)),]
+
+# Insertions : 
+# adds all the other insertions into the ancestor
+ins$anc <- unname(mapply(restoreInsAnc, ins$anc, ins$tip, ins$indel, ins$pos))
+ins$anc <- gsub("-","",ins$anc)
+ins$pos <- ins$pos - nchar(ins$indel) + 1
+# not needed for deletions because no sequences contain more than 1 deletion
+#del$tip <- unname(mapply(restoreOtherIndels, del$tip, del$anc, del$indel, del$pos))
+
+
 
 par(mar=c(6,6,6,2))
 caxis=1.3
@@ -59,11 +168,11 @@ all$Vseq <- gsub("-","",all$Vseq)
 
 # apply flankCheck 
 # parameters can be changed here to get different results 
-flanking <- unname(mapply(flankCheck, indel=ins$Seq, pos=ins$Pos, vseq=ins$Vseq, wobble=1/9, offset=0))
+flanking <- unname(mapply(flankCheck, indel=ins$indel, pos=ins$Pos, vseq=ins$Vseq, wobble=1/9, offset=0))
 
 # modify flanking data.frame 
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)
-flanking <- cbind(ins[,c(1,2,7)], len=nchar(ins$Seq), flanking)
+flanking <- cbind(ins[,c(1,2,7)], len=nchar(ins$indel), flanking)
 colnames(flanking) <- c("header","vloop","pos", "len", "indel", "vseq","before.bool", "before.offset", "before.diff", "before.seq","after.bool", "after.offset", "after.diff",  "after.seq")
 flanking[,"before.bool"] <- as.logical(flanking[,"before.bool"] )
 flanking[,"after.bool"] <- as.logical(flanking[,"after.bool"] )
@@ -90,7 +199,7 @@ all[all$Header %in% names(tabs),"count.flanking"] <- tabs
 
 # creation of the new.count column 
 all$new.count <- 0
-all[all$count.flanking!=0, "new.count"] <- nchar(all[all$count.flanking!=0,"Seq"])
+all[all$count.flanking!=0, "new.count"] <- nchar(all[all$count.flanking!=0,"indel"])
 
 # creation of a substitution list column
 #all$subs <- unname(mapply(subs, all$Vseq, all$Anc))
@@ -114,7 +223,7 @@ p.slip[3] <- 0
 # probability of a slippage event occurring per nucleotide per v-loop (flanking contains a single insertion event per row)
 nt.slip <- c()
 for (i in 1:4){
-  nt.slip[i] <-nrow(sub.v[[i]][sub.v[[i]]$before.bool | sub.v[[i]]$after.bool,]) / sum(nchar(all[all$Vloop==i & all$Seq == "","Vseq"]))
+  nt.slip[i] <-nrow(sub.v[[i]][sub.v[[i]]$before.bool | sub.v[[i]]$after.bool,]) / sum(nchar(all[all$Vloop==i & all$indel == "","Vseq"]))
 }
 
 # creates a transitional probability matrix for EACH V-LOOP (1,2,4,5 ; not V3) 
@@ -195,7 +304,7 @@ sum(subset$after.bool) / nrow(subset)
 # HISTOGRAMS OF NUCLEOTIDE DIFFERENCES STRATIFIED BY INSERTION LENGTH
 # ---------------------------------------------
 # NEEDS FIXING 
-toTest <- data.frame(counts=c(ins$before,ins$after), len=rep(nchar(ins$Seq),2))
+toTest <- data.frame(counts=c(ins$before,ins$after), len=rep(nchar(ins$indel),2))
 caxis=1.1
 clab=1.3
 cmain=1.6
@@ -216,9 +325,9 @@ hist(toTest[toTest$len>15,1], breaks=seq(-0.5,max(toTest[toTest$len>15,1], na.rm
 
 # SET A CUTOFF 
 # negates any results that are below a certain length threshold (I chose 6 nt as the minimum)
-ins[which(nchar(ins$Seq)< 6),"before"] <- NA
-ins[which(nchar(ins$Seq)< 6),"after"] <- NA
+ins[which(nchar(ins$indel)< 6),"before"] <- NA
+ins[which(nchar(ins$indel)< 6),"after"] <- NA
 
 # proportion of insertions that have a match within x nucl before, and after the insertion
-length(ins[!is.na(ins$before), 'before'])/nrow(ins[which(nchar(ins$Seq) >=6),])
-length(ins[!is.na(ins$after), 'after'])/nrow(ins[which(nchar(ins$Seq) >=6),])
+length(ins[!is.na(ins$before), 'before'])/nrow(ins[which(nchar(ins$indel) >=6),])
+length(ins[!is.na(ins$after), 'after'])/nrow(ins[which(nchar(ins$indel) >=6),])
