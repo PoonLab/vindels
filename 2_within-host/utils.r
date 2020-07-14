@@ -418,7 +418,8 @@ truncate <- function(aaseq){
 }
 
 translate <- function(dna) {
-  require(ape)
+
+  #print(dna)
   
   if (nchar(dna) %% 3 != 0) {
     extra <- nchar(dna) %% 3

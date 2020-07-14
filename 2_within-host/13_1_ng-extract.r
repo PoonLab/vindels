@@ -12,6 +12,9 @@ insRandTest <- function(seq, indel, start){
   
   # for every number in this random sample 
   seq <- sapply(smpl, function(x){insert(seq,indel,x)})
+  if(sum(is.na(seq))>0){
+    print(seq[which(is.na(seq))])
+  }
   
     # generate the result sequence ; use substring to add the insertion sequence into the seqestor 
   aa.seq <- unname(sapply(seq, translate))
@@ -27,6 +30,9 @@ delRandTest <- function(seq, indel, start){
   
   # for every number in this random sample 
   seq <- sapply(smpl, function(x){delete(seq,indel,x)})
+  if(sum(is.na(seq))>0){
+    print(seq[which(is.na(seq))])
+  }
 
   # generate the result sequence ; use substring to add the insertion sequence into the seqestor 
   aa.seq <- unname(sapply(seq, translate))
@@ -40,18 +46,22 @@ delRandTest <- function(seq, indel, start){
 # GLYC SITE RANDOMIZATION TEST 
 
 observedGlycChange <- function(anc, indel, pos, option="i"){
-  anc <- gsub("-","",anc)
   aa.seq <- unname(sapply(anc, translate))
   glycs <- unname(sapply(aa.seq,extractGlycs))
   before <- unname(sapply(glycs,csvcount))
   
   # generate the new sequence by applying the appropriate insertion or deletion
   if (option == "i"){
-    newanc <- insert(anc, indel, (pos - nchar(indel) + 1))
+    newanc <- insert(anc, indel, pos)
   }else{
-    newanc <- delete(anc, indel, (pos - nchar(indel) + 1))
+    newanc <- delete(anc, indel, pos)
   }
-
+  if(is.na(newanc)){
+    print(newanc)
+    print(indel)
+    print(pos)
+  }
+  
   # recalculate the number of N-glyc sites 
   new.aa <- unname(sapply(newanc, translate))
   glycs <- unname(sapply(new.aa,extractGlycs))
@@ -72,10 +82,9 @@ glycCount <- function(seq){
 }
 
 #PycharmProjects/hiv-withinhost/
-path <- "~/PycharmProjects/hiv-withinhost/"
-#path <- "~/Lio/"
-ins <- read.csv(paste0(path, "13_nglycs/all/ins-sep.csv"),  sep="\t", stringsAsFactors = F)
-del <- read.csv(paste0(path,"13_nglycs/all/del-sep.csv"), sep="\t", stringsAsFactors = F)
+
+ins <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/all/ins-sep.csv",  sep="\t", stringsAsFactors = F)
+del <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/all/del-sep.csv", sep="\t", stringsAsFactors = F)
 
 
 ins <- ins[,-c(3,4,5)]
@@ -92,7 +101,8 @@ ins$tip <- unname(mapply(restoreOtherSeq,ins$tip, ins$anc))
 # this is to include any insertions in the ancestor 
 del$anc <- unname(mapply(restoreOtherSeq,del$anc, del$tip))
 
-
+del <- del[-which(nchar(del$indel) > nchar(del$anc)),]
+del <- del[-which(del$pos > nchar(del$anc)),]
 
 # Insertions : 
 # adds all the other insertions into the ancestor
@@ -199,54 +209,58 @@ for (n in 1:5){
                                          oupper=doquantiles[[2]],
                                          counts=dcounts))
 }
+del.data[2,1:3] <- del.data[2,1:3] + 0.005
+del.data[3,1:3] <- del.data[3,1:3] - 0.005
 
 
 require(RColorBrewer)
 colors <- brewer.pal(5, "Set1")
 vloops <- c("V1","V2","V3","V4","V5")
 cex=1
-par(pty="s", xpd=F, mar=c(6,8,4,1),las=0)
+par(pty="s", xpd=F, mar=c(7,7,3,1),las=0)
 #as.numeric(row.names(data))+20 
 # this take in data either as ins.data or del.data
 
 # Deletion data points 
 data <- del.data
-sizes <- 0.5*sqrt(data$counts)
-sizes[3] <- 1.2
 
-lim = c(-0.8,0.5)
+sizes <- 0.42*sqrt(data$counts)
+sizes[3] <- 2.4
 
-plot(data[,c('exp','obs')], pch=1, cex=sizes, lwd=10, col=colors,xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='', main="N-linked Glycosylation Site Changes")
+lim = c(-0.85,0.5)
+
+plot(data[,c('exp','obs')], pch=1, cex=sizes, lwd=c(10,10,5,10,10), col=colors,xlim=lim,ylim=lim,
+     cex.lab=1.85, cex.axis=1.4,cex.main=1.8,las=1, ylab='', xlab='')#main="N-linked Glycosylation Site Changes")
 abline(0,1)
-title(ylab="Observed Net Change in N-Glyc Sites", line=3,cex.lab=1.4)
-title(xlab="Expected Net Change in N-Glyc Sites", line=3,cex.lab=1.4)
-arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
-arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
+title(ylab="Observed Change in PNGS Count\nPer Indel", line=4,cex.lab=1.7)
+title(xlab="Expected Change in PNGS Count\nPer Indel", line=5,cex.lab=1.7)
+arrows(data[,1], data[,5], data[,1], data[,6], length=0.035, angle=90, code=3)
+arrows(data[,2], data[,4], data[,3], data[,4], length=0.035, angle=90, code=3)
 
 # Insertion data points 
-data <- ins.data
-sizes <- 0.5*sqrt(data$counts)
-sizes[3] <- 1.2
-points(data[,c("exp","obs")], pch=21, col=colors, cex=sizes,lwd=1, bg=colors )
-arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
-arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
+data <- ins.data[-3,]
+newcol <- colors[-3]
+sizes <- 0.42*sqrt(data$counts)
 
-legend(0.25,-0.3,legend=vloops, pch=21,cex=1.3, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.8)
+points(data[,c("exp","obs")], pch=21, col=newcol, cex=sizes,lwd=1, bg=newcol )
+arrows(data[,1], data[,5], data[,1], data[,6], length=0.035, angle=90, code=3)
+arrows(data[,2], data[,4], data[,3], data[,4], length=0.035, angle=90, code=3)
+
+legend(0.25,-0.3,legend=vloops, pch=21,cex=1.5, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.8)
 #legend(0.45,0.2,legend=c("Ins", "Del"), pch=c(21,1),cex=1.3, pt.bg=colors[1],col=colors[1], x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
-rect(0.25,-0.25,0.48,-0.03)
-text(0.4, -0.09, labels="Ins", cex=1.3)
-text(0.4, -0.19, labels="Del", cex=1.3)
-points(c(0.30,0.30), c(-0.09, -0.18), pch=c(21,1), cex=2.5, lwd=7, col='black', bg='black')
+rect(0.25,-0.23,0.46,-0.03)
+text(0.4, -0.09, labels="Ins", cex=1.5)
+text(0.4, -0.17, labels="Del", cex=1.5)
+points(c(0.30,0.30), c(-0.09, -0.17), pch=c(21,1), cex=2.5, lwd=7, col='black', bg='black')
 # positions for V1,V2,V3,V4,V5 (top set first )
-xposi <- c(-0.42, -0.18, -0.2, -0.70, 0)
-yposi <- c(0.35, 0.3, 0.05, 0.32, 0.30)
+xposi <- c(-0.42, -0.18,-0.65, -0.03)
+yposi <- c(0.48, 0.13, 0.33, 0.07)
 
-xposd <- c(-0.55, -0.4, -0.1, -0.75, -0.1)
-yposd <- c(-0.32, -0.22, -0.22,-0.37, -0.03)
+xposd <- c(-0.57, -0.12, -0.28, -0.81, -0.31)
+yposd <- c(-0.40, -0.26, -0.33,-0.68, -0.06)
 
-text(xposi, yposi, labels=c("V1","V2","V3","V4","V5"))
-text(xposd, yposd, labels=c("V1","V2","V3","V4","V5"))
+text(xposi, yposi, labels=c("V1","V2","V4","V5"),cex=1.2)
+text(xposd, yposd, labels=c("V1","V2","V3","V4","V5"),cex=1.2)
 
 
 
