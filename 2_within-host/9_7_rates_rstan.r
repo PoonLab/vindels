@@ -68,43 +68,16 @@ title(ylab="Density", line=4.2, cex.lab=1.7)
 
 
 
-
-
-# TESTING
-nrows <- 100
-tre.rate <- rnorm(num.trees, mean=0.02, sd=0.005)
-counts <- matrix(nrow=nrows, ncol=num.trees)
-lens <- matrix(nrow=nrows, ncol=num.trees)
-for (j in 1:num.trees){
-  len.temp <- rexp(nrows, 1.4)
-  lens[, j] <- len.temp
-  c <- rpois(nrows, lambda=tre.rate[j]*len.temp)
-  counts[,j] <- c
-}
-
-data.stan <- list(ntree = num.trees,
-                  nrow=nrows,
-                  counts = counts,
-                  lengths = lens)
-
- 
-stan.fit <- stan("~/vindels/2_within-host/rate-test.stan",
-                 data= data.stan, 
-                 chains=1,
-                 iter=100000)    
-
-
-
 # ----- Real Data ----
 type <- c("tip","node")
 rstan_options(auto_write=T)
-set.seed(1153)
+set.seed(5132)
 options(mc.cores = parallel::detectCores()-1)
-# rm(all.data)
-# rm(iint)
-# rm(itip)
-# rm(dtip)
-# rm(dint)
+rm(all.data)
+rm(iint)
+rm(itip)
+rm(dtip)
+rm(dint)
 irates <- data.frame(stringsAsFactors = F)
 drates <- data.frame(stringsAsFactors =F)
 for (t in 1:2){ 
@@ -127,16 +100,11 @@ for (t in 1:2){
                       sizes= s,
                       counts = cmat,
                       lengths = tmat)
-    init.param <- function() list(sub_rate=0.01, 
-                            sub_sd=0.01,
-                            pat_rates=rep(0.01,num.pat),
-                            pat_sd=0.01,
-                            tre_rates=rep(0.01,num.tree))
+
     # Stan modeling 
     stan.fit <- stan("rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
-                     init=init.param,
                      #control=list(
                      #  max_treedepth=10,
                      #  adapt_delta=0.7),
@@ -182,9 +150,9 @@ for (t in 1:2){
     stan.fit <- stan("rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
-                     control=list(
-                       max_treedepth=7,
-                       adapt_delta=0.7),
+                     # control=list(
+                     #   max_treedepth=7,
+                     #   adapt_delta=0.7),
                      iter=10000)
     drates<- rbind(drates, data.frame(rate=summary(stan.fit)$summary[1,6],
                                       vloop=paste0("V",as.character(i)),
