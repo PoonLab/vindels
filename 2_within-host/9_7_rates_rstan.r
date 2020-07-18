@@ -178,6 +178,23 @@ for (t in 1:2){
 # }
 
 
+# ------ Adjustment factor for indel rates ----- 
+med.len <- sapply(all.lens, function(x){
+  sapply(x, median)
+})
+med.len <- c(med.len[c(1,2,4,5),1])
+adj <- rep(1e3 * 365 / med.len, 2)
+
+irates[,1] <- irates[,1] * adj
+irates[,4] <- irates[,4] * adj
+irates[,5] <- irates[,5] * adj
+
+drates[,1] <- drates[,1] * adj
+drates[,4] <- drates[,4] * adj
+drates[,5] <- drates[,5] * adj
+
+
+
 require(Rmisc)
 require(ggplot2)
 iplot <- ggplot() + 
