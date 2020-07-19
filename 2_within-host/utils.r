@@ -243,6 +243,31 @@ restoreOtherSeq <- function(tip, anc){
   
 }
 
+# for 14_flanking ONLY 
+restoreTipDel <- function(tip, anc, indel, pos){
+  # this is used to restore any deletion gaps in tip sequences containing insertions 
+  # Reasoning:
+  # I need to restore the tip sequence to its ORIGINAL STATE where no deletions have occurred
+  # want to focus on investigating specific insertions at one time 
+  # Any and all gaps in the tip sequence are deletions and need to be restored
+  
+  if(!grepl("-",tip)){
+    return(c(tip,pos))
+  }else{
+    tip.chars <- strsplit(tip, "")[[1]]
+    anc.chars <- strsplit(anc, "")[[1]]
+    idx <- which(tip.chars=="-")
+    
+    # perform a readjustment of the position (for insertions only 
+    if (!is.na(pos)){
+      pos <- gregexpr("[ACTG]", tip)[[1]][pos]
+    }
+    tip.chars[idx] <- anc.chars[idx]
+    tip <- paste0(tip.chars,collapse="")
+    return(c(tip, pos))
+  }
+}
+
 
 # general
 csvcount <- function(input,delim=","){

@@ -61,7 +61,7 @@ simPair <- function(rate){
 
   # ------ INDELS -------
   # determine the number of insertions that occur 
-  counts <- rgeom(vlen,prob=(1-rate))
+  counts <- rpois(vlen,lambda=rate)
   return(counts)
 }
 
@@ -87,7 +87,7 @@ likelihood <- function(slip){
     return(-Inf)
   }
   #sum(dgeom(counts,prob=(1-slip), log=T))
-  sum(dgeom(counts,prob=(1-slip), log=T))
+  sum(dpois(counts,lambda=slip, log=T))
 }
 
 prior <- function(slip){
@@ -143,6 +143,24 @@ chain <- runMCMC(startvalue, 100000)
 burnin <- ceiling((nrow(chain)-1)*0.1)
 acceptance <- 1 - mean(duplicated(chain[-(1:burnin),]))
 print(paste0("Acceptance: ", acceptance))
+
+
+# ----- Plotting ---- 
+par(mar=c(6,6,3,1.5),las=1)
+hist(chain[-(1:burnin),1], 
+     freq=F,
+     col="dodgerblue",
+     breaks=15,
+     yaxt="n",
+     ylab="",
+     main="",
+     xlab="Posterior of Lambda",cex.axis=1.2,cex.lab=1.5)
+abline(v=0.001,col='black',lwd=4,lty=2)
+lines(xy.coords(x=c(0,1), y=c(1,1)),col="red",lwd=2.5)
+title(ylab="Density", line=4, cex.lab=1.5)
+axis(2,labels=c("0","5e3", "1e4", "1.5e4"),
+     at=c(0,5000,10000,15000),
+     cex.axis=1.2)
 
 #png(file="~/vindels/Figures/within-host/mcmc-posterior.png",width=800,height=600, res=120)
 #hist(chain[-(1:burnin),1],nclass=30, main="Posterior of x", xlab="Probability of Copy (1 - slip)" )
