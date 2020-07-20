@@ -182,28 +182,40 @@ for (t in 1:2){
 med.len <- sapply(all.lens, function(x){
   sapply(x, median)
 })
-med.len <- c(med.len[c(1,2,4,5),1])
+med.len <- c(med.len[,1])
 adj <- rep(1e3 * 365 / med.len, 2)
 
-irates[,1] <- irates[,1] * adj
-irates[,4] <- irates[,4] * adj
-irates[,5] <- irates[,5] * adj
+irates[,c(1,4,5)] <- irates[,c(1,4,5)] * adj
+drates[,c(1,4,5)] <- drates[,c(1,4,5)] * adj
 
-drates[,1] <- drates[,1] * adj
-drates[,4] <- drates[,4] * adj
-drates[,5] <- drates[,5] * adj
+lower <- c()
+upper <- c()
+for (i in 1:4){
+  for (j in 1:5){
+    #print(i)
+    #print(j)
+    res <- quantile(all.lens[[i]][[j]],c(0.005,0.995))
+    print(res)
+    idx <- ((i-1)*5 + j)
+    print(idx)
+    lower[idx] <- res[2]
+    upper[idx] <- res[1]
+  }
+}
 
 
+var <- c("V1","V2","V3","V4","V5")
 
 require(Rmisc)
 require(ggplot2)
+par(mar=c(3,3,3,2))
 iplot <- ggplot() + 
   geom_bar(aes(vloop, rate, fill=id), data=irates, stat='identity', position="dodge") + 
-  scale_fill_manual(values=c("red","dodgerblue"), name="Subset", labels=c("Tip Sequences","Internal Nodes")) +
+  scale_fill_manual(values=c("red","dodgerblue"), name="Subset", labels=c("Terminal Branches","Internal Branches")) +
   coord_flip() + geom_errorbar(aes(x=irates$vloop, fill=irates$id, ymax = irates$upper, ymin = irates$lower),
                 width = 0.25, size=0.8,
                 position = position_dodge(0.9)) +
-  scale_y_continuous(lim=c(0,35), expand=c(0,0)) + 
+  scale_y_continuous(lim=c(0,10), expand=c(0,0)) + 
   scale_x_discrete(limits = rev(levels(irates$vloop))) +
   labs(#x="Variable Loop", 
        y=expression(paste("      Insertion Rate \n (Events/Nt/Year x",10^-3 ,")", sep = ""))) + 
@@ -215,22 +227,22 @@ iplot <- ggplot() +
         panel.grid.minor.x = element_blank(),
         panel.spacing=unit(1, "mm"),
         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 4, r = 4, b = 5, l = 0, unit = "mm"),
+        plot.margin =margin(t = 4, r = 10, b = 5, l = 0, unit = "mm"),
         panel.border=element_rect(fill=NA, size=1),
         #axis.line.x = element_line(colour = "black"), 
         #axis.line.y.left=element_line(colour="black"),
         axis.title.y=element_blank(),
-        axis.title.x=element_text(size=24,margin=margin(t = 22, r = 3, b = 0, l = 22)),
-        axis.text.y = element_text(size=22, colour="black", margin=margin(t = 0, r = 6, b = 2, l = 2)),
-        axis.text.x=element_text(size=22, colour="black"),
+        axis.title.x=element_text(size=22,margin=margin(t = 22, r = 3, b = 0, l = 22)),
+        axis.text.y = element_text(size=20, colour="black", margin=margin(t = 0, r = 10, b = 2, l = 0)),
+        axis.text.x=element_text(size=20, colour="black",margin=margin(t = 0, r = 20, b = 0, l = 0)),
         #plot.title = element_text(size=22, hjust = 0.5),
-        legend.position=c(0.73,0.85),
-        legend.text=element_text(size=22), 
+        legend.position=c(0.68,0.85),
+        legend.text=element_text(size=18), 
         legend.background=element_rect(colour="black"),
-        legend.title=element_text(size=24),
+        legend.title=element_text(size=20),
         legend.spacing.y = unit(2, "mm")
-        ) + geom_text(aes(y=c(1.7,1.7),x=c(3.25,2.75)),label="N/A", size=8)
-iplot
+        ) #+ geom_text(aes(y=c(1.7,1.7),x=c(3.25,2.75)),label="N/A", size=8)
+#iplot
 dplot <- ggplot() + 
   geom_bar(aes(x=vloop, y=rate, fill=id), data=drates, stat='identity', position="dodge") + 
   coord_flip() + scale_fill_manual(values=c("red","dodgerblue"))+
@@ -239,7 +251,7 @@ dplot <- ggplot() +
                 position = position_dodge(0.9)) +
   labs(x="Variable Loop", 
        y="Deletion Rate") +
-  scale_y_reverse(lim=c(35,0), expand=c(0,0)) + 
+  scale_y_reverse(lim=c(10,0), expand=c(0,0)) + 
   scale_x_discrete(limits = rev(levels(drates$vloop))) +
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),#element_line(color="black",size=0.3),
@@ -249,15 +261,15 @@ dplot <- ggplot() +
         panel.border=element_rect(fill=NA, size=1),
         #axis.line.x=element_line(colour = "black"),
         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 4, r = 2, b = 13.5, l = 12, unit = "mm"),
+        plot.margin =margin(t = 4, r = 5, b = 13.5, l = 12, unit = "mm"),
         #axis.line.y = element_line(colour = "black"), 
         axis.text.y = element_blank(),
-        axis.title.y=element_text(size=22),
-        axis.title.x=element_text(size=24,margin=margin(t = 7, r = 3, b = 0, l = 12)),
-        axis.text = element_text(size=22, colour="black"),
+        axis.title.y=element_text(size=20),
+        axis.title.x=element_text(size=22,margin=margin(t = 7, r = 3, b = 0, l = 12)),
+        axis.text = element_text(size=20, colour="black"),
         plot.title = element_text(size=28, hjust = 0.5),
-        legend.position="none") + geom_text(aes(y=2.2,x= 3.25),label="N/A", size=8)
-dplot
+        legend.position="none") #+ geom_text(aes(y=2.2,x= 3.25),label="N/A", size=8)
+#dplot
 multiplot(dplot,iplot, cols=2)
 
 png(filename="~/vindels/Figures/within-host/finalized/indel-rates-v2", width=1000,height=700)
