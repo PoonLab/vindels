@@ -138,14 +138,14 @@ del$anc <- gsub("-","",del$anc)
 del$pos <- del$pos - nchar(del$indel) + 1
 
 
-df <- del
+df <- ins
 
 flanking <- unname(mapply(flankCheck, 
                           indel=df$indel,
                           pos=df$pos, 
                           vseq=df$anc, 
-                          wobble=0, 
-                          offset=10000))
+                          wobble=1/9, 
+                          offset=0))
 
 # modify flanking data.frame 
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)

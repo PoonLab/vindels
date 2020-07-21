@@ -213,6 +213,27 @@ restoreInsAnc <- function(anc, tip, indel, pos){
   return(anc)
 }
 
+restoreInsAnc2 <- function(anc, indel, pos){
+  # find the location of all gap characters in tip/anc
+  
+  # create a vector of positions to be copied over
+  idx <- rep(T, nchar(anc))
+  
+  # retrieve the boundaries of the indel
+  end <- as.numeric(pos)
+  start <- as.numeric(pos) - nchar(indel) + 1
+  
+  # make sure it ignores the indel sequence
+  toIgnore <- start:end
+  idx[toIgnore] <- F
+  
+  # fill in all other insertions / deletions that are not the one of interest ***
+  anc.chars <- strsplit(anc, "")[[1]]
+  anc <- paste0(anc.chars[idx], collapse="")
+  return(anc)
+  
+}
+
 restoreOtherSeq <- function(tip, anc){
   # this is used to restore any deletion gaps in tip sequences containing insertions 
   # Reasoning:
