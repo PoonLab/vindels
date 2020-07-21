@@ -54,7 +54,7 @@ flankCheck <- function(indel,pos,vseq,wobble=1/12, offset=0){
     # subtract length to get the start of the sequence 
     # needs to be enough nucleotides to check
     if ((pos - len - idx) >= 0){
-      before <- substr(vseq, pos-2*len-idx+1, pos-idx-len)
+      before <- substr(vseq, pos-len-idx, pos-idx-1)
       #print(before)
       diffs <- checkDiff(indel, before)
       if (length(diffs) < lowest){
@@ -68,7 +68,7 @@ flankCheck <- function(indel,pos,vseq,wobble=1/12, offset=0){
     beforeBool <- T
     beforeIdx <- bestIdx
     beforeDiff <- lowest
-    beforeSeq <- substr(vseq,pos-len-bestIdx+1, pos-bestIdx)
+    beforeSeq <- substr(vseq,pos-len-bestIdx, pos-bestIdx-1)
   }
   
   # AFTER 
@@ -78,7 +78,7 @@ flankCheck <- function(indel,pos,vseq,wobble=1/12, offset=0){
   for (idx in 0:offset){
     if ((pos + len + idx) <= nchar(vseq)){
       # then the PRECEDING position can be checked
-      after <- substr(vseq, pos+idx+1, pos+len+idx)
+      after <- substr(vseq, pos+idx, pos+len+idx-1)
       #print(after)
       diffs <- checkDiff(indel, after)
       if (length(diffs) < lowest){
@@ -92,7 +92,7 @@ flankCheck <- function(indel,pos,vseq,wobble=1/12, offset=0){
     afterBool <- T
     afterIdx <- bestIdx
     afterDiff <- lowest
-    afterSeq <- substr(vseq,pos+bestIdx+1, pos+len+bestIdx)
+    afterSeq <- substr(vseq,pos+bestIdx, pos+len+bestIdx-1)
   }
   
   c(indel, vseq, as.logical(beforeBool),  as.numeric(beforeIdx),  as.numeric(beforeDiff), beforeSeq, as.logical(afterBool), as.numeric(afterIdx), as.numeric(afterDiff),afterSeq)
@@ -117,69 +117,102 @@ flankProps <- function(indel, pos, vseq){
 
 ins <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/all/flanking/ins-sep.csv", stringsAsFactors = F, row.names = 1)
 del <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/all/flanking/del-sep.csv", stringsAsFactors = F, row.names = 1)
-del <- del[-c(which(nchar(del$indel) > 50)),]
-ins <- ins[-c(which(nchar(ins$indel) > 50)),]
+#del <- del[-c(which(nchar(del$indel) > 50)),]
+#ins <- ins[-c(which(nchar(ins$indel) > 50)),]
 lens <- nchar(ins$indel)
 
-
+del <- del[-which(nchar(del$indel) > nchar(del$anc)),]
+del <- del[-which(del$pos > nchar(del$anc)),]
 
 # apply an adjust to the deletion locations to make them the same as insertions 
 #del$pos <- as.numeric(del$pos) + nchar(del$indel)
 
 # Insertions : fill in gaps found in the tip sequences 
-ins$tip <- unname(mapply(restoreOtherSeq,ins$tip, ins$anc))
-
-# Deletions : fill in gaps found in the ancestral sequences 
-# this is to include any insertions in the ancestor 
-del$anc <- unname(mapply(restoreOtherSeq,del$anc, del$tip))
-
-del <- del[-which(nchar(del$indel) > nchar(del$anc)),]
-del <- del[-which(del$pos > nchar(del$anc)),]
-
-# Insertions : 
-# adds all the other insertions into the ancestor
-ins$anc <- unname(mapply(restoreInsAnc, ins$anc, ins$tip, ins$indel, ins$pos))
 ins$anc <- gsub("-","",ins$anc)
 ins$pos <- ins$pos - nchar(ins$indel) + 1
-# not needed for deletions because no sequences contain more than 1 deletion
-#del$tip <- unname(mapply(restoreOtherIndels, del$tip, del$anc, del$indel, del$pos))
+# Deletions : fill in gaps found in the ancestral sequences 
+# this is to include any insertions in the ancestor 
+
+del$anc <- mapply(restoreInsAnc2, del$anc, del$indel, del$pos)
+del$anc <- gsub("-","",del$anc)
+del$pos <- del$pos - nchar(del$indel) + 1
 
 
+df <- del
 
-par(mar=c(6,6,6,2))
-caxis=1.3
-clab=1.5
-cmain=1.8
-hist(lens, breaks=seq(-0.5,max(lens)+0.5), col='red',cex.lab=clab, main="Insertion Lengths", cex.axis=caxis, cex.main=cmain, xlab="Length (Nucleotides)")
-
-all <- read.csv(paste0(path,"10_nucleotide/ins-nosep-all.csv"), stringsAsFactors = F, row.names=1)
-
-ins$Vseq <- gsub("-","",ins$Vseq)
-all$Vseq <- gsub("-","",all$Vseq)
-
-
-#ins$Header <- mapply(fixHeader, header=ins$Header, pat=ins$Pat)
-#all$Header <- mapply(fixHeader, header=all$Header, pat=all$Pat)
-
-# FIXED AND NO LONGER NEEDED 
-#ins$Accno <- unname(mapply(labels, ins$Accno, ins$Pat, ins$Vloop))
-#all$Accno <- unname(mapply(labels, all$Accno, all$Pat, all$Vloop))
-
-
-# apply flankCheck 
-# parameters can be changed here to get different results 
-flanking <- unname(mapply(flankCheck, indel=ins$indel, pos=ins$Pos, vseq=ins$Vseq, wobble=1/9, offset=0))
+flanking <- unname(mapply(flankCheck, 
+                          indel=df$indel,
+                          pos=df$pos, 
+                          vseq=df$anc, 
+                          wobble=0, 
+                          offset=10000))
 
 # modify flanking data.frame 
 flanking <- as.data.frame(t(flanking), stringsAsFactors = F)
-flanking <- cbind(ins[,c(1,2,7)], len=nchar(ins$indel), flanking)
-colnames(flanking) <- c("header","vloop","pos", "len", "indel", "vseq","before.bool", "before.offset", "before.diff", "before.seq","after.bool", "after.offset", "after.diff",  "after.seq")
+flanking <- cbind(df[,c(2,7)], len=nchar(df$indel), flanking)
+colnames(flanking) <- c("vloop", "pos", "len","indel","anc", "before.bool", "before.offset", "before.diff", "before.seq","after.bool", "after.offset", "after.diff",  "after.seq")
 flanking[,"before.bool"] <- as.logical(flanking[,"before.bool"] )
 flanking[,"after.bool"] <- as.logical(flanking[,"after.bool"] )
 flanking[,"before.offset"] <- as.numeric(flanking[,"before.offset"] )
 flanking[,"after.offset"] <- as.numeric(flanking[,"after.offset"] )
 flanking[,"before.diff"] <- as.numeric(flanking[,"before.diff"] )
 flanking[,"after.diff"] <- as.numeric(flanking[,"after.diff"] )
+
+idx <- which(flanking$after.bool | flanking$before.bool)
+
+dist2 <- sapply(1:nrow(flanking), function(i){
+  b1 <- flanking$after.bool[i]
+  b2 <- flanking$before.bool[i]
+  
+  if (b1 & b2){
+    os1 <- flanking$after.offset[i]
+    os2 <- flanking$before.offset[i]
+    if (os1 < os2){
+      return(os1)
+    }else{
+      return(os2)
+    }
+  }else{
+    if(b1){
+      return(flanking$after.offset[i])
+    }else if(b2){
+      return(flanking$before.offset[i])
+    }else{
+      return(100)
+    }
+  }
+})
+dist<-dist[dist<=100]
+dist2 <- dist2[dist2<=100]
+par(mar=c(5,5,5,2))
+caxis=1.3
+clab=1.4
+cmain=1.5
+
+par(mfrow=c(1,2), mar=c(6,5,4,0),las=1,xpd=F)
+# distribution of how far you need to travel to find an EXACT MATCH (wobble = 0, offset=10000)
+hist(dist, breaks=seq(-0.5,100.5), xlim=c(0,29),
+     ylim=c(0,0.25),freq=F, col='red',cex.lab=clab, 
+     ylab="",main="Insertion - Exact Match Distance",cex.axis=caxis, 
+     cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+title(ylab="Density", line=3.5, cex.lab=clab)
+par(xpd=NA)
+text(-5,0.285, "a)", cex=1.7)
+par(mar=c(6,5,4,2),xpd=F)
+hist(dist2, breaks=seq(-0.5,100.5), xlim=c(0,29),ylim=c(0,0.25),freq=F, 
+     col='red',cex.lab=clab, ylab="",main="Deletion - Exact Match Distance",
+     cex.axis=caxis, cex.main=cmain, 
+     xlab="Distance from Deletion Site (nt)")
+title(ylab="Density", line=3.5, cex.lab=clab)
+par(xpd=NA)
+text(-5,0.285, "b)", cex=1.7)
+par(xpd=F)
+
+sum(flanking$before.bool | flanking$after.bool) / nrow(flanking)
+
+sub <- flanking[flanking$len > 5,]
+
+sum(sub$before.bool | sub$after.bool) / nrow(sub)
 
 
 # used to remove problematic cases 
@@ -189,7 +222,7 @@ all <- all[-13514, ]
 
 # proportion of insertions ACROSS ALL VARIABLE LOOPS that contain a match with 1/6 wobble directly 
 #   adjacent (EITHER 5' or 3', no offset) 
-nrow(flanking[flanking$before.bool | flanking$after.bool,]) / nrow(flanking)
+sum(flanking$before.bool | flanking$after.bool) / nrow(flanking)
 
 
 # retrieves insertions that have at least one instance of flanking sequence 
@@ -202,7 +235,7 @@ all$new.count <- 0
 all[all$count.flanking!=0, "new.count"] <- nchar(all[all$count.flanking!=0,"indel"])
 
 # creation of a substitution list column
-#all$subs <- unname(mapply(subs, all$Vseq, all$Anc))
+#all$subs <- unname(mapply(subs, all$anc, all$Anc))
 
 write.csv(flanking, "~/PycharmProjects/hiv-withinhost/14_flanking/flanking.csv")
 write.csv(all, "~/PycharmProjects/hiv-withinhost/14_flanking/flanking-all.csv")
@@ -227,7 +260,7 @@ for (i in 1:4){
 }
 
 # creates a transitional probability matrix for EACH V-LOOP (1,2,4,5 ; not V3) 
-all$Vseq <- mapply(addX, all$Vseq, all$Pos)
+all$Vseq <- mapply(addX, all$Vseq, all$pos)
 all.v <- split(all, all$Vloop)
 
 p.trans <- list()
@@ -249,13 +282,16 @@ for (i in c(1,2,4,5)){
 
 
 
-
+par(mfrow=c(3,2))
 # 3 x 2 HISTOGRAM PLOT 
 # -------------------------------------
 # set flanking to infinite offset, 0 wobble
 # determine how far you need to go to find a match
-a.dist <- flanking[flanking$after.bool, "after.offset"]
-b.dist <- flanking[flanking$before.bool, "before.offset"]
+flanking[is.nan(flanking$after.offset),"after.offset"] <- 100
+flanking[is.nan(flanking$before.offset),"before.offset"] <- 100
+
+a.dist <- flanking[ , "after.offset"]
+b.dist <- flanking[, "before.offset"]
 a.dist1 <- flanking[!is.na(flanking$after.offset), "after.offset"]
 b.dist1 <- flanking[!is.na(flanking$before.offset), "before.offset"]
 a.dist2 <- flanking[!is.na(flanking$after.offset), "after.offset"]
@@ -266,10 +302,10 @@ caxis=1.3
 clab=1.4
 cmain=1.5
 
-par(mfrow=c(1,2), xpd=NA, mar=c(6,6,4,2),las=1)
+par(mfrow=c(1,2), mar=c(6,6,4,2),las=1)
 # distribution of how far you need to travel to find an EXACT MATCH (wobble = 0, offset=10000)
-hist(b.dist, breaks=seq(-0.5,max(b.dist)+0.5), col='red',cex.lab=clab, main="Distances to next exact match - 5'",cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
-hist(a.dist, breaks=seq(-0.5,max(a.dist)+0.5), col='red',cex.lab=clab, main="Distances to next exact match - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+hist(b.dist, breaks=100, xlim=c(0,50),freq=F, col='red',cex.lab=clab, main="Distances to next exact match - 5'",cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
+hist(a.dist, breaks=100,  xlim=c(0,50),freq=F,col='red',cex.lab=clab, main="Distances to next exact match - 3'", cex.axis=caxis, cex.main=cmain, xlab="Distance from Insertion Site (nt)")
 
 
 # distribution of how far you need to travel to find a MATCH WITHIN 1 NT (wobble = 1, offset=10000)
