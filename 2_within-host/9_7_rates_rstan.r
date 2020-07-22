@@ -73,17 +73,17 @@ type <- c("tip","node")
 rstan_options(auto_write=T)
 set.seed(5132)
 options(mc.cores = parallel::detectCores()-1)
-rm(all.data)
-rm(iint)
-rm(itip)
-rm(dtip)
-rm(dint)
-irates <- data.frame(stringsAsFactors = F)
-drates <- data.frame(stringsAsFactors =F)
+#irates <- data.frame(stringsAsFactors = F)
+#drates <- data.frame(stringsAsFactors =F)
+ifits <- list()
+dfits <- list()
+v3ifits <-list()
+v3dfits <- list()
+loops <- c(1,2,4,5,3)
 for (t in 1:2){ 
-  for (i in c(1,2,4,5)){
-    cmat <- all.counts[[t]][[i]]
-    tmat <- all.times[[t]][[i]]
+  for (i in 1:4){
+    cmat <- counts[[t]][[loops[i]]]
+    tmat <- times[[t]][[loops[i]]]
     
     #cmat <- cmat[,1:100]
     #tmat <- tmat[,1:100]
@@ -105,35 +105,29 @@ for (t in 1:2){
     stan.fit <- stan("rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
-                     #control=list(
-                     #  max_treedepth=10,
+                     control=list(max_treedepth=12),
                      #  adapt_delta=0.7),
                      #init_r=0.2,
-                     iter=10000)
-    # 100 columns, adapt_delta = 0.7, maxtree = 7, 404s per iter, 5400s total
-    #control = list(adapt_delta = 0.99))
-    
+                     iter=50000)
     # export results to a data frame 
     irates <- rbind(irates, data.frame(rate=summary(stan.fit)$summary[1,6],
-                                       vloop=paste0("V",as.character(i)),
+                                       vloop=paste0("V",as.character(loops[i])),
                                        id=type[t],
                                        lower=summary(stan.fit)$summary[1,4],
                                        upper=summary(stan.fit)$summary[1,8]
-    ))      # ----- Stan Model ----
-    # }else{
-    #   irates <- rbind(irates, data.frame(rate=NA,
-    #                                      vloop=paste0("V",as.character(i)),
-    #                                      id=type[t],
-    #                                      lower=NA,
-    #                                      upper=NA))
-    # }
-    cmat <- all.counts[[t+2]][[i]]
-    tmat <- all.times[[t+2]][[i]]
+    ))     
+    idx <- (t-1) * 4 + i
+    v3ifits[[1]] <- stan.fit
+    
+    # ----- Deletions ---- 
+
+    cmat <- counts[[t+2]][[loops[i]]]
+    tmat <- times[[t+2]][[loops[i]]]
     
     #cmat <- cmat[,1:100]
     #tmat <- tmat[,1:100]
     
-    s <- sizes[[t+2]]
+    s <- sizes[[t]]
     
     num.pat <- length(s)
     num.tree <- ncol(cmat)
@@ -150,32 +144,32 @@ for (t in 1:2){
     stan.fit <- stan("rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
-                     # control=list(
-                     #   max_treedepth=7,
+                      control=list(max_treedepth=12),
                      #   adapt_delta=0.7),
-                     iter=10000)
+                     iter=50000)
     drates<- rbind(drates, data.frame(rate=summary(stan.fit)$summary[1,6],
-                                      vloop=paste0("V",as.character(i)),
+                                      vloop=paste0("V",as.character(loops[i])),
                                       id=type[t],
                                       lower=summary(stan.fit)$summary[1,4],
                                       upper=summary(stan.fit)$summary[1,8]
     ))
-    # }else{
-    #   drates <- rbind(drates, data.frame(rate=NA,
-    #                                      vloop=paste0("V",as.character(i)),
-    #                                      id=type[t],
-    #                                      lower=NA,
-    #                                      upper=NA))
-    # }
+    v3dfits[[1]] <- stan.fit
   }
 }
-# # --- bootstraps --- 
-# not useful; give CIs that are far too narrow
-# bs <- c()
-# for (i in 1:1000){
-#   cols <- ncol(V1.mat[[1]])
-#   bs[i] <- mean(V1.mat[[1]][sample(1:200, cols),1:cols])
-# }
+
+
+insertions 
+mean / median
+irate <- c(2.382861e-05, 2.338753e-05, 4.196071e-05, 4.180047e-05, 4.431492e-05, 4.498296e-05, 8.006266e-05, 8.021932e-05)
+isd <- c(1.483429e-06 ,1.241316e-06 ,1.496752e-06 ,1.273513e-06 ,1.525796e-06 ,1.264572e-06 ,1.522098e-06 ,1.261372e-06)
+
+drate <- c(7.238429e-05, 7.232098e-05, 5.606446e-05, 5.563663e-05, 6.847116e-05, 6.826069e-05, 1.051018e-04, 1.061269e-04)
+dsd<-  c(1.481917e-06, 1.232391e-06, 1.492279e-06, 1.256041e-06, 1.507554e-06, 1.268980e-06, 1.535336e-06, 1.278238e-06)
+
+isd <- isd/1e-6
+dsd <- dsd/1e-6
+
+med.len <- c(78, 123, 105,  93,  30)
 
 
 # ------ Adjustment factor for indel rates ----- 
@@ -185,8 +179,8 @@ med.len <- sapply(all.lens, function(x){
 med.len <- c(med.len[,1])
 adj <- rep(1e3 * 365 / med.len, 2)
 
-irates[,c(1,4,5)] <- irates[,c(1,4,5)] * adj
-drates[,c(1,4,5)] <- drates[,c(1,4,5)] * adj
+irates[,c(1,4,5)] <- irates[,c(1,4,5)] / adj
+drates[,c(1,4,5)] <- drates[,c(1,4,5)] / adj
 
 lower <- c()
 upper <- c()

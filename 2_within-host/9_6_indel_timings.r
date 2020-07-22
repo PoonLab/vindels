@@ -116,11 +116,11 @@ for (file in 1:length(ifolder)){
 }
 # determine which patients did not complete fully 
 patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
-table(pat.idx)
+table(patnames)
 pat.idx <- table(sapply(ifolder, function(x){
    strsplit(basename(x), "-")[[1]][1]
 }))
-toRemove <- which(patnames == names(pat.idx)[which(pat.idx != 400)])
+toRemove <- which(patnames == names(pat.idx)[which(pat.idx <70)])
 
 iint <- iint[-toRemove]
 itip <- itip[-toRemove]
@@ -205,33 +205,93 @@ for (i in 1:4){
         x <- all.data[[i]][[df]][selectRows,]
         x[x$vloop == k, "length"]
       }) 
-      mat <- sapply(idx, function(df){
-        x <- all.data[[i]][[df]][selectRows,]
-        x[x$vloop == k, "vlen"]
-      })
-      if(is.null(dim(mat))){
-        print(sapply(mat, length))
-      }
-      all.lens[[i]][[k]] <- as.vector(mat)
+      # mat <- sapply(idx, function(df){
+      #   x <- all.data[[i]][[df]][selectRows,]
+      #   x[x$vloop == k, "vlen"]
+      # })
+      # if(is.null(dim(mat))){
+      #   print(sapply(mat, length))
+      # }
+      # all.lens[[i]][[k]] <- as.vector(mat)
       #pos <- pos + nrow(mat)
-      if (k == 1){
-        sizes[[i]] <- c(sizes[[i]],nrow(mat))
-        #print(sizes[[i]])
-      }
+      # if (k == 1){
+      #   sizes[[i]] <- c(sizes[[i]],nrow(mat))
+      #   #print(sizes[[i]])
+      # }
     }
   }
 }
 
-all.counts <- lapply(1:4, function(x){
+sizes <- list(double(),double(),double(),double())
+counts <- lapply(1:4, function(x){
   lapply(1:5, function(y){
-    do.call(rbind, all.counts[[x]][[y]])
+    sub <- all.counts[[x]][[y]]
+    all.mats <- list()
+    lowest.dim <- 10000
+    for (i in 1:length(sub)){
+      if (class(sub[[i]]) == "list"){
+        
+        lowest <- min(unname(sapply(sub[[i]], function(z) sum(!is.na(z)))))
+        mat <- sapply(sub[[i]], function(a){
+          notna <- which(!is.na(a))
+          a[notna[sample(lowest)]]
+        })
+        #print(nrow(mat))
+        if ( y == 1){
+          print(nrow(mat))
+        }
+        
+        
+        if (dim(mat)[2] < lowest.dim){
+          lowest.dim <- dim(mat)[2]
+        }
+        all.mats[[i]] <- mat
+      }else{
+        if (dim(sub[[i]])[2] < lowest.dim){
+          lowest.dim <- dim(sub[[i]])[2]
+        }
+        if ( y == 1){
+          print(nrow(sub[[i]]))
+        }
+        all.mats[[i]] <- sub[[i]]
+      }
+    }
+    all.mats <- lapply(all.mats, function(b){
+      b[,sample(lowest.dim)]
+    })
+    do.call(rbind, all.mats)
   })
 })
-all.times <- lapply(1:4, function(x){
+times <- lapply(1:4, function(x){
   lapply(1:5, function(y){
-    do.call(rbind, all.times[[x]][[y]])
+    sub <- all.times[[x]][[y]]
+    all.mats <- list()
+    lowest.dim <- 10000
+    for (i in 1:length(sub)){
+      if (class(sub[[i]]) == "list"){
+        lowest <- min(unname(sapply(sub[[i]], function(z) sum(!is.na(z)))))
+        mat <- sapply(sub[[i]], function(a){
+          notna <- which(!is.na(a))
+          a[notna[sample(lowest)]]
+        })
+        if (dim(mat)[2] < lowest.dim){
+          lowest.dim <- dim(mat)[2]
+        }
+        all.mats[[i]] <- mat
+      }else{
+        if (dim(sub[[i]])[2] < lowest.dim){
+          lowest.dim <- dim(sub[[i]])[2]
+        }
+        all.mats[[i]] <- sub[[i]]
+      }
+    }
+    all.mats <- lapply(all.mats, function(b){
+      b[,sample(lowest.dim)]
+    })
+    do.call(rbind, all.mats)
   })
 })
+
 all.mid <- lapply(1:2, function(x){
   unlist(all.mid[[x]])
 })
