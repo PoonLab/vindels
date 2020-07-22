@@ -87,7 +87,7 @@ likelihood <- function(slip){
     return(-Inf)
   }
   #sum(dgeom(counts,prob=(1-slip), log=T))
-  sum(dpois(counts,lambda=slip, log=T))
+  sum(dgeom(counts,prob=(1-slip), log=T))
 }
 
 prior <- function(slip){
@@ -132,7 +132,7 @@ runMCMC <- function(startvalue, iterations){
 }
 
 
-counts <- simSeqs(25000, 0.001)
+#counts <- simSeqs(25000, 0.001)
 
 # RUN MCMC
 startvalue <- 0.5
@@ -146,7 +146,7 @@ print(paste0("Acceptance: ", acceptance))
 
 
 # ----- Plotting ---- 
-par(mar=c(6,6,3,1.5),las=1)
+par(mar=c(5,6,1.5,1.5),las=1)
 hist(chain[-(1:burnin),1], 
      freq=F,
      col="dodgerblue",
@@ -155,9 +155,9 @@ hist(chain[-(1:burnin),1],
      ylab="",
      main="",
      xlab="Posterior of Lambda",cex.axis=1.2,cex.lab=1.5)
-abline(v=0.001,col='black',lwd=4,lty=2)
-lines(xy.coords(x=c(0,1), y=c(1,1)),col="red",lwd=2.5)
-title(ylab="Density", line=4, cex.lab=1.5)
+#abline(v=0.001,col='black',lwd=4,lty=2)
+#lines(xy.coords(x=c(0,1), y=c(1,1)),col="red",lwd=2.5)
+title(ylab="Density", line=3.5, cex.lab=1.5)
 axis(2,labels=c("0","5e3", "1e4", "1.5e4"),
      at=c(0,5000,10000,15000),
      cex.axis=1.2)
