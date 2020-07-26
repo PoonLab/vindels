@@ -3,8 +3,11 @@ source("~/vindels/2_within-host/utils.r")
 # INSERTION PARSING ----------
 path <- "~/Lio/"
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/test/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/test/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/del/*.tsv"))
+
+ifolder <- ifolder[grepl("30622-a|30631-a|30647|30651-a|49641",ifolder)]
+dfolder <- dfolder[grepl("30622-a|30631-a|30647|30651-a|49641",dfolder)]
 
 require(stringr)
 require(phangorn)
@@ -41,7 +44,7 @@ for (file in 1:length(ifolder)){
   
   # reads in the tree
   treename <- strsplit(filename, "\\.")[[1]][1]
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/test200/",treename,".tree.sample")))
+  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim200/",treename,".tree.sample")))
       # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
   
   # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
@@ -205,22 +208,35 @@ for (i in 1:4){
         x <- all.data[[i]][[df]][selectRows,]
         x[x$vloop == k, "length"]
       }) 
-      # mat <- sapply(idx, function(df){
-      #   x <- all.data[[i]][[df]][selectRows,]
-      #   x[x$vloop == k, "vlen"]
-      # })
-      # if(is.null(dim(mat))){
-      #   print(sapply(mat, length))
-      # }
-      # all.lens[[i]][[k]] <- as.vector(mat)
-      #pos <- pos + nrow(mat)
-      # if (k == 1){
-      #   sizes[[i]] <- c(sizes[[i]],nrow(mat))
-      #   #print(sizes[[i]])
-      # }
+      mat <- sapply(idx, function(df){
+        x <- all.data[[i]][[df]][selectRows,]
+        x[x$vloop == k, "vlen"]
+      })
+      if(is.null(dim(mat))){
+        print(sapply(mat, length))
+      }
+      all.lens[[i]][[k]] <- as.vector(mat)
+      pos <- pos + nrow(mat)
+      if (k == 1){
+        sizes[[i]] <- c(sizes[[i]],nrow(mat))
+        #print(sizes[[i]])
+      }
     }
   }
 }
+
+all.counts <- lapply(1:4, function(x){
+  lapply(1:5, function(y){
+    do.call(rbind, all.counts[[x]][[y]])
+  })
+})
+all.times <- lapply(1:4, function(x){
+  lapply(1:5, function(y){
+    do.call(rbind, all.times[[x]][[y]])
+  })
+})
+
+# --- For handling completely different data sizes and formats ---- 
 
 sizes <- list(double(),double(),double(),double())
 counts <- lapply(1:4, function(x){
