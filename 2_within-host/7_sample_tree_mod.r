@@ -19,40 +19,45 @@ for (i in 1:length(args)){
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
 logpath <- args[1]
-tfolder <- args[2]
+tpath <- args[2]
 outfolder <- args[3]
 
-
 dir.create(outfolder, showWarnings = F)
+trefolder <- Sys.glob(paste0(tpath, "*"))
 logfolder <- Sys.glob(paste0(logpath,"*.log"))
-
-for (logfile in logfolder){
+heights <- c()
+for (l in 1:length(logfolder)){
   
-  print(logfile)
-  filename <- basename(logfile)
+  print(logfolder[l])
+  filename <- basename(logfolder[l])
   pat <- strsplit(filename, "\\.")[[1]][1]
-  
+
   # uses log file name to find and read BEAST log file
-  logfile <- read.csv(logfile, sep="\t", skip=4)
+  logfile <- read.csv(logfolder[l], sep="\t", skip=4)
+
+  pat_trees <- Sys.glob(paste0(tpath,pat,"*"))
   
-  pat_trees <- Sys.glob(paste0(tfolder,pat,"*"))
   for (tree in pat_trees){
+    # treename1 <- paste0(strsplit(basename(hfolder[h]), "_recon")[[1]][1], ".tree.sample")
+    # 
+    # treename1 <- paste0(tfolder, treename1)
+    # 
+    # intree <- read.tree(treename1)
+    # 
+    # heights[h] <- max(node.depth.edgelength(intree))
+    # 
     treename <- basename(tree)
-    
-    treename <- gsub("-original","",treename)
-    
-    intree <- read.tree(tree)
-    
     state <- as.numeric(paste0(strsplit(strsplit(treename, "\\.")[[1]][1], "_")[[1]][3],"00000"))
-    
+  
+    intree <- read.tree(tree)
     rescale.factor <- logfile[which(logfile$state == state),"ucld.mean"]
 
-    print(rescale.factor)
+    #print(rescale.factor)
   
     # rescales all the edge lengths of the tree
     intree$edge.length <- (intree$edge.length * rescale.factor)
-
-    # writes the rescaled tree to a new folder called "rescaled"
+    
+    #writes the rescaled tree to a new folder called "rescaled"
     write.tree(intree,paste0(outfolder, gsub(".sample","",treename)))
   }
 }

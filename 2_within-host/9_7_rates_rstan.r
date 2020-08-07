@@ -252,6 +252,13 @@ adj <- rep(1e3 * 365 / med.len, 2)
 irates[,c(1,4,5)] <- irates[,c(1,4,5)] *  adj
 drates[,c(1,4,5)] <- drates[,c(1,4,5)] * adj
 
+irates[,c(1,4,5,6,7)] <- irates[,c(1,4,5,6,7)] *  adj
+drates[,c(1,4,5,6,7)] <- drates[,c(1,4,5,6,7)] * adj
+
+names <- c("rate", "vloop","id","lower.old","upper.old","lower","upper")
+colnames(irates) <- names
+colnames(drates) <- names
+
 var <- c("V1","V2","V3","V4","V5")
 
 
@@ -259,33 +266,36 @@ var <- c("V1","V2","V3","V4","V5")
 par(mar=c(7,6,3,2),las=1)
 cl <- 1.7
 ca <- 1.4
-plot(irates$rate, pch=21, bg="dodgerblue", cex=1.7, 
+pcex <- 3.3
+wid <- 3.4
+plot(irates$rate, pch=1, bg="white", cex=pcex, lwd=wid,col="blue",
      cex.axis=ca, cex.lab=cl, xaxt="n",xlab="",
      ylab=expression(paste("Insertion Rate (Events/Nt/Year x",10^-3,")",sep="")),
      yaxs="i",ylim=c(0,6))
 title(xlab="Group", line=5,cex.lab=cl)
 axis(1, labels=rep(c("Terminal","Internal"),5), at= 1:10, line=0, cex.axis=ca-0.2)
 axis(1, labels=var, at= seq(1.5,9.5, 2), line=1.5, lwd=0, cex.axis=ca)
-arrows(c(1:10), irates$lower, c(1:10), irates$upper, code=3, length=0.1, angle=90,lwd=1.5)
-points(x=1:10, y= iunfix$rate, pch=22, bg="red", cex=1.7)
-arrows(c(1:10), iunfix$lower, c(1:10), iunfix$upper, code=3, length=0.1, angle=90,lwd=1.5)
-legend(x=1,y=5.7,legend=c("Fixed","Unfixed"), pch=c(21,22), pt.bg=c("dodgerblue","red"),cex=1.5, pt.cex=1.9)
+arrows(c(1:10), irates$lower, c(1:10), irates$upper, code=3, length=0.07, angle=90,lwd=1.5)
+points(x=1:10, y= iunfix$rate, bg="white", cex=pcex, lwd=wid,pch=0, col="red")
+arrows(c(1:10), iunfix$lower, c(1:10), iunfix$upper, code=3, length=0.07, angle=90,lwd=1.5)
+legend(x=1,y=5.7,legend=c("Fixed","Unfixed"), pch=c(1,0), pt.bg=c("white","white"),col=c("blue","red"),cex=1.5, pt.cex=pcex,pt.lwd=wid,y.intersp = 1.2)
 
 par(mar=c(7,6,3,2),las=1)
 cl <- 1.7
 ca <- 1.4
-plot(drates$rate, pch=21, bg="dodgerblue", cex=1.7, 
+pcex <- 3.3
+wid <- 3.4
+plot(drates$rate, pch=1, bg="white", cex=pcex, lwd=wid,col="blue",
      cex.axis=ca, cex.lab=cl, xaxt="n",xlab="",
      ylab=expression(paste("Deletion Rate (Events/Nt/Year x",10^-3,")",sep="")),
      yaxs="i",ylim=c(0,10))
 title(xlab="Group", line=5,cex.lab=cl)
 axis(1, labels=rep(c("Terminal","Internal"),5), at= 1:10, line=0, cex.axis=ca-0.2)
 axis(1, labels=var, at= seq(1.5,9.5, 2), line=1.5, lwd=0, cex.axis=ca)
-arrows(c(1:10), drates$lower, c(1:10), drates$upper, code=3, length=0.1, angle=90,lwd=1.5)
-points(x=1:10, y= dunfix$rate, pch=22, bg="red", cex=1.7)
-arrows(c(1:10), dunfix$lower, c(1:10), dunfix$upper, code=3, length=0.1, angle=90,lwd=1.5)
-legend(x=1,y=9.5,legend=c("Fixed","Unfixed"), pch=c(21,22), pt.bg=c("dodgerblue","red"),cex=1.5, pt.cex=1.9)
-
+arrows(c(1:10), drates$lower, c(1:10), drates$upper, code=3, length=0.08, angle=90,lwd=1.5)
+points(x=1:10, y= dunfix$rate, bg="white", cex=pcex, lwd=wid,pch=0, col="red")
+arrows(c(1:10), dunfix$lower, c(1:10), dunfix$upper, code=3, length=0.08, angle=90,lwd=1.5)
+legend(x=1,y=9.5,legend=c("Fixed","Unfixed"), pch=c(1,0), pt.bg=c("white","white"),col=c("blue","red"),cex=1.5, pt.cex=pcex,pt.lwd=wid,y.intersp = 1.2)
 
 
 

@@ -286,7 +286,7 @@ for pat in full.keys():
             
 
             subcount[fields[0]] = subcount.get(fields[0], 0) + 1
-            patcount[pat] = patcount.get(pat, 0) + 1
+            patcount[pat] = fields[0]
 
             
 
@@ -295,7 +295,7 @@ for pat in full.keys():
             seqcount += 1
         else:
             subcount["C"] = subcount.get("C", 0) + 1
-            patcount[pat] = patcount.get(pat, 0) + 1
+            patcount[pat] = "C"
             
 
             #outputfull.write(">"+ header + "\n" + full[pat][header] + "\n")

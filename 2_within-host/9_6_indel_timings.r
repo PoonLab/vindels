@@ -6,8 +6,8 @@ path <- "~/PycharmProjects/hiv-withinhost/"
 ifolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/ins/*.tsv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/del/*.tsv"))
 
-ifolder <- ifolder[grepl("30622-a|30631-a|30647|30651-a|49641",ifolder)]
-dfolder <- dfolder[grepl("30622-a|30631-a|30647|30651-a|49641",dfolder)]
+#ifolder <- ifolder[grepl("30622-a|30631-a|30647|30651-a|49641",ifolder)]
+#dfolder <- dfolder[grepl("30622-a|30631-a|30647|30651-a|49641",dfolder)]
 
 require(stringr)
 require(phangorn)

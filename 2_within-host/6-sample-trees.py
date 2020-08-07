@@ -52,24 +52,24 @@ def sample_beast(infile, outdir, numsample=5):
         outdir += "/"
 
     name = os.path.basename(infile).split(".")[0]
-    input = open(infile,'rU')
+    tfile = open(infile,'rU')
 
     # load a list of state numbers 
     states = []
-    for line in input:
+    for line in tfile:
         data = line.split()
         if len(data) == 6:
             states.append(int(data[1].lstrip("STATE_")))
-    input.close()
-    total = len(states) * 2 - 1
+    tfile.close()
+    total = len(states) - 1
     #print(total)
-    start = int(total*0.1) + 2
+    start = int(total*0.1) + 1
     #print(start)
-    rsample = []
 
-    #print(states)
-    rsample = random.sample(states, numsample)
-    rsample = [str(x) for x in rsample]
+    #print(range(start, total+1))
+    rsample = random.sample(range(start, total+1), numsample)
+    #print(rsample)
+    rsample = [str(x*100000) for x in rsample]
     '''for x in range(numsample):
         #chose 101 just in case (left 101 states for the burn in and sampled from last 900 states out of 1001)
         random.shuffle(randpool)
@@ -77,19 +77,20 @@ def sample_beast(infile, outdir, numsample=5):
         rsample.append(str(x*int(states[1])))
     '''
     sample_count = 0
-    
+    #print(rsample)
     seqDict = getSeqDict(infile)
 
-    input2 = open(infile,'rU')
+    tfile2 = open(infile,'rU')
 
     #d = open(outdir+"dict/"+name+".dictionary", "w")
     
-    for line in input2:
-
+    for line in tfile2:
+        data = line.split()
         # this finds and processes each tree state in the rsample
         if len(data) == 6 and data[1].lstrip("STATE_") in rsample:
             sample_count += 1
             state = data[1].lstrip("STATE_")
+            #print(sample_count)
             if len(state) >1:
                 state = state[:-5]
             rawtree = data[-1]
@@ -115,7 +116,7 @@ def main():
     
 
     if len(sys.argv) != 3: #and len(sys.argv) != 4:
-        print("USAGE: python 6_sample-beast-trees.py [input trees folder] [output trees folder] [optional comma-delimiter exclusion]")
+        print("USAGE: python 6_sample-beast-trees.py [input trees folder] [output trees folder]")
         quit()
     for i in range(len(sys.argv)):
         if not sys.argv[i].endswith("/"):
