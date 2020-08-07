@@ -43,6 +43,8 @@ dLength$Len <- sapply(dLength$indel, nchar)
 iLength$Bin <- sapply(iLength$indel,categorize)
 dLength$Bin <- sapply(dLength$indel,categorize)
 
+dLength <- dLength[nchar(dLength$indel) < 200, ]
+
 # verify that  no commas are found within the iLength and dLength data frames 
 "," %in% iLength$indel
 "," %in% dLength$indel
