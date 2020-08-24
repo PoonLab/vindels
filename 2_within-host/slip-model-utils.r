@@ -169,7 +169,7 @@ pairllh <- function(anc, newtip, rate, branch){
     
     # finalize the calculation for tip likelihood
     # dot product
-    llh <- tmat %*% tip.llh
+    llh <- tmat %*% tip.llh    # tip.llh = c(1,0,0,0) for A
     llh <- llh * f
     if (!achar %in% nt){
       print(achar)

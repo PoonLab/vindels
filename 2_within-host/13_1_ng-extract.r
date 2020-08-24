@@ -139,12 +139,12 @@ for (n in 1:5){
   ires <- t(unname(mapply(insRandTest, iTemp$anc,iTemp$indel, iTemp$glycs)))
   ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
   
-  iedist <- unname(unlist(lapply(ires, mean)))
+  iedist <- unlist(ires)
   
   iemean <- mean(iedist)
   # Boostraps for expected insertions
   bs.means <- c()
-  for (i in 1:100){
+  for (i in 1:1000){
     sam <- sample(length(iedist), length(iedist), replace=T)
     iexp.bs <- iedist[sam]
     bs.means[i] <- mean(iexp.bs)
@@ -160,7 +160,7 @@ for (n in 1:5){
   demean <- mean(dedist)
   # Boostraps for expected deletions
   bs.means <- c()
-  for (i in 1:100){
+  for (i in 1:1000){
     sam <- sample(length(dedist), length(dedist), replace=T)
     dexp.bs <- dedist[sam]
     bs.means[i] <- mean(dexp.bs)
@@ -175,7 +175,7 @@ for (n in 1:5){
   iomean <- mean(iobs)
   # Boostraps for observed insertions
   bs.means <- c()
-  for (i in 1:100){
+  for (i in 1:1000){
     sam <- sample(length(iobs), length(iobs), replace=T)
     iobs.bs <- iobs[sam]
     bs.means[i] <- mean(iobs.bs)
@@ -187,7 +187,7 @@ for (n in 1:5){
   domean <- mean(dobs)
   # Boostraps for observed deletions
   bs.means <- c()
-  for (i in 1:100){
+  for (i in 1:1000){
     sam <- sample(length(dobs), length(dobs), replace=T)
     dobs.bs <- dobs[sam]
     bs.means[i] <- mean(dobs.bs)
@@ -209,8 +209,10 @@ for (n in 1:5){
                                          oupper=doquantiles[[2]],
                                          counts=dcounts))
 }
-del.data[2,1:3] <- del.data[2,1:3] + 0.005
-del.data[3,1:3] <- del.data[3,1:3] - 0.005
+
+# manual jitter 
+del.data[2,1:3] <- del.data[2,1:3] - 0.005
+del.data[3,1:3] <- del.data[3,1:3] + 0.005
 
 
 require(RColorBrewer)
