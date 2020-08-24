@@ -344,7 +344,7 @@ for f in folder:
     infile.close()
 
     # read the tree using the Tree using ETE3
-    trefile = filename.split("_recon")[0] + ".tree.sample"
+    trefile = filename.split("_recon")[0] + ".tree"
     tree = Tree(tpath+trefile)
     
     # get the root label and sequence from the last entry of cdata

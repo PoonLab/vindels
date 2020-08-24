@@ -137,7 +137,7 @@ for (n in 1:5){
   # ---------------
   # Insertions
   ires <- t(unname(mapply(insRandTest, iTemp$anc,iTemp$indel, iTemp$glycs)))
-  ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
+  #ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
   
   iedist <- unlist(ires)
   

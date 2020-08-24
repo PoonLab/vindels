@@ -3,11 +3,13 @@ source("~/vindels/2_within-host/utils.r")
 # INSERTION PARSING ----------
 path <- "~/Lio/"
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/test200/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/test200/del/*.tsv"))
 
-#ifolder <- ifolder[grepl("30622-a|30631-a|30647|30651-a|49641",ifolder)]
-#dfolder <- dfolder[grepl("30622-a|30631-a|30647|30651-a|49641",dfolder)]
+reg <- "16362|30622|30631|30647|30660|30667"
+
+ifolder <- ifolder[grepl(reg,ifolder)]
+dfolder <- dfolder[grepl(reg,dfolder)]
 
 require(stringr)
 require(phangorn)
@@ -44,7 +46,7 @@ for (file in 1:length(ifolder)){
   
   # reads in the tree
   treename <- strsplit(filename, "\\.")[[1]][1]
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim200/",treename,".tree.sample")))
+  tre <- read.tree(paste0(paste0(path,"7SampleTrees/test-prelim200/",treename,".tree.sample")))
       # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
   
   # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
@@ -119,11 +121,10 @@ for (file in 1:length(ifolder)){
 }
 # determine which patients did not complete fully 
 patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
-table(patnames)
 pat.idx <- table(sapply(ifolder, function(x){
    strsplit(basename(x), "-")[[1]][1]
 }))
-toRemove <- which(patnames == names(pat.idx)[which(pat.idx <70)])
+toRemove <- which(!grepl(reg, patnames))
 
 iint <- iint[-toRemove]
 itip <- itip[-toRemove]
@@ -159,71 +160,102 @@ for (a in 1:4){
   }
 }
 
-names <- list()
-pos <- 1
-# iterate through 4 lists 
+
+names <- c()
 for (i in 1:4){
-  # each list has 5200 entries 
   for (j in 1:length(unique(patnames))){
-    # get the indexes associated with one patient run 
     idx <- which(patnames == unique(patnames)[j])
-    
-    # save the name of the patient
     if (i == 1){
       names[j] <- unique(patnames)[j] 
     }
     print(j)
-  
-    # filter out any branches containing zeroes 
-    selectRows <- 1:nrow(all.data[[i]][[idx[1]]])
-    
-    nas <- unique(unlist(sapply(idx, function(df){
-      x <- all.data[[i]][[df]]
-      which(x$length <=0 | x$rtt.mid <=0)
-    })))
-    
-    if (length(nas) > 0){
-      selectRows <- selectRows[-nas]
-    }
-    
-    if (i < 3){
-      ind <- 1
-    }else{
-      ind <- 2
-    }
-    all.mid[[ind]][[j]] <- sapply(idx, function(df){
-      x <- all.data[[i]][[df]]
-      rep(x$rtt.mid, x$count)
-    })
-    
-    # iterate through 5 vloops 
     for (k in 1:5){
-
-      all.counts[[i]][[k]][[j]] <- sapply(idx, function(df){
-        x <- all.data[[i]][[df]][selectRows,]
+      mat <- sapply(idx, function(df){
+        x <- all.data[[i]][[df]]
         x[x$vloop == k,"count"]
       })
+      all.counts[[i]][[k]][[j]] <- mat
       
-      all.times[[i]][[k]][[j]] <- sapply(idx, function(df){
-        x <- all.data[[i]][[df]][selectRows,]
+      mat2 <- sapply(idx, function(df){
+        x <- all.data[[i]][[df]]
         x[x$vloop == k, "length"]
-      }) 
-      mat <- sapply(idx, function(df){
-        x <- all.data[[i]][[df]][selectRows,]
-        x[x$vloop == k, "vlen"]
       })
-      if(is.null(dim(mat))){
-        print(sapply(mat, length))
-      }
-      all.lens[[i]][[k]] <- as.vector(mat)
-      pos <- pos + nrow(mat)
+      all.times[[i]][[k]][[j]] <- mat2 
+      
       if (k == 1){
-        sizes[[i]] <- c(sizes[[i]],nrow(mat))
-        #print(sizes[[i]])
+        sizes[[i]] <- c(sizes[[i]],nrow(mat2))
+        print(sizes[[i]])
       }
     }
   }
 }
+
+
+# names <- list()
+# pos <- 1
+# # iterate through 4 lists 
+# for (i in 1:4){
+#   # each list has 5200 entries 
+#   for (j in 1:length(unique(patnames))){
+#     # get the indexes associated with one patient run 
+#     idx <- which(patnames == unique(patnames)[j])
+#     
+#     # save the name of the patient
+#     if (i == 1){
+#       names[j] <- unique(patnames)[j] 
+#     }
+#     print(j)
+#   
+#     # filter out any branches containing zeroes 
+#     selectRows <- 1:nrow(all.data[[i]][[idx[1]]])
+#     
+#     nas <- unique(unlist(sapply(idx, function(df){
+#       x <- all.data[[i]][[df]]
+#       which(x$length <=0 | x$rtt.mid <=0)
+#     })))
+#     
+#     if (length(nas) > 0){
+#       selectRows <- selectRows[-nas]
+#     }
+#     
+#     if (i < 3){
+#       ind <- 1
+#     }else{
+#       ind <- 2
+#     }
+#     all.mid[[ind]][[j]] <- sapply(idx, function(df){
+#       x <- all.data[[i]][[df]]
+#       rep(x$rtt.mid, x$count)
+#     })
+#     
+#     # iterate through 5 vloops 
+#     for (k in 1:5){
+# 
+#       all.counts[[i]][[k]][[j]] <- sapply(idx, function(df){
+#         x <- all.data[[i]][[df]][selectRows,]
+#         x[x$vloop == k,"count"]
+#       })
+#       
+#       all.times[[i]][[k]][[j]] <- sapply(idx, function(df){
+#         x <- all.data[[i]][[df]][selectRows,]
+#         x[x$vloop == k, "length"]
+#       }) 
+#       mat <- sapply(idx, function(df){
+#         x <- all.data[[i]][[df]][selectRows,]
+#         x[x$vloop == k, "vlen"]
+#       })
+#       if(is.null(dim(mat))){
+#         print(sapply(mat, length))
+#       }
+#       all.lens[[i]][[k]] <- as.vector(mat)
+#       pos <- pos + nrow(mat)
+#       if (k == 1){
+#         sizes[[i]] <- c(sizes[[i]],nrow(mat))
+#         #print(sizes[[i]])
+#       }
+#     }
+#   }
+# }
 
 all.counts <- lapply(1:4, function(x){
   lapply(1:5, function(y){
