@@ -124,6 +124,7 @@ total = 0
 patcount = {}
 seqcount = 0
 subcount = {}
+tp = []
 for pat in full.keys():
     print(pat)
 
@@ -147,6 +148,7 @@ for pat in full.keys():
             #this one is just a count of how many timepoints
             if n == 0:
                 timepoints = int(fields[9])
+                print(timepoints)
         
         # unique = list of 4 elements
         # counts the number of unique dates in each date field    
@@ -154,7 +156,7 @@ for pat in full.keys():
         for x in range(4):
             dateset = set(dates[x])
             unique.append(len(dateset))
-
+        print(unique)
         # NO UNIQUE TIMEPOINTS 
         # skip the patient if they contain no unique timepoints 
         if not any(i > 1 for i in unique):
@@ -169,6 +171,7 @@ for pat in full.keys():
                 print(n)
                 if x > bestIdx:
                     bestIdx = n
+        tp.append(unique[bestIdx])
         bestIdx = bestIdx + 5
 
         #ensure that the patient has 5 time points or more 
@@ -308,3 +311,5 @@ for pat in full.keys():
 print(seqcount)
 print(subcount)
 print(len(patcount))
+tp = np.array(tp)
+print(tp[tp > 4])
