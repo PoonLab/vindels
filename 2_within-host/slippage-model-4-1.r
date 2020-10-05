@@ -47,15 +47,16 @@ setup <- function(tip, anc, len, pos, branches, shuffle){
   lens <- unlist(lapply(slip.list, sum))
   lens <- lens[lens != 0]
   
-  # all multiple-of-3 insertion lengths
+  # number of inframe insertions
   a <<- sum(lens %% 3 == 0)
-  # all non-3 insertion lengths
+  # number of frameshift insertions
   b <<- sum(lens %% 3 != 0)
   
-  # REMOVE:  est.total <<- a / 0.29
-  # REMOVE: est.fix <<- b / (est.total - a)
-  non3 <- 1:100
-  non3 <<- non3[-which(non3%%3==0)]
+  # the length values that are under selection
+  # i.e. there's a low probability for their inclusion
+  inframe <- 1:100
+  inframe <<- inframe[-which(inframe%%3!=0)] - 1    # -1 because we only count the number of steps 
+                                           # after entering the slip state; i.e. 2 = len3, 5 = len6, 8 = len9
 }
 
 likelihood<- function(param, slip.list, llh.list){
@@ -64,13 +65,19 @@ likelihood<- function(param, slip.list, llh.list){
   
   # ---- Fixation Parameter ----
   # this determines the likelihood of the fixation parameter 
-  # mean determined by calculated 'est.fix' value
   # param[4] is the proposed 'fix' value
   
-  est.non3 <- round((a / (1 - sum(dgeom(non3-1, (1-p.stay))))) - a)
-   
-  llh.fix <- dbinom(b, est.non3, param[4], log=T)    # mean=est.fix, sd=0.005, log=T)
+  # (1-p.stay) is the probability of terminating an insertion 
+  # Assuming that a (inframe lengths) are under no selection, 
+  # est.non3 is the THEORETRICAL number of frameshifts that should be present 
+  # est.non3 = (#inframes / geometric density of inframe)- #inframes
+  est.non3 <- round((a / sum(dgeom(inframe, (1-p.stay)))) - a)   
   
+  # b is the OBSERVED number of frameshifts present in the data, 
+  # so we calcuate the likelihood of seeing this proportion, given param[4] (fixation)
+  llh.fix <- dbinom(b, est.non3, param[4], log=T) 
+  
+  # adjust p.enter to match the size of the OBSERVED data set 
   adj.enter <- p.enter * ((a+b) / (a + est.non3))
   
   # ---- Affine Likelihood ---- 
@@ -90,16 +97,13 @@ likelihood<- function(param, slip.list, llh.list){
 }
 
 prior <- function(param){
-  prior.pe <- dunif(param[1], min=1e-7, max=1e-3, log=T) 
+  # some of these are weakly informative and can be narrowed
+  prior.pe <- dunif(param[1], min=1e-7, max=1e-3, log=T)  
   prior.ps <- dunif(param[2], min=0.55, max=0.99, log=T) 
   prior.rate <- dlnorm(param[3],meanlog=log(0.00001),sdlog=1.1,log=T) #dunif(param[3], min=1e-7, max=1e-3, log=T)
-  prior.fix <- dbeta(param[4], shape1=3, shape2=27, log=T)
-  #prior.fixsd <- dexp(param[5], rate=1, log=T)
-  #prior.pe <- dlnorm(p.enter,meanlog=log(0.00015),sdlog=1.2, log=T)
-  #prior.ps <- dlnorm(p.stay,meanlog=log(0.75),sdlog=0.1,log=T)
-  #prior.rate <- dlnorm(rate,meanlog=log(0.00001), sdlog=1.5,log=T)
+  prior.fix <- dbeta(param[4], shape1=3, shape2=27, log=T) 
   
-  return(prior.pe + prior.ps + prior.rate + prior.fix) # + prior.fixsd)
+  return(prior.pe + prior.ps + prior.rate + prior.fix)
 }
 
 posterior <- function(param, slip, llh){
@@ -113,29 +117,39 @@ posterior <- function(param, slip, llh){
 proposalFunction <- function(param, slip_current, llh_current){
 
   num <- runif(1)
+  # "slip-to-parameter" ratio : controls how often slips are changed compared to parameters
   s2p <- 0.96
   
   # CHANGE PARAMETERS 
   if (num > s2p){
-    num <- (num - s2p) / (1-s2p)
-    if (num < 1/5){
+    # draw a new random number
+    num <- runif(1)
+    # weighting variables of each parameter (weight 4 is the remaining complement; 1-w3-w2-w1)
+    w1 <- 0.2
+    w2 <- 0.3
+    w3 <- 0.3
+    
+    if (num < w1){   # 0.2 density
       param[1] <- rlnorm(1,meanlog=log(param[1]),sdlog=0.1)
-      llh_proposed <- llh_current   # stays the same
-    }else if(num > 2/10 && num < 5/10){
+      llh_proposed <- llh_current  # stays the same
+      
+    }else if(num > w1 && num < w2+w1){    # 0.3 density
       param[2] <- rlnorm(1,meanlog=log(param[2]),sdlog=0.02)
       llh_proposed <- llh_current   # stays the same
-    }else if(num > 5/10 && num < 8/10){
+      
+    }else if(num > w1+w2 && num < w1+w2+w3){    # 0.3 density
       param[3] <- rlnorm(1,meanlog=log(param[3]),sdlog=0.08)
       llh_proposed <- seqllh(param[3], slip_current)  # recalcuate using the new rate
-    }else{
+      
+    }else{        # 0.2 density
       param[4] <- rlnorm(1,meanlog=log(param[4]),sdlog=0.008)
       llh_proposed <- llh_current
     }
-    slip_proposed <- slip_current    # stays the same
+    slip_proposed <- slip_current    # always stays the same
   
-  # CHANGE SLIP
+  # CHANGE SLIP LIST
   }else{
-    # choose a sequence to edit
+    # randomly choose a sequence to edit
     rand <- sample(length(idx),1)
     changed <- idx[rand]          # this is the location at which the slip.list was changed
     # convert it to indices
@@ -164,7 +178,7 @@ runMCMC <- function(startvalue, iterations, runno, notes){
   
   # keep a logfile up to date
   logfile <- file(paste0("~/PycharmProjects/hiv-withinhost/15_modeling/slip-", 
-                         as.character(runno),#substr(gsub("[\\ :-]","",Sys.time()), 9, 12),
+                         as.character(runno), "-",substr(gsub("[\\ :-]","",Sys.time()), 7, 12),
                          ".csv"), "w")
   notes <- gsub("^", "#",notes)
   notes <- gsub("\n", "\n#", notes)
@@ -175,20 +189,19 @@ runMCMC <- function(startvalue, iterations, runno, notes){
     # calculate posterior of current position
     p.current <- posterior(chain[i,], slip_current, llh_current)
     
-    
-    # generate proposal 
+    # generate new proposal 
     proposal <- proposalFunction(chain[i,], slip_current, llh_current)
-    
     
     # calculate posterior of the new proposal (parameters, slip_proposed, llh_proposed)
     p.next <- posterior(proposal[[1]], proposal[[2]], proposal[[3]])
     #print(paste("Current:", p.current, "Next:", p.next, sep=" "))
-    #print(paste(proposal[[1]], sep=" "))
-    s.change <- any(unname(unlist(slip_current))!=unname(unlist(proposal[[2]])))
-    #print(paste0("Sliplist change proposed: ", s.change))
     
+    # --- For checking if the slip list has changed ---
+    # s.change <- any(unname(unlist(slip_current))!=unname(unlist(proposal[[2]])))
+    # print(paste0("Sliplist change proposed: ", s.change))
+    
+    # Metropolis-Hastings: Calculate the proportion of the proposal to the current position
     prop <- exp(sum(p.next) - sum(p.current))
-    #print(prop)
     
     # if the proportion exceeds the random uniform sample, ACCEPT the proposed value
     if (runif(1) < prop) {

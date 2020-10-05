@@ -83,6 +83,8 @@ for (i in 1:length(rtdfolder)){
   
   #write.tree(rtd, file=paste0(path,"guide_trees/", filename,2))
 }
+names(rsqr) <- names
+
 sapply(1:length(names),function(x){
   print(names[x])
   print(rsqr[x])

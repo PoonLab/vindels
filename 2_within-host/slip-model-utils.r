@@ -2,16 +2,17 @@
 
 createSlips <- function(anc, len, pos){
   # start out with a base vector containing nchar number of zeros 
+  base <- rep(0,nchar(anc)) 
   # remove the gap characters from the ancestral sequence 
   anc <- gsub("-","",anc)
-  base <- rep(0,nchar(anc))  # removed the nchar(anc) + 1 because there cannot be a slip at the final position (there is nothing to skip over)
-  # if there is no insertion, simply add a zero to complete the vector 
+
+  # if there is no insertion, return the vector of zeros 
   if (len == 0 || is.na(len)){
     return (base)
     
-    # if there is an insertion, add the slip count  at the appropriate position
+    # if there is an insertion, include the slip countat the appropriate position
   }else{
-    pos <- as.numeric(pos) - len + 1
+    pos <- as.numeric(pos) - len + 1   # pos marks the end of the insertion; adjust by 
     base[pos] <- len
     return (base)
   }

@@ -1,37 +1,35 @@
 source("~/vindels/2_within-host/utils.r")
 source("~/vindels/2_within-host/slip-model-utils.r")
-path <- "~/PycharmProjects/hiv-withinhost/"
-
+setwd("~/PycharmProjects/hiv-withinhost/")
 # ---- Real Data ---- 
-insertions <- read.csv(paste0(path,"10_nucleotide/tips/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
+insertions <- read.csv("10_nucleotide/tips/ins-sep-all.csv",row.names=1, stringsAsFactors = F)
 
-# PROBLEMATIC CASE: remove instances with gaps in the ancestor but NO INSERTION
+# ---- DATA CLEANING ----
+# CASE: remove instances with gaps in the ancestor but NO INSERTION
 insertions <- insertions[-c(which(grepl("-",insertions$Anc) & insertions$Seq=="")),]
 
 # CASE: remove instances with insertion position 0
 insertions <- insertions[-c(which(insertions$Pos==0)),]
+
+# CASE: tip sequences have deletions; remove deletions to isolate for insertions only 
 res <- as.data.frame(t(unname(mapply(restoreTipDel,insertions$Vseq, insertions$Anc, insertions$Seq, insertions$Pos))))
 insertions$Vseq <- as.character(res[,1])
 insertions$Pos <- as.numeric(as.character(res[,2]))
 
-# #slips <- matrix(rep(rep(0,121),10), nrow=10,ncol=121)
-# slips <- c(rep(0,121000))
-# slips[sample(121000,100)] <- sample(3,100,replace = T) * 3
-slips <- nchar(insertions[insertions$Count!=0, "Seq"])
-#slips <- slips[-167]
-slips <- c(slips, rep(0, sum(nchar(insertions$Vseq))))
+# Create the slip vector using the length of insertions 
+counts <- nchar(insertions[insertions$Count!=0, "Seq"])
+counts <- c(counts, rep(0, sum(nchar(insertions$Vseq)) - sum(counts)))
 
 # randomly shuffle all the entries
-rnd <- sample(length(slips),length(slips))
-slips <- slips[rnd]
-counts <- slips
-rm(slips)
+rand <- sample(length(counts),length(counts))
+counts <- counts[rand]
 
-
+# resulting format = c(0,0,0,0,0,6,0,0,0,3)
 
 # ----- Simulated Data ----
 
 genSeq <- function(len){
+  # function for generating a nucleotide sequence with a given frequency (f)
   seq <- c()
   for (n in 1:len){
     num <- runif(1)

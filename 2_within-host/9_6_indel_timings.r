@@ -11,6 +11,12 @@ reg <- "16362|30622|30631|30647|30660|30667"
 ifolder <- ifolder[grepl(reg,ifolder)]
 dfolder <- dfolder[grepl(reg,dfolder)]
 
+tally <- function(infolder){
+  name <- basename(infolder)
+  name <- gsub("-.+","",name)
+  return (table(name))
+}
+
 require(stringr)
 require(phangorn)
 require(data.table)
