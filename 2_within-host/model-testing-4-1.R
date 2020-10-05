@@ -1,49 +1,36 @@
-# model testing 
-# relies upon modeling2.r
-# used to test the 
-
-# SIMULATE DNA 
-# ------------------
-# SIMULATE DNA SEQUENCES 
 source('~/vindels/2_within-host/utils.r')
 source("~/vindels/2_within-host/slippage-model-4-1.r")
-# calculate the median lengths of the variable loops
-# ins.v <- split(insertions, insertions$Vloop)
-# lens <- unname(unlist(lapply(ins.v, function(x){median(x[,"Vlength"])})))
-# f <- estimateFreq(c(insertions$Vseq, insertions$Anc))
-# names(f) <- nt
-# rm (ins.v)
-# rm(insertions)
-lens <- c(75, 126, 105,  90 , 33)
-f <- c(0.4158261, 0.1649874, 0.1761463, 0.2423612 )
+
+nt <- c("A", "C", "G", "T")
+lens <- c(75, 126, 105,  90 , 33)   # median nucleotide lengths of the five variable loops
+f <- c(0.4158261, 0.1649874, 0.1761463, 0.2423612)
 names(f) <- nt
 
-# Generates a sequence that adheres to the nucleotide frequencies of the data 
+
 genSeq <- function(len){
-  seq <- c()
-  for (n in 1:len){
+  # generates one nucleotide sequence based on set nucleotide frequencies (f)
+  
+  seq <- sapply(1:len, function(x){
     num <- runif(1)
     if (num < f[1]){
-      nucl <- "A"
+      "A"
     }else if (num > f[1] && num < (f[2]+f[1])){
-      nucl <- "C"
+      "C"
     }else if (num > (f[2]+f[1]) && num < (f[3]+f[2]+f[1])){
-      nucl <- "G"
+      "G"
     }else{
-      nucl <- "T"
+      "T"
     }
-    seq[n] <- nucl
-  }
+  })
   paste(seq, collapse="")
 }
 
-nt <- c("A", "C", "G", "T")
-
-# used to test for the prior probability of P.ENTER
-# res <- sapply(1:100, function(x){sum(sapply(1:29250, function(x){sum(runif(120) < 0.000109)}))})
-# sum(res!=0)
-#lens <- c(10,20,20,30,30)
 simPair <- function(param){
+  # function to simulate a pair of sequences 
+    # draws nucleotides based on constant underlying values
+    # creates nucleotides based on the rate parameter
+    # creates indel events based on the p.enter and p.stay parameters
+    # filters out frameshift-length indels based on the "fix" parameter
   
   p.enter <- param[1]
   p.stay <- param[2]
@@ -57,7 +44,7 @@ simPair <- function(param){
   branch <- rlnorm(1, meanlog=4, sdlog=1.05)
   
   # ----SUBSTITUTIONS--------
-  # add in substitutions based on the rate value 
+  # add in substitutions based on the substitution rate value (param 3) 
   
   anc.chars <- strsplit(anc, "")[[1]]
   tmat <- getMat(rate, branch)
@@ -133,11 +120,6 @@ simPair <- function(param){
   # there's a low probability that it will be kept (penalty)
   
 }
-# avec <- c()
-# bvec <- c()
-# total <- c()
-# for (i in 1:50){
-# SIMULATE TIP + ANCESTOR SEQUENCES
 
 simSeqs <- function(iter, param){
   all.seqs <- sapply(1:iter, function(n){

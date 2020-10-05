@@ -1,4 +1,6 @@
 # SLIP MODEL UTILS
+require(expm)
+require(stringr)
 
 createSlips <- function(anc, len, pos){
   # start out with a base vector containing nchar number of zeros 
@@ -10,19 +12,20 @@ createSlips <- function(anc, len, pos){
   if (len == 0 || is.na(len)){
     return (base)
     
-    # if there is an insertion, include the slip countat the appropriate position
+  # if there is an insertion, include the slip count at the appropriate position
   }else{
-    pos <- as.numeric(pos) - len + 1   # pos marks the end of the insertion; adjust by 
+    pos <- as.numeric(pos) - (len-1)   # pos marks the end of the insertion; adjust by subtracting length-1 
     base[pos] <- len
     return (base)
   }
 }
 
 estimateFreq <- function(seqs){
-  require(stringr)
+  # estimates the frequency of nucleotides in the observed sequence data
   nt <- c("A", "C", "G", "T")
+  
   output <- c()
-  for (n in 1:length(nt)){
+  for (n in 1:4){
     counts <- sum(unname(sapply(seqs,function(x) str_count(x, nt[n]))))
     output[n] <- counts / sum(unname(sapply(seqs, nchar)))
   }
@@ -36,10 +39,22 @@ getSlipVector <- function(locs, length){
     return (vect)
   }else{
     tab <- table(locs)
-    for (n in 1:length(tab)){
-      vect[as.numeric(names(tab)[n])] <- unname(tab[n])
+    if(length(as.numeric(names(tab))) != length(unname(tab))){
+      print("WRONG")
     }
+    # ********************
+    vect[as.numeric(names(tab))] <- unname(tab)
     return(vect)
+  }
+}
+
+getSlipLocations <- function(slip){
+  # used to go from c(0,0,0,3,0,0,0) to c(4,4,4)
+  nonzeros <- which(slip!=0)
+  if (length(nonzeros) == 0){
+    return (list(loc=c(),len=length(slip)))
+  }else{
+    return (list(loc=rep(nonzeros, slip[nonzeros]),len=length(slip)))
   }
 }
 
@@ -79,17 +94,6 @@ getTip <- function(oldtip, slip){
   }
 }
 
-getSlipLocations <- function(slip){
-  # used to go from c(0,0,0,3,0,0,0) to c(4,4,4)
-  nonzeros <- which(slip!=0)
-  locations <- c()
-  for (pos in nonzeros){
-    locations <- c(locations, rep(pos, slip[pos]))
-  }
-  tab <- table(locations)
-  return (list(loc=locations,len=length(slip)))
-}
-
 delta <- function(sd=2){
   # chooses a normally distributed discrete value above 0
   x <- rnorm(1,mean=0,sd=sd)
@@ -105,21 +109,20 @@ delta <- function(sd=2){
 
 getMat <- function(rate, branch){
   # returns the F81 transition probability matrtix 
-  require(expm)
-  nt <- c("A", "C", "G", "T")
   
-  # generate the F81 rate matrix 
+  # set up the matrix
   mat <- matrix(rep(f, each=4), nrow=4, ncol=4,dimnames=list(nt,nt))
+  # save the inverse of each frequency
   inv.freq <- sapply(1:4, function(x) 1-f[x])
+  # multiply by rate 
   mat <- mat * rate
-  #diag(mat) <- sapply(1:4, function(x) -(rate*sum(f[-x]))) # equivalent to -rate*(sum(f[-x]))
+  # adjust the diagonals so that every row sums to 0
   diag(mat) <- sapply(1:4, function(x) -(rate*inv.freq[x]))
   # multiply by branch length
   mat <- branch * mat
   
   # exponentiate and return
-  tmat <- expm(mat)
-  tmat
+  expm(mat)
 }
 
 changeSlip <- function(slip.list){

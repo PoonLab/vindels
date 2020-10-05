@@ -1,5 +1,5 @@
 # SLIP MODEL 
-# CURRENT VERSION : #4-1
+# CURRENT VERSION : #4-1 ; most up to date version
 # 4-1 :  Addition of fixation parameter
 # This parameter will selectively remove non3 indel sequences 
 # from analysis using a beta distribution prior
@@ -211,7 +211,8 @@ runMCMC <- function(startvalue, iterations, runno, notes){
       llh <- p.next[2]
       #print("Accept")
       accept <- T
-      # if the proportion is less than the random uniform sample, REJECT the proposed value stick with current 
+    
+    # if the proportion is less than the random uniform sample, REJECT the proposed value stick with current 
     } else {
       chain[i+1,] <- chain[i,]
       #print("Reject")
@@ -219,10 +220,13 @@ runMCMC <- function(startvalue, iterations, runno, notes){
       llh <- p.current[2]
     }
     
+    # Save the slip list every  iterations
     if (i %% 100 == 0){
       print(paste(c("STATE",i,":", chain[i,], sum(p.current)), collapse=" "))
       write(paste(c(chain[i,], llh, sum(p.current), as.numeric(s.change), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
     }
+    
+    # Save the slip list every 50000 iterations
     if (i %% 50000 == 0){
       slip_current <<- slip_current
       llh_current <<- llh_current
