@@ -28,14 +28,15 @@ setup <- function(tip, anc, len, pos, branches, shuffle){
         return (x)
       }else{
         locs <- getSlipLocations(x)[[1]]
+        len <- getSlipLocations(x)[[2]]
         for (n in 1:length(locs)){
           proposed <- -1
-          while(proposed < 0 || proposed > length(x)){
+          while(proposed <= 0 || proposed > length(x)){
             proposed <- locs[n] + delta(2)
           }
           locs[n] <- proposed
         }
-        getSlipVector(locs, length(x))
+        getSlipVector(locs, len)
       }
     })
   }

@@ -6,10 +6,10 @@ path <- "~/PycharmProjects/hiv-withinhost/"
 ifolder <- Sys.glob(paste0(path,"9Indels/test200/ins/*.tsv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/test200/del/*.tsv"))
 
-reg <- "16362|30622|30631|30647|30660|30667"
+reg <- "56552"
 
-ifolder <- ifolder[grepl(reg,ifolder)]
-dfolder <- dfolder[grepl(reg,dfolder)]
+ifolder <- ifolder[!grepl(reg,ifolder)]
+dfolder <- dfolder[!grepl(reg,dfolder)]
 
 tally <- function(infolder){
   name <- basename(infolder)
@@ -53,10 +53,7 @@ for (file in 1:length(ifolder)){
   # reads in the tree
   treename <- strsplit(filename, "\\.")[[1]][1]
   tre <- read.tree(paste0(paste0(path,"7SampleTrees/test-prelim200/",treename,".tree.sample")))
-      # [(length(tre$tip.label)+1):(length(tre$edge.length)+1)]  #used if you want to only access internal nodes and not tips
   
-  # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
-  #lens <- lens[-(Ntip(tre)+1)]
   res <- unname(sapply(iCSV$header, function(x){
     # this expression will return results for NODES ONLY
     # second column provides the CAPTURED TIP LABELS from within the node label
@@ -92,14 +89,8 @@ for (file in 1:length(ifolder)){
   
 
   
-  # these remain 'lengths' and not 'rtt.mid's because I need to use the full tree length as the maximum cutoff
+  # use the full tree lengths as the maximum cutoff
   maxes[file] <- max(lens,na.rm=T)
-  
-  #iCSV <- iCSV[,c(1,2,3,10,11,8,6,7,9)]
-  #dCSV <- dCSV[,c(1,2,3,10,11,8,6,7,9)]
-  
-  #colnames(iCSV) <- c('header',"vloop", "vlen", "length","rtt.mid", "count", "indel", "pos", "pat")
-  #colnames(dCSV) <- c('header',"vloop", "vlen", "length","rtt.mid", "count",  "indel", "pos", "pat")
   
   # ----- TIP + INTERIOR INDEL COUNTS ---
   # Cumulative data frame split by interior vs tip

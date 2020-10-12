@@ -39,11 +39,7 @@ getSlipVector <- function(locs, length){
     return (vect)
   }else{
     tab <- table(locs)
-    if(length(as.numeric(names(tab))) != length(unname(tab))){
-      print("WRONG")
-    }
-    # ********************
-    vect[as.numeric(names(tab))] <- unname(tab)
+    vect <- replace(vect, as.numeric(names(tab)), as.numeric(tab))
     return(vect)
   }
 }
