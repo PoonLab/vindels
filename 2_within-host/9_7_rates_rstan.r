@@ -85,7 +85,7 @@ rm(pat.idx)
 
 type <- c("tip","node")
 rstan_options(auto_write=T)
-set.seed(4142)
+set.seed(1431)
 options(mc.cores = parallel::detectCores()-10)
 irates <- data.frame(stringsAsFactors = F)
 drates <- data.frame(stringsAsFactors =F)
@@ -96,9 +96,6 @@ for (t in 1:2){
   for (i in 1:5){
     cmat <- all.counts[[t]][[loops[i]]]
     tmat <- all.times[[t]][[loops[i]]]
-    
-    #cmat <- cmat[,1:100]
-    #tmat <- tmat[,1:100]
     
     s <- sizes[[t]]
     
@@ -117,9 +114,6 @@ for (t in 1:2){
     stan.fit <- stan("rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
-                     #control=list(max_treedepth=1),
-                     #  adapt_delta=0.7),
-                     #init_r=0.2,
                      iter=10000)
     # export results to a data frame 
     irates <- rbind(irates, data.frame(rate=summary(stan.fit)$summary[1,6],

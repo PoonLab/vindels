@@ -1,15 +1,21 @@
+require(ape)
+require(stringr)
+require(phangorn)
+require(data.table)
+require(bbmle)
 source("~/vindels/2_within-host/utils.r")
 
 # INSERTION PARSING ----------
-path <- "~/Lio/"
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/test200/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/test200/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/del/*.tsv"))
+sep <- "\t"
+trefolder <- paste0(path,"7SampleTrees/prelim200/")
 
 reg <- "56552"
 
-ifolder <- ifolder[!grepl(reg,ifolder)]
-dfolder <- dfolder[!grepl(reg,dfolder)]
+#ifolder <- ifolder[!grepl(reg,ifolder)]
+#dfolder <- dfolder[!grepl(reg,dfolder)]
 
 tally <- function(infolder){
   name <- basename(infolder)
@@ -17,10 +23,6 @@ tally <- function(infolder){
   return (table(name))
 }
 
-require(stringr)
-require(phangorn)
-require(data.table)
-require(bbmle)
 
 all.ins <- c()
 all.del <- c()
@@ -38,8 +40,8 @@ for (file in 1:length(ifolder)){
   filename <- basename(ifolder[file])
   full.id <- gsub("_\\d+\\.tsv$","",filename)
 
-  iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep="\t")
-  dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep="\t")
+  iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep=sep)
+  dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep=sep)
   
   iCSV$count <- unname(sapply(iCSV$indel, csvcount, delim=":"))
   dCSV$count <- unname(sapply(dCSV$indel, csvcount, delim=":"))
@@ -52,7 +54,7 @@ for (file in 1:length(ifolder)){
   
   # reads in the tree
   treename <- strsplit(filename, "\\.")[[1]][1]
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/test-prelim200/",treename,".tree.sample")))
+  tre <- read.tree(paste0(paste0(trefolder,treename,".tree.sample")))
   
   res <- unname(sapply(iCSV$header, function(x){
     # this expression will return results for NODES ONLY
@@ -121,7 +123,7 @@ patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
 pat.idx <- table(sapply(ifolder, function(x){
    strsplit(basename(x), "-")[[1]][1]
 }))
-toRemove <- which(!grepl(reg, patnames))
+toRemove <- which(grepl(reg, patnames))
 
 iint <- iint[-toRemove]
 itip <- itip[-toRemove]
@@ -181,12 +183,22 @@ for (i in 1:4){
       
       if (k == 1){
         sizes[[i]] <- c(sizes[[i]],nrow(mat2))
-        print(sizes[[i]])
+        #print(sizes[[i]])
       }
     }
   }
 }
 
+all.counts <- lapply(1:4, function(x){
+  lapply(1:5, function(y){
+    do.call(rbind, all.counts[[x]][[y]])
+  })
+})
+all.times <- lapply(1:4, function(x){
+  lapply(1:5, function(y){
+    do.call(rbind, all.times[[x]][[y]])
+  })
+})
 
 # names <- list()
 # pos <- 1
@@ -254,16 +266,7 @@ for (i in 1:4){
 #   }
 # }
 
-all.counts <- lapply(1:4, function(x){
-  lapply(1:5, function(y){
-    do.call(rbind, all.counts[[x]][[y]])
-  })
-})
-all.times <- lapply(1:4, function(x){
-  lapply(1:5, function(y){
-    do.call(rbind, all.times[[x]][[y]])
-  })
-})
+
 
 # --- For handling completely different data sizes and formats ---- 
 
