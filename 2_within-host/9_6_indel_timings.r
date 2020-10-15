@@ -7,8 +7,8 @@ source("~/vindels/2_within-host/utils.r")
 
 # INSERTION PARSING ----------
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/rep2/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/rep2/del/*.tsv"))
 sep <- "\t"
 trefolder <- paste0(path,"7SampleTrees/prelim200/")
 
