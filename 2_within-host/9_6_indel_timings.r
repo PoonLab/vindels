@@ -12,10 +12,13 @@ dfolder <- Sys.glob(paste0(path,"9Indels/rep2/wholetree/del/*.tsv"))
 sep <- "\t"
 trefolder <- paste0(path,"7SampleTrees/prelim200/")
 
-reg <- "56552"
+# CASE: Removed patient 56552 because could not complete Historian runs 
+# CASE: Removed patients 49641 and 56549 because they are SUBTYPE B
+# CASE: Removed patient 28376 and B because of very bad Rsquared value 
+reg <- "56552|49641|56549|28376|B"
 
-#ifolder <- ifolder[!grepl(reg,ifolder)]
-#dfolder <- dfolder[!grepl(reg,dfolder)]
+ifolder <- ifolder[!grepl(reg,ifolder)]
+dfolder <- dfolder[!grepl(reg,dfolder)]
 
 tally <- function(infolder){
   name <- basename(infolder)
@@ -118,7 +121,7 @@ for (file in 1:length(ifolder)){
     dtip[[id]]  <- rbind(dtip[[id]], dCSV[tips,])
   }
 }
-# determine which patients did not complete fully 
+
 patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
 pat.idx <- table(sapply(ifolder, function(x){
    strsplit(basename(x), "-")[[1]][1]
