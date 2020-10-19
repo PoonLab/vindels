@@ -204,8 +204,6 @@ pairllh <- function(anc, newtip, rate, branch){
 
 seqllh <- function(rate, slip.list){
 
-  
-
   #print("Starting SeqLLH ... ")
   tip.seqs <- unname(mcmapply(getTip, indels$tip, slip.list, mc.cores=16))
   #print(head(tip.seqs))
@@ -213,4 +211,41 @@ seqllh <- function(rate, slip.list){
   #print("Calculating pairwise ... ")
   unname(mcmapply(pairllh, anc.seqs, tip.seqs, rate, branches, mc.cores=16))
   #print(head(total.llh))
+}
+
+# this function uses the START positions of insertions, not the end positions
+insert <- function(str, indel,pos ){
+  #pos <- pos+1
+  vect <- strsplit(str,"")[[1]]
+  if (pos < 1){
+    return (NA)
+  }
+  
+  if (pos == 1){
+    return (paste(c(indel, vect[1:length(vect)]),collapse=""))
+    
+    # adds insert after the vector (at the end )
+  }else if (pos == length(vect)+1){
+    return (paste(c(vect[1:length(vect)], indel),collapse=""))
+    # involves slicing the before and after parts of the vector around the insert
+    # used when pos = 2 : nchar-1
+  }else{
+    return (paste(c(vect[1:pos-1], indel, vect[pos:length(vect)]),collapse=""))
+  }
+}
+delete <- function(str, indel, pos){
+  vect <- rep(T, nchar(str))
+  
+  if (pos > (nchar(str))){
+    return (NA)
+  }
+  
+  start <- pos - nchar(indel) + 1
+  end <- pos
+  
+  vect[start:end] <- F
+  
+  chars <- strsplit(str, "")[[1]]
+  
+  return(paste(chars[which(vect)],collapse=""))
 }

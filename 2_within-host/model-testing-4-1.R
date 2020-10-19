@@ -1,4 +1,4 @@
-source('~/vindels/2_within-host/utils.r')
+source('~/vindels/2_within-host/slip-model-utils.r')
 source("~/vindels/2_within-host/slippage-model-4-1.r")
 
 nt <- c("A", "C", "G", "T")
@@ -166,13 +166,6 @@ shuffle: on
 "
 chain <- runMCMC(startvalue, 200000, '22-test', notes)
 
-# fix2 : (0.00016, 0.75, 0.00001, 0.15)   # missed on multiple accounts 
-# fix3 : (0.00016, 0.75, 0.00001, 0.12)  # currently running on Lio, NO SHUFFLE
-# 11-nofix : (0.00016, 0.75, 0.00001)
-# 12-ratetest : (0.00016, 0.75, 0.001)
-# loc-prior : (0.001, 0.70, 0.0001)
-# loc-prior2 : (0.00016, 0.75, 0.00001)
-
 # # --- print out the whole slip list  ----
 # indels$slip <- lapply(lapply(slip_current, function(x){
 #   getSlipLocations(x)[[1]]}), function(slip){
@@ -192,12 +185,3 @@ chain <- runMCMC(startvalue, 200000, '22-test', notes)
 csv <- read.csv("~/PycharmProjects/hiv-withinhost/15_modeling/slip-14-perfect3.csv", stringsAsFactors = F, skip=1, header=F)
 colnames(csv) <- c('p.enter', 'p.stay', "rate" ,'slip.changed', 'accept', 'time')
 
-# -----IDEA TO IMPLEMENT ------
-# to estimate the ACTUAL rate of indels, you need to make failures occur after p.enter has been selected
-# algorithm:
-# probability of enter is chosen
-# draw a number from a poisson process
-# if the number is %% 3 == 0: 
-# keep it 100 percent
-# else if the number if %%3 != 0:
-# there's a low probability that it will be kept (penalty)

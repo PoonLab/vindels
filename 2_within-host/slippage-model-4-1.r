@@ -224,7 +224,7 @@ runMCMC <- function(startvalue, iterations, runno, notes){
     # Save the slip list every  iterations
     if (i %% 100 == 0){
       print(paste(c("STATE",i,":", chain[i,], sum(p.current)), collapse=" "))
-      write(paste(c(chain[i,], llh, sum(p.current), as.numeric(s.change), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
+      write(paste(c(chain[i,], llh, sum(p.current), as.numeric(accept), (proc.time() - start.time)[[3]]), collapse=",") , file=logfile, append=T)
     }
     
     # Save the slip list every 50000 iterations
