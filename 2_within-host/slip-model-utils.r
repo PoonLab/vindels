@@ -1,7 +1,9 @@
 # SLIP MODEL UTILS
 require(expm)
 require(stringr)
+require(parallel)
 
+# Function to convert ancestral sequences into vectors of slip events
 createSlips <- function(anc, len, pos){
   # start out with a base vector containing nchar number of zeros 
   base <- rep(0,nchar(anc)) 
@@ -20,8 +22,10 @@ createSlips <- function(anc, len, pos){
   }
 }
 
+# Receives a vector of sequences and returns a vector of c(A,C,G,T) nucleotide proportions 
+# found in the data
 estimateFreq <- function(seqs){
-  # estimates the frequency of nucleotides in the observed sequence data
+  
   nt <- c("A", "C", "G", "T")
   
   output <- c()
@@ -32,8 +36,10 @@ estimateFreq <- function(seqs){
   output
 }
 
+# Function to convert vector of slip locations c(4,4,4,4,4,4)
+# to slip vectors c(0,0,0,6,0,0)
 getSlipVector <- function(locs, length){
-  # used to go from c(4,4,4) to c(0,0,0,3,0,0,0) 
+  
   vect <- rep(0,length)
   if (length(locs) == 0){
     return (vect)
@@ -44,6 +50,8 @@ getSlipVector <- function(locs, length){
   }
 }
 
+# Function to convert vector of slip vectors c(0,0,0,6,0,0) 
+# to slip locations c(4,4,4,4,4,4)
 getSlipLocations <- function(slip){
   # used to go from c(0,0,0,3,0,0,0) to c(4,4,4)
   nonzeros <- which(slip!=0)
@@ -54,22 +62,28 @@ getSlipLocations <- function(slip){
   }
 }
 
+# Function to determine the new tip sequence from the old one using the slip vector
 getTip <- function(oldtip, slip){
-  # used to determine the new tip sequence using the slip index
+  
   nonzeros <- which(slip != 0)
   
+  # no slip events
   if (length(nonzeros) == 0){
     return(oldtip)
+  
+  # one or more slip events
   }else{
-    #print(oldtip)
-    toCopy <- rep(T, nchar(oldtip))
-    tip.chars <- strsplit(oldtip, "")[[1]]
-    loc <- getSlipLocations(slip)[[1]]
+    toCopy <- rep(T, nchar(oldtip))     # default vector of T values 
+    tip.chars <- strsplit(oldtip, "")[[1]]   # nucleotide sequence (split up)
+    loc <- getSlipLocations(slip)[[1]]     # returns the locations of all slip events 
     tab <- table(loc)
+    
+    # for every distinct slip event specified in the slip vector, 
     for (n in 1:length(tab)){
       start <- as.numeric(names(tab)[n])
       stop <- start + (tab[[n]] - 1)
-      # Case to catch when the 
+      
+      
       if (start > nchar(oldtip) || stop > nchar(oldtip)){
         start <- nchar(oldtip) - (stop - start)
         stop <- nchar(oldtip)
@@ -90,8 +104,9 @@ getTip <- function(oldtip, slip){
   }
 }
 
+# Function for drawing discrete  distribution 0
 delta <- function(sd=2){
-  # chooses a normally distributed discrete value above 0
+  
   x <- rnorm(1,mean=0,sd=sd)
   if (x < 0){
     x <- abs(x)
@@ -162,9 +177,9 @@ pairllh <- function(anc, newtip, rate, branch){
   tmat <- getMat(rate,branch)
   achars <- strsplit(anc, "")[[1]]
   tchars <- strsplit(newtip, "")[[1]]
-  #print(branch)
+
   result <- mapply(function(tchar,achar){
-    # initializes a matrix with a 
+    # initializes simple row vector with 1 for the given nucleotide, 0 for the others
     tip.llh <- matrix(as.numeric(tchar == nt), nrow=4,ncol=1,dimnames=list(nt))
     
     # finalize the calculation for tip likelihood
@@ -182,13 +197,15 @@ pairllh <- function(anc, newtip, rate, branch){
   sum(result)
 }
 
+# likelihood of the entire slip.list
+# HIGHEST TIME COMPLEXITY -- only calculated when : 
+# a) rate parameter is changed
+# b) before the MCMC starts for the first iteration
+
 seqllh <- function(rate, slip.list){
-  # likelihood of the entire slip.list
-  # HIGHEST TIME COMPLEXITY -- only calculated when : 
-  # a) rate parameter is changed
-  # b) before the MCMC starts for the first iteration
+
   
-  require(parallel)
+
   #print("Starting SeqLLH ... ")
   tip.seqs <- unname(mcmapply(getTip, indels$tip, slip.list, mc.cores=16))
   #print(head(tip.seqs))
