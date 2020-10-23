@@ -30,10 +30,6 @@ getAccno <- function(input){
   accno
 }
 
-bootstrap <- function(vector, replicates){
-  
-}
-
 
 # specifically handles fields containing a comma
 # and copies their data so they can be split into individual rows in a data frame
