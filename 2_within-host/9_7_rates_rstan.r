@@ -109,7 +109,7 @@ for (t in 1:2){
                       ntree = num.tree,
                       sizes= s,
                       counts = cmat,
-                      lengths = tmat)
+                      branches = tmat)
 
     # Stan modeling 
     start <- proc.time()
@@ -147,7 +147,7 @@ for (t in 1:2){
                       ntree = num.tree,
                       sizes= s,
                       counts = cmat,
-                      lengths = tmat)
+                      branches = tmat)
     
     # Stan modeling 
     stan.fit <- stan("rate-perpat-dc.stan",

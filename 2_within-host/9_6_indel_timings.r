@@ -26,6 +26,30 @@ tally <- function(infolder){
   return (table(name))
 }
 
+findAncestor <- function(header){
+  # this expression will return results for NODES ONLY
+  # second column provides the CAPTURED TIP LABELS from within the node label
+  header <- substr(header, 1, nchar(header)-4)
+  tips <- str_match_all(header,"([^\\)\\(,\n:]+):")[[1]][,2]
+  if (length(tips) == 0){
+    # no colons; this means its a TIP 
+    # the index in the tre$tip.label vector is the final result
+    index <- match(header, tre$tip.label)
+  }else{
+    # retreive all descendants of every node and tip in the tree
+    desc <- Descendants(tre)
+    
+    # find the numeric labels of all extracted tips 
+    matches <- match(tips, tre$tip.label)
+    
+    # find the SINGLE node in the descendants list that contains the exact same subset of tips
+    index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
+  }
+  if (length(index)!=1){
+    return(paste0("PROBLEM:",as.character(index)))
+  }
+  return(index)
+}
 
 all.ins <- c()
 all.del <- c()
@@ -59,30 +83,7 @@ for (file in 1:length(ifolder)){
   treename <- strsplit(filename, "\\.")[[1]][1]
   tre <- read.tree(paste0(paste0(trefolder,treename,".tree.sample")))
   
-  res <- unname(sapply(iCSV$header, function(x){
-    # this expression will return results for NODES ONLY
-    # second column provides the CAPTURED TIP LABELS from within the node label
-    x <- substr(x, 1, nchar(x)-4)
-    tips <- str_match_all(x,"([^\\)\\(,\n:]+):")[[1]][,2]
-    if (length(tips) == 0){
-      # no colons; this means its a TIP 
-      # the index in the tre$tip.label vector is the final result
-      index <- match(x, tre$tip.label)
-    }else{
-      # retreive all descendants of every node and tip in the tree
-      desc <- Descendants(tre)
-
-      # find the numeric labels of all extracted tips 
-      matches <- match(tips, tre$tip.label)
-      
-      # find the SINGLE node in the descendants list that contains the exact same subset of tips
-      index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
-    }
-    if (length(index)!=1){
-      return(paste0("PROBLEM:",as.character(index)))
-    }
-    return(index)
-  }))
+  res <- unname(sapply(iCSV$header, findAncestor)) 
 
   iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
   dCSV$length <- iCSV$length
@@ -91,9 +92,7 @@ for (file in 1:length(ifolder)){
   # midpoint = (rtt length of tip) + (rtt length of ancestor) / 2
   iCSV$rtt.mid <- (lens[res] + lens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
   dCSV$rtt.mid <- iCSV$rtt.mid
-  
 
-  
   # use the full tree lengths as the maximum cutoff
   maxes[file] <- max(lens,na.rm=T)
   
@@ -105,10 +104,9 @@ for (file in 1:length(ifolder)){
   tips <-  which(grepl("^[^\\(\\):\n]+$", iCSV$header))
   nodes <- which(!grepl("^[^\\(\\):\n]+$", iCSV$header))
   
-  iCSV <- iCSV[,-c(1,2,5,6)]
-  dCSV <- dCSV[,-c(1,2,5,6)]
+  iCSV <- iCSV[,-c(1,2,5,6,8)]
+  dCSV <- dCSV[,-c(1,2,5,6,8)]
 
-  
   if (is.null(iint[[id]])){
     iint[[id]] <- iCSV[nodes,]
     itip[[id]]  <- iCSV[tips,]
@@ -121,6 +119,8 @@ for (file in 1:length(ifolder)){
     dtip[[id]]  <- rbind(dtip[[id]], dCSV[tips,])
   }
 }
+
+# CHECKPOINT : 9_6_finished.RData 
 
 patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
 pat.idx <- table(sapply(ifolder, function(x){
@@ -142,6 +142,7 @@ rm(dint)
 rm(iCSV)
 rm(dCSV)
 
+# ---- DATA FLATTENING ----
 
 # COMPARISON OF INSERTION RATES INTERIOR VS TIP
 patnames <- unname(sapply(names(all.data[[1]]), function(x){strsplit(x,"-")[[1]][1]}))
@@ -172,20 +173,20 @@ for (i in 1:4){
     }
     print(j)
     for (k in 1:5){
-      mat <- sapply(idx, function(df){
+      mat <- t(sapply(idx, function(df){
         x <- all.data[[i]][[df]]
         x[x$vloop == k,"count"]
-      })
+      }))
       all.counts[[i]][[k]][[j]] <- mat
       
-      mat2 <- sapply(idx, function(df){
+      mat <- t(sapply(idx, function(df){
         x <- all.data[[i]][[df]]
         x[x$vloop == k, "length"]
-      })
-      all.times[[i]][[k]][[j]] <- mat2 
+      }))
+      all.times[[i]][[k]][[j]] <- mat
       
       if (k == 1){
-        sizes[[i]] <- c(sizes[[i]],nrow(mat2))
+        sizes[[i]] <- c(sizes[[i]],nrow(mat))
         #print(sizes[[i]])
       }
     }
@@ -203,72 +204,56 @@ all.times <- lapply(1:4, function(x){
   })
 })
 
-# names <- list()
-# pos <- 1
-# # iterate through 4 lists 
-# for (i in 1:4){
-#   # each list has 5200 entries 
-#   for (j in 1:length(unique(patnames))){
-#     # get the indexes associated with one patient run 
-#     idx <- which(patnames == unique(patnames)[j])
-#     
-#     # save the name of the patient
-#     if (i == 1){
-#       names[j] <- unique(patnames)[j] 
-#     }
-#     print(j)
-#   
-#     # filter out any branches containing zeroes 
-#     selectRows <- 1:nrow(all.data[[i]][[idx[1]]])
-#     
-#     nas <- unique(unlist(sapply(idx, function(df){
-#       x <- all.data[[i]][[df]]
-#       which(x$length <=0 | x$rtt.mid <=0)
-#     })))
-#     
-#     if (length(nas) > 0){
-#       selectRows <- selectRows[-nas]
-#     }
-#     
-#     if (i < 3){
-#       ind <- 1
-#     }else{
-#       ind <- 2
-#     }
-#     all.mid[[ind]][[j]] <- sapply(idx, function(df){
-#       x <- all.data[[i]][[df]]
-#       rep(x$rtt.mid, x$count)
-#     })
-#     
-#     # iterate through 5 vloops 
-#     for (k in 1:5){
-# 
-#       all.counts[[i]][[k]][[j]] <- sapply(idx, function(df){
-#         x <- all.data[[i]][[df]][selectRows,]
-#         x[x$vloop == k,"count"]
-#       })
-#       
-#       all.times[[i]][[k]][[j]] <- sapply(idx, function(df){
-#         x <- all.data[[i]][[df]][selectRows,]
-#         x[x$vloop == k, "length"]
-#       }) 
-#       mat <- sapply(idx, function(df){
-#         x <- all.data[[i]][[df]][selectRows,]
-#         x[x$vloop == k, "vlen"]
-#       })
-#       if(is.null(dim(mat))){
-#         print(sapply(mat, length))
-#       }
-#       all.lens[[i]][[k]] <- as.vector(mat)
-#       pos <- pos + nrow(mat)
-#       if (k == 1){
-#         sizes[[i]] <- c(sizes[[i]],nrow(mat))
-#         #print(sizes[[i]])
-#       }
-#     }
-#   }
-# }
+# ---- DATA PADDING APPROACH (NEW) ----
 
+# COMPARISON OF INSERTION RATES INTERIOR VS TIP
+patnames <- unname(sapply(names(all.data[[1]]), function(x){strsplit(x,"-")[[1]][1]}))
+all.counts <- list()
+all.times <- list()
+all.lens <- list()
+all.mid <- list(list(),list())
+sizes <- list()
+for (a in 1:4){
+  all.counts[[a]] <- list()
+  all.times[[a]] <- list()
+  all.lens[[a]] <- list()
+  sizes[[a]] <- double()
+  # for (b in 1:5){
+  #   all.counts[[a]][[b]] <- list()
+  #   all.times[[a]][[b]] <- list()
+  #   all.lens[[a]][[b]] <- double()
+  # }
+}
+
+# --- Find maximum number of branch lengths among patients ---- 
+idx <- seq(1,4201,200)
+max <- c()
+for (a in 1:4){
+  #print(a)
+  max[a] <- max(sapply(all.data[[a]][idx], nrow) / 5)
+  # v3 <- sapply(all.data[[1]][idx], function(df){sum(df$vloop==3)})  # to test
+}
+max <- max(max)
+
+for(x in 1:4){
+  for (v in 1:5){
+    counts <- array(data=Inf, dim=c(200, max, length(unique(patnames))))
+    times <- array(data=Inf, dim=c(200, max, length(unique(patnames))))
+    
+    s <- c()
+    for (y in 1:length(unique(patnames))){
+      range <- idx[y]:(idx[y] + 199)
+      temp <- t(sapply(all.data[[x]][range], function(df) df[df$vloop==v,3]))
+      counts[1:200, 1:ncol(temp),y] <- temp 
+      s[y] <- ncol(temp)
+    }
+    if (v == 1){
+      sizes[[x]] <- s
+    }
+    all.counts[[x]][[v]] <- counts
+    all.times[[x]][[v]] <- times
+  }
+}
 
 
 # --- For handling completely different data sizes and formats ---- 
