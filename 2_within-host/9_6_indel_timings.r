@@ -173,17 +173,17 @@ for (i in 1:4){
     }
     print(j)
     for (k in 1:5){
-      mat <- t(sapply(idx, function(df){
+      mat <- sapply(idx, function(df){
         x <- all.data[[i]][[df]]
         x[x$vloop == k,"count"]
-      }))
+      })
       all.counts[[i]][[k]][[j]] <- mat
       
-      mat <- t(sapply(idx, function(df){
+      mat2 <- sapply(idx, function(df){
         x <- all.data[[i]][[df]]
         x[x$vloop == k, "length"]
-      }))
-      all.times[[i]][[k]][[j]] <- mat
+      })
+      all.times[[i]][[k]][[j]] <- mat2
       
       if (k == 1){
         sizes[[i]] <- c(sizes[[i]],nrow(mat))

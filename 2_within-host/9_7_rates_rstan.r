@@ -86,8 +86,8 @@ rm(pat.idx)
 type <- c("tip","node")
 rstan_options(auto_write=T)
 setwd("~/vindels/2_within-host/")
-set.seed(1431)
-options(mc.cores = parallel::detectCores()-10)
+set.seed(3124)
+options(mc.cores = parallel::detectCores()-8)
 irates <- data.frame(stringsAsFactors = F)
 drates <- data.frame(stringsAsFactors =F)
 ifits <- list()
@@ -113,10 +113,10 @@ for (t in 1:2){
 
     # Stan modeling 
     start <- proc.time()
-    stan.fit <- stan("rate-perpat-dc.stan",
+    stan.fit <- stan("stan_modeling/rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
-                     iter=15000)
+                     iter=40000)
     end <- proc.time() - start
     # export results to a data frame 
     irates <- rbind(irates, data.frame(rate=summary(stan.fit)$summary[1,6],
