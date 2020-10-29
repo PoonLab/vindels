@@ -4,7 +4,7 @@ data {
   int<lower=0> mx;
   int <lower=0> sizes[npat];                            // Vector describing the number of rows belonging to each patient
   int<lower=0> counts[ntree, mx, npat];         // Count data
-  real<lower=0> branches[ntree, mx, npat] ;     // Time data
+  matrix<lower=0>[ntree,mx] branches[npat] ;     // Time data
 }
 
 parameters {
@@ -29,7 +29,7 @@ model {
   for (i in 1:npat){
     tre_rates ~ normal(pat_rates[i], pat_sd);  // 0.2 is arbitrary
 
-    counts[1:ntree, 1:sizes[i], i] ~ poisson(tre_rates * branches[1:ntree, 1:sizes[i], i]  );
+    counts[1:ntree, 1:sizes[i], i] ~ poisson(branches[1:ntree,1:sizes[i],i] .* tre_rates  );
   }
 
 }

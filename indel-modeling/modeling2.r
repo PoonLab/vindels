@@ -61,7 +61,7 @@ collapseVect <- function(vect){
 
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
-insertions <- read.csv(paste0(path,"10_nucleotide/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
+insertions <- read.csv(paste0(path,"10_nucleotide/all/ins-sep-all.csv"),row.names=1, stringsAsFactors = F)
 
 # FIX HEADERS
 insertions$Header <- gsub("_\\d$","",insertions$Header)

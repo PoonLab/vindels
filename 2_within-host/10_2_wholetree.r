@@ -4,16 +4,40 @@ require(ape)
 require(phangorn)
 require(data.table)
 source("~/vindels/2_within-host/utils.r")
-# Lio
+
 path <- "~/PycharmProjects/hiv-withinhost/"
-#path <- "~/Lio/"
- 
+
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.tsv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.tsv"))
 
 ins.sep <-list()
 del.sep <- list()
 count <- 0
+
+findAncestor <- function(header){
+  # this expression will return results for NODES ONLY
+  # second column provides the CAPTURED TIP LABELS from within the node label
+  header <- substr(header, 1, nchar(header)-4)
+  tips <- str_match_all(header,"([^\\)\\(,\n:]+):")[[1]][,2]
+  if (length(tips) == 0){
+    # no colons; this means its a TIP 
+    # the index in the tre$tip.label vector is the final result
+    index <- match(header, tre$tip.label)
+  }else{
+    # retreive all descendants of every node and tip in the tree
+    desc <- Descendants(tre)
+    
+    # find the numeric labels of all extracted tips 
+    matches <- match(tips, tre$tip.label)
+    
+    # find the SINGLE node in the descendants list that contains the exact same subset of tips
+    index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
+  }
+  if (length(index)!=1){
+    return(paste0("PROBLEM:",as.character(index)))
+  }
+  return(index)
+}
 
 ins.nosep <- list()
 del.nosep <- list()
@@ -58,30 +82,7 @@ for (file in 1:length(ifolder)){
 
   # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
   #lens <- lens[-(Ntip(tre)+1)]
-  res <- unname(sapply(iCSV$header, function(x){
-    # this expression will return results for NODES ONLY
-    # second column provides the CAPTURED TIP LABELS from within the node label
-    x <- substr(x, 1, nchar(x)-2)
-    tips <- str_match_all(x,"([^\\)\\(,\n:]+):")[[1]][,2]
-    if (length(tips) == 0){
-      # no colons; this means its a TIP 
-      # the index in the tre$tip.label vector is the final result
-      index <- match(x, tre$tip.label)
-    }else{
-      # retreive all descendants of every node and tip in the tree
-      desc <- Descendants(tre)
-      
-      # find the numeric labels of all extracted tips 
-      matches <- match(tips, tre$tip.label)
-      
-      # find the SINGLE node in the descendants list that contains the exact same subset of tips
-      index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
-    }
-    if (length(index)!=1){
-      return(paste0("PROBLEM:",as.character(index)))
-    }
-    return(c(index))
-  }))
+  res <- unname(sapply(iCSV$header, findAncestor)) 
   
   iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
   dCSV$length <- iCSV$length
