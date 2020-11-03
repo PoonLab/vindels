@@ -1,201 +1,136 @@
-require(bbmle)
-require(stringr)
 require(ape)
+require(stringr)
+require(phangorn)
+require(data.table)
+require(bbmle)
 source("~/vindels/2_within-host/utils.r")
 
-vloops <- c("V1","V2","V3","V4","V5")
-
-# used for extracting condensed CSV information 
-# specifically handles fields containing a comma
-
-
 # INSERTION PARSING ----------
-#path <- "~/Lio/"
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/rep2/ins/*.csv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/rep2/del/*.csv"))
-all.ins <- data.frame()
-all.del <- data.frame()
-csv.ins <- list()
-csv.del <- list()
+ifolder <- Sys.glob(paste0(path,"9Indels/rep2/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/rep2/del/*.tsv"))
+sep <- "\t"
+trefolder <- paste0(path,"7SampleTrees/prelim200/")
 
-iTotal <- list()
-dTotal <- list()
-count <- 0
-sequences <- list()
+# CASE: Removed patient 56552 because could not complete Historian runs 
+# CASE: Removed patients 49641 and 56549 because they are SUBTYPE B
+# CASE: Removed patient 28376 and B because of very bad Rsquared value 
+reg <- "56552|49641|56549|28376|B"
+
+ifolder <- ifolder[!grepl(reg,ifolder)]
+dfolder <- dfolder[!grepl(reg,dfolder)]
+
+tally <- function(infolder){
+  name <- basename(infolder)
+  name <- gsub("-.+","",name)
+  return (table(name))
+}
+
+findAncestor <- function(header){
+  # this expression will return results for NODES ONLY
+  # second column provides the CAPTURED TIP LABELS from within the node label
+  header <- substr(header, 1, nchar(header)-4)
+  tips <- str_match_all(header,"([^\\)\\(,\n:]+):")[[1]][,2]
+  if (length(tips) == 0){
+    # no colons; this means its a TIP 
+    # the index in the tre$tip.label vector is the final result
+    index <- match(header, tre$tip.label)
+  }else{
+    # retreive all descendants of every node and tip in the tree
+    desc <- Descendants(tre)
+    
+    # find the numeric labels of all extracted tips 
+    matches <- match(tips, tre$tip.label)
+    
+    # find the SINGLE node in the descendants list that contains the exact same subset of tips
+    index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
+  }
+  if (length(index)!=1){
+    return(paste0("PROBLEM:",as.character(index)))
+  }
+  return(index)
+}
+
+all.ins <- c()
+all.del <- c()
+
+maxes <- c()
+
+iint <- list()
+itip <- list()
+dint <- list()
+dtip <- list()
 
 
 for (file in 1:length(ifolder)){
   print(file)
-  filename <- strsplit(basename(ifolder[file]),"\\.")[[1]][1]
-  pat <- str_split(filename, "_")[[1]][1]
-  runno <- strsplit(filename, "_")[[1]][2]
-  count <- count + 1
-  iCSV <- read.csv(ifolder[file], stringsAsFactors = F)
-  dCSV <- read.csv(dfolder[file], stringsAsFactors = F)
+  filename <- basename(ifolder[file])
+  full.id <- gsub("_\\d+\\.tsv$","",filename)
   
-  # used for handling cases where there are no indels
-  if (all(is.na(iCSV$ins))){
-    iCSV$ins <- ""
-  }
-  if (all(is.na(dCSV$del))){
-    dCSV$del <- ""
-  }
+  iCSV <- read.csv(ifolder[file], stringsAsFactors = F, sep=sep)
+  dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep=sep)
   
-  # retrieving subtype field from the header
-  iCSV$Subtype <- unname(sapply(iCSV$header, getSubtype))
-  dCSV$Subtype <- unname(sapply(dCSV$header, getSubtype))
+  iCSV$count <- unname(sapply(iCSV$indel, csvcount, delim=":"))
+  dCSV$count <- unname(sapply(dCSV$indel, csvcount, delim=":"))
   
-  # retrieving the accno from the header
-  #iAccno <- unname(sapply(iCSV$Accno, getAccno))
-  #dAccno <- unname(sapply(dCSV$Accno, getAccno))
+  iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
+  dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
   
-  # 
-  #iCSV$Accno <- iAccno
-  #dCSV$Accno <- dAccno
-  
+  iCSV$header <- unname(mapply(labels, iCSV$header, iCSV$pat))
+  dCSV$header <- unname(mapply(labels, dCSV$header, dCSV$pat))
   
   # reads in the tree
-  tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim200/",filename , ".tree.sample")))
+  treename <- strsplit(filename, "\\.")[[1]][1]
+  tre <- read.tree(paste0(paste0(trefolder,treename,".tree.sample")))
   
-  tip.rtt <- node.depth.edgelength(tre)[1:Ntip(tre)]
-  names(tip.rtt) <- tre$tip.label
+  res <- unname(sapply(iCSV$header, findAncestor)) 
   
-  tip.rows <- which(tre$edge[,2] <= Ntip(tre)) # this locates the rows in the edge table that correspond to tips 
-  tip.nodes <- tre$edge[tip.rows,1]  
-  anc.rtt <- node.depth.edgelength(tre)[tip.nodes]
-  names(anc.rtt) <- tre$tip.label
+  iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
+  dCSV$length <- iCSV$length
   
-  iheaders <- unname(sapply(iCSV$header, function(x){gsub("_\\d+$","",x)[[1]]}))
-  dheaders <- unname(sapply(dCSV$header, function(x){gsub("_\\d+$","",x)[[1]]}))
+  lens <- node.depth.edgelength(tre)
+  # midpoint = (rtt length of tip) + (rtt length of ancestor) / 2
+  iCSV$rtt.mid <- (lens[res] + lens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
+  dCSV$rtt.mid <- iCSV$rtt.mid
   
-  iCSV$mid.rtt <- (tip.rtt[iheaders] + anc.rtt[iheaders]) / 2
-  dCSV$mid.rtt <- (tip.rtt[dheaders] + anc.rtt[dheaders]) / 2
-
+  # use the full tree lengths as the maximum cutoff
+  maxes[file] <- max(lens,na.rm=T)
   
-  # adjusts the tre tip labels to match the accession numbers
-  #tre$tip.label <- unname(sapply(tre$tip.label, function(x){strsplit(x,"_")[[1]][1]}))
-  #tre <- read.tree(paste0(paste0(path,"7SampleTrees/prelim/",filename , ".tree.sample")))
-  # retrieves branch lengths from the tree
-  branches <- tre$edge.length[tre$edge[,2] <=Ntip(tre)]   
+  # ----- TIP + INTERIOR INDEL COUNTS ---
+  # Cumulative data frame split by interior vs tip
+  id <- gsub("[ab]_","",full.id)   # 16362-100
   
-  # matches the branch length to each of the sequences 
-  iCSV$Date <- branches[match(sub("_\\d*$","",iCSV$header), tre$tip.label)]
-  dCSV$Date <- branches[match(sub("_\\d*$","",dCSV$header), tre$tip.label)]
+  # this regexp matches TIP SEQUENCES (NOT CONTAINING LEFT AND RIGHT BRACKETS)
+  tips <-  which(grepl("^[^\\(\\):\n]+$", iCSV$header))
+  nodes <- which(!grepl("^[^\\(\\):\n]+$", iCSV$header))
   
-  # extracts info from the indel column and puts it into two separate columns
-  insInfo <- unname(sapply(iCSV$ins, extractInfo))
-  insInfo <- t(insInfo)
-  insInfo <- as.data.frame(insInfo)
-  insInfo$V1 <- as.character(insInfo$V1)
-  insInfo$V2 <- as.character(insInfo$V2)
-  iCSV <- cbind(iCSV, insInfo)
-  iCSV$ins <- NULL
-  rm(insInfo)
+  iCSV <- iCSV[,-c(1,2,5,6,8)]
+  dCSV <- dCSV[,-c(1,2,5,6,8)]
   
-  delInfo <- unname(sapply(dCSV$del, extractInfo))
-  delInfo <- t(delInfo)
-  delInfo <- as.data.frame(delInfo)
-  delInfo$V1 <- as.character(delInfo$V1)
-  delInfo$V2 <- as.character(delInfo$V2)
-  dCSV <- cbind(dCSV, delInfo)
-  dCSV$del <- NULL
-  rm(delInfo)
-  
-  iCSV$Run <- rep(runno, nrow(iCSV))
-  dCSV$Run <- rep(runno, nrow(dCSV))
-  
-  # creates the counts column
-  iCSV$Count <- sapply(iCSV$V1, csvcount) 
-  dCSV$Count <- sapply(dCSV$V1, csvcount)
-  
-  iCSV$PatRun <- paste0(strsplit(rep(pat, nrow(iCSV)),"-")[[1]][1],"-", iCSV$Run)
-  dCSV$PatRun <- paste0(strsplit(rep(pat, nrow(dCSV)),"-")[[1]][1],"-", dCSV$Run)
-  
-  #rearrange
-  iCSV <- iCSV[c(1,2,3,6,12,8,9,10,7,4,5,13,11)]
-  dCSV <- dCSV[c(1,2,3,6,12,8,9,10,7,4,5,13,11)]
-  
-  iCSV$Pat <- strsplit(rep(pat, nrow(iCSV)),"-")[[1]][1]
-  dCSV$Pat <- strsplit(rep(pat, nrow(dCSV)),"-")[[1]][1]
-  c.headers <- c("header","Vloop", "Vlength","Subtype", "Count","Date", "Seq", "Pos",
-                 "mid.rtt","Vseq", "Anc",  "PatRun", "Run","Pat")
-  colnames(iCSV) <- c.headers
-  colnames(dCSV) <- c.headers
-
-  # COMMA SEPARATION FIX
-  
-  # new.ins <- data.frame()
-  # new.del <- data.frame()
-  # # make a new data.frame for each CSV df
-  # # transport over all rows which do NOT contain a comma
-  # new.ins <- iCSV[!grepl(",",iCSV$Seq),]
-  # new.del <- dCSV[!grepl(",",dCSV$Seq),]
-  # 
-  # # handle comma rows separately with a function 
-  # iCommas <- iCSV[grepl(",",iCSV$Seq),]
-  # dCommas <- dCSV[grepl(",",dCSV$Seq),]
-  # #c()
-  # if (nrow(iCommas) > 0){
-  #   newrows <- apply(iCommas,1,splitRows)
-  #   for (i in 1:length(newrows)){
-  #     idx <- as.double(names(newrows)[i])
-  #     len <- nrow(newrows[[i]])
-  #     rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-  #     new.ins <- rbind(new.ins, newrows[[i]])
-  #   }
-  #   #new.ins <- new.ins[order(as.double(rownames(new.ins)))]
-  # }
-  # if (nrow(dCommas) > 0){
-  #   newrows <- apply(dCommas,1,splitRows)
-  #   for (i in 1:length(newrows)){
-  #     idx <- as.double(names(newrows)[i])
-  #     len <- nrow(newrows[[i]])
-  #     rownames(newrows[[i]]) <- seq(0,0.1*len-0.1,length=len) + idx
-  #     new.del <- rbind(new.del, newrows[[i]])
-  #   }
-  #   #new.del <- new.del[order(as.double(rownames(new.del)))]
-  # }
-  # 
-  # # OUTPUT 
-  # # for other analyses
-  # # -----------------------------
-  # 
-  # all.ins <- rbind(all.ins, new.ins)
-  # all.del <- rbind(all.del, new.del)
-  # 
-  
-  # OUTPUT 2 
-  # used for indel rates 
-  
-  # REMOVED because inefficient for 12000 files
-  #csv.ins <- rbind(csv.ins, iCSV)
-  #csv.del <- rbind(csv.del, dCSV)
-  filename <- gsub("[ab]","", paste(strsplit(filename, "_")[[1]][-3],collapse = ""))
-  if (is.null(csv.ins[[filename]])){
-    csv.ins[[filename]] <- iCSV
-    csv.del[[filename]] <- dCSV
+  if (is.null(iint[[id]])){
+    iint[[id]] <- iCSV[nodes,]
+    itip[[id]]  <- iCSV[tips,]
+    dint[[id]]  <- dCSV[nodes,]
+    dtip[[id]]  <- dCSV[tips,]
   }else{
-    csv.ins[[filename]] <- rbind(csv.ins[[filename]], iCSV)
-    csv.del[[filename]] <- rbind(csv.del[[filename]], dCSV)
-    #print(nrow(csv.ins[[filename]]) == 2* nrow(iCSV))
-    #print(nrow(csv.del[[filename]]) == 2* nrow(dCSV))
+    iint[[id]] <- rbind(iint[[id]], iCSV[nodes,])
+    itip[[id]]  <- rbind(itip[[id]], iCSV[tips,])
+    dint[[id]]  <- rbind(dint[[id]] , dCSV[nodes,])
+    dtip[[id]]  <- rbind(dtip[[id]], dCSV[tips,])
   }
-  
-  
-  
-  # if (!is.null(iTotal[[runno]])){
-  #   iTotal[[runno]] <- rbind(iTotal[[runno]], iCSV)
-  # }else{
-  #   iTotal[[runno]] <- iCSV
-  # }
-  # 
-  # if (!is.null(dTotal[[runno]])){
-  #   dTotal[[runno]] <- rbind(dTotal[[runno]], dCSV)
-  # }else{
-  #   dTotal[[runno]] <- dCSV
-  # }
 }
+
+# CHECKPOINT : 9_6_finished.RData 
+
+patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
+pat.idx <- table(sapply(ifolder, function(x){
+  strsplit(basename(x), "-")[[1]][1]
+}))
+toRemove <- which(grepl(reg, patnames))
+
+
+
+
 # checks for which patient did not fully complete all 200 replicates
 table(unname(sapply(names(csv.ins), function(x)strsplit(x, "-")[[1]][1])))
 iTotal <- csv.ins[-which(unname(sapply(names(csv.ins), function(x)strsplit(x, "-")[[1]][1]))== '56552')]

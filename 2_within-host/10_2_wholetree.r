@@ -163,6 +163,7 @@ ins <- ins.sep[ins.sep$indel!="",]
 del <- del.sep[del.sep$indel!="",]
 
 
+#------ Checkpoint: 10_2_finished.RData
 
 
 
