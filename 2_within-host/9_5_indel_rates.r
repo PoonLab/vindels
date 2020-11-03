@@ -15,7 +15,7 @@ trefolder <- paste0(path,"7SampleTrees/prelim200/")
 # CASE: Removed patient 56552 because could not complete Historian runs 
 # CASE: Removed patients 49641 and 56549 because they are SUBTYPE B
 # CASE: Removed patient 28376 and B because of very bad Rsquared value 
-reg <- "56552|49641|56549|28376|B"
+reg <- "56552|49641|56549|28376"
 
 ifolder <- ifolder[!grepl(reg,ifolder)]
 dfolder <- dfolder[!grepl(reg,dfolder)]
@@ -166,35 +166,37 @@ for (i in 1:length(iTotal)){
     itemp <- iData[iData$Vloop==vloop,]
     dtemp <- dData[dData$Vloop==vloop,]
     
-    iFinal <- itemp[itemp$Date < 325 & itemp$Count < 3,]
-    dFinal <- dtemp[dtemp$Date < 325 & dtemp$Count < 3,]
+    iFinal <- itemp[itemp$Date < 325 & itemp$count < 3,]
+    dFinal <- dtemp[dtemp$Date < 325 & dtemp$count < 3,]
+    rm(itemp)
+    rm(dtemp)
     
     # ADDED THIS FOR RTT ANALYSIS
     # used to retrieve the midpoint of each branch length along which an indel occurred
-    irtt[[as.character(vloop)]] <- c(irtt[[as.character(vloop)]],iFinal[iFinal$Count>0,'mid.rtt'])
-    drtt[[as.character(vloop)]] <- c(drtt[[as.character(vloop)]], dFinal[dFinal$Count>0,'mid.rtt'])
+    #irtt[[as.character(vloop)]] <- c(irtt[[as.character(vloop)]],iFinal[iFinal$count>0,'mid.rtt'])
+    #drtt[[as.character(vloop)]] <- c(drtt[[as.character(vloop)]], dFinal[dFinal$count>0,'mid.rtt'])
     #print(nrow(current) - nrow(iFinal))
     
     # INSERTION RATES 
-    ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
+    ifit <- glm(iFinal$count ~ 1, offset=log(iFinal$Date), family="poisson")
     irate <- exp(coef(ifit)[[1]])*365/median(iFinal$Vlength)
     irates <- c(irates, irate)
     #print(summary(ifit))
     
     # DELETION RATES
-    dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
+    dfit <- glm(dFinal$count ~ 1, offset=log(dFinal$Date), family="poisson")
     drate <- exp(coef(dfit)[[1]])*365/median(dFinal$Vlength)
     drates <- c(drates, drate)
     #print(summary(dfit))
     
-    # COUNTING NUCLEOTIDES: change the formula to this : nchar(gsub(",","",iFinal$Seq))*iFinal$Count ~ 1
+    # COUNTING NUCLEOTIDES: change the formula to this : nchar(gsub(",","",iFinal$Seq))*iFinal$count ~ 1
     #print(1 - (fit$deviance/fit$null.deviance))
     #all.df <- rbind(all.df, iFinal)
     #EDA(residuals(fit))
     
     #to.remove <- c(order(residuals(fit), decreasing = T)[1:52])
     #iFinal2 <- iFinal[-to.remove,]
-    #fit2 <- glm(iFinal2$Count ~ iFinal2$Date, family="poisson")
+    #fit2 <- glm(iFinal2$count ~ iFinal2$Date, family="poisson")
     #EDA(residuals(fit2))
   }
   
@@ -327,16 +329,16 @@ for (sub in subtypes){
     itemp <- iData[iData$Vloop==vloop,]
     dtemp <- dData[dData$Vloop==vloop,]
     
-    iFinal <- itemp[itemp$Date < 325 & itemp$Count < 2,]
-    dFinal <- dtemp[dtemp$Date < 325 & dtemp$Count < 2,]
+    iFinal <- itemp[itemp$Date < 325 & itemp$count < 2,]
+    dFinal <- dtemp[dtemp$Date < 325 & dtemp$count < 2,]
     #print(nrow(current) - nrow(iFinal))
     
-    ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
+    ifit <- glm(iFinal$count ~ 1, offset=log(iFinal$Date), family="poisson")
     irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
     irates <- c(irates, irate)
     print(summary(ifit))
     
-    dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
+    dfit <- glm(dFinal$count ~ 1, offset=log(dFinal$Date), family="poisson")
     drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
     drates <- c(drates, drate)
     print(summary(dfit))
@@ -484,109 +486,3 @@ g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) +
 #+ geom_text(aes(y=0.5,x=3 ),label="N/A", size=6)
 
 multiplot(g1,g2)
-# 
-# 
-# 
-# # SUBTYPE STRATIFICATION 
-# # ----------------------------------------------
-# ins <- list()
-# ins$B <- csv.ins[csv.ins$Subtype=="B",]
-# ins$C <- csv.ins[csv.ins$Subtype=="C",]
-# del <- list()
-# del$B <- csv.del[csv.del$Subtype=="B",]
-# del$C <- csv.del[csv.del$Subtype=="C",]
-# 
-# sub_irates <- data.frame()
-# sub_drates <- data.frame()
-# 
-# for (i in 1:2){
-#   
-#   iData <- ins[[i]]
-#   dData <- del[[i]]
-#   irates <- c()
-#   drates <- c()
-#   
-#   st <- c("B", "C")
-#   
-#   for (vloop in 1:5){
-#     iFinal <- iData[iData$Vloop==vloop & iData$Date < 325 & iData$Count < 2,]
-#     dFinal <- dData[dData$Vloop==vloop & dData$Date < 325 & dData$Count < 2,]
-#     #print(nrow(current) - nrow(iFinal))
-#     
-#     ifit <- glm(iFinal$Count ~ 1, offset=log(iFinal$Date), family="poisson")
-#     irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
-#     irates <- c(irates, irate)
-#     print(summary(ifit))
-#     
-#     dfit <- glm(dFinal$Count ~ 1, offset=log(dFinal$Date), family="poisson")
-#     drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
-#     drates <- c(drates, drate)
-#     print(summary(dfit))
-#     
-#     #print(1 - (fit$deviance/fit$null.deviance))
-#     #all.df <- rbind(all.df, iFinal)
-#     #EDA(residuals(fit))
-#     
-#     #to.remove <- c(order(residuals(fit), decreasing = T)[1:52])
-#     #iFinal2 <- iFinal[-to.remove,]
-#     #fit2 <- glm(iFinal2$Count ~ iFinal2$Date, family="poisson")
-#     #EDA(residuals(fit2))
-#   }
-#   sub_irates <- rbind(sub_irates, data.frame(rate=irates, adjrate=(irates*10^3),subtype=rep(st[[i]],5), VLoop=vloops))
-#   sub_drates <- rbind(sub_drates, data.frame(rate=drates, adjrate=(drates*10^3),subtype=rep(st[[i]],5), VLoop=vloops))
-# }
-# 
-# 
-# # SUBTYPE PLOT INSERTIONS
-# g1 <- ggplot(sub_irates, aes(x=VLoop, y=adjrate,fill=subtype)) + 
-#   geom_bar(stat="identity",position="dodge") + 
-#   labs(title="Insertions",x="Variable Loop", 
-#        y="Insertion Rate")+
-#   #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
-#   scale_y_continuous(expand = c(0, 0),limits = c(0, 3))+
-#   scale_fill_brewer(palette="Set1")+
-#   theme(panel.grid.major.y = element_line(color="black",size=0.3),
-#         panel.grid.major.x = element_blank(),
-#         panel.grid.minor.y = element_blank(),
-#         panel.grid.minor.x = element_blank(),
-#         panel.spacing=unit(1, "mm"),
-#         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-#         plot.margin =margin(t = 12, r = 12, b = 15, l = 24, unit = "pt"),
-#         axis.line = element_line(colour = "black"), 
-#         axis.title.y=element_text(size=20,margin=margin(t = 0, r = 11, b = 0, l = 6)),
-#         axis.title.x=element_text(size=20,margin=margin(t = 5, r = 0, b = 0, l = 0)),
-#         strip.text.x = element_text(size=16),
-#         axis.text.x=element_text(size=18),
-#         axis.text.y=element_text(size=18),
-#         plot.title = element_text(size=25,hjust=0.5),
-#         legend.position="right", legend.text=element_text(size=18), legend.title=element_text(size=20)) + geom_text(aes(y=0.1,x=3 ),
-#                                             label="N/A", 
-#                                             size=6)
-# g1
-# 
-# 
-# # SUBTYPE PLOT DELETIONS 
-# g2 <- ggplot(sub_drates, aes(x=VLoop, y=adjrate,fill=subtype)) + 
-#   geom_bar(stat="identity",position="dodge") + 
-#   labs(title="Deletions",x="Variable Loop", 
-#        y="Deletion Rate")+
-#   #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
-#   scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
-#   scale_fill_brewer(palette="Set1")+
-#   theme(panel.grid.major.y = element_line(color="black",size=0.3),
-#         panel.grid.major.x = element_blank(),
-#         panel.grid.minor.y = element_blank(),
-#         panel.grid.minor.x = element_blank(),
-#         panel.spacing=unit(1, "mm"),
-#         #panel.background=element_rect(fill="gray88",colour="white",size=0),
-#         plot.margin =margin(t = 12, r = 12, b = 15, l = 24, unit = "pt"),
-#         axis.line = element_line(colour = "black"), 
-#         axis.title.y=element_text(size=20,margin=margin(t = 0, r = 11, b = 0, l = 6)),
-#         axis.title.x=element_text(size=20,margin=margin(t = 5, r = 0, b = 0, l = 0)),
-#         strip.text.x = element_text(size=16),
-#         axis.text.x=element_text(size=18),
-#         axis.text.y=element_text(size=18),
-#         plot.title = element_text(size=25,hjust=0.5),
-#         legend.position="right", legend.text=element_text(size=18), legend.title=element_text(size=20)) + geom_text(aes(y=0.1,x=3 ),
-#                                                                                                                     label="N/A", 
-#                                                                                                                     size=6)
