@@ -1,9 +1,9 @@
 #!/bin/bash
 inDir=$1
 
-if [ ${inDir:(-1)} != "/"];
+if [[ $inDir != */ ]];
 then
-    inDir="$1/"
+    inDir="$inDir/"
 fi
 
 for filename in $inDir*.xml; do

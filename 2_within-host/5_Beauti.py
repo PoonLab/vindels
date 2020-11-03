@@ -12,24 +12,31 @@ if len(sys.argv) != 3:
     print("USAGE: python 5_Beauti.py [template file name] [unique run id]")
     sys.exit()
 
+work = "/home/jpalmer/PycharmProjects/hiv-withinhost/"
+template_path = '/home/jpalmer/vindels/2_within-host/templates/'
+out_path = work+'5BEAST/'
+
 template_id = sys.argv[1]
 run_id = sys.argv[2]
 
-if not os.path.isfile(template_id):
-    print("ERROR: Template file not found" + '/home/jpalmer/vindels/2_within-host/templates/' + template_id)
+
+template_file = template_path+template_id
+# Check if template file exists 
+if not os.path.isfile(template_file):
+    print("ERROR: Template file not found " + template_file)
     sys.exit()
 
-if os.path.isdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/' + run_id + "/"):
+# Check for existing directory 
+if os.path.isdir(out_path + run_id + "/"):
     print("ERROR: Run name already exists ")
     sys.exit()
 else:
-    os.mkdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/' + run_id + "/")
+    os.mkdir(out_path + run_id + "/")
     
 
-template_file = template_id
 
 #parse(template_file=args.template, fasta_file=args.fasta, stem=args.stem, outfile=args.out, nreps=args.nreps)
-files = glob('/home/jpalmer/PycharmProjects/hiv-withinhost/4MSA/final/*.fasta')
+files = glob(work+'4MSA/final/*.fasta')
 subtypes = {}
 for f in files:
     with open(f, "r") as handle: 
@@ -43,7 +50,7 @@ for f in files:
         name = str(os.path.basename(f)).split(".")[0]  + '-' + rep
         #name = re.sub("-original","",name)
         print(name)
-        xmlpath = '/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/' + run_id + "/"
+        xmlpath = out_path + run_id + "/"
         out = xmlpath + name + ".xml"
         #os.mkdir(xmlpath+name+'/')
         #stem = xmlpath+name+"/"
