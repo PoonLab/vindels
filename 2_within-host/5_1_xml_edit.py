@@ -16,24 +16,26 @@ if len(sys.argv) != 2:
     print("USAGE: python 5_1_xml_edit.py [unique run id]")
     sys.exit()
 
+work = "/home/jpalmer/PycharmProjects/hiv-withinhost/"
+
 run_id = sys.argv[1]
 
 # read in the separate CSV containing all the root heights of the trees
-df = pd.read_csv("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/root-heights.csv", index_col="file")
+df = pd.read_csv(work+"4_5_Raxml/100BS/root-heights.csv", index_col="file")
 print(df)
 
-if not os.path.isdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/' + run_id + "/"):
+if not os.path.isdir(work+'5BEAST/' + run_id + "/"):
     print("ERROR: Preliminary run folder not found.")
     sys.exit()
 
-if os.path.isdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/' + run_id + "/"):
+if os.path.isdir(work+'5_1_BEASTguided/' + run_id + "/"):
     print("ERROR: Run already exists as folder in 5_1. Please check the folder.")
     sys.exit()
 else:
-    os.mkdir('/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/' + run_id + "/")
+    os.mkdir(work+'5_1_BEASTguided/' + run_id + "/")
 
 # iterate through the 5BEAST/ --- folder directory    
-xmlFolder = glob("/home/jpalmer/PycharmProjects/hiv-withinhost/5BEAST/"+run_id+"/*.xml")
+xmlFolder = glob(work+"5BEAST/"+run_id+"/*.xml")
 
 for infile in xmlFolder:
     xml = ET.parse(infile)
@@ -54,14 +56,13 @@ for infile in xmlFolder:
         treename = treename[0] + "-" +treename[1] + ".tree"
 
     # open the tree file 
-    treefile = open("/home/jpalmer/PycharmProjects/hiv-withinhost/4_5_Raxml/100BS/guide_trees/"+treename, "rU")
+    treefile = open(work+"4_5_Raxml/100BS/guide_trees/"+treename, "rU")
 
     tree = treefile.readline()
     root = xml.getroot()
 
     seqcount = 0
     removelist = []
-    #tempremove = []
     dates = []
     
     for element in root.iter():
@@ -82,11 +83,9 @@ for infile in xmlFolder:
             if element != None:
                 elem = element.find("parameter")
                 elem.set("dimension","5")'''
-
         '''# SAMPLING FROM PRIOR ONLY 
         # -----------------------------------------
         if element.tag == "alignment":
-
             #<taxon idref="C.ZM.2002.16362.GQ485317.12.3_11"/>
             for seq in element.findall("sequence"):
                 name = seq.find("taxon").get("idref")
@@ -94,7 +93,6 @@ for infile in xmlFolder:
                 seq.append(ET.Element("taxon",{"idref":name}))
                 seq.text="???"'''
                 
-
         
         # FIXING THE GUIDE TREE 
         # -----------------------------------------------
@@ -171,7 +169,7 @@ for infile in xmlFolder:
         #print(r)
         root.remove(r)'''
 
-    # extracts the root_height value from the root height CSV file 
+    '''# extracts the root_height value from the root height CSV file 
     rheight = df.loc[treename.split(".")[0],'root_height']
     print(rheight)
 
@@ -180,8 +178,8 @@ for infile in xmlFolder:
         if element.get("id") == "skygrid.cutOff":
             #print(element.attrib)
             element.set("value", str(rheight))
-            print(element.attrib)
-    xml.write("/home/jpalmer/PycharmProjects/hiv-withinhost/5_1_BEASTguided/"+run_id+"/"+outname)    
+            print(element.attrib)'''
+    xml.write(work+"5_1_BEASTguided/"+run_id+"/"+outname)    
 
 
 
