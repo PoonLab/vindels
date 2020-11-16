@@ -108,15 +108,6 @@ def extractIndels(tip, anc, vidx):
     aSeq = {}
    
     
-    # case for retrieving the v-loops of the root node
-    #if anc == "":
-    #    for n, char in enumerate(tip):
-    #        if vregion[n] != -1:
-    #            vseqs[vregion[n]] += char
-    #    vSeq[accno] = vseqs 
-    #    return (vSeq, aSeq)
-    # ai will count the number of nucleotides, skipping gaps 
-    
     current = -1
     pidx = -1
     plist = []
@@ -162,8 +153,7 @@ def extractIndels(tip, anc, vidx):
                         if dTemp:
                             deletions[vregion[n]].append(dTemp+"-"+str(pidx))
                             dTemp = ''
-                
-                        
+                     
                 elif achar != "-":
                     #deletion in seq 1
                     if schar == "-":
@@ -208,12 +198,7 @@ def extractIndels(tip, anc, vidx):
             if a != "-" or b != "-":
                 newvar[n] += a
                 newanc[n] += b
-    '''if any(insertions): 
-        print(newvar)
-        print(newanc)
-        print(plist)
-        print(insertions)
-    '''    
+
     #SANITY CHECK 
     #ensures that the iterated sequences are the proper variable loops and that they are identical to the one found in the csv file 
     # for n, vr in enumerate(vseqs):
