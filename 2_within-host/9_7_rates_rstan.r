@@ -116,7 +116,7 @@ for (t in 1:2){
     stan.fit <- stan("stan_modeling/rate-perpat-dc.stan",
                      data= data.stan, 
                      chains=1,
-                     iter=40000)
+                     iter=100000)
     end <- proc.time() - start
     # export results to a data frame 
     irates <- rbind(irates, data.frame(rate=summary(stan.fit)$summary[1,6],
