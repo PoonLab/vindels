@@ -7,8 +7,8 @@ source("~/vindels/2_within-host/utils.r")
 
 # INSERTION PARSING ----------
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/rep2/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/rep2/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/main/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/main/del/*.tsv"))
 sep <- "\t"
 trefolder <- paste0(path,"7SampleTrees/prelim200/")
 
@@ -24,31 +24,6 @@ tally <- function(infolder){
   name <- basename(infolder)
   name <- gsub("-.+","",name)
   return (table(name))
-}
-
-findAncestor <- function(header){
-  # this expression will return results for NODES ONLY
-  # second column provides the CAPTURED TIP LABELS from within the node label
-  header <- substr(header, 1, nchar(header)-4)
-  tips <- str_match_all(header,"([^\\)\\(,\n:]+):")[[1]][,2]
-  if (length(tips) == 0){
-    # no colons; this means its a TIP 
-    # the index in the tre$tip.label vector is the final result
-    index <- match(header, tre$tip.label)
-  }else{
-    # retreive all descendants of every node and tip in the tree
-    desc <- Descendants(tre)
-    
-    # find the numeric labels of all extracted tips 
-    matches <- match(tips, tre$tip.label)
-    
-    # find the SINGLE node in the descendants list that contains the exact same subset of tips
-    index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
-  }
-  if (length(index)!=1){
-    return(paste0("PROBLEM:",as.character(index)))
-  }
-  return(index)
 }
 
 all.ins <- c()
@@ -83,7 +58,7 @@ for (file in 1:length(ifolder)){
   treename <- strsplit(filename, "\\.")[[1]][1]
   tre <- read.tree(paste0(paste0(trefolder,treename,".tree.sample")))
   
-  res <- unname(sapply(iCSV$header, findAncestor)) 
+  res <- unname(sapply(iCSV$header, findAncestor, tree=tre)) 
   
   iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
   dCSV$length <- iCSV$length
@@ -126,26 +101,26 @@ patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
 pat.idx <- table(sapply(ifolder, function(x){
   strsplit(basename(x), "-")[[1]][1]
 }))
-toRemove <- which(grepl(reg, patnames))
+#toRemove <- which(grepl(reg, patnames))
 
+iTotal <- iint
+dTotal <- dint
 
-
-
-# checks for which patient did not fully complete all 200 replicates
-table(unname(sapply(names(csv.ins), function(x)strsplit(x, "-")[[1]][1])))
-iTotal <- csv.ins[-which(unname(sapply(names(csv.ins), function(x)strsplit(x, "-")[[1]][1]))== '56552')]
-dTotal <- csv.del[-which(unname(sapply(names(csv.del), function(x)strsplit(x, "-")[[1]][1]))== '56552')]
-
-rm(csv.ins)
-rm(csv.del)
 
 require(data.table)
-all.ins <- as.data.frame(rbindlist(csv.ins))
-all.del <- as.data.frame(rbindlist(csv.del))
+iTotal <- as.data.frame(rbindlist(iTotal))
+dTotal <- as.data.frame(rbindlist(dTotal))
+# all.ins <- as.data.frame(rbindlist(csv.ins))
+# all.del <- as.data.frame(rbindlist(csv.del))
 
 #csv.ins$header <- getPat(csv.ins$header, csv.ins$Pat)
 #csv.del$header <- getPat(csv.del$header, csv.del$Pat)
 
+iTotal$pat <- gsub("-.+$", "",iTotal$pat)
+dTotal$pat <- gsub("-.+$", "",dTotal$pat)
+
+iPat <- split(iTotal, iTotal$pat)
+dPat <- split(dTotal, dTotal$pat)
 
 irtt <- list()
 drtt <- list()
@@ -156,18 +131,16 @@ ins.list <- list()
 del.list <- list()
 
 for (i in 1:length(iTotal)){
-  iData <- iTotal[[i]]
-  dData <- dTotal[[i]]
   print(i)
   irates <- c()
   drates <- c()
   
   for (vloop in 1:5){
-    itemp <- iData[iData$Vloop==vloop,]
-    dtemp <- dData[dData$Vloop==vloop,]
+    itemp <- iTotal[[i]][iTotal[[i]]$vloop==vloop,]
+    dtemp <- dTotal[[i]][dTotal[[i]]$vloop==vloop,]
     
-    iFinal <- itemp[itemp$Date < 325 & itemp$count < 3,]
-    dFinal <- dtemp[dtemp$Date < 325 & dtemp$count < 3,]
+    iFinal <- itemp[itemp$count < 3 & itemp$length > 0,]
+    dFinal <- dtemp[dtemp$count < 3 & dtemp$length > 0,]
     rm(itemp)
     rm(dtemp)
     
@@ -178,15 +151,35 @@ for (i in 1:length(iTotal)){
     #print(nrow(current) - nrow(iFinal))
     
     # INSERTION RATES 
-    ifit <- glm(iFinal$count ~ 1, offset=log(iFinal$Date), family="poisson")
-    irate <- exp(coef(ifit)[[1]])*365/median(iFinal$Vlength)
-    irates <- c(irates, irate)
+    cons <- 0
+    vals <- c()
+    for (i in 2:length(vec1)){
+      if (vec1[i] == (vec1[i-1]+1)){
+        cons = cons + 1
+      }else{
+        vals <- c(vals, cons)
+        cons <- 0
+      }
+    }
+    # DELETION RATES
+    tryCatch(
+      {
+        ifit <- glm(iFinal$count ~ 1, offset=log(iFinal$length), family="poisson", control=list(maxit=50))
+        dfit <- glm(dFinal$count ~ 1, offset=log(dFinal$length), family="poisson", control=list(maxit=50))
+      },error=function(cond){
+        print("failed")
+      },warning=function(cond){
+        print(cond)
+        print(sum(iFinal$count > 0))
+        print(sum(dFinal$count > 0))
+      }
+    )
+    irate <- exp(coef(ifit)[[1]])*365/median(iFinal$vlen)
+    irates[vloop]  <- irate   
     #print(summary(ifit))
     
-    # DELETION RATES
-    dfit <- glm(dFinal$count ~ 1, offset=log(dFinal$Date), family="poisson")
-    drate <- exp(coef(dfit)[[1]])*365/median(dFinal$Vlength)
-    drates <- c(drates, drate)
+    drate <- exp(coef(dfit)[[1]])*365/median(dFinal$vlen)
+    drates[vloop] <- drate
     #print(summary(dfit))
     
     # COUNTING NUCLEOTIDES: change the formula to this : nchar(gsub(",","",iFinal$Seq))*iFinal$count ~ 1
@@ -196,7 +189,7 @@ for (i in 1:length(iTotal)){
     
     #to.remove <- c(order(residuals(fit), decreasing = T)[1:52])
     #iFinal2 <- iFinal[-to.remove,]
-    #fit2 <- glm(iFinal2$count ~ iFinal2$Date, family="poisson")
+    #fit2 <- glm(iFinal2$count ~ iFinal2$length, family="poisson")
     #EDA(residuals(fit2))
   }
   
@@ -329,16 +322,16 @@ for (sub in subtypes){
     itemp <- iData[iData$Vloop==vloop,]
     dtemp <- dData[dData$Vloop==vloop,]
     
-    iFinal <- itemp[itemp$Date < 325 & itemp$count < 2,]
-    dFinal <- dtemp[dtemp$Date < 325 & dtemp$count < 2,]
+    iFinal <- itemp[itemp$length < 325 & itemp$count < 2,]
+    dFinal <- dtemp[dtemp$length < 325 & dtemp$count < 2,]
     #print(nrow(current) - nrow(iFinal))
     
-    ifit <- glm(iFinal$count ~ 1, offset=log(iFinal$Date), family="poisson")
+    ifit <- glm(iFinal$count ~ 1, offset=log(iFinal$length), family="poisson")
     irate <- exp(coef(ifit)[[1]])*365/vlengths[vloop]
     irates <- c(irates, irate)
     print(summary(ifit))
     
-    dfit <- glm(dFinal$count ~ 1, offset=log(dFinal$Date), family="poisson")
+    dfit <- glm(dFinal$count ~ 1, offset=log(dFinal$length), family="poisson")
     drate <- exp(coef(dfit)[[1]])*365/vlengths[vloop]
     drates <- c(drates, drate)
     print(summary(dfit))

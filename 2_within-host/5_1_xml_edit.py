@@ -169,7 +169,7 @@ for infile in xmlFolder:
         #print(r)
         root.remove(r)'''
 
-    '''# extracts the root_height value from the root height CSV file 
+    # extracts the root_height value from the root height CSV file 
     rheight = df.loc[treename.split(".")[0],'root_height']
     print(rheight)
 
@@ -178,7 +178,7 @@ for infile in xmlFolder:
         if element.get("id") == "skygrid.cutOff":
             #print(element.attrib)
             element.set("value", str(rheight))
-            print(element.attrib)'''
+            print(element.attrib)
     xml.write(work+"5_1_BEASTguided/"+run_id+"/"+outname)    
 
 

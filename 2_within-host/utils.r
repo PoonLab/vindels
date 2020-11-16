@@ -1,9 +1,48 @@
 #require(Biostrings)
 # for changing headers from ACCNO_DATE format to ACCNO
+
+findAncestor <- function(header, tree){
+  # this expression will return results for NODES ONLY
+  # second column provides the CAPTURED TIP LABELS from within the node label
+  header <- gsub("_\\d+$","",header)
+  tips <- str_match_all(header,"([^\\)\\(,\n:]+):")[[1]][,2]
+  if (length(tips) == 0){
+    # no colons; this means its a TIP 
+    # the index in the tre$tip.label vector is the final result
+    index <- match(header, tree$tip.label)
+  }else{
+    # retreive all descendants of every node and tip in the tree
+    desc <- Descendants(tree)
+    
+    # find the numeric labels of all extracted tips 
+    matches <- match(tips, tree$tip.label)
+    
+    # find the SINGLE node in the descendants list that contains the exact same subset of tips
+    index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
+  }
+  if (length(index)!=1){
+    return(paste0("PROBLEM:",as.character(index)))
+  }
+  return(index)
+}
+
 getSubtype <- function(header){
   newheader <- strsplit(as.character(header),"\\.")[[1]][1]
   newheader
 }
+consecutive <- function(vect){
+  cons <- 0
+  vals <- c()
+  for (i in 2:length(vect)){
+    if (vect[i] == (vect[i-1]+1)){
+      cons = cons + 1
+    }else{
+      vals <- c(vals, cons)
+      cons <- 0
+    }
+  }
+}
+
 
 getPat <- function(header, pat){
   label <- strsplit(pat, "-")[[1]][2]
