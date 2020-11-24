@@ -24,31 +24,24 @@ outfolder <- args[3]
 
 dir.create(outfolder, showWarnings = F)
 trefolder <- Sys.glob(paste0(tpath, "*"))
-logfolder <- Sys.glob(paste0(logpath,"*.log"))
-heights <- c()
-for (t in 1:length(trefolder)){
-  
-  print(trefolder[t])
-  filename <- basename(logfolder[l])
-  pat <- strsplit(filename, "\\.")[[1]][1]
 
-  pat_trees <- Sys.glob(paste0(tpath,pat,"*"))
-  
-  for (tree in pat_trees){
-    # treename1 <- paste0(strsplit(basename(hfolder[h]), "_recon")[[1]][1], ".tree.sample")
-    # 
-    # treename1 <- paste0(tfolder, treename1)
-    # 
-    # intree <- read.tree(treename1)
-    # 
-    # heights[h] <- max(node.depth.edgelength(intree))
-    # uses log file name to find and read BEAST log file
-    logfile <- read.csv(logfolder[l], sep="\t", skip=4)
+patnames <- unique(sapply(trefolder, function(x) strsplit(x, "_")[[1]][1]))
 
-    treename <- basename(tree)
+for (i in 1:length(patnames)){
+  
+  filename <- paste0(patnames[i],".log")
+  print(filename)
+  
+  # uses log file name to find and read BEAST log file
+  logfile <- read.csv(paste0(logpath,filename), sep="\t", skip=4)
+    
+  pat_trees <- Sys.glob(paste0(tpath,patnames[i],"*"))
+  
+  for (t in 1:length(pat_trees)){
+    treename <- basename(pat_trees[t])
     state <- as.numeric(paste0(strsplit(strsplit(treename, "\\.")[[1]][1], "_")[[1]][3],"00000"))
   
-    intree <- read.tree(tree)
+    intree <- read.tree(pat_trees[t])
     rescale.factor <- logfile[which(logfile$state == state),"ucld.mean"]
 
     #print(rescale.factor)
