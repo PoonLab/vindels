@@ -1,10 +1,7 @@
-#require(Biostrings)
-# for changing headers from ACCNO_DATE format to ACCNO
-
 findAncestor <- function(header, tree){
   # this expression will return results for NODES ONLY
   # second column provides the CAPTURED TIP LABELS from within the node label
-  header <- gsub("_\\d+$","",header)
+  header <- substr(header, 1, nchar(header)-4)
   tips <- str_match_all(header,"([^\\)\\(,\n:]+):")[[1]][,2]
   if (length(tips) == 0){
     # no colons; this means its a TIP 
