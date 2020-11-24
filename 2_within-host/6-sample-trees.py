@@ -65,11 +65,16 @@ def sample_beast(infile, outdir, numsample=5):
     #print(total)
     start = int(total*0.1) + 1
     #print(start)
-
-    #print(range(start, total+1))
-    rsample = random.sample(range(start, total+1), numsample)
-    #print(rsample)
-    rsample = [str(x*100000) for x in rsample]
+    
+    # Check : upper and lower bounds of sampling 
+    #print(states[start:(total+1)])
+    #print(states[start])
+    rsample = random.sample(states[start:(total+1)], numsample)
+    print(len(rsample))
+    #rsample = [x for x in rsample]
+    
+    # Sanity check; should be 0 
+    #print([x<20000000 for x in rsample])
     '''for x in range(numsample):
         #chose 101 just in case (left 101 states for the burn in and sampled from last 900 states out of 1001)
         random.shuffle(randpool)
@@ -87,7 +92,7 @@ def sample_beast(infile, outdir, numsample=5):
     for line in tfile2:
         data = line.split()
         # this finds and processes each tree state in the rsample
-        if len(data) == 6 and data[1].lstrip("STATE_") in rsample:
+        if len(data) == 6 and int(data[1].lstrip("STATE_")) in rsample:
             sample_count += 1
             state = data[1].lstrip("STATE_")
             #print(sample_count)
@@ -136,6 +141,7 @@ def main():
         #        skip = True
         print(os.path.basename(infile))
         sample_beast(infile,outfolder, 200)
+    
 
 
 

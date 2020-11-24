@@ -26,14 +26,11 @@ dir.create(outfolder, showWarnings = F)
 trefolder <- Sys.glob(paste0(tpath, "*"))
 logfolder <- Sys.glob(paste0(logpath,"*.log"))
 heights <- c()
-for (l in 1:length(logfolder)){
+for (t in 1:length(trefolder)){
   
-  print(logfolder[l])
+  print(trefolder[t])
   filename <- basename(logfolder[l])
   pat <- strsplit(filename, "\\.")[[1]][1]
-
-  # uses log file name to find and read BEAST log file
-  logfile <- read.csv(logfolder[l], sep="\t", skip=4)
 
   pat_trees <- Sys.glob(paste0(tpath,pat,"*"))
   
@@ -45,7 +42,9 @@ for (l in 1:length(logfolder)){
     # intree <- read.tree(treename1)
     # 
     # heights[h] <- max(node.depth.edgelength(intree))
-    # 
+    # uses log file name to find and read BEAST log file
+    logfile <- read.csv(logfolder[l], sep="\t", skip=4)
+
     treename <- basename(tree)
     state <- as.numeric(paste0(strsplit(strsplit(treename, "\\.")[[1]][1], "_")[[1]][3],"00000"))
   

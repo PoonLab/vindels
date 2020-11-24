@@ -16,9 +16,12 @@ trefolder <- paste0(path,"7SampleTrees/prelim200/")
 # CASE: Removed patients 49641 and 56549 because they are SUBTYPE B
 # CASE: Removed patient 28376 and B because of very bad Rsquared value 
 reg <- "56552|49641|56549|28376"
+newreg <- "30647"
 
-ifolder <- ifolder[!grepl(reg,ifolder)]
-dfolder <- dfolder[!grepl(reg,dfolder)]
+# ifolder <- ifolder[!grepl(reg,ifolder)]
+# dfolder <- dfolder[!grepl(reg,dfolder)]
+ifolder <- ifolder[grepl(newreg,ifolder)]
+dfolder <- dfolder[grepl(newreg,dfolder)]
 
 tally <- function(infolder){
   name <- basename(infolder)
@@ -79,8 +82,8 @@ for (file in 1:length(ifolder)){
   tips <-  which(grepl("^[^\\(\\):\n]+$", iCSV$header))
   nodes <- which(!grepl("^[^\\(\\):\n]+$", iCSV$header))
   
-  iCSV <- iCSV[,-c(1,2,5,6,8)]
-  dCSV <- dCSV[,-c(1,2,5,6,8)]
+  iCSV <- iCSV[,-c(2,5,6,8)]
+  dCSV <- dCSV[,-c(2,5,6,8)]
   
   if (is.null(iint[[id]])){
     iint[[id]] <- iCSV[nodes,]
@@ -103,6 +106,8 @@ pat.idx <- table(sapply(ifolder, function(x){
 }))
 #toRemove <- which(grepl(reg, patnames))
 
+iint <- as.data.frame(rbindlist(iint))
+
 iTotal <- iint
 dTotal <- dint
 
@@ -119,8 +124,8 @@ dTotal <- as.data.frame(rbindlist(dTotal))
 iTotal$pat <- gsub("-.+$", "",iTotal$pat)
 dTotal$pat <- gsub("-.+$", "",dTotal$pat)
 
-iPat <- split(iTotal, iTotal$pat)
-dPat <- split(dTotal, dTotal$pat)
+iPat <- split(iTotal, iTotal$vloop)
+dPat <- split(dTotal, dTotal$vloop)
 
 irtt <- list()
 drtt <- list()
