@@ -25,16 +25,15 @@ outfolder <- args[3]
 dir.create(outfolder, showWarnings = F)
 trefolder <- Sys.glob(paste0(tpath, "*"))
 
-patnames <- unique(sapply(trefolder, function(x) strsplit(x, "_")[[1]][1]))
+patnames <- unique(sapply(basename(trefolder), function(x) strsplit(x, "_")[[1]][1]))
 
 for (i in 1:length(patnames)){
   
   filename <- paste0(patnames[i],".log")
   print(filename)
-  
+   
   # uses log file name to find and read BEAST log file
   logfile <- read.csv(paste0(logpath,filename), sep="\t", skip=4)
-    
   pat_trees <- Sys.glob(paste0(tpath,patnames[i],"*"))
   
   for (t in 1:length(pat_trees)){
