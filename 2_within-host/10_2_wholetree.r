@@ -10,6 +10,10 @@ path <- "~/PycharmProjects/hiv-withinhost/"
 ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.tsv"))
 dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.tsv"))
 
+newreg <- "30647"
+ifolder <- ifolder[grepl(newreg,ifolder)]
+dfolder <- dfolder[grepl(newreg,dfolder)]
+
 ins.sep <-list()
 del.sep <- list()
 count <- 0

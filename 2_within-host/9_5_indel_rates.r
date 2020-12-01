@@ -18,8 +18,8 @@ trefolder <- paste0(path,"7SampleTrees/prelim200/")
 reg <- "56552|49641|56549|28376"
 newreg <- "30647"
 
-# ifolder <- ifolder[!grepl(reg,ifolder)]
-# dfolder <- dfolder[!grepl(reg,dfolder)]
+ifolder <- ifolder[!grepl(reg,ifolder)]
+dfolder <- dfolder[!grepl(reg,dfolder)]
 ifolder <- ifolder[grepl(newreg,ifolder)]
 dfolder <- dfolder[grepl(newreg,dfolder)]
 
@@ -62,6 +62,12 @@ for (file in 1:length(ifolder)){
   tre <- read.tree(paste0(paste0(trefolder,treename,".tree.sample")))
   
   res <- unname(sapply(iCSV$header, findAncestor, tree=tre)) 
+  iCSV$index <- res
+  idx <- seq(1,length(res), 5)
+  dict <- lapply(1:length(unique(res)), function(x){
+    iCSV[idx[x], "header"]
+  })  
+
   
   iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
   dCSV$length <- iCSV$length
@@ -98,6 +104,8 @@ for (file in 1:length(ifolder)){
   }
 }
 
+
+
 # CHECKPOINT : 9_6_finished.RData 
 
 patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
@@ -106,7 +114,18 @@ pat.idx <- table(sapply(ifolder, function(x){
 }))
 #toRemove <- which(grepl(reg, patnames))
 
+counts <- lapply(unique(patnames), function(x){
+  index = which(patnames == x)
+  median(sapply(index, function(y){
+    sum(itip[[y]]$count)
+  }))
+})
+
+
 iint <- as.data.frame(rbindlist(iint))
+itip <- as.data.frame(rbindlist(itip))
+dint <- as.data.frame(rbindlist(dint))
+dtip <- as.data.frame(rbindlist(dtip))
 
 iTotal <- iint
 dTotal <- dint
@@ -234,18 +253,6 @@ for (i in 1:26){
 }
 
 
-V1 <- lapply(ins.final, function(x){if (median(x[,3] > 1e-2))x[,3]})
-V2 <- lapply(ins.final, function(x){if (median(x[,4] > 1e-2))x[,4]})
-V3 <- lapply(ins.final, function(x){if (median(x[,5] > 1e-2))x[,5]})
-V4 <- lapply(ins.final, function(x){if (median(x[,6] > 1e-2))x[,6]})
-V5 <- lapply(ins.final, function(x){if (median(x[,7] > 1e-2))x[,7]})
-
-require(plyr)
-V1 <- compact(V1)
-V2 <- compact(V2)
-V3 <- compact(V3)
-V4 <- compact(V4)
-V5 <- compact(V5)
 
 
 dev.off()
@@ -374,30 +381,6 @@ for (i in 1:5){
 }
 wth.rates <- as.double(apply(indel.df, 2, median))
 wilcox.test(btw.rates,wth.rates, paired=T)
-
-
-
-# --------------------------
-# BOOTSTRAPS - over 20 replicates (simple)
-ins.rep <- matrix(nrow=2, ncol=5)
-del.rep <- matrix(nrow=2, ncol=5)
-for (v in 1:5){
-  itemp <- ins.df[,v]
-  dtemp <- del.df[,v]
-  
-  imeds <- sapply(1:1000, function(x){
-    rand <- sample(1:20, 20, replace=T)
-    median(itemp[rand])
-  })
-  
-  dmeds <- sapply(1:1000, function(x){
-    rand <- sample(1:20, 20, replace=T)
-    median(dtemp[rand])
-  })
-  
-  ins.rep[,v] <- quantile(imeds, c(0.025,0.975))
-  del.rep[,v] <- quantile(dmeds, c(0.025,0.975))
-}
 
 
 
