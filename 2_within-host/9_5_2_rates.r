@@ -24,12 +24,12 @@ final.data <- lapply(final.data, function(x){
 
 # ---- Simulate Data JAGS ---- 
 
-rate <- 0.0001
-time <- rexp(10000,rate=0.05)
+rate <- 0.00002
+time <- round(rlnorm(20000,4.5,0.3))
 
-lambda <- exp(rate) * time
+lambda <- rate * time
 
-y <- rpois(10000,lambda=0.1)
+y <- rpois(20000,lambda=lambda)
 
 data <- data.frame(time, y)
 
@@ -64,7 +64,7 @@ mod.csim <- as.mcmc(do.call(rbind, mod.sim))
 # ---- Simulate Data RSTAN ---- 
 
 # Data import
-data.stan <- list(N=1000,
+data.stan <- list(N=20000,
                   counts=data$y,
                   branches=data$time)
 
@@ -73,7 +73,11 @@ start <- proc.time()
 stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-new.stan",
                  data= data.stan, 
                  chains=1,
-                 iter=50000,
-                 control=list(adapt_delta=0.99))
+                 iter=10000,
+                 control=list(adapt_delta=0.90))
 end <- proc.time() - start
 
+
+w <- extract(stan.fit)
+plot(density(w$rate))
+line(v=rate)
