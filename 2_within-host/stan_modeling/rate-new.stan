@@ -10,7 +10,7 @@ parameters {
 }
 
 model {
-  rate ~ normal(0,15);
+  rate ~ normal(0,20);
   for (i in 1:N){
     counts[i] ~ poisson(exp(rate) * branches[i]);
   }

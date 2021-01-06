@@ -1,5 +1,5 @@
 library("rjags")
-
+library("data.table")
 # Load 9_6 rsession
 
 iint <- as.data.frame(rbindlist(iint))
@@ -24,12 +24,12 @@ final.data <- lapply(final.data, function(x){
 
 # ---- Simulate Data JAGS ---- 
 
-rate <- 0.00002
-time <- round(rlnorm(20000,4.5,0.3))
+rate <- 0.00001
+time <- round(rlnorm(50000,4.5,0.3))
 
 lambda <- rate * time
 
-y <- rpois(20000,lambda=lambda)
+y <- rpois(50000,lambda=lambda)
 
 data <- data.frame(time, y)
 
@@ -37,7 +37,7 @@ mod_string <- "
 model {
   for (i in 1:N){
     counts[i] ~ dpois(lam[i])
-    log(lam[i]) = log(length[i]) + int
+    lam[i] = exp(int) * length[i]
   }
 
   int ~ dlnorm(log(0.0001),0.5)
@@ -64,7 +64,7 @@ mod.csim <- as.mcmc(do.call(rbind, mod.sim))
 # ---- Simulate Data RSTAN ---- 
 
 # Data import
-data.stan <- list(N=20000,
+data.stan <- list(N=50000,
                   counts=data$y,
                   branches=data$time)
 
