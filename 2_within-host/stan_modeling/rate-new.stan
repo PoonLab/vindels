@@ -6,11 +6,11 @@ data {
 
 
 parameters {
-  real<lower=-20, upper=5> rate;
+  real<lower=-30, upper=30> rate;
 }
 
 model {
-  rate ~ normal(0,20);
+  rate ~ uniform(-30,30);
   for (i in 1:N){
     counts[i] ~ poisson(exp(rate) * branches[i]);
   }

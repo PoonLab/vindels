@@ -1,6 +1,7 @@
 library("rjags")
 library("data.table")
 # Load 9_6 rsession
+# 9_6 loads finalized indel count and timing data 
 
 iint <- as.data.frame(rbindlist(iint))
 itip <- as.data.frame(rbindlist(itip))
@@ -14,12 +15,27 @@ dtip <- as.data.frame(rbindlist(dtip))
 final.data <- list(itip, iint, dtip, dint)
 
 final.data <- lapply(final.data, function(x){
-  x[,"pat"] <- sapply(x$pat, function(str){
-    strsplit(str, "-")[[1]][1]
-  })
+  
+  res <- t(sapply(x$pat, function(str){
+    strsplit(str, "_")[[1]]
+    
+  }))
+  x[, 'pat'] <- res[,1]
+  x[, 'rep'] <- res[,2]
   split(x, x$vloop)
 })
 
+
+# --- Preprocessing of Data ---
+
+final.data <- lapply(1:4, function(x){
+  lvl1 <- final.data[[x]]
+  
+  lapply(1:5, function(vloop){
+    vloop <- final.data[[x]][[vloop]]
+    split(vloop , vloop$rep)
+  })
+})
 
 
 # ---- Simulate Data JAGS ---- 
@@ -33,14 +49,19 @@ y <- rpois(50000,lambda=lambda)
 
 data <- data.frame(time, y)
 
+# ---- STANDARD GLM ----
+fit <- glm(y ~ 1, offset=log(time), data=df, family='poisson')
+exp(coef(fit)[[1]])
+
+
 mod_string <- " 
 model {
   for (i in 1:N){
     counts[i] ~ dpois(lam[i])
-    lam[i] = exp(int) * length[i]
+    log(lam[i]) = int + log(length[i])
   }
 
-  int ~ dlnorm(log(0.0001),0.5)
+  int ~ dunif(0,0.1)
   
 }"
 
@@ -52,12 +73,12 @@ forJags <- list(counts = data$y,
 
 model.fit <- jags.model(textConnection(mod_string), 
                         data = forJags,
-                        n.chains=1)
-update(model.fit, 1000)
+                        n.chains=3)
+update(model.fit, 100)
 
 mod.sim = coda.samples(model=model.fit,
                        variable.names=params,
-                       n.iter=10000)
+                       n.iter=1000)
 
 mod.csim <- as.mcmc(do.call(rbind, mod.sim))
 
@@ -73,9 +94,78 @@ start <- proc.time()
 stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-new.stan",
                  data= data.stan, 
                  chains=1,
-                 iter=10000,
+                 iter=2000,
                  control=list(adapt_delta=0.90))
 end <- proc.time() - start
+
+
+# ---- REAL DATA RSTAN ---- 
+
+df <- final.data[[1]][[1]][[1]]
+
+# Data import
+data.stan <- list(N=nrow(df),
+                  counts=df$count,
+                  branches=df$length)
+
+# Stan modeling 
+start <- proc.time()
+stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-new.stan",
+                 data= data.stan, 
+                 chains=1,
+                 iter=1000,
+                 control=list(adapt_delta=0.90))
+end <- proc.time() - start
+
+
+# ---- REAL DATA RSTAN ITERATED ----
+
+data <- final.data[[1]][[1]]
+
+
+options(mc.cores = parallel::detectCores()-2)
+# Stan modeling 
+start <- proc.time()
+
+vmean <- list()
+vmed <- list()
+vneff <- list()
+
+for (v in 1:5){
+  data <- final.data[[1]][[v]]
+  mean <- c()
+  median <- c()
+  neff <- c()
+  
+  for (i in 1:200){
+    # Data import
+    df <- data[[i]]
+    df <- list(N=nrow(df),
+               counts=df$count,
+               branches=df$length)
+    
+    stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-new.stan",
+                     data=df, 
+                     chains=1,
+                     iter=10000,
+                     control=list(adapt_delta=0.90),
+                     verbose=F)
+    
+    mean[i] <- summary(stan.fit)$summary[1,1]
+    median[i] <- summary(stan.fit)$summary[1,6]
+    neff[i] <- summary(stan.fit)$summary[1,'n_eff']
+    print(paste0("Finished: ", i))
+  }
+  vmean[[v]] <- mean
+  vmed[[v]] <- median
+  vneff[[v]] <- neff
+}
+
+
+end <- proc.time() - start
+
+
+
 
 
 w <- extract(stan.fit)
