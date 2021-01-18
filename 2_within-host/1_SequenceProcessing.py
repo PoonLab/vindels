@@ -25,9 +25,6 @@ for infile in folder:
     
     # filter : screen for sequences missing subtype, collection year, and those without sampling collection info
     for x in data:
-        print(len(data[x]))
-        continue
-
         header = x.split(".")
         total += 1 
         if len(data[x]) < minlen:

@@ -140,20 +140,20 @@ for (v in 1:5){
   for (i in 1:200){
     # Data import
     df <- data[[i]]
-    df <- list(N=nrow(df),
+    stan.df <- list(N=nrow(df),
                counts=df$count,
                branches=df$length)
     
     stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-new.stan",
-                     data=df, 
+                     data=stan.df, 
                      chains=1,
                      iter=10000,
                      control=list(adapt_delta=0.90),
                      verbose=F)
-    
-    mean[i] <- summary(stan.fit)$summary[1,1]
-    median[i] <- summary(stan.fit)$summary[1,6]
-    neff[i] <- summary(stan.fit)$summary[1,'n_eff']
+    sum <- summary(stan.fit)$summary
+    mean[i] <- exp(sum[1,1]) * (365 / median(df$vlen))
+    median[i] <- exp(sum[1,6]) * (365 / median(df$vlen))
+    neff[i] <- sum[1,'n_eff']
     print(paste0("Finished: ", i))
   }
   vmean[[v]] <- mean
@@ -164,7 +164,17 @@ for (v in 1:5){
 
 end <- proc.time() - start
 
+lens <- lapply(1:5, function(v){
+  sapply(1:200, function(x){
+    median(final.data[[1]][[v]][[x]]$vlen)
+  })
+})
 
+final <- lapply(1:5, function(v){
+  sapply(1:200, function(x){
+    exp(vmean[[v]][x]) * (365 / median(lens[[v]][x]))
+  })
+})
 
 
 
