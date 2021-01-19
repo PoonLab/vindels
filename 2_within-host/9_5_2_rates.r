@@ -172,7 +172,7 @@ lens <- lapply(1:5, function(v){
 
 final <- lapply(1:5, function(v){
   sapply(1:200, function(x){
-    exp(vmean[[v]][x]) * (365 / median(lens[[v]][x]))
+    1000* exp(vmean[[v]][x]) * (365 / median(lens[[v]][x]))
   })
 })
 

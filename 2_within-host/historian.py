@@ -9,23 +9,23 @@ import time
 if not sys.argv[1].endswith('/'):
     sys.argv[1] += '/'
 
+tpath = sys.argv[1]+'trees/'
+
+trees = [os.path.basename(x) for x in glob(tpath+"*")]
+
 
 tpath = sys.argv[1]+'trees/'
-opath = sys.argv[2]
+opath = sys.argv[1]+'output/'
 mpath = '/home/jpalmer/work/4MSA/final/'
 
-trees = glob(tpath+'*')
-infile = open(sys.argv[3], 'rU')
+finished = [os.path.basename(x) for x in glob(opath+"*")]
+trees = [x for x in trees if x.split(".")[0]+"_recon.fasta" not in finished]
 
-entries = list(map(lambda x: x[2:-1], infile.readlines()))
-if len(sys.argv)>2:
-    trees = [ x.split("_recon")[0]+'.tree' for x in entries]
+msa =  [mpath+x.split("-")[0] + ".fasta" for x in trees]
+out =  [opath+x.split(".tree")[0] + "_recon.fasta" for x in trees]
 
-msa =  [mpath+os.path.basename(x.split("-")[0] + ".fasta") for x in trees]
-out =  [opath+os.path.basename(x.split(".tree")[0] + "_recon.fasta") for x in trees]
-
+trees = [tpath+x for x in trees]
 start = time.time()
-#print(trees)
 
 
 for i in range(len(trees)):
@@ -36,4 +36,3 @@ for i in range(len(trees)):
     outfile.close()
     current = time.time()
     print('Elapsed: {}'.format(current-start))
-    break
