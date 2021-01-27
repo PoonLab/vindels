@@ -7,18 +7,18 @@ source("~/vindels/2_within-host/utils.r")
 
 # INSERTION PARSING ----------
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/rep2/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/rep2/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/new-skygrid/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/new-skygrid/del/*.tsv"))
 sep <- "\t"
-trefolder <- paste0(path,"7SampleTrees/prelim200/")
+trefolder <- paste0(path,"7SampleTrees/new-skygrid/prelim/")
 
 # CASE: Removed patient 56552 because could not complete Historian runs 
 # CASE: Removed patients 49641 and 56549 because they are SUBTYPE B
 # CASE: Removed patient 28376 and B because of very bad Rsquared value 
-reg <- "56552|49641|56549|28376|B"
+#reg <- "56552|49641|56549|28376|B"
 
-ifolder <- ifolder[!grepl(reg,ifolder)]
-dfolder <- dfolder[!grepl(reg,dfolder)]
+# ifolder <- ifolder[!grepl(reg,ifolder)]
+# dfolder <- dfolder[!grepl(reg,dfolder)]
 
 tally <- function(infolder){
   name <- basename(infolder)
