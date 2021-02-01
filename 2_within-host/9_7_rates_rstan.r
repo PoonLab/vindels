@@ -1,3 +1,7 @@
+# this script is solely dedicated to statistical analysis of indel rates
+# First part simulates data to run tests in RStan
+# Second part relies on existing data being loaded from 9_6 
+
 # stan model for indel rates 
 library(rstan)
 setwd("~/vindels/2_within-host/")
