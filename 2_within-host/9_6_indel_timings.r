@@ -79,8 +79,8 @@ for (file in 1:length(ifolder)){
   tips <-  which(grepl("^[^\\(\\):\n]+$", iCSV$header))
   nodes <- which(!grepl("^[^\\(\\):\n]+$", iCSV$header))
   
-  iCSV <- iCSV[,-c(1,2,5,6,8)]
-  dCSV <- dCSV[,-c(1,2,5,6,8)]
+  iCSV <- iCSV[,-c(1,2,5,6)]
+  dCSV <- dCSV[,-c(1,2,5,6)]
 
   if (is.null(iint[[id]])){
     iint[[id]] <- iCSV[nodes,]

@@ -16,12 +16,17 @@ final.data <- list(itip, iint, dtip, dint)
 
 final.data <- lapply(final.data, function(x){
   
+  # Filter for length 0 
+  x <- x[x$length>0,]
+  
+  # Extract patient strings
   res <- t(sapply(x$pat, function(str){
     strsplit(str, "_")[[1]]
     
   }))
   x[, 'pat'] <- res[,1]
   x[, 'rep'] <- res[,2]
+
   split(x, x$vloop)
 })
 
@@ -53,6 +58,9 @@ data <- data.frame(time, y)
 fit <- glm(y ~ 1, offset=log(time), data=df, family='poisson')
 exp(coef(fit)[[1]])
 
+fit2 <- glm(y ~ offset(log(time)), data=df, family='poisson')
+exp(coef(fit2)[[1]])
+
 
 mod_string <- " 
 model {
@@ -61,7 +69,7 @@ model {
     log(lam[i]) = int + log(length[i])
   }
 
-  int ~ dunif(0,0.1)
+  int ~ dnorm(0,1)
   
 }"
 
@@ -73,7 +81,7 @@ forJags <- list(counts = data$y,
 
 model.fit <- jags.model(textConnection(mod_string), 
                         data = forJags,
-                        n.chains=3)
+                        n.chains=1)
 update(model.fit, 100)
 
 mod.sim = coda.samples(model=model.fit,
