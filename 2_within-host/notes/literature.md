@@ -48,8 +48,15 @@
     - withinhost and between host evolutionary rates across HIV genome 
     - withinhost rates are found to be an order of magnitude higher than between host rates 
     - based on data retrieved from ENV:
-        - within host is roughly 10<sup>-2 
+        - within host is roughly 10<sup>-2 </sup>
         - between host is roughly 10<sup>-3</sup>
+    - evolutionary rates in env are higher than other HIV genes 
+- Moore ; [link](https://journals.plos.org/plospathogens/article?id=10.1371/journal.ppat.1000598)
+    - In subtype C infection, amino acid changes in the V1V2 region often involved indel events or changes to glycans 
+    - 
+- Frost 2005 [link](https://www.pnas.org/content/pnas/102/51/18514.full.pdf)
+    - targeting by neutralizing antibodies induce rapid and continuous within host evolution toward variants that evade these responses
+
 
 
 
