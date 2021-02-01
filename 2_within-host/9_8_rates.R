@@ -1,12 +1,12 @@
 library("rjags")
 library("data.table")
-# Load 9_6 rsession
-# 9_6 loads finalized indel count and timing data 
 
-iint <- as.data.frame(rbindlist(iint))
-itip <- as.data.frame(rbindlist(itip))
-dint <- as.data.frame(rbindlist(dint))
-dtip <- as.data.frame(rbindlist(dtip))
+# iint <- as.data.frame(rbindlist(iint))
+# itip <- as.data.frame(rbindlist(itip))
+# dint <- as.data.frame(rbindlist(dint))
+# dtip <- as.data.frame(rbindlist(dtip))
+
+# LOAD 9_6_unfixed here 
 
 # type 
   # vloop
@@ -41,6 +41,16 @@ final.data <- lapply(1:4, function(x){
     split(vloop , vloop$rep)
   })
 })
+
+# CHECK FOR LENGTH 0 ENTRIES
+test <- lapply(1:4, function(x){
+  lapply(1:5, function(v){
+    lapply(1:200, function(rep){
+      final.data[[x]][[v]][[rep]]$length
+    })
+  })
+})
+sum(unlist(x) == 0)
 
 
 # ---- Simulate Data JAGS ---- 
