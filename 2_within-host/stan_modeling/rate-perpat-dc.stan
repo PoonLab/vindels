@@ -17,14 +17,14 @@ parameters {
 model {
   int pos;
   int lim;
-  pat_rates ~ lognormal(log(sub_rate), sub_sd);  // 0.2 is arbitrary
+  pat_rates ~ lognormal(sub_rate, sub_sd);  // 0.2 is arbitrary
   
-  pos = 1;
+  pos = 1;           # lpmf 
   for (i in 1:npat){
-    tre_rates ~ lognormal(log(pat_rates[i]), pat_sd);  // 0.2 is arbitrary
+    tre_rates ~ lognormal(pat_rates[i], pat_sd);  // 0.2 is arbitrary
     lim = pos+sizes[i]-1;
-    for (j in 1:ntree){      
-      counts[pos:lim, j] ~ poisson(tre_rates[j] * branches[pos:lim, j]); 
+    for (j in 1:ntree){      # poisson_log_lpmf()
+      counts[pos:lim, j] ~ poisson_log(tre_rates[j] * branches[pos:lim, j]); 
     }
     pos = pos + sizes[i];
   }
