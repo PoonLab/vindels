@@ -7,24 +7,25 @@ data {
 }
 
 parameters {
-  real<lower=0.000001, upper=0.1> sub_rate;
-  real<lower=0.000001, upper=1> sub_sd;
-  real<lower=0.000001, upper=0.1> pat_rates[npat];
-  real<lower=0.000001,upper=1> pat_sd;
-  real<lower=0.000001, upper=0.1> tre_rates[ntree];
+  real<lower=-20,upper=10> sub_rate;
+  real<lower=0, upper=5> sub_sd;
+  real<lower=-20,upper=10> pat_rates[npat];
+  real<lower=0,upper=5> pat_sd;
+  real<lower=-20, upper=0> tre_rates[ntree, npat];
 }
 
 model {
   int pos;
   int lim;
-  pat_rates ~ lognormal(sub_rate, sub_sd);  // 0.2 is arbitrary
+  pat_rates ~ normal_lpdf(sub_rate, sub_sd);  // 0.2 is arbitrary
   
-  pos = 1;           # lpmf 
+  pos = 1;           
   for (i in 1:npat){
-    tre_rates ~ lognormal(pat_rates[i], pat_sd);  // 0.2 is arbitrary
+    tre_rates[,i] ~ normal_lpdf(pat_rates[i], pat_sd);  // 0.2 is arbitrary
     lim = pos+sizes[i]-1;
-    for (j in 1:ntree){      # poisson_log_lpmf()
-      counts[pos:lim, j] ~ poisson_log(tre_rates[j] * branches[pos:lim, j]); 
+    
+    for (j in 1:ntree){      
+      counts[pos:lim, j] ~ poisson_log_lpmf(tre_rates[j,i] + log(branches[pos:lim, j])); 
     }
     pos = pos + sizes[i];
   }

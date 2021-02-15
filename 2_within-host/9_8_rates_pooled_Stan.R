@@ -17,12 +17,18 @@ final.data <- list(itip, iint, dtip, dint)
 final.data <- lapply(final.data, function(x){
   
   # Filter for length 0 
-  x <- x[x$length>0,]
+  idx <- x$length == 0
+  x[idx,'length'] <- 0.001
   
   # Extract patient strings
   res <- t(sapply(x$pat, function(str){
-    strsplit(str, "_")[[1]]
     
+    parsed <- strsplit(str, "_")[[1]]
+    if(grepl("-b_", str)){
+      parsed[2] = paste(as.numeric(parsed[2]) + 200)
+    }
+    parsed[1] <- strsplit(parsed[1], "-")[[1]][1]
+    parsed
   }))
   x[, 'pat'] <- res[,1]
   x[, 'rep'] <- res[,2]
@@ -53,7 +59,7 @@ test <- lapply(1:4, function(x){
 sum(unlist(x) == 0)
 
 
-# ---- Simulate Data JAGS ---- 
+# ---- Simulate Data---- 
 
 rate <- 0.00001
 time <- round(rlnorm(50000,4.5,0.3))
@@ -66,10 +72,10 @@ data <- data.frame(time, y)
 
 # ---- STANDARD GLM ----
 fit <- glm(y ~ 1, offset=log(time), data=df, family='poisson')
-exp(coef(fit)[[1]])
+coef(fit)[[1]]
 
 fit2 <- glm(y ~ offset(log(time)), data=df, family='poisson')
-exp(coef(fit2)[[1]])
+coef(fit2)[[1]]
 
 
 # ---- Simulate Data RSTAN ---- 
@@ -84,7 +90,7 @@ start <- proc.time()
 stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-new.stan",
                  data= data.stan, 
                  chains=1,
-                 iter=2000,
+                 iter=1000,
                  control=list(adapt_delta=0.90))
 end <- proc.time() - start
 
@@ -120,8 +126,7 @@ for (v in 1:5){
                      data=stan.df, 
                      chains=1,
                      iter=10000,
-                     control=list(adapt_delta=0.90),
-                     verbose=F)
+                     control=list(adapt_delta=0.90))
     sum <- summary(stan.fit)$summary
     mean[i] <- exp(sum[1,1]) * (365 / median(df$vlen))
     median[i] <- exp(sum[1,6]) * (365 / median(df$vlen))
@@ -147,6 +152,105 @@ final <- lapply(1:5, function(v){
     1000* exp(vmean[[v]][x]) * (365 / median(lens[[v]][x]))
   })
 })
+
+# ----- REAL DATA -----
+# ------------------------
+
+# ---- STANDARD GLM ----
+df <- final.data[[1]][[1]]
+fit <- glm(count ~ 1, offset=log(length), data=df, family='poisson')
+coef(fit)[[1]]
+
+fit2 <- glm(count ~ offset(log(length)), data=df, family='poisson')
+coef(fit2)[[1]]
+
+
+
+# ---- REAL DATA RSTAN ITERATED ----
+
+data <- final.data[[1]][[1]]
+
+
+options(mc.cores = parallel::detectCores()-2)
+# Stan modeling 
+start <- proc.time()
+
+mean <- c()
+median <- c()
+neff <- c()
+
+
+for (v in 1:5){
+  # Load data 
+  
+  data <- final.data[[1]][[v]]
+  data$rep <- as.numeric(data$rep)
+  
+  npat = length(unique(data$pat))
+  ntree = length(unique(data$rep))
+  
+  
+  sizes <- c(table(data[data$rep=="1",'pat']))
+  
+  byPat <- split(data, data$pat)
+  byPat <- lapply(byPat, function(x){
+    x[order(x$rep),]
+  })
+  all.counts <- matrix(nrow=sum(sizes),
+                       ncol=ntree)
+  all.times <- matrix(nrow=sum(sizes),
+                      ncol=ntree)
+  pos = 1 
+  for(i in 1:npat){
+    start = pos
+    end = pos + sizes[i]-1
+    print(paste0(start," ",end))
+    all.counts[start:end,] = byPat[[i]]$count
+    all.times[start:end,] = byPat[[i]]$length
+    
+    pos = pos + sizes[i]
+  }
+  
+  stan.df <- list(npat=npat,
+                  ntree=ntree,
+                  sizes=sizes,
+                  counts=all.counts,
+                  branches=all.times)
+  
+  stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-perpat-dc.stan",
+                   data=stan.df, 
+                   chains=1,
+                   iter=10000,
+                   control=list(adapt_delta=0.90))
+  
+  # Save summary 
+  sum <- summary(stan.fit)$summary
+  
+  # Load results 
+  mean[i] <- exp(sum[1,1]) * (365 / median(df$vlen))
+  median[i] <- exp(sum[1,6]) * (365 / median(df$vlen))
+  neff[i] <- sum[1,'n_eff']
+  
+  print(paste0("Finished: ", i))
+
+}
+
+
+end <- proc.time() - start
+
+lens <- lapply(1:5, function(v){
+  sapply(1:200, function(x){
+    median(final.data[[1]][[v]][[x]]$vlen)
+  })
+})
+
+final <- lapply(1:5, function(v){
+  sapply(1:200, function(x){
+    1000* exp(vmean[[v]][x]) * (365 / median(lens[[v]][x]))
+  })
+})
+
+
 
 
 

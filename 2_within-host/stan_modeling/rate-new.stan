@@ -12,7 +12,7 @@ parameters {
 model {
   rate ~ uniform(-30,30);
   for (i in 1:N){
-    counts[i] ~ poisson(exp(rate) * branches[i]);
+    counts[i] ~ poisson_log_lpmf(rate + log(branches[i]));
   }
 }
 
