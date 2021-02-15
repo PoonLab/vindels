@@ -182,55 +182,78 @@ neff <- c()
 
 for (v in 1:5){
   # Load data 
-  
   data <- final.data[[1]][[v]]
   data$rep <- as.numeric(data$rep)
   
+  # Dimensions of matrices 
   npat = length(unique(data$pat))
   ntree = length(unique(data$rep))
   
-  
+  # Count number of branches per patient 
   sizes <- c(table(data[data$rep=="1",'pat']))
   
+  # Split by patient 
   byPat <- split(data, data$pat)
   byPat <- lapply(byPat, function(x){
     x[order(x$rep),]
   })
+  
+  # Search for empty patients 
+  pos = 1 
+  sums <- c()
+  for(i in 1:npat){
+    start = pos
+    end = pos + sizes[i]-1
+    
+    sums[i] <- sum(byPat[[i]]$count)
+    
+    pos = pos + sizes[i]
+  }
+  
+  # Modify sizes to remove the empty patients
+  sizes <- sizes[-which(sums==0)]
+  npat <- npat - sum(sums==0)
+  byPat <- byPat[-which(sums==0)]
+
+  # Initialize matrices
   all.counts <- matrix(nrow=sum(sizes),
                        ncol=ntree)
   all.times <- matrix(nrow=sum(sizes),
                       ncol=ntree)
-  pos = 1 
+
+  # Load matrices
+  pos = 1
   for(i in 1:npat){
     start = pos
     end = pos + sizes[i]-1
     print(paste0(start," ",end))
     all.counts[start:end,] = byPat[[i]]$count
     all.times[start:end,] = byPat[[i]]$length
-    
+
     pos = pos + sizes[i]
   }
-  
+
   stan.df <- list(npat=npat,
                   ntree=ntree,
                   sizes=sizes,
                   counts=all.counts,
                   branches=all.times)
-  
+
   stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-perpat-dc.stan",
-                   data=stan.df, 
+                   data=stan.df,
                    chains=1,
                    iter=10000,
-                   control=list(adapt_delta=0.90))
-  
-  # Save summary 
+                   #control=list(adapt_delta=0.90)
+                   )
+
+  # Save summary
   sum <- summary(stan.fit)$summary
-  
-  # Load results 
+
+  # Load results
   mean[i] <- exp(sum[1,1]) * (365 / median(df$vlen))
   median[i] <- exp(sum[1,6]) * (365 / median(df$vlen))
   neff[i] <- sum[1,'n_eff']
-  
+
   print(paste0("Finished: ", i))
 
 }

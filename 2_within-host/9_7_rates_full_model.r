@@ -80,17 +80,32 @@ title(ylab="Density", line=4.2, cex.lab=1.7)
 
 # ---- Real Data ----
 
-rm(all.data)
-rm(mat)
-rm(tre)
-rm(ifolder)
-rm(dfolder)
-rm(lens)
-rm(maxes)
-rm(patnames)
-rm(tips)
-rm(selectRows)
-rm(pat.idx)
+
+final.data <- list(itip, iint, dtip, dint)
+
+final.data <- lapply(final.data, function(x){
+  
+  # Filter for length 0 
+  idx <- x$length == 0
+  x[idx,'length'] <- 0.001
+  
+  # Extract patient strings
+  res <- t(sapply(x$pat, function(str){
+
+    parsed <- strsplit(str, "_")[[1]]
+    # if(grepl("-b_", str)){
+    #   parsed[2] = paste(as.numeric(parsed[2]) + 200)
+    # }
+    # parsed[1] <- strsplit(parsed[1], "-")[[1]][1]
+    parsed[1] <- substr(parsed[1], 1, nchar(parsed[1])-2)
+    parsed
+  }))
+  x[, 'pat'] <- res[,1]
+  x[, 'rep'] <- res[,2]
+  
+  split(x, x$vloop)
+})
+
 
 
 type <- c("tip","node")

@@ -7,11 +7,11 @@ data {
 }
 
 parameters {
-  real<lower=-20,upper=10> sub_rate;
+  real<lower=-15,upper=0> sub_rate;
   real<lower=0, upper=5> sub_sd;
-  real<lower=-20,upper=10> pat_rates[npat];
+  real<lower=-15,upper=0> pat_rates[npat];
   real<lower=0,upper=5> pat_sd;
-  real<lower=-20, upper=0> tre_rates[ntree, npat];
+  real<lower=-15, upper=0> tre_rates[ntree, npat];
 }
 
 model {
