@@ -24,18 +24,18 @@ final.data <- lapply(final.data, function(x){
   res <- t(sapply(x$pat, function(str){
     
     parsed <- strsplit(str, "_")[[1]]
-    if(grepl("-b_", str)){
-      parsed[2] = paste(as.numeric(parsed[2]) + 200)
-    }
-    parsed[1] <- strsplit(parsed[1], "-")[[1]][1]
+    # if(grepl("-b_", str)){
+    #   parsed[2] = paste(as.numeric(parsed[2]) + 200)
+    # }
+    # parsed[1] <- strsplit(parsed[1], "-")[[1]][1]
+    parsed[1] <- substr(parsed[1], 1, nchar(parsed[1])-2)
     parsed
   }))
   x[, 'pat'] <- res[,1]
   x[, 'rep'] <- res[,2]
-
+  
   split(x, x$vloop)
 })
-
 
 # --- Preprocessing of Data ---
 
@@ -245,6 +245,7 @@ for (v in 1:5){
                    iter=10000,
                    #control=list(adapt_delta=0.90)
                    )
+  end <- proc.time() - start
 
   # Save summary
   sum <- summary(stan.fit)$summary
@@ -259,7 +260,7 @@ for (v in 1:5){
 }
 
 
-end <- proc.time() - start
+
 
 lens <- lapply(1:5, function(v){
   sapply(1:200, function(x){
