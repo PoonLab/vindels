@@ -187,7 +187,7 @@ for (v in 1:5){
   
   # Dimensions of matrices 
   npat = length(unique(data$pat))
-  ntree = length(unique(data$rep))
+  ntree = 50 # length(unique(data$rep))
   
   # Count number of branches per patient 
   sizes <- c(table(data[data$rep=="1",'pat']))
@@ -227,8 +227,8 @@ for (v in 1:5){
     start = pos
     end = pos + sizes[i]-1
     print(paste0(start," ",end))
-    all.counts[start:end,] = byPat[[i]]$count
-    all.times[start:end,] = byPat[[i]]$length
+    all.counts[start:end,] = byPat[[i]]$count[sample(ntree)]
+    all.times[start:end,] = log(byPat[[i]]$length[sample(ntree)])
 
     pos = pos + sizes[i]
   }
@@ -237,7 +237,7 @@ for (v in 1:5){
                   ntree=ntree,
                   sizes=sizes,
                   counts=all.counts,
-                  branches=all.times)
+                  l_branches=all.times)
 
   stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-perpat-dc.stan",
                    data=stan.df,
