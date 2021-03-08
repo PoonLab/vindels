@@ -5,8 +5,8 @@ require(ape)
 
 args <- commandArgs(trailingOnly = T)
 
-if (length(args) != 3){
-  print("USAGE: Rscript 7_sample_tree_mod.r [log dir] [input dir] [output dir]")
+if (length(args) != 2){
+  print("USAGE: Rscript 7_sample_tree_mod.r [log dir] [tree dir]")
   quit()
 }
 
@@ -19,8 +19,8 @@ for (i in 1:length(args)){
 # input directory of sampled BEAST trees
 # relies on the presence of a "prelim" folder being present
 logpath <- args[1]
-tpath <- args[2]
-outfolder <- args[3]
+tpath <- paste0(args[2], "prelim/")
+outfolder <- paste0(args[2], "rescaled/")
 
 dir.create(outfolder, showWarnings = F)
 trefolder <- Sys.glob(paste0(tpath, "*"))

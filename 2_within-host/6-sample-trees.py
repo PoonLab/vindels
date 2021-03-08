@@ -120,18 +120,18 @@ def sample_beast(infile, outdir, numsample=5):
 def main():
     
 
-    if len(sys.argv) != 3: #and len(sys.argv) != 4:
-        print("USAGE: python 6_sample-beast-trees.py [input trees folder] [output trees folder]")
+    if len(sys.argv) != 3 and len(sys.argv) != 4:
+        print("USAGE: python 6_sample-beast-trees.py [numTrees] [input trees folder] [output trees folder]")
         quit()
-    for i in range(len(sys.argv)):
+    for i in range(2,len(sys.argv)):
         if not sys.argv[i].endswith("/"):
             sys.argv[i] += "/"
 
     #if len(sys.argv) == 4:
     #    exclude = sys.argv[4].split(",")
         
-    infolder = glob(sys.argv[1]+"*.time.trees")
-    outfolder = sys.argv[2]
+    infolder = glob(sys.argv[2]+"*.time.trees")
+    outfolder = sys.argv[3]
     
     for infile in infolder:
         #filename = os.path.basename(infile).split(".")[0]
@@ -140,7 +140,7 @@ def main():
         #    if re.search(item, infile) != None:
         #        skip = True
         print(os.path.basename(infile))
-        sample_beast(infile,outfolder, 200)
+        sample_beast(infile,outfolder, int(sys.argv[1]))
     
 
 

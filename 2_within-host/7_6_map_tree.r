@@ -4,6 +4,8 @@ args <- commandArgs(trailingOnly = T)
 folder <- args[1]
 outfolder <- args[2]
 
+folder = 
+
 logfiles <- Sys.glob(paste0(folder,"*.log"))
 treefiles <- Sys.glob(paste0(folder, "trees/*"))
 
