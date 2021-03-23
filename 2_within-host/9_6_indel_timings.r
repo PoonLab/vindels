@@ -59,13 +59,16 @@ for (file in 1:length(ifolder)){
   tre <- read.tree(paste0(paste0(trefolder,treename,".tree.sample")))
   
   res <- unname(sapply(iCSV$header, findAncestor, tree=tre)) 
-
+  
+  rttlens <- node.depth.edgelength(tre)
+  midpoints <- (rttlens[res] + rttlens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
+  
   iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
   dCSV$length <- iCSV$length
   
-  lens <- node.depth.edgelength(tre)
+  
   # midpoint = (rtt length of tip) + (rtt length of ancestor) / 2
-  iCSV$rtt.mid <- (lens[res] + lens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
+  iCSV$rtt.mid <- 
   dCSV$rtt.mid <- iCSV$rtt.mid
 
   # use the full tree lengths as the maximum cutoff

@@ -6,7 +6,7 @@ require(ape)
 args <- commandArgs(trailingOnly = T)
 
 if (length(args) != 2){
-  print("USAGE: Rscript 7_sample_tree_mod.r [log dir] [tree dir]")
+  print("USAGE: Rscript 7_sample_tree_mod.r [log dir] [output dir]")
   quit()
 }
 
