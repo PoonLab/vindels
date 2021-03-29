@@ -63,13 +63,13 @@ for (file in 1:length(ifolder)){
   rttlens <- node.depth.edgelength(tre)
   midpoints <- (rttlens[res] + rttlens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
   
-  iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
+  iCSV$length <- midpoints # tre$edge.length[match(res, tre$edge[,2])]
   dCSV$length <- iCSV$length
   
   
   # midpoint = (rtt length of tip) + (rtt length of ancestor) / 2
-  iCSV$rtt.mid <- 
-  dCSV$rtt.mid <- iCSV$rtt.mid
+  #iCSV$rtt.mid <- midpoints
+  #dCSV$rtt.mid <- iCSV$rtt.mid
 
   # use the full tree lengths as the maximum cutoff
   maxes[file] <- max(lens,na.rm=T)

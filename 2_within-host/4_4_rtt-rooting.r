@@ -56,7 +56,7 @@ for (i in 1:length(rtdfolder)){
 
   #print(filename)
   daterange[n] <- diff(range(tip.dates))
-  
+  print(tip.dates[1:5])
   # create a linear model and save it
   linear <- lm(lens ~ tip.dates)
   rates[n] <- coef(linear)[[2]]

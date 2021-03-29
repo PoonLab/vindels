@@ -31,13 +31,3 @@ trees = [tpath+x for x in trees]
 start = time.time()
 
 print(len(trees))
-
-for i in range(len(trees)):
-    print("Beginning analysis on file: " + trees[i]+"\n")
-
-    outfile = open(out[i],'w+') 
-    status = check_call(['/home/jpalmer/historian/bin/historian', '-guide', msa[i], '-tree', trees[i],'-ancseq','-output','fasta'], stdout=outfile) 
-    outfile.close()
-    current = time.time()
-    print('Elapsed: {}'.format(current-start))
-

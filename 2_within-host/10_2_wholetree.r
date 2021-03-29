@@ -7,44 +7,22 @@ source("~/vindels/2_within-host/utils.r")
 
 path <- "~/PycharmProjects/hiv-withinhost/"
 
-ifolder <- Sys.glob(paste0(path,"9Indels/mcc/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/mcc/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/supp/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/supp/del/*.tsv"))
 
-newreg <- "30647"
-ifolder <- ifolder[grepl(newreg,ifolder)]
-dfolder <- dfolder[grepl(newreg,dfolder)]
+# ifolder <- ifolder[grepl(newreg,ifolder)]
+# dfolder <- dfolder[grepl(newreg,dfolder)]
+
 
 ins.sep <-list()
 del.sep <- list()
 count <- 0
 
-findAncestor <- function(header){
-  # this expression will return results for NODES ONLY
-  # second column provides the CAPTURED TIP LABELS from within the node label
-  header <- substr(header, 1, nchar(header)-4)
-  tips <- str_match_all(header,"([^\\)\\(,\n:]+):")[[1]][,2]
-  if (length(tips) == 0){
-    # no colons; this means its a TIP 
-    # the index in the tre$tip.label vector is the final result
-    index <- match(header, tre$tip.label)
-  }else{
-    # retreive all descendants of every node and tip in the tree
-    desc <- Descendants(tre)
-    
-    # find the numeric labels of all extracted tips 
-    matches <- match(tips, tre$tip.label)
-    
-    # find the SINGLE node in the descendants list that contains the exact same subset of tips
-    index <- which(sapply(desc, function(x){ifelse(length(x) == length(matches) && all(x==matches),T,F)}))
-  }
-  if (length(index)!=1){
-    return(paste0("PROBLEM:",as.character(index)))
-  }
-  return(index)
-}
-
 ins.nosep <- list()
 del.nosep <- list()
+
+ins.final <- list()
+del.final <- list()
 
 for (file in 1:length(ifolder)){
   print(file)
@@ -54,18 +32,14 @@ for (file in 1:length(ifolder)){
   dCSV <- read.csv(dfolder[file], stringsAsFactors = F, sep="\t")
 
   # extracts info from the indel column and puts it into two separate columns
-  insInfo <- sapply(iCSV$indel, extractInfo)
-  insInfo <- unname(insInfo)
-  insInfo <- t(insInfo)
+  insInfo <- t(unname(sapply(iCSV$indel, extractInfo)))
   insInfo <- as.data.frame(insInfo)
   insInfo$V1 <- as.character(insInfo$V1)
   insInfo$V2 <- as.character(insInfo$V2)
   iCSV <- cbind(iCSV, insInfo)
   iCSV$indel <- NULL
   
-  delInfo <- sapply(dCSV$indel, extractInfo)
-  delInfo <- unname(delInfo)
-  delInfo <- t(delInfo)
+  delInfo <- t(unname(sapply(dCSV$indel, extractInfo)))
   delInfo <- as.data.frame(delInfo)
   delInfo$V1 <- as.character(delInfo$V1)
   delInfo$V2 <- as.character(delInfo$V2)
@@ -82,14 +56,14 @@ for (file in 1:length(ifolder)){
   dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
   
   # Load time-based branch lengths from the time-scaled trees
-  tre <- read.tree(paste0(path,"7_5_MCC/prelim/", strsplit(filename, "\\.tsv")[[1]], ".tree"))
+  tre <- read.tree(paste0(path,"7_5_MCC/new_skygrid/prelim/", strsplit(filename, "\\.tsv")[[1]], ".tree.sample"))
 
   # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
   #lens <- lens[-(Ntip(tre)+1)]
   res <- unname(sapply(iCSV$header, findAncestor)) 
   
-  iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
-  dCSV$length <- iCSV$length
+  #iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
+  #dCSV$length <- iCSV$length
   
   # lens <- node.depth.edgelength(tre)
   # iCSV$rtt.mid <- (lens[res] + lens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
@@ -104,8 +78,8 @@ for (file in 1:length(ifolder)){
   iCSV <- iCSV[,c(1,2,3,9,10,6,7,4,5,8)]
   dCSV <- dCSV[,c(1,2,3,9,10,6,7,4,5,8)]
   
-  colnames(iCSV) <- c("header","vloop", "vlen", "length","count", "indel", "pos", "tip","anc","pat")
-  colnames(dCSV) <- c("header", "vloop", "vlen", "length","count",  "indel", "pos", "tip","anc","pat")
+  colnames(iCSV) <- c("header","vloop", "vlen","count", "indel", "pos", "tip","anc","pat")
+  colnames(dCSV) <- c("header", "vloop", "vlen", "count",  "indel", "pos", "tip","anc","pat")
   
   ins.nosep[[file]] <-  iCSV
   del.nosep[[file]] <-  dCSV
