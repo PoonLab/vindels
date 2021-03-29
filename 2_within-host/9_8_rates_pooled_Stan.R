@@ -1,6 +1,46 @@
 library("rjags")
 library("data.table")
+# ---- Simulate Data---- 
 
+rate <- 0.00001
+time <- round(rlnorm(50000,4.5,0.3))
+
+lambda <- rate * time
+
+y <- rpois(50000,lambda=lambda)
+
+data <- data.frame(time, y)
+
+# ---- STANDARD GLM ----
+fit <- glm(y ~ 1, offset=log(time), data=df, family='poisson')
+coef(fit)[[1]]
+
+fit2 <- glm(y ~ offset(log(time)), data=df, family='poisson')
+coef(fit2)[[1]]
+
+
+# ---- Simulate Data RSTAN ---- 
+
+# Data import
+data.stan <- list(N=50000,
+                  counts=data$y,
+                  branches=data$time)
+
+# Stan modeling 
+start <- proc.time()
+stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-new.stan",
+                 data= data.stan, 
+                 chains=1,
+                 iter=1000,
+                 control=list(adapt_delta=0.90))
+end <- proc.time() - start
+
+
+# ---- MAIN DATA ------
+# ---- REAL DATA RSTAN ITERATED ----
+
+
+# ---- PREPROCESSING ----
 # iint <- as.data.frame(rbindlist(iint))
 # itip <- as.data.frame(rbindlist(itip))
 # dint <- as.data.frame(rbindlist(dint))
@@ -9,8 +49,8 @@ library("data.table")
 # LOAD 9_6_unfixed here 
 
 # type 
-  # vloop
-    # data frame
+# vloop
+# data frame
 
 final.data <- list(itip, iint, dtip, dint)
 
@@ -59,48 +99,35 @@ test <- lapply(1:4, function(x){
 sum(unlist(x) == 0)
 
 
-# ---- Simulate Data---- 
+# REMOVE PATIENTS WITH NO INDELS 
+# (getting data for Roux-Cil)
+x <- final.data[[1]]
+x <- x[x$vloop==1, ]
+treeno <- sapply(x$pat, function(a)strsplit(a,"_")[[1]][2])
+names <-sapply(x$pat, function(a)strsplit(a,"-")[[1]][1])
+x$name <- names 
+x$treeno <- treeno
+y <- split(x, x$name)
+counts <- sapply(y, function(a) sum(a$count))
+zeros <- names(which(counts==0))
+x = x[!x$name %in% zeros,]
+final <- x[,-c(1,2,4,6)]
+colnames(final)[2] <- 'times'
 
-rate <- 0.00001
-time <- round(rlnorm(50000,4.5,0.3))
+y <- split(final, final$name)
 
-lambda <- rate * time
+# Create lists of matrices 
+clist<- lapply(y, function(a){matrix(a$count, ncol=200)})
+tlist <- lapply(y, function(a){matrix(a$times, ncol=200)})
 
-y <- rpois(50000,lambda=lambda)
-
-data <- data.frame(time, y)
-
-# ---- STANDARD GLM ----
-fit <- glm(y ~ 1, offset=log(time), data=df, family='poisson')
-coef(fit)[[1]]
-
-fit2 <- glm(y ~ offset(log(time)), data=df, family='poisson')
-coef(fit2)[[1]]
-
-
-# ---- Simulate Data RSTAN ---- 
-
-# Data import
-data.stan <- list(N=50000,
-                  counts=data$y,
-                  branches=data$time)
-
-# Stan modeling 
-start <- proc.time()
-stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-new.stan",
-                 data= data.stan, 
-                 chains=1,
-                 iter=1000,
-                 control=list(adapt_delta=0.90))
-end <- proc.time() - start
+# Concatenate matrices together
+counts <- do.call(rbind, clist)
+times <- do.call(rbind, tlist)
 
 
 
-# ---- REAL DATA RSTAN ITERATED ----
 
 data <- final.data[[1]][[1]]
-
-
 options(mc.cores = parallel::detectCores()-2)
 # Stan modeling 
 start <- proc.time()
@@ -153,6 +180,13 @@ final <- lapply(1:5, function(v){
   })
 })
 
+
+
+
+
+
+
+# DEPRECATED ----------------
 # ----- REAL DATA -----
 # ------------------------
 
@@ -167,7 +201,8 @@ coef(fit2)[[1]]
 
 
 # ---- REAL DATA RSTAN ITERATED ----
-
+# POOLING ACROSS ALL PATIENTS 
+# NOT MEANINGFUL
 data <- final.data[[1]][[1]]
 
 
@@ -259,25 +294,3 @@ for (v in 1:5){
 
 }
 
-
-
-
-lens <- lapply(1:5, function(v){
-  sapply(1:200, function(x){
-    median(final.data[[1]][[v]][[x]]$vlen)
-  })
-})
-
-final <- lapply(1:5, function(v){
-  sapply(1:200, function(x){
-    1000* exp(vmean[[v]][x]) * (365 / median(lens[[v]][x]))
-  })
-})
-
-
-
-
-
-w <- extract(stan.fit)
-plot(density(w$rate))
-line(v=rate)
