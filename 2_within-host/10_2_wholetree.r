@@ -34,55 +34,48 @@ for (file in 1:length(ifolder)){
   # extracts info from the indel column and puts it into two separate columns
   insInfo <- t(unname(sapply(iCSV$indel, extractInfo)))
   insInfo <- as.data.frame(insInfo)
-  insInfo$V1 <- as.character(insInfo$V1)
-  insInfo$V2 <- as.character(insInfo$V2)
-  iCSV <- cbind(iCSV, insInfo)
+  insInfo$indel <- as.character(insInfo$V1)
+  insInfo$pos <- as.character(insInfo$V2)
+  iCSV <- cbind(iCSV, insInfo[,c('indel','pos')])
   iCSV$indel <- NULL
   
   delInfo <- t(unname(sapply(dCSV$indel, extractInfo)))
   delInfo <- as.data.frame(delInfo)
-  delInfo$V1 <- as.character(delInfo$V1)
-  delInfo$V2 <- as.character(delInfo$V2)
-  dCSV <- cbind(dCSV, delInfo)
+  delInfo$indel <- as.character(delInfo$V1)
+  delInfo$pos <- as.character(delInfo$V2)
+  dCSV <- cbind(dCSV, delInfo[,c('indel','pos')])
   dCSV$indel <- NULL
   
-  if(all(is.na(iCSV$V1))){
-    iCSV$V1 <- ""
-    iCSV$V2 <- ""
+  if(all(is.na(iCSV$indel))){
+    iCSV$indel <- ""
+    iCSV$pos <- ""
   }
-  
+  if(all(is.na(dCSV$indel))){
+    dCSV$indel <- ""
+    dCSV$pos <- ""
+  }
   
   iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
   dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
   
   # Load time-based branch lengths from the time-scaled trees
-  tre <- read.tree(paste0(path,"7_5_MCC/new_skygrid/prelim/", strsplit(filename, "\\.tsv")[[1]], ".tree.sample"))
+  tre <- read.tree(paste0(path,"7_5_MCC/main/prelim/", strsplit(filename, "\\.tsv")[[1]], ".tree.sample"))
 
-  # remove the root from the rtt length vector because it is NOT found in the reconstruction or the indel extraction (deprecated)
-  #lens <- lens[-(Ntip(tre)+1)]
-  res <- unname(sapply(iCSV$header, findAncestor)) 
+  res <- unname(sapply(iCSV$header, findAncestor, tree=tre)) 
   
-  #iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]
-  #dCSV$length <- iCSV$length
-  
-  # lens <- node.depth.edgelength(tre)
-  # iCSV$rtt.mid <- (lens[res] + lens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
-  # dCSV$rtt.mid <- iCSV$rtt.mid 
-  
-  iCSV$count <- unname(sapply(iCSV$V1, csvcount))
-  dCSV$count <- unname(sapply(dCSV$V1, csvcount))
+  iCSV$count <- unname(sapply(iCSV$indel, csvcount))
+  dCSV$count <- unname(sapply(dCSV$indel, csvcount))
   
   iCSV$header <- unname(mapply(labels, iCSV$header, iCSV$pat))
   dCSV$header <- unname(mapply(labels, dCSV$header, dCSV$pat))
   
-  iCSV <- iCSV[,c(1,2,3,9,10,6,7,4,5,8)]
-  dCSV <- dCSV[,c(1,2,3,9,10,6,7,4,5,8)]
+  iCSV <- iCSV[,c(2,3,8,9,6,7,4,5)]
+  dCSV <- dCSV[,c(2,3,8,9,6,7,4,5)]
   
-  colnames(iCSV) <- c("header","vloop", "vlen","count", "indel", "pos", "tip","anc","pat")
-  colnames(dCSV) <- c("header", "vloop", "vlen", "count",  "indel", "pos", "tip","anc","pat")
-  
+  # Store DF with no separations
   ins.nosep[[file]] <-  iCSV
   del.nosep[[file]] <-  dCSV
+  
   # COMMA SEPARATION FIX
   # make a new data.frame for each CSV df
   # transport over all rows which do NOT contain a comma
@@ -92,9 +85,12 @@ for (file in 1:length(ifolder)){
   # handle comma rows separately with a function
   iCommas <- iCSV[grepl(",",iCSV$indel),]
   dCommas <- dCSV[grepl(",",dCSV$indel),]
+  
   # APPLY THE SPLIT ROWS TO GET ONE INDEL PER ROW
+  coli <- which(colnames(iCSV)=='indel')
+  colp <-  which(colnames(iCSV)=='pos')
   if (nrow(iCommas) > 0){
-    newrows <- apply(iCommas,1,splitRows, c(6,7))
+    newrows <- apply(iCommas,1,splitRows, c(coli,colp))
     for (i in 1:length(newrows)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
@@ -103,7 +99,7 @@ for (file in 1:length(ifolder)){
     }
   }
   if (nrow(dCommas) > 0){
-    newrows <- apply(dCommas,1,splitRows, c(6,7))
+    newrows <- apply(dCommas,1,splitRows, c(coli,colp))
     for (i in 1:length(newrows)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
@@ -116,20 +112,19 @@ for (file in 1:length(ifolder)){
   #iTemp$vpos <- as.numeric(unname(mapply(addPos, pos=iTemp$pos, header=iTemp$header, vloop=iTemp$vloop)))
   #dTemp$vpos <- as.numeric(unname(mapply(addPos, pos=dTemp$pos, header=dTemp$header, vloop=dTemp$vloop)))
   
-  
-
   # OUTPUT 
   # for other analyses
   # -----------------------------
   ins.sep[[file]] <- iTemp
   del.sep[[file]] <- dTemp
-
 }
 
 rm(iTemp)
 rm(dTemp)
 rm(iCSV)
 rm(dCSV)
+rm(iCommas)
+rm(dCommas)
 
 ins.sep <- as.data.frame(rbindlist(ins.sep))
 del.sep <- as.data.frame(rbindlist(del.sep))
@@ -141,9 +136,8 @@ ins <- ins.sep[ins.sep$indel!="",]
 del <- del.sep[del.sep$indel!="",]
 
 
+
 #------ Checkpoint: 10_2_finished.RData
-
-
 
 # N - GLYC SITE OUTPUTS 
 # ---------------------------------------------
