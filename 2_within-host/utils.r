@@ -1,7 +1,8 @@
+require(stringr)
 findAncestor <- function(header, tree){
   # this expression will return results for NODES ONLY
   # second column provides the CAPTURED TIP LABELS from within the node label
-  header <- substr(header, 1, nchar(header)-4)
+  header <- str_replace(header, "_[0-9]$", "")
   tips <- str_match_all(header,"([^\\)\\(,\n:]+):")[[1]][,2]
   if (length(tips) == 0){
     # no colons; this means its a TIP 
@@ -46,7 +47,8 @@ getPat <- function(header, pat){
   paste0(header,"_",label)
 }
 extractPat <- function(header){
-  str_split(header,"\\.")[[1]][4]
+  x <- strsplit(header,"_")[[1]]
+  c(x[1], x[2])
 }
 getLoop <- function(header, vloop){
   paste0(header,"_",vloop)

@@ -22,8 +22,12 @@ categorize <- function(seqList){
       "7-8"
     }else if(x == 9){
       "9"
-    }else if(x > 9){
-      ">9"
+    }else if(x == 10 | x == 11){
+      "10-11"
+    }else if(x == 12){
+      "12"
+    }else{
+      ">12"
     }
   })))
   category
@@ -31,48 +35,48 @@ categorize <- function(seqList){
 
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
-iLength <- read.csv(paste0(path,"12_lengths/all/ins-all.csv"), row.names=1, stringsAsFactors = F)
-dLength <- read.csv(paste0(path,"12_lengths/all/del-all.csv"), row.names=1, stringsAsFactors = F)
+ins <- read.csv(paste0(path,"12_lengths/all/ins-all.csv"), row.names=1, stringsAsFactors = F)
+del <- read.csv(paste0(path,"12_lengths/all/del-all.csv"), row.names=1, stringsAsFactors = F)
  
-iLength <- iLength[iLength$count>0,]
-dLength <- dLength[dLength$count>0,]
+ins <- ins[ins$count>0,]
+del <- del[del$count>0,]
 
-iLength$Len <- sapply(iLength$indel, nchar)
-dLength$Len <- sapply(dLength$indel, nchar)
+ins$len <- sapply(ins$indel, nchar)
+del$len <- sapply(del$indel, nchar)
 
-iLength$Bin <- sapply(iLength$indel,categorize)
-dLength$Bin <- sapply(dLength$indel,categorize)
+ins$bin <- sapply(ins$indel,categorize)
+del$bin <- sapply(del$indel,categorize)
 
-dLength <- dLength[nchar(dLength$indel) < 200, ]
+del <- del[nchar(del$indel) < 200, ]
 
-# verify that  no commas are found within the iLength and dLength data frames 
-"," %in% iLength$indel
-"," %in% dLength$indel
+# verify that  no commas are found within the ins and del data frames 
+"," %in% ins$indel
+"," %in% del$indel
 
-# order the iLength and dLength dataframes 
-l <- c(">9","9","7-8", "6", "4-5","3", "1-2")
+# order the ins and del dataframes 
+l <- c(">12","12","10-11","9","7-8", "6", "4-5","3", "1-2")
 l <- l[length(l):1]  # TO REVERSE THE ORDER 
 
-iLength$Bin <- factor(iLength$Bin,levels=l)
-dLength$Bin <- factor(dLength$Bin,levels=l)
+ins$bin <- factor(ins$bin,levels=l)
+del$bin <- factor(del$bin,levels=l)
 
 # table manipulation for data display
-itab <- table(iLength$Bin, iLength$vloop)
-dtab <- table(dLength$Bin, dLength$vloop)
+itab <- as.matrix(table(ins$bin, ins$vloop)) / 20
+dtab <- as.matrix(table(del$bin, del$vloop) )/ 20
 
 require(vcd)
 
-idf <- as.data.frame(itab)
-ddf <- as.data.frame(dtab)
+idf <- as.data.frame(round(itab))
+ddf <- as.data.frame(round(dtab))
 
 
-colnames(idf) <- c("Bin", "vloop", "count")
+colnames(idf) <- c("bin", "vloop", "count")
 colnames(ddf) <- colnames(idf)
 
 
 # --- Mosaic Plot -----
-data <- ddf
-df <- data.frame(bin=factor(rep(data$Bin, data$count),levels=c("1-2","3","4-5","6","7-8","9",">9")), vloop = rep(data$vloop, data$count))
+data <- idf
+df <- data.frame(bin=factor(rep(data$bin, data$count),levels=l), vloop = rep(data$vloop, data$count))
 
 # reorder the data frame 
 df$bin <- factor(df$bin, levels=c("1-2","3","4-5","6","7-8","9",">9"))
@@ -108,10 +112,10 @@ ddf$Sign <- rep(2,35)
 ddf$Sign[c(1,4,7,9,11,13,14,15,16,30,31,34,35)] <- c(1,1,3,1,3,3,1,3,1,3,3,1,1)
 
 # Proportion of frameshift indels 
-x <- nchar(iLength$indel)
+x <- nchar(ins$indel)
 sum(x[x%%3 != 0]) / sum(x)
 
-x <- nchar(dLength$indel)
+x <- nchar(del$indel)
 sum(x[x%%3 != 0]) / sum(x)
 
 
@@ -121,10 +125,10 @@ l <- l[length(l):1]
 # STACK BAR PLOT 
 # -------------------------------------------
 require(RColorBrewer)
-pal <- c("gray28", "blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
+pal <- c("gray28", "cyan","brown","blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
 pal <- pal[length(pal):1]
 
-data <- ddf
+data <- idk
 
 ymx <- 650
 
@@ -176,7 +180,7 @@ legend(5.05,450,
 
 require(ggplot2)
 iplot <- ggplot() + 
-  geom_bar(aes(x=vloop, y=count, fill=Bin), data=idf, stat='identity') + 
+  geom_bar(aes(x=vloop, y=count, fill=bin), data=idf, stat='identity') + 
   scale_fill_manual(values=rep(pal,4)) + 
   labs(x="Variable Loop", 
        y="Frequency", title="Insertion Lengths") +
@@ -198,7 +202,7 @@ iplot
 
 
 dplot <- ggplot() + 
-  geom_bar(aes(x=vloop, y=count, fill=Bin), data=ddf, stat='identity') + 
+  geom_bar(aes(x=vloop, y=count, fill=bin), data=ddf, stat='identity') + 
   scale_fill_manual(values=rep(pal,4)) + 
   labs(x="Variable Loop", 
        y="Frequency", title="Deletion Lengths") +
@@ -224,7 +228,7 @@ dplot
 # TEST : ALLUVIAL PLOT
 # ----------------------------------------
 iplot <- ggplot(idf, aes(y=count, axis1=)) + 
-  geom_bar(aes(x=vloop, y=count, fill=Bin), data=idf, stat='identity') + 
+  geom_bar(aes(x=vloop, y=count, fill=bin), data=idf, stat='identity') + 
 
 
 
@@ -232,7 +236,7 @@ iplot <- ggplot(idf, aes(y=count, axis1=)) +
 
 
 
-mosaic(~vloop + Bin, data=iLength,
+mosaic(~vloop + bin, data=ins,
        shade=T, main=NULL, direction="v",
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",
@@ -242,7 +246,7 @@ mosaic(~vloop + Bin, data=iLength,
                             gp_labels=gpar(fontsize=20),
                             gp_varnames=gpar(fontsize=26),
                             set_varnames = c(vloop="Variable Loop", 
-                                             Bin="Insertion Length (nt)"),
+                                             bin="Insertion Length (nt)"),
                             offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
        legend=legend_resbased(fontsize = 20, fontfamily = "",
                               x = unit(0.5, "lines"), y = unit(2,"lines"),
@@ -251,7 +255,7 @@ mosaic(~vloop + Bin, data=iLength,
        set_labels=list(vloop=c("V1","V2","V4","V5")))
 
 
-mosaic(~vloop + Bin, data=dLength,
+mosaic(~vloop + bin, data=del,
        shade=T, main=NULL, direction="v",
        spacing=spacing_equal(sp = unit(0.7, "lines")),
        residuals_type="Pearson",
@@ -261,7 +265,7 @@ mosaic(~vloop + Bin, data=dLength,
                             gp_labels=gpar(fontsize=20),
                             gp_varnames=gpar(fontsize=26),
                             set_varnames = c(vloop="Variable Loop", 
-                                             Bin="Deletion Length (nt)"),
+                                             bin="Deletion Length (nt)"),
                             offset_labels=c(0,0,0,0),rot_labels=c(0,0,0,0), just_labels=c("center","center","center","center")),
        legend=legend_resbased(fontsize = 20, fontfamily = "",
                               x = unit(0.5, "lines"), y = unit(2,"lines"),
