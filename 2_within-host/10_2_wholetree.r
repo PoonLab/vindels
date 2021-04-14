@@ -55,22 +55,39 @@ for (file in 1:length(ifolder)){
     dCSV$pos <- ""
   }
   
-  iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
-  dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
+
   
   # Load time-based branch lengths from the time-scaled trees
   tre <- read.tree(paste0(path,"7_5_MCC/main/prelim/", strsplit(filename, "\\.tsv")[[1]], ".tree.sample"))
 
   res <- unname(sapply(iCSV$header, findAncestor, tree=tre)) 
   
+  rttlens <- node.depth.edgelength(tre)
+  midpoints <- (rttlens[res] + rttlens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
+  
+  iCSV$length <- midpoints # tre$edge.length[match(res, tre$edge[,2])]
+  dCSV$length <- iCSV$length
+  
   iCSV$count <- unname(sapply(iCSV$indel, csvcount))
   dCSV$count <- unname(sapply(dCSV$indel, csvcount))
   
-  iCSV$header <- unname(mapply(labels, iCSV$header, iCSV$pat))
-  dCSV$header <- unname(mapply(labels, dCSV$header, dCSV$pat))
+  iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
+  dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
   
-  iCSV <- iCSV[,c(2,3,8,9,6,7,4,5)]
-  dCSV <- dCSV[,c(2,3,8,9,6,7,4,5)]
+  # iCSV$header <- unname(mapply(labels, iCSV$header, iCSV$pat))
+  # dCSV$header <- unname(mapply(labels, dCSV$header, dCSV$pat))
+  
+  res <- as.data.frame(t(unname(sapply(iCSV$pat, extractPat))))
+  colnames(res) <- c("pat", "rep")
+  
+  iCSV <- cbind(iCSV, res)
+  dCSV <- cbind(dCSV, res)
+  
+  iCSV$pat <- NULL
+  dCSV$pat <- NULL
+  
+  iCSV <- iCSV[,c(10,11,2,3,8,9,6,7,4,5)]
+  dCSV <- dCSV[,c(10,11,2,3,8,9,6,7,4,5)]
   
   # Store DF with no separations
   ins.nosep[[file]] <-  iCSV
@@ -87,10 +104,10 @@ for (file in 1:length(ifolder)){
   dCommas <- dCSV[grepl(",",dCSV$indel),]
   
   # APPLY THE SPLIT ROWS TO GET ONE INDEL PER ROW
-  coli <- which(colnames(iCSV)=='indel')
-  colp <-  which(colnames(iCSV)=='pos')
+  colindel <- which(colnames(iCSV)=='indel')
+  colpos <-  which(colnames(iCSV)=='pos')
   if (nrow(iCommas) > 0){
-    newrows <- apply(iCommas,1,splitRows, c(coli,colp))
+    newrows <- apply(iCommas,1,splitRows, c(colindel,colpos))
     for (i in 1:length(newrows)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
@@ -99,7 +116,7 @@ for (file in 1:length(ifolder)){
     }
   }
   if (nrow(dCommas) > 0){
-    newrows <- apply(dCommas,1,splitRows, c(coli,colp))
+    newrows <- apply(dCommas,1,splitRows, c(colindel,colpos))
     for (i in 1:length(newrows)){
       idx <- as.double(names(newrows)[i])
       len <- nrow(newrows[[i]])
@@ -119,12 +136,15 @@ for (file in 1:length(ifolder)){
   del.sep[[file]] <- dTemp
 }
 
+# CLEAN UP
 rm(iTemp)
 rm(dTemp)
 rm(iCSV)
 rm(dCSV)
 rm(iCommas)
 rm(dCommas)
+
+# FINALIZE DATAFRAMES 
 
 ins.sep <- as.data.frame(rbindlist(ins.sep))
 del.sep <- as.data.frame(rbindlist(del.sep))
@@ -137,7 +157,7 @@ del <- del.sep[del.sep$indel!="",]
 
 
 
-#------ Checkpoint: 10_2_finished.RData
+#------ Checkpoint: 10_2_sample.RData
 
 # N - GLYC SITE OUTPUTS 
 # ---------------------------------------------
@@ -147,80 +167,85 @@ write.table(del,paste0(path, "13_nglycs/all/del-sep.csv"), row.names=F, sep="\t"
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
 
-write.csv(ins.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/ins-all.csv"))
-write.csv(del.sep[,c(1,2,5,6)], paste0(path,"12_lengths/all/del-all.csv"))
+write.csv(ins.sep[,c('pat','rep','vloop','vlen','count', 'indel')], paste0(path,"12_lengths/all/ins-all.csv"))
+write.csv(del.sep[,c('pat','rep', 'vloop','vlen','count', 'indel')], paste0(path,"12_lengths/all/del-all.csv"))
 
 
 # ---- Indel Nucleotide Analysis ----
 # focus on only the columns needed 
-total.ins <- ins[,c(2,3,6,9)]
-total.del <- del[,c(2,3,6,9)]
+nt.ins <- ins[,c(2,3,4,7,8,10)]
+nt.del <- del[,c(2,3,4,7,8,10)]
+
+nt.ins$pos <- as.numeric(nt.ins$pos)
+nt.del$pos <- as.numeric(nt.del$pos)
+
+nt.ins$len <- sapply(nt.ins$indel, nchar)
+nt.del$len <- sapply(nt.del$indel, nchar)
+
+nt.ins$vlen <- as.numeric(nt.ins$vlen)
+nt.del$vlen <- as.numeric(nt.del$vlen)
+
+nt.del$anc <- paste0(substr(nt.del$anc, 0, nt.del$pos - nchar(nt.del$indel)), substr(nt.del$anc, nt.del$pos+1, nchar(nt.del$anc)))
+
+nt.ins$anc <- gsub("-","",nt.ins$anc)
+nt.del$anc <- gsub("-","",nt.del$anc)
 
 
-total.ins$len <- sapply(total.ins$indel, nchar)
-total.del$len <- sapply(total.del$indel, nchar)
-
-total.ins$vlen <- as.numeric(total.ins$vlen)
-total.del$vlen <- as.numeric(total.del$vlen)
-
-total.ins$anc <- gsub("-","",total.ins$anc)
-total.del$anc <- gsub("-","",total.del$anc)
-
-
-write.csv(total.ins, paste0(path,"10_nucleotide/all/total-ins.csv"))
-write.csv(total.del, paste0(path,"10_nucleotide/all/total-del.csv"))
+write.csv(nt.ins, paste0(path,"10_nucleotide/all/total-ins.csv"))
+write.csv(nt.del, paste0(path,"10_nucleotide/all/total-del.csv"))
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
 
-write.csv(total.ins[total.ins$len>1,], paste0(path,"10_nucleotide/all/dinucl-ins.csv"))
-write.csv(total.del[total.del$len>1,], paste0(path,"10_nucleotide/all/dinucl-del.csv"))
+write.csv(nt.ins[nt.ins$len>1,], paste0(path,"10_nucleotide/all/dinucl-ins.csv"))
+write.csv(nt.del[nt.del$len>1,], paste0(path,"10_nucleotide/all/dinucl-del.csv"))
 
-# FLANKING INSERTIONS (14) OUTPUT 
-# ------------------------------------
-write.csv(ins, paste0(path,"/10_nucleotide/all/flanking/ins-sep.csv"))
-write.csv(del, paste0(path,"/10_nucleotide/all/flanking/del-sep.csv"))
-
-write.csv(ins.nosep, paste0(path,"/10_nucleotide/all/flanking/ins-nosep-all.csv"))
-write.csv(del.nosep, paste0(path,"/10_nucleotide/all/flanking/del-nosep-all.csv"))
-
-# --- Modeling 2 ----
-write.csv(ins.sep, paste0(path,"/10_nucleotide/all/flanking/ins-sep-all.csv"))
-write.csv(del.sep, paste0(path,"/10_nucleotide/all/flanking/del-sep-all.csv"))
+# # FLANKING INSERTIONS (14) OUTPUT 
+# # ------------------------------------
+# write.csv(ins, paste0(path,"/10_nucleotide/all/flanking/ins-sep.csv"))
+# write.csv(del, paste0(path,"/10_nucleotide/all/flanking/del-sep.csv"))
+# 
+# write.csv(ins.nosep, paste0(path,"/10_nucleotide/all/flanking/ins-nosep-all.csv"))
+# write.csv(del.nosep, paste0(path,"/10_nucleotide/all/flanking/del-nosep-all.csv"))
+# 
+# # --- Modeling 2 ----
+# write.csv(ins.sep, paste0(path,"/10_nucleotide/all/flanking/ins-sep-all.csv"))
+# write.csv(del.sep, paste0(path,"/10_nucleotide/all/flanking/del-sep-all.csv"))
 
 
 
 # NT PROPORTIONS -- ALL
 # --------------------------------------------
-
 nucl <- c("A","C","G","T")
-iProps <- c()
-dProps <- c()
-iVProps <- c()
-dVProps <- c()
-counts <- data.frame()
-iTotals <- c(sum(unname(sapply(total.ins$indel, nchar))), sum(unname(sapply(total.ins$anc, nchar))))
-dTotals <- c(sum(unname(sapply(total.del$indel, nchar))),sum(unname(sapply(total.del$anc, nchar))))
-
-for (n in 1:4){
-  icount <- sum(str_count(total.ins$indel, nucl[n]))
-  dcount <- sum(str_count(total.del$indel, nucl[n]))
-  counts <- rbind(counts, data.frame(nucl=nucl[n], ins=icount, del=dcount))
+ntprop <- function(df){
   
-  iProps[n] <- icount / iTotals[1]
-  dProps[n] <- dcount / dTotals[1]
+  indels <- df$indel
+  anc <- df$anc
   
-  iVProps[n] <- sum(str_count(total.ins$anc, nucl[n])) / iTotals[2]
-  dVProps[n] <- sum(str_count(total.del$anc, nucl[n])) / dTotals[2]
+  props <- c()
+  vprops <- c()
+  counts <- c()
+  totals <- c(sum(unname(sapply(indels, nchar))), sum(unname(sapply(anc, nchar))))
+  
+  for (n in 1:4){
+    counts[n] <- sum(str_count(indels, nucl[n]))
+    props[n] <- counts[n] / totals[1]
+    vprops[n] <- sum(str_count(anc, nucl[n])) / totals[2]
+  }
+  return(list(indel=props, vloop=vprops, count=counts))
 }
-require(reshape)
-counts2 <- reshape2::melt(counts)
 
-ins.nt <- data.frame(nt=nucl,props=iProps,vprops=iVProps)
-del.nt <- data.frame(nt=nucl,props=dProps,vprops=dVProps)
+
+# ---- FULL ----
+ires <- ntprop(nt.ins)
+dres <- ntprop(nt.del)
+
+
+ins.nt <- data.frame(nt=nucl,props=ires$indel,vprops=ires$vloop, count=ires$count)
+del.nt <- data.frame(nt=nucl,props=dres$indel,vprops=dres$vloop, count=dres$count)
 indel.nt <- rbind(ins.nt, del.nt)
 indel.nt$indel <- c(rep(0,4),rep(1,4))
-indel.nt$counts <- counts2$value
+
 
 # -----------------------------------------
 # RANDOMIZATION TEST (gave negative result)
@@ -228,25 +253,25 @@ sampleString <- function(len, vloop){
   len <- len-1
   idx <- sample(1:(nchar(vloop)-len),100, replace=TRUE)
   strings <- sapply(idx, function(x){substr(vloop, x, x+len)})
-  a <- unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)}))
-  c <- unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)}))
-  g <- unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)}))
-  t <- unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)}))
+  a <- mean(unname(sapply(strings, function(x){str_count(x, "A")/nchar(x)})))
+  c <- mean(unname(sapply(strings, function(x){str_count(x, "C")/nchar(x)})))
+  g <- mean(unname(sapply(strings, function(x){str_count(x, "G")/nchar(x)})))
+  t <- mean(unname(sapply(strings, function(x){str_count(x, "T")/nchar(x)})))
   list(a,c,g,t)
 }
 
 
 # generates the randomly sampled substrings for each indel
-ires <- mapply(sampleString, total.ins[,"len"], total.ins[,"anc"])
-dres <- mapply(sampleString, total.del[,"len"], total.del[,"anc"])
+isample <- mapply(sampleString, nt.ins[,"len"], nt.ins[,"anc"])
+dsample <- mapply(sampleString, nt.del[,"len"], nt.del[,"anc"])
 
 
 # compares the observed proportion to the overall distribution of each nucleotide 
 isign <- c()
 dsign <- c()
 for (i in 1:4){
-  idist <- unlist(ires[i,])
-  ddist <- unlist(dres[i,])
+  idist <- unlist(isample[i,])
+  ddist <- unlist(dsample[i,])
   print(i)
   
   if(any(is.na(idist))){
@@ -287,19 +312,19 @@ for (i in 1:4){
 ins.nt$sign <- isign
 del.nt$sign <- dsign
 
-# BOOTSTRAPS
-# ----------------
+# BOOTSTRAPS (95% Confidence Intervals)
+# ---------------- 
 
 bs.props <- list()
 
 for (n in 1:1000){
   
   # create the bootstrap sample 
-  sam1 <- sample(nrow(total.ins), nrow(total.ins), replace=T)
-  sam2 <- sample(nrow(total.del), nrow(total.del), replace=T)
+  sam1 <- sample(nrow(nt.ins), nrow(nt.ins), replace=T)
+  sam2 <- sample(nrow(nt.del), nrow(nt.del), replace=T)
   
-  df1.bs <- total.ins[sam1,]
-  df2.bs <- total.del[sam2,]
+  df1.bs <- nt.ins[sam1,]
+  df2.bs <- nt.del[sam2,]
   
   total1 <- c(sum(nchar(df1.bs[,'indel'])), sum(nchar(df1.bs[,'anc'])))
   total2 <- c(sum(nchar(df2.bs[,'indel'])), sum(nchar(df2.bs[,'anc'])))
@@ -342,35 +367,88 @@ upper.y <- con.int[which(!grepl("v",names(con.int)) & grepl("97.5",names(con.int
 
 
 
+
+
+# ---- SPLIT BY REPLICATE ---- 
+ins.rep <- split(nt.ins, nt.ins$rep)
+del.rep <- split(nt.del, nt.del$rep)
+
+ins.rep <- t(sapply(ins.rep, ntprop))
+del.rep <- t(sapply(del.rep, ntprop))
+
+iprop <- do.call(rbind, ins.rep[,1])
+ivprop <- do.call(rbind, ins.rep[,2])
+icount <- do.call(rbind, ins.rep[,3])
+
+dprop <- do.call(rbind, del.rep[,1])
+dvprop <- do.call(rbind, del.rep[,2])
+dcount <- do.call(rbind, del.rep[,3])
+
+colnames(iprop) <- nucl
+colnames(ivprop) <- nucl
+colnames(dprop) <- nucl
+colnames(dvprop) <- nucl
+colnames(icount) <- nucl
+colnames(dcount) <- nucl
+
+iprop <- melt(iprop)
+ivprop <- melt(ivprop)
+dprop <- melt(dprop)
+dvprop <- melt(dvprop)
+icount <- melt(icount)
+dcount <- melt(dcount)
+
+iprop <- iprop[order(iprop$X2, iprop$X1),]
+ivprop <- ivprop[order(ivprop$X2, ivprop$X1),]
+dprop <- dprop[order(dprop$X2, dprop$X1),]
+dvprop <- dvprop[order(dvprop$X2, dvprop$X1),]
+icount <- icount[order(icount$X2, icount$X1),]
+dcount <- dcount[order(dcount$X2, dcount$X1),]
+
+
+ins.nt <- data.frame(nt=iprop$X2,props=iprop$value,vprops=ivprop$value, count=as.numeric(icount$value))
+del.nt <- data.frame(nt=iprop$X2,props=dprop$value,vprops=dvprop$value, count=as.numeric(dcount$value))
+indel.nt2 <- rbind(ins.nt, del.nt)
+indel.nt2$indel <- c(rep(0,80),rep(1,80))
+#indel.nt$counts <- counts2$value
+lim = c(0.14,0.42)
+plot(x=indel.nt2$vprops, y=indel.nt2$props, pch=indel.nt2[,5]+1, col=indel.nt2$nt ,xlim=lim,ylim=lim, cex=0.10*sqrt(indel.nt2$count),
+     cex.lab=1.2, cex.axis=1.6,lwd=6, ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
+
+
+
 # NT ALL INDELS PLOT 
 # broken down by variable loop and nucleotide
 # -------------------------------------
-require(RColorBrewer)
-#colors <- brewer.pal(4, 'Set1')
-colors <- c( "limegreen","dodgerblue","red", "purple")
 
+colors <- c( "limegreen","dodgerblue","red", "purple")
+require(scales)
 
 par(pty="s", xpd=NA, mar=c(6,8,2,1),las=0)
 clab = 1.9
 ctext = 1.9
-xpos <- c(0.18,0.162,0.245,0.38)
-ypos <- c(0.147, 0.22, 0.26, 0.395)
+# xpos <- c(0.18,0.162,0.245,0.38)
+# ypos <- c(0.147, 0.22, 0.26, 0.395)
 
-lim = c(0.14,0.42)
-plot(x=med.x, y=med.y, pch=indel.nt[,4]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.10*sqrt(indel.nt$counts),
+lim = c(0.10,0.50)
+plot(x=med.x, y=med.y, pch=indel.nt[,5]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.10*sqrt(indel.nt$count),
      cex.lab=clab, cex.axis=1.6,lwd=6, ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
 title(ylab="Proportion In Indels", line=5,cex.lab=clab)
 title(xlab="Proportion in Variable Loops", line=4,cex.lab=clab)
 
 sqn <- c(seq(1,8,2),seq(1,8,2)+1)
 # y error bars 
-arrows(med.x, lower.y[sqn], med.x, upper.y[sqn], length=0, angle=90, code=3,lwd=1.5)
-arrows(0.175,0.153,0.167,0.162, length=0, lwd=1.2)
+arrows(med.x, lower.y[sqn], med.x, upper.y[sqn], length=0, angle=90, code=3,lwd=2)
+#arrows(0.175,0.153,0.167,0.162, length=0, lwd=1.2)
 # x error bars 
-arrows(lower.x[sqn], med.y, upper.x[sqn], med.y, length=0, angle=90, code=3,lwd=1.5)
+arrows(lower.x[sqn], med.y, upper.x[sqn], med.y, length=0, angle=90, code=3,lwd=2)
 #legend(0.38,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 text(xpos, ypos, cex=ctext, labels=c("C", "G", "T", "A"))
 #legend(0.14,0.42,legend=c("Insertions", "Deletions"), pch=c(1,2),cex=1.3, lwd=2, col="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
+points(x=indel.nt2$vprops, y=indel.nt2$props, pch=1, col=alpha(rep(rep(colors,each=20), times=2),0.6), ylab='', xlab='',las=1,alpha=0.5)#, main="Nucleotide Proportions")
+
+
+
 par(xpd=F)
 abline(0,1)
 rect(0.145,0.36,0.206,0.415)
@@ -391,8 +469,8 @@ ins.props <- data.frame()
 del.props <- data.frame()
 
 for (i in c(1,2,3,4,5)){
-  iTemp <- total.ins[total.ins$vloop==i,]
-  dTemp <- total.del[total.del$vloop==i,]
+  iTemp <- nt.ins[nt.ins$vloop==i,]
+  dTemp <- nt.del[nt.del$vloop==i,]
 
   iProps <- c()
   dProps <- c()

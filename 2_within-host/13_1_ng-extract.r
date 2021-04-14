@@ -8,25 +8,26 @@ source("~/vindels/2_within-host/utils.r")
 
 insRandTest <- function(seq, indel, start){
   # this will be the start point of the test insertion 
-  smpl <- sample(nchar(seq)+1,500, replace=T)
+  smpl <- sample(nchar(seq)+1,1, replace=T)
   
   # for every number in this random sample 
-  seq <- sapply(smpl, function(x){insert(seq,indel,x)})
-  if(sum(is.na(seq))>0){
-    print(seq[which(is.na(seq))])
+  aa.seq <- sapply(smpl, function(x){translate(insert(seq,indel,x))})
+  if(sum(is.na(aa.seq))>0){
+    print(aa.seq[which(is.na(aa.seq))])
   }
   
     # generate the result sequence ; use substring to add the insertion sequence into the seqestor 
-  aa.seq <- unname(sapply(seq, translate))
-  seq.glycs <- unname(sapply(aa.seq,extractGlycs))
+  #aa.seq <- unname(sapply(seq, translate))
+  #seq.glycs <- unname(sapply(aa.seq,extractGlycs))
+  png.count <- unname(sapply(aa.seq,function(x) {csvcount(extractGlycs(x))}))
   
-  png.count <- unname(sapply(seq.glycs,csvcount))
+  #png.count <- unname(sapply(seq.glycs,csvcount))
   return(png.count - start)
 }
 
 delRandTest <- function(seq, indel, start){
   # this will be the start point of the test insertion 
-  smpl <- sample(nchar(indel):nchar(seq),500, replace=T)
+  smpl <- sample(nchar(indel):nchar(seq),1, replace=T)
   
   # for every number in this random sample 
   seq <- sapply(smpl, function(x){delete(seq,indel,x)})
@@ -38,6 +39,7 @@ delRandTest <- function(seq, indel, start){
   aa.seq <- unname(sapply(seq, translate))
   seq.glycs <- unname(sapply(aa.seq,extractGlycs))
   
+
   png.count <- unname(sapply(seq.glycs,csvcount))
 
   return(png.count - start)
@@ -45,27 +47,23 @@ delRandTest <- function(seq, indel, start){
 
 # GLYC SITE RANDOMIZATION TEST 
 
-observedGlycChange <- function(anc, indel, pos, option="i"){
-  aa.seq <- unname(sapply(anc, translate))
-  glycs <- unname(sapply(aa.seq,extractGlycs))
-  before <- unname(sapply(glycs,csvcount))
-  
+observedGlycChange <- function(anc, indel, pos, before, option="i",n){
+
   # generate the new sequence by applying the appropriate insertion or deletion
   if (option == "i"){
     newanc <- insert(anc, indel, pos)
   }else{
     newanc <- delete(anc, indel, pos)
   }
-  if(is.na(newanc)){
+  if(is.na(newanc) || newanc == ""){
     print(newanc)
     print(indel)
     print(pos)
   }
   
   # recalculate the number of N-glyc sites 
-  new.aa <- unname(sapply(newanc, translate))
-  glycs <- unname(sapply(new.aa,extractGlycs))
-  after <- unname(sapply(glycs,csvcount))
+  new.aa <- translate(newanc)
+  after <- csvcount(extractGlycs(new.aa))
 
   # report this as a net change in the number of Nglyc sites
   return(after - before)
@@ -81,36 +79,51 @@ glycCount <- function(seq){
   csvcount(seq.glycs)
 }
 
+bootstrap <- function(sampl, n=1000){
+  replicate(n, mean(sample(sampl, replace=T)))
+}
+
 #PycharmProjects/hiv-withinhost/
 
 ins <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/all/ins-sep.csv",  sep="\t", stringsAsFactors = F)
 del <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/all/del-sep.csv", sep="\t", stringsAsFactors = F)
 
 
-ins <- ins[,-c(3,4,5)]
-del <- del[,-c(3,4,5)]
+ins <- ins[,-c(4,5,6)]
+del <- del[,-c(4,5,6)]
 
 
 # apply an adjust to the deletion locations to make them the same as insertions 
 #del$pos <- as.numeric(del$pos) + nchar(del$indel)
 
 # Insertions : fill in gaps found in the tip sequences 
-ins$tip <- unname(mapply(restoreOtherSeq,ins$tip, ins$anc))
+ins$tip <- unname(mapply(restoreAllGaps,ins$tip, ins$anc))
 
 # Deletions : fill in gaps found in the ancestral sequences 
 # this is to include any insertions in the ancestor 
-del$anc <- unname(mapply(restoreOtherSeq,del$anc, del$tip))
+del$anc <- unname(mapply(restoreAllGaps,del$anc, del$tip))
 
-del <- del[-which(nchar(del$indel) > nchar(del$anc)),]
+del <- del[-which(nchar(del$indel) > 100),]
+iprop <- nchar(ins$indel) / nchar(ins$anc)
+dprop <- nchar(del$indel) / nchar(del$tip)
+
+#ins <- ins[-which(iprop >= 1),]
+del <- del[-which(dprop >= 1),]
 del <- del[-which(del$pos > nchar(del$anc)),]
 
 # Insertions : 
 # adds all the other insertions into the ancestor
-ins$anc <- unname(mapply(restoreInsAnc, ins$anc, ins$tip, ins$indel, ins$pos))
+ins$anc <- unname(mapply(restoreOtherIndels, ins$anc, ins$tip, ins$indel, ins$pos))
 ins$anc <- gsub("-","",ins$anc)
 ins$pos <- ins$pos - nchar(ins$indel) + 1
 # not needed for deletions because no sequences contain more than 1 deletion
-#del$tip <- unname(mapply(restoreOtherIndels, del$tip, del$anc, del$indel, del$pos))
+del$tip <- unname(mapply(restoreOtherIndels, del$tip, del$anc, del$indel, del$pos))
+
+ins$glycs <- unname(sapply(ins$anc, glycCount))
+del$glycs <- unname(sapply(del$anc, glycCount))
+
+any(grepl("-",ins$anc))
+any(grepl("-",del$anc))
 
 
 ins.v <- split(ins, ins$vloop)
@@ -121,118 +134,155 @@ del.v <- split(del, del$vloop)
 ins.data <- data.frame()
 del.data <- data.frame()
 
+ins.rep <- matrix(nrow=100, ncol=4)
+del.rep <- matrix(nrow=100, ncol=4)
+
+
 for (n in 1:5){
-  print(paste0("V-loop ",n))
+  print(n)
   iTemp <- ins.v[[n]]
   dTemp <- del.v[[n]]
   
   icounts <- nrow(ins.v[[n]])
   dcounts <- nrow(del.v[[n]])
   
-  iTemp$glycs <- unname(sapply(iTemp$anc, glycCount))
-  dTemp$glycs <- unname(sapply(dTemp$anc, glycCount))
   
-  
-  # EXPECTED GLYC CHANGES (RANDOMIZATION TEST)
+  # EXPECTED GLYC CHANGES 
   # ---------------
   # Insertions
-  ires <- t(unname(mapply(insRandTest, iTemp$anc,iTemp$indel, iTemp$glycs)))
+  print("EXPECTED INSERTIONS...")
+  ires <- unname(mapply(insRandTest, iTemp$anc,iTemp$indel, iTemp$glycs))
   #ires <- split(ires, rep(1:nrow(ires), each=ncol(ires)))
   
-  iedist <- unlist(ires)
+  iedist <- ires
   
   iemean <- mean(iedist)
   # Boostraps for expected insertions
-  bs.means <- c()
-  for (i in 1:1000){
-    sam <- sample(length(iedist), length(iedist), replace=T)
-    iexp.bs <- iedist[sam]
-    bs.means[i] <- mean(iexp.bs)
-  }
-  iequantiles <- quantile(bs.means, c(0.025,0.975))
+  bs.means <- bootstrap(iedist)
+  bs.q <- quantile(bs.means - iemean, c(0.025,0.975))
+  
+  ieconint <- c()
+  ieconint[1] <- iemean - bs.q[[2]]
+  ieconint[2] <- iemean - bs.q[[1]]
   
   # Deletions
-  dres <- t(unname(mapply(delRandTest, dTemp$anc,dTemp$indel, dTemp$glycs)))
-  dres <- split(dres, rep(1:nrow(dres), each=ncol(dres)))
+  print("EXPECTED DELETIONS...")
+  dres <- unname(mapply(delRandTest, dTemp$anc,dTemp$indel, dTemp$glycs))
+  #dres <- split(dres, rep(1:nrow(dres), each=ncol(dres)))
 
-  dedist <- unname(unlist(lapply(dres, mean)))
+  dedist <- dres
   
   demean <- mean(dedist)
+  
   # Boostraps for expected deletions
-  bs.means <- c()
-  for (i in 1:1000){
-    sam <- sample(length(dedist), length(dedist), replace=T)
-    dexp.bs <- dedist[sam]
-    bs.means[i] <- mean(dexp.bs)
-  }
-  dequantiles <- quantile(bs.means, c(0.025,0.975))
+  bs.means <- bootstrap(dedist)
+  bs.q <- quantile(bs.means - demean, c(0.025,0.975))
+  
+  deconint <- c()
+  deconint[1] <- demean - bs.q[[2]]
+  deconint[2] <- demean - bs.q[[1]]
   
   
   # OBSERVED GLYCOSYLATION SITE CHANGES (from the data)
   # ----------------------
-  iobs <- unname(mapply(observedGlycChange, iTemp$anc, iTemp$indel, iTemp$pos, "i"))
+  print("OBSERVED INSERTIONS...")
+  iobs <- unname(mapply(observedGlycChange, iTemp$anc, iTemp$indel, iTemp$pos, iTemp$glycs, "i", 1:nrow(iTemp)))
   
   iomean <- mean(iobs)
   # Boostraps for observed insertions
-  bs.means <- c()
-  for (i in 1:1000){
-    sam <- sample(length(iobs), length(iobs), replace=T)
-    iobs.bs <- iobs[sam]
-    bs.means[i] <- mean(iobs.bs)
-  }
-  ioquantiles <- quantile(bs.means, c(0.025,0.975))
+  bs.means <- bootstrap(iobs)
+  bs.q <- quantile(bs.means - iomean, c(0.025,0.975))
   
-  dobs <- unname(mapply(observedGlycChange, dTemp$anc, dTemp$indel, dTemp$pos, "d"))
+  ioconint <- c()
+  ioconint[1] <- iomean - bs.q[[2]]
+  ioconint[2] <- iomean - bs.q[[1]]
+  
+  print("OBSERVED DELETIONS...")
+  dobs <- unname(mapply(observedGlycChange, dTemp$anc, dTemp$indel, dTemp$pos, dTemp$glycs, "d", 1:nrow(dTemp)))
   
   domean <- mean(dobs)
   # Boostraps for observed deletions
-  bs.means <- c()
-  for (i in 1:1000){
-    sam <- sample(length(dobs), length(dobs), replace=T)
-    dobs.bs <- dobs[sam]
-    bs.means[i] <- mean(dobs.bs)
-  }
-  doquantiles <- quantile(bs.means, c(0.025,0.975))
+  bs.means <- bootstrap(dobs)
+  bs.q <- quantile(bs.means - domean, c(0.025,0.975))
   
-  ins.data <- rbind(ins.data, data.frame(exp=iemean, 
-                                         elower=iequantiles[[1]],
-                                         eupper=iequantiles[[2]],
-                                         obs=iomean, 
-                                         olower=ioquantiles[[1]],
-                                         oupper=ioquantiles[[2]],
-                                         counts=icounts))
-  del.data <- rbind(del.data, data.frame(exp=demean, 
-                                         elower=dequantiles[[1]],
-                                         eupper=dequantiles[[2]],
-                                         obs=domean, 
-                                         olower=doquantiles[[1]],
-                                         oupper=doquantiles[[2]],
-                                         counts=dcounts))
+  doconint <- c()
+  doconint[1] <- domean - bs.q[[2]]
+  doconint[2] <- domean - bs.q[[1]]
+  
+  
+  
+  iQT <- quantile(ires, c(0.025, 0.975))
+  if (iomean < iQT[[1]]){
+    isign <- "lower"
+  }else if(iomean > iQT[[2]]){
+    isign <- "higher"
+  }else{
+    isign <- ""
+  }
+  
+  #dnull <- apply(dres, 2, mean)
+  dQT <- quantile(dres, c(0.025, 0.975))
+  if (domean < dQT[[1]]){
+    dsign <- "lower"
+  }else if(domean > dQT[[2]]){
+    dsign <- "higher"
+  }else{
+    dsign <- ""
+  }
+
+  ins.data <- rbind(ins.data, data.frame(exp=iemean, elower=ieconint[1],eupper=ieconint[2],
+                                         obs=iomean, olower=ioconint[1], oupper=ioconint[2],
+                                         counts=icounts, sign=isign))
+  del.data <- rbind(del.data, data.frame(exp=demean, elower=deconint[1],eupper=deconint[2],
+                                         obs=domean, olower=doconint[1],oupper=doconint[2],
+                                         counts=dcounts, sign=dsign))
+  
+  ioreps <- unname(sapply(split(iobs, ins[ins$vloop==n, 'rep']), mean))
+  iereps <- unname(sapply(split(iedist, ins[ins$vloop==n, 'rep']), mean))
+  
+  doreps <- unname(sapply(split(dobs, del[del$vloop==n, 'rep']), mean))
+  dereps <- unname(sapply(split(dedist, del[del$vloop==n, 'rep']), mean))
+  
+  idx <- ((n-1)*20+1):(n*20)
+  ins.rep[idx, 1] <- rep(n,20)
+  ins.rep[idx, 2] <- 1:20
+  ins.rep[idx, 3] <- iereps
+  ins.rep[idx, 4] <- ioreps
+  
+  del.rep[idx, 1] <- rep(n,20)
+  del.rep[idx, 2] <- 1:20
+  del.rep[idx, 3] <- dereps
+  del.rep[idx, 4] <- doreps
+  
 }
 
-# manual jitter 
-del.data[2,1:3] <- del.data[2,1:3] - 0.005
-del.data[3,1:3] <- del.data[3,1:3] + 0.005
 
 
 require(RColorBrewer)
+require(scales)
 colors <- brewer.pal(5, "Set1")
 vloops <- c("V1","V2","V3","V4","V5")
 cex=1
 par(pty="s", xpd=F, mar=c(7,7,3,1),las=0)
-#as.numeric(row.names(data))+20 
+
 # this take in data either as ins.data or del.data
-
-# Deletion data points 
 data <- del.data
+d.rep <- del.rep
+v3offset <- 0.01
+data[3,1:6] <- data[3,1:6] + v3offset
+d.rep[41:60,3:4] <- d.rep[41:60,3:4] + v3offset
 
-sizes <- 0.42*sqrt(data$counts)
+sizes <- 0.15*sqrt(data$counts)
 sizes[3] <- 2.4
 
 lim = c(-0.85,0.5)
 
-plot(data[,c('exp','obs')], pch=1, cex=sizes, lwd=c(10,10,5,10,10), col=colors,xlim=lim,ylim=lim,
+plot(data[,c('exp','obs')], pch=1, cex=sizes, lwd=c(10,10,5,10,10), col=alpha(colors,0.75),xlim=lim,ylim=lim,
      cex.lab=1.85, cex.axis=1.4,cex.main=1.8,las=1, ylab='', xlab='')#main="N-linked Glycosylation Site Changes")
+
+# CLOUDS 
+points(d.rep[,3], d.rep[,4], pch=1, col=colors[d.rep[,1]], cex=0.7, lwd=1.4)
+
 abline(0,1)
 title(ylab="Observed Change in PNGS Count\nPer Indel", line=4,cex.lab=1.7)
 title(xlab="Expected Change in PNGS Count\nPer Indel", line=5,cex.lab=1.7)
@@ -240,26 +290,37 @@ arrows(data[,1], data[,5], data[,1], data[,6], length=0.035, angle=90, code=3)
 arrows(data[,2], data[,4], data[,3], data[,4], length=0.035, angle=90, code=3)
 
 # Insertion data points 
+i <- c(1,2,3,3,4)
 data <- ins.data[-3,]
 newcol <- colors[-3]
-sizes <- 0.42*sqrt(data$counts)
+sizes <- 0.15*sqrt(data$counts)
 
-points(data[,c("exp","obs")], pch=21, col=newcol, cex=sizes,lwd=1, bg=newcol )
+# MEANS 
+points(data[,c("exp","obs")], pch=21, col=newcol, cex=sizes,lwd=1, bg=alpha(newcol,0.65))
+
+
+# CLOUDS 
+points(ins.rep[,3], ins.rep[,4], pch=21, col=newcol[i[ins.rep[,1]]], cex=0.7, lwd=1.4,bg=alpha(newcol[i[ins.rep[,1]]],0.8))
+
+# CONFIDENCE INTERVALS 
 arrows(data[,1], data[,5], data[,1], data[,6], length=0.035, angle=90, code=3)
 arrows(data[,2], data[,4], data[,3], data[,4], length=0.035, angle=90, code=3)
 
-legend(0.25,-0.3,legend=vloops, pch=21,cex=1.5, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.8)
+
+
+legend(0.25,-0.26,legend=vloops, pch=21,cex=1.5, pt.bg=colors,x.intersp = 1.7,y.intersp=1.2, pt.cex=2.8)
 #legend(0.45,0.2,legend=c("Ins", "Del"), pch=c(21,1),cex=1.3, pt.bg=colors[1],col=colors[1], x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 rect(0.25,-0.23,0.46,-0.03)
 text(0.4, -0.09, labels="Ins", cex=1.5)
 text(0.4, -0.17, labels="Del", cex=1.5)
 points(c(0.30,0.30), c(-0.09, -0.17), pch=c(21,1), cex=2.5, lwd=7, col='black', bg='black')
-# positions for V1,V2,V3,V4,V5 (top set first )
-xposi <- c(-0.42, -0.18,-0.65, -0.03)
-yposi <- c(0.48, 0.13, 0.33, 0.07)
 
-xposd <- c(-0.57, -0.12, -0.28, -0.81, -0.31)
-yposd <- c(-0.40, -0.26, -0.33,-0.68, -0.06)
+# positions for V1,V2,V3,V4,V5 (top set first )
+xposi <- c(-0.42, -0.18,-0.62, -0.02)
+yposi <- c(0.40, 0.15, 0.25, 0.07)
+
+xposd <- c(-0.57, -0.22, -0.16, -0.83, -0.31)
+yposd <- c(-0.43, -0.38, -0.30,-0.67, -0.09)
 
 text(xposi, yposi, labels=c("V1","V2","V4","V5"),cex=1.2)
 text(xposd, yposd, labels=c("V1","V2","V3","V4","V5"),cex=1.2)
@@ -267,69 +328,7 @@ text(xposd, yposd, labels=c("V1","V2","V3","V4","V5"),cex=1.2)
 
 
 
-# --- out of date ---- 
-require(RColorBrewer)
-colors <- brewer.pal(5, "Set1")
-vloops <- c("V1","V2","V3","V4","V5")
-cex=1
-par(pty="s", xpd=F, mar=c(6,8,4,1),las=0)
-#as.numeric(row.names(data))+20
-# this take in data either as ins.data or del.data
-sizes <- 0.45*sqrt(data$counts)
-sizes[3] <- 1.3
-data <- del.data
-lim = c(-0.8,0.8)
-plot(data[,c('exp','obs')], pch=21, cex=sizes, bg=colors,xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.2,cex.main=1.8, ylab='', xlab='', main="Deletions - PNLGS")
-abline(0,1)
-title(ylab="Observed Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
-title(xlab="Expected Net Change in N-Glyc Sites", line=3,cex.lab=1.3)
-arrows(data[,1], data[,5], data[,1], data[,6], length=0.05, angle=90, code=3)
-arrows(data[,2], data[,4], data[,3], data[,4], length=0.05, angle=90, code=3)
-legend(0.5,-0.2,legend=vloops, pch=21,cex=1.2, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=2.5)
 
-
-
-
-
-adjust <- list()
-for (i in 1:length(ires)){
-  adjust[[i]] <- ires[[i]] - iobs[i]
-}
-
-isign <- c()
-for (n in 1:length(iobs)){
-  idist <- ires[[n]]
-  ins.p <- iobs[n]
-  
-  iQT <- quantile(idist, probs=c(0.025,0.975))
-  
-  # highlight significant differences 
-  if (ins.p < iQT[[1]]){
-    isign <- c(isign, "lower")
-  }else if(ins.p > iQT[[2]]){
-    isign <- c(isign, "higher")
-  }else{
-    isign <- c(isign, "")
-  }
-}
-
-cols <- brewer.pal(5,"Set1")
-cex=2
-par(pty="s", mar=c(6,5,4,1),las=0)
-
-lim = c(0,0.8)
-
-plot(x=i)
-
-
-vloops <- vector(mode = "list", length = 5)
-for (v in 1:5){
-  idx <- which(ins$vloop==v)
-  for (i in idx){
-    vloops[[v]] <- c(vloops[[v]], adjust[[i]])
-  }
-}
 
 
 # PLOTTING 

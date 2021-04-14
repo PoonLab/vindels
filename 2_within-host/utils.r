@@ -1,7 +1,9 @@
+require(stringr)
+require(ape)
 findAncestor <- function(header, tree){
   # this expression will return results for NODES ONLY
   # second column provides the CAPTURED TIP LABELS from within the node label
-  header <- substr(header, 1, nchar(header)-4)
+  header <- str_replace(header, "_[0-9]$", "")
   tips <- str_match_all(header,"([^\\)\\(,\n:]+):")[[1]][,2]
   if (length(tips) == 0){
     # no colons; this means its a TIP 
@@ -46,7 +48,8 @@ getPat <- function(header, pat){
   paste0(header,"_",label)
 }
 extractPat <- function(header){
-  str_split(header,"\\.")[[1]][4]
+  x <- strsplit(header,"_")[[1]]
+  c(x[1], x[2])
 }
 getLoop <- function(header, vloop){
   paste0(header,"_",vloop)
@@ -136,6 +139,7 @@ insert <- function(str, indel,pos ){
     return (NA)
   }
   
+  # Insert sequence immediately before the "pos"th position
   if (pos == 1){
     return (paste(c(indel, vect[1:length(vect)]),collapse=""))
 
@@ -152,18 +156,43 @@ delete <- function(str, indel, pos){
   vect <- rep(T, nchar(str))
   
   if (pos > (nchar(str))){
+    print("DELETE PROBLEM")
     return (NA)
   }
-  
+
   start <- pos - nchar(indel) + 1
   end <- pos
-  
+  #if(class(start) != "numeric") print("DELETE PROBLEM");print(class(start))
+  if (start < 1 ){
+    print("DELETE -- INCORRECT START")
+  }
   vect[start:end] <- F
   
   chars <- strsplit(str, "")[[1]]
   
   return(paste(chars[which(vect)],collapse=""))
 }
+
+translate <- function(dna) {
+  if (!is.na(dna)) {
+    if (nchar(dna) %% 3 != 0) {
+      extra <- nchar(dna) %% 3
+      dna <- substr(dna,1, nchar(dna)-extra)
+    }
+    
+    dnabin <- as.DNAbin(DNAString(dna))
+    aabin <- trans(dnabin)[[1]]
+    aaseq <- paste(as.character(aabin),collapse="")
+    aaseq <- gsub("X", "-", aaseq)
+    return(truncate(aaseq))
+  }else{
+    print("START")
+    print(dna)
+    print(class(dna))
+    return("")
+  }
+}
+
 
 
 checkDiff <- function(seq1, seq2){
@@ -218,7 +247,7 @@ slip <- function(seq, pos, p.exit){
 }
 
 # 13_1 nglycs and modeling
-restoreInsAnc <- function(anc, tip, indel, pos){
+restoreOtherIndels <- function(anc, tip, indel, pos){
   # find the location of all gap characters in tip/anc
   gaps <- gregexpr("-",anc)[[1]]
   if (length(gaps) > 1 || gaps != -1){
@@ -266,7 +295,7 @@ restoreInsAnc2 <- function(anc, indel, pos){
   
 }
 
-restoreOtherSeq <- function(tip, anc){
+restoreAllGaps <- function(tip, anc){
   # this is used to restore any deletion gaps in tip sequences containing insertions 
   # Reasoning:
   # I need to restore the tip sequence to its ORIGINAL STATE where no deletions have occurred
@@ -408,21 +437,6 @@ truncate <- function(aaseq){
   aaseq
 }
 
-translate <- function(dna) {
-
-  #print(dna)
-  
-  if (nchar(dna) %% 3 != 0) {
-    extra <- nchar(dna) %% 3
-    dna <- substr(dna,1, nchar(dna)-extra)
-  }
-    
-  dnabin <- as.DNAbin(DNAString(dna))
-  aabin <- trans(dnabin)[[1]]
-  aaseq <- paste(as.character(aabin),collapse="")
-  aaseq <- gsub("X", "-", aaseq)
-  truncate(aaseq)
-}
 
 # takes in an amino acid sequence and returns the locations of all Nglycs
 extractGlycs <- function(aaseq, vect=F){
