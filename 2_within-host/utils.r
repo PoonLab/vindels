@@ -25,6 +25,10 @@ findAncestor <- function(header, tree){
   return(index)
 }
 
+bootstrap <- function(sampl, n=1000){
+  replicate(n, mean(sample(sampl, replace=T)))
+}
+
 getSubtype <- function(header){
   newheader <- strsplit(as.character(header),"\\.")[[1]][1]
   newheader

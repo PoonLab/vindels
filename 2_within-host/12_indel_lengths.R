@@ -38,27 +38,36 @@ path <- "~/PycharmProjects/hiv-withinhost/"
 ins <- read.csv(paste0(path,"12_lengths/all/ins-all.csv"), row.names=1, stringsAsFactors = F)
 del <- read.csv(paste0(path,"12_lengths/all/del-all.csv"), row.names=1, stringsAsFactors = F)
  
-ins <- ins[ins$count>0,]
-del <- del[del$count>0,]
+# DATA CLEANSING 
+# Remove deletions that are greater than 100 nt
+del <- del[-which(nchar(del$indel) > 100),]
+iprop <- nchar(ins$indel) / nchar(ins$anc)
+dprop <- nchar(del$indel) / nchar(del$anc)
 
-ins$len <- sapply(ins$indel, nchar)
-del$len <- sapply(del$indel, nchar)
+#ins <- ins[-which(iprop >= 1),]
+del <- del[-which(dprop >= 1),]
+
+ins <- ins[-which(nchar(ins$indel) > 100),]
+del <- del[-which(del$pos > nchar(del$anc)),]
+
+ins$len <- nchar(ins$indel)
+del$len <- nchar(del$indel)
 
 ins$bin <- sapply(ins$indel,categorize)
 del$bin <- sapply(del$indel,categorize)
 
-del <- del[nchar(del$indel) < 200, ]
+#del <- del[nchar(del$indel) < 200, ]
 
 # verify that  no commas are found within the ins and del data frames 
 "," %in% ins$indel
 "," %in% del$indel
 
 # order the ins and del dataframes 
-l <- c(">12","12","10-11","9","7-8", "6", "4-5","3", "1-2")
-l <- l[length(l):1]  # TO REVERSE THE ORDER 
+labels <- c(">12","12","10-11","9","7-8", "6", "4-5","3", "1-2")
+labels <- labels[length(labels):1]  # TO REVERSE THE ORDER 
 
-ins$bin <- factor(ins$bin,levels=l)
-del$bin <- factor(del$bin,levels=l)
+ins$bin <- factor(ins$bin,levels=labels)
+del$bin <- factor(del$bin,levels=labels)
 
 # table manipulation for data display
 itab <- as.matrix(table(ins$bin, ins$vloop)) / 20
@@ -66,20 +75,24 @@ dtab <- as.matrix(table(del$bin, del$vloop) )/ 20
 
 require(vcd)
 
-idf <- as.data.frame(round(itab))
-ddf <- as.data.frame(round(dtab))
-
+idf <- as.data.frame(itab)
+ddf <- as.data.frame(dtab)
 
 colnames(idf) <- c("bin", "vloop", "count")
 colnames(ddf) <- colnames(idf)
 
+iround <- idf
+dround <- ddf
+iround$count <- round(iround$count)
+dround$count <- round(dround$count)
+
 
 # --- Mosaic Plot -----
-data <- idf
-df <- data.frame(bin=factor(rep(data$bin, data$count),levels=l), vloop = rep(data$vloop, data$count))
+data <- dround
+df <- data.frame(bin=factor(rep(data$bin, data$count),levels=labels), vloop = rep(data$vloop, data$count))
 
 # reorder the data frame 
-df$bin <- factor(df$bin, levels=c("1-2","3","4-5","6","7-8","9",">9"))
+df$bin <- factor(df$bin, levels=c("1-2","3","4-5","6","7-8","9","10-11","12",">12"))
 df <- df[order(df$bin),]
 
 require(vcd)
@@ -104,12 +117,17 @@ mosaic(~ bin + vloop,
 
 # ---- Significance ---- 
 # add in the significance level column
-idf$Sign <- rep(2,35)
-#idf$Sign[c(1,11,15,23,28,30,31,35)] <- c(2,3,3,1,3,3,3,1)
-idf$Sign[c(1,7,11,15,18,28,29,30,32,35)] <- c(1,3,3,3,3,3,3,3,3,1)
-ddf$Sign <- rep(2,35)
-#ddf$Sign[c(7,11,13,14,15,29,30,31,35)] <- c(3,3,3,1,3,1,3,3,1)
-ddf$Sign[c(1,4,7,9,11,13,14,15,16,30,31,34,35)] <- c(1,1,3,1,3,3,1,3,1,3,3,1,1)
+idf$sign <- rep(2,45)
+# Higher
+idf$sign[c(9,19,35,38,40)] <- 3  
+# Lower
+idf$sign[c(45)] <- 1    
+
+ddf$sign <- rep(2,45)
+# Higher
+ddf$sign[c(9,10,15,19,35,38,40)] <- 3
+# Lower
+ddf$sign[c(1,6,17,31,44,45)] <- 1
 
 # Proportion of frameshift indels 
 x <- nchar(ins$indel)
@@ -120,7 +138,7 @@ sum(x[x%%3 != 0]) / sum(x)
 
 
 
-l <- l[length(l):1]
+labels <- labels[length(labels):1]
 
 # STACK BAR PLOT 
 # -------------------------------------------
@@ -128,13 +146,13 @@ require(RColorBrewer)
 pal <- c("gray28", "cyan","brown","blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
 pal <- pal[length(pal):1]
 
-data <- idk
+data <- ddf
 
-ymx <- 650
+ymx <- 510
 
 
 #png(filename="~/vindels/Figures/within-host/finalized/del-length-v2", width=1200, height=700)
-par(mar=c(6,7,2,5.5), xpd=F)
+par(mar=c(6,7,2,8), xpd=F)
 ax <- 1.7
 lab <- 2.1
 plot(NA, xlim=c(0,5), 
@@ -148,7 +166,7 @@ plot(NA, xlim=c(0,5),
 axis(1,at=seq(0.5,4.5), 
      labels=c("V1", "V2", "V3", "V4", "V5"),
      cex.axis=ax)
-title(ylab="Deletion Counts", cex.lab=lab, line=4.2)
+title(ylab="Average Deletion Counts", cex.lab=lab, line=4.2)
 title(xlab="Variable Loop", cex.lab=lab, line=3.5)
 abline(v=seq(0.5,4.5)-0.3, lty=1, col="gray68")
 abline(v=seq(0.5,4.5)+0.3, lty=1, col="gray68")
@@ -160,8 +178,8 @@ for (i in seq(0.5,4.5)){
   d <- data[data$vloop==i+0.5,]
   #data <- data[nrow(data):1,]
   
-  for (j in 1:7){
-    s <- d[j,"Sign"]
+  for (j in 1:9){
+    s <- d[j,"sign"]
     n <- d[j,"count"]
     
     rect(i-0.15*s, pos, i+0.15*s, pos+n, col=pal[j])
@@ -169,13 +187,14 @@ for (i in seq(0.5,4.5)){
   }
 }
 par(xpd=NA)
-text(-0.5,650,"b)",cex=2)
+text(-0.48,ymx,"b)",cex=2)
 pal <- pal[length(pal):1]
-legend(5.05,450,
-       legend=l,cex=1.5, 
-       pch=22,pt.cex=3,pt.bg=pal,
-       y.intersp=1,
-       title="Lengths")
+# legend(5.08,ymx*0.7,
+#        legend=labels,cex=1.5, 
+#        pch=22,pt.cex=5,pt.bg=pal,
+#        y.intersp=1.3,
+#        x.intersp=1.0,
+#        title="Lengths")
 
 
 require(ggplot2)

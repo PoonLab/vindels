@@ -167,8 +167,8 @@ write.table(del,paste0(path, "13_nglycs/all/del-sep.csv"), row.names=F, sep="\t"
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
 
-write.csv(ins.sep[,c('pat','rep','vloop','vlen','count', 'indel')], paste0(path,"12_lengths/all/ins-all.csv"))
-write.csv(del.sep[,c('pat','rep', 'vloop','vlen','count', 'indel')], paste0(path,"12_lengths/all/del-all.csv"))
+write.csv(ins, paste0(path,"12_lengths/all/ins-all.csv"))
+write.csv(del, paste0(path,"12_lengths/all/del-all.csv"))
 
 
 # ---- Indel Nucleotide Analysis ----
@@ -277,7 +277,8 @@ for (i in 1:4){
   if(any(is.na(idist))){
     #print(i)
     idist <- idist[-which(is.na(idist))]
-  }else if (any(is.na(ddist))){
+  }
+  if(any(is.na(ddist))){
     #print(i)
     ddist <- ddist[-which(is.na(ddist))]
   }
@@ -315,9 +316,28 @@ del.nt$sign <- dsign
 # BOOTSTRAPS (95% Confidence Intervals)
 # ---------------- 
 
-bs.props <- list()
 
-for (n in 1:1000){
+
+proportions <- function(df1, df2){
+  total1 <- c(sum(nchar(df1[,'indel'])), sum(nchar(df1[,'anc'])))
+  total2 <- c(sum(nchar(df2[,'indel'])), sum(nchar(df2[,'anc'])))
+  
+  nucl <- c("A","C","G","T")
+  result <- unname(sapply(nucl, function(nuc){
+    iProps <-  sum(str_count(df1$indel, nuc)) / total1[1]
+    dProps <-  sum(str_count(df2$indel, nuc)) / total2[1]
+    
+    iVProps <-  sum(str_count(df1$anc, nuc)) / total1[2]
+    dVProps <-  sum(str_count(df2$anc, nuc)) / total2[2]
+    
+    return(c(iProps, dProps, iVProps, dVProps))
+  }))
+  colnames(result) <- nucl
+  return(result)
+}
+
+bs.props <- list()
+for (n in 1:100){
   
   # create the bootstrap sample 
   sam1 <- sample(nrow(nt.ins), nrow(nt.ins), replace=T)
@@ -326,49 +346,47 @@ for (n in 1:1000){
   df1.bs <- nt.ins[sam1,]
   df2.bs <- nt.del[sam2,]
   
-  total1 <- c(sum(nchar(df1.bs[,'indel'])), sum(nchar(df1.bs[,'anc'])))
-  total2 <- c(sum(nchar(df2.bs[,'indel'])), sum(nchar(df2.bs[,'anc'])))
+  props <- proportions(df1.bs, df2.bs)
   
-  props <- sapply(nucl, function(nuc){
-    iProps <-  sum(str_count(df1.bs$indel, nuc)) / total1[1]
-    dProps <-  sum(str_count(df2.bs$indel, nuc)) / total2[1]
-    
-    iVProps <-  sum(str_count(df1.bs$anc, nuc)) / total1[2]
-    dVProps <-  sum(str_count(df2.bs$anc, nuc)) / total2[2]
-    
-    return(c(iProps, dProps, iVProps, dVProps))
-  })
- 
-  for (nuc in nucl){
-    bs.props[[paste0("ins-",nuc)]] <- c(bs.props[[paste0("ins-",nuc)]], unname(props[1,nuc]))
-    bs.props[[paste0("del-",nuc)]] <- c(bs.props[[paste0("del-",nuc)]], unname(props[2,nuc]))
-    bs.props[[paste0("v-ins-",nuc)]] <- c(bs.props[[paste0("v-ins-",nuc)]], unname(props[3,nuc]))
-    bs.props[[paste0("v-del-",nuc)]] <- c(bs.props[[paste0("v-del-",nuc)]], unname(props[4,nuc]))
+  for (n in 1:4){
+    bs.props[[paste0("ins-",n)]] <- c(bs.props[[paste0("ins-",n)]], unname(props[1,n]))
+    bs.props[[paste0("del-",n)]] <- c(bs.props[[paste0("del-",n)]], unname(props[2,n]))
+    bs.props[[paste0("v-ins-",n)]] <- c(bs.props[[paste0("v-ins-",n)]], unname(props[3,n]))
+    bs.props[[paste0("v-del-",n)]] <- c(bs.props[[paste0("v-del-",n)]], unname(props[4,n]))
   }
 }
-medians <- unlist(lapply(bs.props,median))
-m.tab <- matrix(nrow=4,ncol=4, dimnames=list(nucl,c("ins","del","v-ins","v-del")))
-cols <- rep(1:4,4)
-rows <- rep(1:4,each=4)
-for (i in 1:16){
-  m.tab[rows[i], cols[i]] <- medians[[i]]
-}
+
+m.tab <- t(proportions(nt.ins, nt.del))
+colnames(m.tab) <- c("ins","del","v-ins","v-del")
 
 med.x <- as.vector(m.tab[,c(3,4)])
 med.y <- as.vector(m.tab[,c(1,2)])
 
-con.int <- unlist(lapply(bs.props, function(x){quantile(x, c(0.025,0.975))}))
+means <- as.vector(t(m.tab))
+bounds <- lapply(1:length(bs.props), function(i){
+  quantile(bs.props[[i]] - means[i], c(0.025,0.975))
+})
+con.int <- t(unname(sapply(1:length(bounds), function(j){
+  c(means[j] - bounds[[j]][[2]], means[j] - bounds[[j]][[1]])
+})))
+
 cols <- rep(1:4,4, each=2)
 rows <- rep(1:8,each=4)
-lower.x <- con.int[which(grepl("v",names(con.int)) & grepl("2.5",names(con.int)))]
-upper.x <- con.int[which(grepl("v",names(con.int)) & grepl("97.5",names(con.int)))]
-lower.y <- con.int[which(!grepl("v",names(con.int)) & grepl("2.5",names(con.int)))]
-upper.y <- con.int[which(!grepl("v",names(con.int)) & grepl("97.5",names(con.int)))]
+
+lower.x <- con.int[c(3,4,7,8,11,12,15,16),1]
+upper.x <- con.int[c(3,4,7,8,11,12,15,16),2]
+
+lower.y <- con.int[c(1,2,5,6,9,10,13,14),1]
+upper.y <- con.int[c(1,2,5,6,9,10,13,14),2]
+# lower.x <- con.int[which(grepl("v",names(con.int)) & grepl("2.5",names(con.int)))]
+# upper.x <- con.int[which(grepl("v",names(con.int)) & grepl("97.5",names(con.int)))]
+# lower.y <- con.int[which(!grepl("v",names(con.int)) & grepl("2.5",names(con.int)))]
+# upper.y <- con.int[which(!grepl("v",names(con.int)) & grepl("97.5",names(con.int)))]
 
 
 
 
-
+require(reshape2)
 # ---- SPLIT BY REPLICATE ---- 
 ins.rep <- split(nt.ins, nt.ins$rep)
 del.rep <- split(nt.del, nt.del$rep)
@@ -398,20 +416,20 @@ dvprop <- melt(dvprop)
 icount <- melt(icount)
 dcount <- melt(dcount)
 
-iprop <- iprop[order(iprop$X2, iprop$X1),]
-ivprop <- ivprop[order(ivprop$X2, ivprop$X1),]
-dprop <- dprop[order(dprop$X2, dprop$X1),]
-dvprop <- dvprop[order(dvprop$X2, dvprop$X1),]
-icount <- icount[order(icount$X2, icount$X1),]
-dcount <- dcount[order(dcount$X2, dcount$X1),]
+iprop <- iprop[order(iprop$Var2, iprop$Var1),]
+ivprop <- ivprop[order(ivprop$Var2, ivprop$Var1),]
+dprop <- dprop[order(dprop$Var2, dprop$Var1),]
+dvprop <- dvprop[order(dvprop$Var2, dvprop$Var1),]
+icount <- icount[order(icount$Var2, icount$Var1),]
+dcount <- dcount[order(dcount$Var2, dcount$Var1),]
 
 
-ins.nt <- data.frame(nt=iprop$X2,props=iprop$value,vprops=ivprop$value, count=as.numeric(icount$value))
-del.nt <- data.frame(nt=iprop$X2,props=dprop$value,vprops=dvprop$value, count=as.numeric(dcount$value))
+ins.nt <- data.frame(nt=iprop$Var2,props=iprop$value,vprops=ivprop$value, count=as.numeric(icount$value))
+del.nt <- data.frame(nt=iprop$Var2,props=dprop$value,vprops=dvprop$value, count=as.numeric(dcount$value))
 indel.nt2 <- rbind(ins.nt, del.nt)
 indel.nt2$indel <- c(rep(0,80),rep(1,80))
 #indel.nt$counts <- counts2$value
-lim = c(0.14,0.42)
+lim = c(0.18,0.42)
 plot(x=indel.nt2$vprops, y=indel.nt2$props, pch=indel.nt2[,5]+1, col=indel.nt2$nt ,xlim=lim,ylim=lim, cex=0.10*sqrt(indel.nt2$count),
      cex.lab=1.2, cex.axis=1.6,lwd=6, ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
 
@@ -424,37 +442,37 @@ plot(x=indel.nt2$vprops, y=indel.nt2$props, pch=indel.nt2[,5]+1, col=indel.nt2$n
 colors <- c( "limegreen","dodgerblue","red", "purple")
 require(scales)
 
-par(pty="s", xpd=NA, mar=c(6,8,2,1),las=0)
+par(pty="s", xpd=F, mar=c(6,8,2,1),las=0)
 clab = 1.9
-ctext = 1.9
-# xpos <- c(0.18,0.162,0.245,0.38)
-# ypos <- c(0.147, 0.22, 0.26, 0.395)
+ctext = 1.7
 
-lim = c(0.10,0.50)
-plot(x=med.x, y=med.y, pch=indel.nt[,5]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.10*sqrt(indel.nt$count),
+
+lim = c(0.15,0.42)
+plot(x=med.x, y=med.y, pch=indel.nt[,5]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.03*sqrt(indel.nt$count),
      cex.lab=clab, cex.axis=1.6,lwd=6, ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
 title(ylab="Proportion In Indels", line=5,cex.lab=clab)
 title(xlab="Proportion in Variable Loops", line=4,cex.lab=clab)
 
+points(x=indel.nt2$vprops, y=indel.nt2$props, pch=1, col=alpha(rep(rep(colors,each=20), times=2),0.6), ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
+
 sqn <- c(seq(1,8,2),seq(1,8,2)+1)
+
+abline(0,1)
+xpos <- c(0.18,0.162,0.28,0.375)
+ypos <- c(0.16, 0.215, 0.245, 0.395)
 # y error bars 
 arrows(med.x, lower.y[sqn], med.x, upper.y[sqn], length=0, angle=90, code=3,lwd=2)
 #arrows(0.175,0.153,0.167,0.162, length=0, lwd=1.2)
 # x error bars 
 arrows(lower.x[sqn], med.y, upper.x[sqn], med.y, length=0, angle=90, code=3,lwd=2)
-#legend(0.38,0.24,legend=nucleotides, pch=22,cex=1.3, pt.bg=indel.nt[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+legend(0.368,0.24,legend=nucl, pch=21, cex=1.9, pt.lwd=1, pt.bg=colors, col='black',x.intersp = 1.6,y.intersp=1.1, pt.cex=4)
 text(xpos, ypos, cex=ctext, labels=c("C", "G", "T", "A"))
 #legend(0.14,0.42,legend=c("Insertions", "Deletions"), pch=c(1,2),cex=1.3, lwd=2, col="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
-points(x=indel.nt2$vprops, y=indel.nt2$props, pch=1, col=alpha(rep(rep(colors,each=20), times=2),0.6), ylab='', xlab='',las=1,alpha=0.5)#, main="Nucleotide Proportions")
-
-
-
-par(xpd=F)
-abline(0,1)
-rect(0.145,0.36,0.206,0.415)
-text(0.19, 0.40, labels="Ins", cex=ctext)
-text(0.19, 0.376, labels="Del", cex=ctext)
-points(c(0.16,0.16), c(0.40, 0.376), pch=c(1,2), cex=4, lwd=5, col='black', bg='black')
+pos <- c(0.36,0.24)
+rect(pos[1]+0.008 , pos[2]+0.003,pos[1]+0.055,pos[2]+0.053)
+text(pos[1]+0.043, pos[2]+0.04, labels="Ins", cex=ctext)
+text(pos[1]+0.043, pos[2]+0.016, labels="Del", cex=ctext)
+points(c(pos[1]+0.021,pos[1]+0.021), c(pos[2]+0.04, pos[2]+0.016), pch=c(1,2), cex=4, lwd=5, col='black', bg='black')
 
 
 
