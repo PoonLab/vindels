@@ -156,6 +156,21 @@ ins <- ins.sep[ins.sep$indel!="",]
 del <- del.sep[del.sep$indel!="",]
 
 
+# ---- Data Cleaning ----
+iprop <- nchar(ins$indel) / nchar(ins$anc)
+dprop <- nchar(del$indel) / nchar(del$anc)
+
+#ins <- ins[-which(iprop >= 1),]
+del <- del[-which(dprop >= 1),]
+
+# Remove deletions that are greater than 100 nt
+ins <- ins[-which(nchar(ins$indel) > 80),]
+del <- del[-which(nchar(del$indel) > 80),]
+
+#ins <- ins[-which(as.numeric(ins$pos) > nchar(ins$anc)),]
+del <- del[-which(as.numeric(del$pos) > nchar(del$anc)),]
+
+
 
 #------ Checkpoint: 10_2_sample.RData
 
@@ -179,8 +194,8 @@ nt.del <- del[,c(2,3,4,7,8,10)]
 nt.ins$pos <- as.numeric(nt.ins$pos)
 nt.del$pos <- as.numeric(nt.del$pos)
 
-nt.ins$len <- sapply(nt.ins$indel, nchar)
-nt.del$len <- sapply(nt.del$indel, nchar)
+nt.ins$len <- nchar(nt.ins$indel)
+nt.del$len <- nchar(nt.del$indel)
 
 nt.ins$vlen <- as.numeric(nt.ins$vlen)
 nt.del$vlen <- as.numeric(nt.del$vlen)
@@ -190,9 +205,6 @@ nt.del$anc <- paste0(substr(nt.del$anc, 0, nt.del$pos - nchar(nt.del$indel)), su
 nt.ins$anc <- gsub("-","",nt.ins$anc)
 nt.del$anc <- gsub("-","",nt.del$anc)
 
-
-write.csv(nt.ins, paste0(path,"10_nucleotide/all/total-ins.csv"))
-write.csv(nt.del, paste0(path,"10_nucleotide/all/total-del.csv"))
 
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
@@ -409,12 +421,12 @@ colnames(dvprop) <- nucl
 colnames(icount) <- nucl
 colnames(dcount) <- nucl
 
-iprop <- melt(iprop)
-ivprop <- melt(ivprop)
-dprop <- melt(dprop)
-dvprop <- melt(dvprop)
-icount <- melt(icount)
-dcount <- melt(dcount)
+iprop <- reshape2::melt(iprop)
+ivprop <- reshape2::melt(ivprop)
+dprop <- reshape2::melt(dprop)
+dvprop <- reshape2::melt(dvprop)
+icount <- reshape2::melt(icount)
+dcount <- reshape2::melt(dcount)
 
 iprop <- iprop[order(iprop$Var2, iprop$Var1),]
 ivprop <- ivprop[order(ivprop$Var2, ivprop$Var1),]
@@ -428,11 +440,6 @@ ins.nt <- data.frame(nt=iprop$Var2,props=iprop$value,vprops=ivprop$value, count=
 del.nt <- data.frame(nt=iprop$Var2,props=dprop$value,vprops=dvprop$value, count=as.numeric(dcount$value))
 indel.nt2 <- rbind(ins.nt, del.nt)
 indel.nt2$indel <- c(rep(0,80),rep(1,80))
-#indel.nt$counts <- counts2$value
-lim = c(0.18,0.42)
-plot(x=indel.nt2$vprops, y=indel.nt2$props, pch=indel.nt2[,5]+1, col=indel.nt2$nt ,xlim=lim,ylim=lim, cex=0.10*sqrt(indel.nt2$count),
-     cex.lab=1.2, cex.axis=1.6,lwd=6, ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
-
 
 
 # NT ALL INDELS PLOT 
@@ -469,7 +476,7 @@ legend(0.368,0.24,legend=nucl, pch=21, cex=1.9, pt.lwd=1, pt.bg=colors, col='bla
 text(xpos, ypos, cex=ctext, labels=c("C", "G", "T", "A"))
 #legend(0.14,0.42,legend=c("Insertions", "Deletions"), pch=c(1,2),cex=1.3, lwd=2, col="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 pos <- c(0.36,0.24)
-rect(pos[1]+0.008 , pos[2]+0.003,pos[1]+0.055,pos[2]+0.053)
+rect(pos[1]+0.008 , pos[2]+0.003,pos[1]+0.058,pos[2]+0.053)
 text(pos[1]+0.043, pos[2]+0.04, labels="Ins", cex=ctext)
 text(pos[1]+0.043, pos[2]+0.016, labels="Del", cex=ctext)
 points(c(pos[1]+0.021,pos[1]+0.021), c(pos[2]+0.04, pos[2]+0.016), pch=c(1,2), cex=4, lwd=5, col='black', bg='black')

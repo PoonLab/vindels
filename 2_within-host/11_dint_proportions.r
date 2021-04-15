@@ -6,8 +6,8 @@ nucleotides <- c("A","C","G","T")
 total.ins <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/all/dinucl-ins.csv", stringsAsFactors = F, row.names=1)
 total.del <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/all/dinucl-del.csv", stringsAsFactors = F, row.names = 1)
 
-total.ins$Vseq <- gsub("-","",total.ins$Vseq)
-total.del$Vseq <- gsub("-","",total.del$Vseq)
+total.ins$anc <- gsub("-","",total.ins$anc)
+total.del$anc <- gsub("-","",total.del$anc)
 
 
 dinucleotide <- function(seq){
@@ -50,8 +50,8 @@ di.iv <- Reduce("+", di.iv)
 di.d <- Reduce("+", di.d)
 di.dv <- Reduce("+", di.dv)
 
-di.ins <- data.frame(ins=di.i, vloop=di.iv)
-di.del <- data.frame(del=di.d, vloop=di.dv)
+di.ins <- data.frame(indel=di.i, vloop=di.iv)
+di.del <- data.frame(indel=di.d, vloop=di.dv)
 
 di.ins$iprop <- sapply(di.ins[,1], function(x){x/colSums(di.ins)[[1]]})
 di.ins$vprop <- sapply(di.ins[,2], function(x){x/colSums(di.ins)[[2]]})
@@ -67,39 +67,54 @@ di.del$vprop <- sapply(di.del[,2], function(x){x/colSums(di.del)[[2]]})
 
 
 
-
+nt <- c("A","C","G","T")
+nts <- c()
+for(i in 1:4){for(j in 1:4){nts <- c(nts, paste0(nt[i],nt[j]))}}
 
 # RANDOMIZATION TEST 
 # -----------------------------------------
 sampleString <- function(len, vloop){
   nucl <- c("A","C", "G" ,"T")
   len <- len-1
-  idx <- sample(1:(nchar(vloop)-len),100, replace=TRUE)
+  idx <- sample(1:(nchar(vloop)-len),50, replace=TRUE)
   strings <- sapply(idx, function(x){substr(vloop, x, x+len)})
   result <- list()
-  for (a in 1:4){
-    for (b in 1:4){
-      dinucl <- paste0(nucl[a], nucl[b])
-      result[[dinucl]] <- unname(sapply(strings, function(x){str_count(x, dinucl)/nchar(x)}))
-    }
-  }
+  sapply(nts, function(x){
+    result[[x]] <<- unname(sapply(strings, function(y){str_count(y, x)/nchar(y)}))
+  })
   result
 }
 
 iSample <- list()
 dSample <- list()
-nt <- c("A","C","G","T")
-nts <- c()
-for(i in 1:4){for(j in 1:4){nts <- c(nts, paste0(nt[i],nt[j]))}}
-# generates the randomly sampled substrings for each indel
-for (row in 1:nrow(total.ins)){
-  itemp <- sampleString(nchar(total.ins[row,'indel']), total.ins[row,"anc"])
-  dtemp <- sampleString(nchar(total.del[row,'indel']), total.del[row,"anc"])
-  for (i in 1:16){
-    iSample[[nts[i]]] <- c(iSample[[nts[i]]], itemp[[nts[i]]])
-    dSample[[nts[i]]] <- c(dSample[[nts[i]]], dtemp[[nts[i]]])
-  }
+for (i in 1:16) {
+  iSample[[nts[i]]] <- c()
+  dSample[[nts[i]]] <- c()
 }
+# generates the randomly sampled substrings for each indel
+
+
+size <- 50
+null <- sapply(1:nrow(total.ins), function(i){
+  temp <- sampleString(nchar(total.ins[i,'indel']), total.ins[i,"anc"])
+  for (n in 1:16){
+    iSample[[nts[n]]][((i-1)*size+1):(i*size)] <<- temp[[nts[n]]]
+  }
+})
+size <- 50
+null <- sapply(1:nrow(total.del), function(i){
+  temp <- sampleString(nchar(total.del[i,'indel']), total.del[i,"anc"])
+  for (n in 1:16){
+    dSample[[nts[n]]][((i-1)*size+1):(i*size)] <<- temp[[nts[n]]]
+  }
+})
+#   itemp <- sampleString(nchar(total.ins[row,'indel']), total.ins[row,"anc"])
+#   dtemp <- sampleString(nchar(total.del[row,'indel']), total.del[row,"anc"])
+#   for (i in 1:16){
+#     iSample[[nts[i]]] <- c(iSample[[nts[i]]], itemp[[nts[i]]])
+#     dSample[[nts[i]]] <- c(dSample[[nts[i]]], dtemp[[nts[i]]])
+#   }
+# }
 
 # compares the observed proportion to the overall distribution of each nucleotide 
 isign <- c()
@@ -160,9 +175,9 @@ text(-0.045, 0.15, labels="a)", cex=2)
 #legend(0.38,0.24,legend=nucleotides, pch=21,cex=1.9, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 #legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(22,23),cex=1.9, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 
-ex <- c(6,10,11,14 )
-pnts <- di.del[ex,]
-di.del <- di.del[-ex,]
+# ex <- c(6,10,11,14 )
+# pnts <- di.del[ex,]
+# di.del <- di.del[-ex,]
 
 cex=2
 par(pty="s", mar=c(6,8,2,1),las=0)

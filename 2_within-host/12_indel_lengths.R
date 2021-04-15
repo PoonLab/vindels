@@ -38,17 +38,6 @@ path <- "~/PycharmProjects/hiv-withinhost/"
 ins <- read.csv(paste0(path,"12_lengths/all/ins-all.csv"), row.names=1, stringsAsFactors = F)
 del <- read.csv(paste0(path,"12_lengths/all/del-all.csv"), row.names=1, stringsAsFactors = F)
  
-# DATA CLEANSING 
-# Remove deletions that are greater than 100 nt
-del <- del[-which(nchar(del$indel) > 100),]
-iprop <- nchar(ins$indel) / nchar(ins$anc)
-dprop <- nchar(del$indel) / nchar(del$anc)
-
-#ins <- ins[-which(iprop >= 1),]
-del <- del[-which(dprop >= 1),]
-
-ins <- ins[-which(nchar(ins$indel) > 100),]
-del <- del[-which(del$pos > nchar(del$anc)),]
 
 ins$len <- nchar(ins$indel)
 del$len <- nchar(del$indel)

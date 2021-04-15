@@ -103,13 +103,6 @@ ins$tip <- unname(mapply(restoreAllGaps,ins$tip, ins$anc))
 # this is to include any insertions in the ancestor 
 del$anc <- unname(mapply(restoreAllGaps,del$anc, del$tip))
 
-del <- del[-which(nchar(del$indel) > 100),]
-iprop <- nchar(ins$indel) / nchar(ins$anc)
-dprop <- nchar(del$indel) / nchar(del$tip)
-
-#ins <- ins[-which(iprop >= 1),]
-del <- del[-which(dprop >= 1),]
-del <- del[-which(del$pos > nchar(del$anc)),]
 
 # Insertions : 
 # adds all the other insertions into the ancestor
@@ -268,7 +261,7 @@ par(pty="s", xpd=F, mar=c(7,7,3,1),las=0)
 # this take in data either as ins.data or del.data
 data <- del.data
 d.rep <- del.rep
-v3offset <- 0.01
+v3offset <- 0
 data[3,1:6] <- data[3,1:6] + v3offset
 d.rep[41:60,3:4] <- d.rep[41:60,3:4] + v3offset
 
@@ -290,17 +283,18 @@ arrows(data[,1], data[,5], data[,1], data[,6], length=0.035, angle=90, code=3)
 arrows(data[,2], data[,4], data[,3], data[,4], length=0.035, angle=90, code=3)
 
 # Insertion data points 
-i <- c(1,2,3,3,4)
+i <- c(1,2,0,3,4)
 data <- ins.data[-3,]
 newcol <- colors[-3]
 sizes <- 0.15*sqrt(data$counts)
+i.rep <- ins.rep[-c(41:60),]
 
 # MEANS 
-points(data[,c("exp","obs")], pch=21, col=newcol, cex=sizes,lwd=1, bg=alpha(newcol,0.65))
+points(data[,c("exp","obs")], pch=21, col=newcol, cex=sizes,lwd=1, bg=alpha(newcol,0.55))
 
 
 # CLOUDS 
-points(ins.rep[,3], ins.rep[,4], pch=21, col=newcol[i[ins.rep[,1]]], cex=0.7, lwd=1.4,bg=alpha(newcol[i[ins.rep[,1]]],0.8))
+points(i.rep[,3], i.rep[,4], pch=21, col=newcol[i[i.rep[,1]]], cex=0.7, lwd=1.4,bg=alpha(newcol[i[i.rep[,1]]],0.8))
 
 # CONFIDENCE INTERVALS 
 arrows(data[,1], data[,5], data[,1], data[,6], length=0.035, angle=90, code=3)
@@ -310,17 +304,17 @@ arrows(data[,2], data[,4], data[,3], data[,4], length=0.035, angle=90, code=3)
 
 legend(0.25,-0.26,legend=vloops, pch=21,cex=1.5, pt.bg=colors,x.intersp = 1.7,y.intersp=1.2, pt.cex=2.8)
 #legend(0.45,0.2,legend=c("Ins", "Del"), pch=c(21,1),cex=1.3, pt.bg=colors[1],col=colors[1], x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
-rect(0.25,-0.23,0.46,-0.03)
+rect(0.25,-0.23,0.47,-0.03)
 text(0.4, -0.09, labels="Ins", cex=1.5)
 text(0.4, -0.17, labels="Del", cex=1.5)
 points(c(0.30,0.30), c(-0.09, -0.17), pch=c(21,1), cex=2.5, lwd=7, col='black', bg='black')
 
 # positions for V1,V2,V3,V4,V5 (top set first )
-xposi <- c(-0.42, -0.18,-0.62, -0.02)
-yposi <- c(0.40, 0.15, 0.25, 0.07)
+xposi <- c(-0.42, -0.16,-0.62, -0.02)
+yposi <- c(0.40, 0.15, 0.25, 0.08)
 
-xposd <- c(-0.57, -0.22, -0.16, -0.83, -0.31)
-yposd <- c(-0.43, -0.38, -0.30,-0.67, -0.09)
+xposd <- c(-0.57, -0.26, -0.15, -0.83, -0.31)
+yposd <- c(-0.42, -0.41, -0.32,-0.67, -0.09)
 
 text(xposi, yposi, labels=c("V1","V2","V4","V5"),cex=1.2)
 text(xposd, yposd, labels=c("V1","V2","V3","V4","V5"),cex=1.2)
