@@ -171,8 +171,8 @@ del <- del[-which(nchar(del$indel) > 80),]
 del <- del[-which(as.numeric(del$pos) > nchar(del$anc)),]
 
 
+# ---- CHECKPOINT 10_6_finished ---- 
 
-#------ Checkpoint: 10_2_sample.RData
 
 # N - GLYC SITE OUTPUTS 
 # ---------------------------------------------
@@ -199,6 +199,12 @@ nt.del$len <- nchar(nt.del$indel)
 
 nt.ins$vlen <- as.numeric(nt.ins$vlen)
 nt.del$vlen <- as.numeric(nt.del$vlen)
+
+nt.ins$vloop <- as.factor(nt.ins$vloop)
+nt.del$vloop <- as.factor(nt.del$vloop)
+
+levels(nt.ins$rep) <- as.character(1:20)
+levels(nt.del$rep) <- as.character(1:20)
 
 nt.del$anc <- paste0(substr(nt.del$anc, 0, nt.del$pos - nchar(nt.del$indel)), substr(nt.del$anc, nt.del$pos+1, nchar(nt.del$anc)))
 
@@ -488,12 +494,67 @@ points(c(pos[1]+0.021,pos[1]+0.021), c(pos[2]+0.04, pos[2]+0.016), pch=c(1,2), c
 
 # NT PROPORTIONS BY VARIABLE LOOP 
 # --------------------------------------------
+
+
+require(reshape2)
+# ---- SPLIT BY REPLICATE ---- 
+ins.rep <- split(nt.ins, list(nt.ins$rep, nt.ins$vloop))
+del.rep <- split(nt.del, list(nt.del$rep, nt.del$vloop))
+
+ins.rep <- t(sapply(ins.rep, ntprop))
+del.rep <- t(sapply(del.rep, ntprop))
+
+iprop <- do.call(rbind, ins.rep[,1])
+ivprop <- do.call(rbind, ins.rep[,2])
+icount <- do.call(rbind, ins.rep[,3])
+
+dprop <- do.call(rbind, del.rep[,1])
+dvprop <- do.call(rbind, del.rep[,2])
+dcount <- do.call(rbind, del.rep[,3])
+
+colnames(iprop) <- nucl
+colnames(ivprop) <- nucl
+colnames(dprop) <- nucl
+colnames(dvprop) <- nucl
+colnames(icount) <- nucl
+colnames(dcount) <- nucl
+
+iprop <- reshape2::melt(iprop)
+ivprop <- reshape2::melt(ivprop)
+dprop <- reshape2::melt(dprop)
+dvprop <- reshape2::melt(dvprop)
+icount <- reshape2::melt(icount)
+dcount <- reshape2::melt(dcount)
+
+iprop <- iprop[order(iprop$Var2, iprop$Var1),]
+ivprop <- ivprop[order(ivprop$Var2, ivprop$Var1),]
+dprop <- dprop[order(dprop$Var2, dprop$Var1),]
+dvprop <- dvprop[order(dvprop$Var2, dvprop$Var1),]
+icount <- icount[order(icount$Var2, icount$Var1),]
+dcount <- dcount[order(dcount$Var2, dcount$Var1),]
+
+
+ins.nt <- data.frame(name=iprop$Var1,nt=iprop$Var2,props=iprop$value,vprops=ivprop$value, count=as.numeric(icount$value))
+del.nt <- data.frame(name=dprop$Var1, nt=iprop$Var2,props=dprop$value,vprops=dvprop$value, count=as.numeric(dcount$value))
+indel.nt3 <- rbind(ins.nt, del.nt)
+indel.nt3$indel <- c(rep(0,nrow(ins.nt)),rep(1,nrow(del.nt)))
+
+res <- as.data.frame(t(sapply(as.character(indel.nt3$name), function(x) strsplit(x, "\\.")[[1]])))
+colnames(res) <- c("rep", "vloop")                     
+
+
+indel.nt3$name <- NULL
+indel.nt3 <- cbind(res, indel.nt3)
+indel.nt3$vloop <- as.numeric(indel.nt3$vloop)
+indel.nt3$rep <- as.numeric(indel.nt3$rep)
+
+
 vloops <- c(1, 2,3,4,5)
 vloops2 <- c("V1","V2","V3","V4","V5")
 ins.props <- data.frame()
 del.props <- data.frame()
 
-for (i in c(1,2,3,4,5)){
+for (i in 1:5){
   iTemp <- nt.ins[nt.ins$vloop==i,]
   dTemp <- nt.del[nt.del$vloop==i,]
 
@@ -520,31 +581,53 @@ for (i in c(1,2,3,4,5)){
   del.props <- rbind(del.props, data.frame(nt=nucl, dprops=dProps, vprops=dVProps, vloop=rep(vloops[i],4)))
 }
 
-
-
+props <- list(ins = ins.props, del=del.props)
+rm(ins.props)
+rm(del.props)
 
 # NT PROP INSERTIONS PLOT 
 # broken down by variable loop and nucleotide
 # -------------------------------------
 require(RColorBrewer)
+require(scales)
 colors <- brewer.pal(4, "Set1")
+names <- c("Insertions", "Deletions")
+# ins = 0 ; del = 1
+i <- 1
+
+reps <- indel.nt3[indel.nt3$indel==i,]
+reps <- reps[reps$vloop!=3,]
+
+means <- props[[i+1]]
+means <- means[means$vloop!=3,]
 
 cex=2
 par(pty="s", xpd=F, mar=c(6,6,2,1),las=1)
 
-lim = c(0,0.55)
+lim = c(0.13,0.45)
 plot(NA,xlim=lim,ylim=lim,
      cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='')
-#text(0.187,0.475,labels="a)", cex=1.5)
-#text(0.245,0.452,labels="A", cex=1.5)
+
+# CLOUDS 
+points(reps[,c(5,4)], pch=reps[,2]+20, col=as.numeric(reps$nt),cex=1, lwd=1.5)
+
+# MEANS
+points(means[,c(3,2)], pch=means[,4]+20, bg=alpha(as.numeric(means[,1]),0.45),cex=4, lwd=1.5)
+
+# LINE 
 abline(0,1)
-points(ins.props[,c(3,2)], pch=ins.props[,4]+20, bg=ins.props[,1],cex=3.5)
-title(ylab="Proportion In Insertions", line=3.5,cex.lab=1.75)
+
+# TITLES 
+title(ylab=paste0("Proportion In ", names[i+1]), line=4.3,cex.lab=1.75)
 title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.47,0.20,legend=nucl, pch=21,cex=1.5, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.36,0.20,legend=vloops2, pch=c(21,22,23,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
+
+# LEGEND 
+legend(0.41,0.22,legend=nucl, pch=21,cex=1.7, pt.bg=means[,1],x.intersp = 1.0,y.intersp=1.3, pt.cex=3.5)
+legend(0.355,0.22,legend=vloops2[-3], pch=c(21,22,24,25),cex=1.7, col="black", pt.lwd=4, x.intersp = 1.0,y.intersp=1.3, pt.cex=3.5)
 par(xpd=NA)
 text(-0.135, 0.55, labels="a)",cex=2)
+
+
 
 
 
