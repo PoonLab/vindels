@@ -6,19 +6,24 @@ require(bbmle)
 source("~/vindels/2_within-host/utils.r")
 
 # INSERTION PARSING ----------
-path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/new-skygrid/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/new-skygrid/del/*.tsv"))
+path <- "~/work/"
+ifolder <- Sys.glob(paste0(path,"9Indels/new-final/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/new-final/del/*.tsv"))
 sep <- "\t"
-trefolder <- paste0(path,"7SampleTrees/new-skygrid/prelim/")
+trefolder <- paste0(path,"7SampleTrees/new-final/prelim/")
 
 # CASE: Removed patient 56552 because could not complete Historian runs 
 # CASE: Removed patients 49641 and 56549 because they are SUBTYPE B
 # CASE: Removed patient 28376 and B because of very bad Rsquared value 
-#reg <- "56552|49641|56549|28376|B"
+reg <- "49641|56549|108869"
 
-# ifolder <- ifolder[!grepl(reg,ifolder)]
-# dfolder <- dfolder[!grepl(reg,dfolder)]
+ifolder <- ifolder[!grepl(reg,ifolder)]
+dfolder <- dfolder[!grepl(reg,dfolder)]
+
+first20 <- "_1{0,1}[0-9]_|_20_"
+
+ifolder <- ifolder[grepl(first20, ifolder)]
+dfolder <- dfolder[grepl(first20, dfolder)]
 
 tally <- function(infolder){
   name <- basename(infolder)
@@ -35,6 +40,8 @@ iint <- list()
 itip <- list()
 dint <- list()
 dtip <- list()
+
+finalCols <- c("pat", "rep", "vloop", "vlen", "count", "length", "rtt.mid")
 
 
 for (file in 1:length(ifolder)){
@@ -61,18 +68,28 @@ for (file in 1:length(ifolder)){
   res <- unname(sapply(iCSV$header, findAncestor, tree=tre)) 
   
   rttlens <- node.depth.edgelength(tre)
-  midpoints <- (rttlens[res] + rttlens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
-  
-  iCSV$length <- midpoints # tre$edge.length[match(res, tre$edge[,2])]
-  dCSV$length <- iCSV$length
-  
   
   # midpoint = (rtt length of tip) + (rtt length of ancestor) / 2
-  #iCSV$rtt.mid <- midpoints
-  #dCSV$rtt.mid <- iCSV$rtt.mid
+  midpoints <- (rttlens[res] + rttlens[tre$edge[match(res, tre$edge[,2]),1]]) / 2
+  
+  iCSV$length <- tre$edge.length[match(res, tre$edge[,2])]   # midpoints (if we want full depth)
+  dCSV$length <- iCSV$length
+  
+  iCSV$rtt.mid <- midpoints
+  dCSV$rtt.mid <- midpoints
+  
+  res <- as.data.frame(t(unname(sapply(iCSV$pat, extractPat, removeLetter=T))))
+  colnames(res) <- c("pat", "rep")
+  
+  iCSV <- cbind(iCSV, res)
+  dCSV <- cbind(dCSV, res)
+  
+  iCSV$pat <- NULL
+  dCSV$pat <- NULL
+  
 
   # use the full tree lengths as the maximum cutoff
-  maxes[file] <- max(lens,na.rm=T)
+  maxes[file] <- max(rttlens,na.rm=T)
   
   # ----- TIP + INTERIOR INDEL COUNTS ---
   # Cumulative data frame split by interior vs tip
@@ -84,6 +101,9 @@ for (file in 1:length(ifolder)){
   
   iCSV <- iCSV[,-c(1,2,5,6)]
   dCSV <- dCSV[,-c(1,2,5,6)]
+  
+  iCSV <- iCSV[,finalCols]
+  dCSV <- dCSV[,finalCols]
 
   if (is.null(iint[[id]])){
     iint[[id]] <- iCSV[nodes,]
@@ -104,14 +124,18 @@ patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
 pat.idx <- table(sapply(ifolder, function(x){
    strsplit(basename(x), "-")[[1]][1]
 }))
-toRemove <- which(grepl(reg, patnames))
+# toRemove <- which(grepl(reg, patnames))
 
-iint <- iint[-toRemove]
-itip <- itip[-toRemove]
-dint <- dint[-toRemove]
-dtip <- dtip[-toRemove]
+# iint <- iint[-toRemove]
+# itip <- itip[-toRemove]
+# dint <- dint[-toRemove]
+# dtip <- dtip[-toRemove]
+
+
 
 all.data <- list(itip,iint,dtip,dint)
+
+# ---- CHECKPOINT 9_6_final_sample  ---- 
 
 rm(iint)
 rm(itip)
@@ -123,7 +147,7 @@ rm(dCSV)
 # ---- DATA FLATTENING ----
 
 # COMPARISON OF INSERTION RATES INTERIOR VS TIP
-patnames <- unname(sapply(names(all.data[[1]]), function(x){strsplit(x,"-")[[1]][1]}))
+#patnames <- unname(sapply(names(all.data[[1]]), function(x){strsplit(x,"-")[[1]][1]}))
 all.counts <- list()
 all.times <- list()
 all.lens <- list()

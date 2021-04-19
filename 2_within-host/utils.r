@@ -3,7 +3,7 @@ require(ape)
 findAncestor <- function(header, tree){
   # this expression will return results for NODES ONLY
   # second column provides the CAPTURED TIP LABELS from within the node label
-  header <- str_replace(header, "_[0-9]$", "")
+  header <- str_replace(header, "_[0-9](_[ab]){0,1}$", "")
   tips <- str_match_all(header,"([^\\)\\(,\n:]+):")[[1]][,2]
   if (length(tips) == 0){
     # no colons; this means its a TIP 
@@ -51,9 +51,13 @@ getPat <- function(header, pat){
   label <- strsplit(pat, "-")[[1]][2]
   paste0(header,"_",label)
 }
-extractPat <- function(header){
+extractPat <- function(header, removeLetter=F){
   x <- strsplit(header,"_")[[1]]
-  c(x[1], x[2])
+  if (removeLetter){
+    return(c(strsplit(x[1],"-")[[1]][1], x[2]))
+  }else{
+    return(c(x[1], x[2]))
+  }
 }
 getLoop <- function(header, vloop){
   paste0(header,"_",vloop)
