@@ -20,10 +20,10 @@ reg <- "49641|56549|108869"
 ifolder <- ifolder[!grepl(reg,ifolder)]
 dfolder <- dfolder[!grepl(reg,dfolder)]
 
-first20 <- "_1{0,1}[0-9]_|_20_"
-
-ifolder <- ifolder[grepl(first20, ifolder)]
-dfolder <- dfolder[grepl(first20, dfolder)]
+# first20 <- "_1{0,1}[0-9]_|_20_"
+# 
+# ifolder <- ifolder[grepl(first20, ifolder)]
+# dfolder <- dfolder[grepl(first20, dfolder)]
 
 tally <- function(infolder){
   name <- basename(infolder)
@@ -118,7 +118,7 @@ for (file in 1:length(ifolder)){
   }
 }
 
-# CHECKPOINT : 9_6_finished.RData 
+# CHECKPOINT : 9_6_final_unprocessed
 
 patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
 pat.idx <- table(sapply(ifolder, function(x){
@@ -131,11 +131,9 @@ pat.idx <- table(sapply(ifolder, function(x){
 # dint <- dint[-toRemove]
 # dtip <- dtip[-toRemove]
 
-
-
 all.data <- list(itip,iint,dtip,dint)
 
-# ---- CHECKPOINT 9_6_final_sample  ---- 
+# ---- CHECKPOINT 9_6_final_sample  (only 20 samples) ---- 
 
 rm(iint)
 rm(itip)
@@ -143,6 +141,8 @@ rm(dtip)
 rm(dint)
 rm(iCSV)
 rm(dCSV)
+rm(ifolder)
+rm(dfolder)
 
 # ---- DATA FLATTENING ----
 
