@@ -185,6 +185,16 @@ pal <- pal[length(pal):1]
 #        x.intersp=1.0,
 #        title="Lengths")
 
+# ---- INSERTION / DELETION LENGTH HISTOGRAMS ----
+par(mfrow=c(1,2), mar=c(5,5,2,1))
+hist(ins$len, breaks=seq(0.5,60.5), col='red', main='', xlab='Length (nt)')
+hist(del$len, breaks=seq(0.5,66.5), col='red', main='', xlab='Length (nt)')
+
+
+
+
+
+# ---- OLD ----
 
 require(ggplot2)
 iplot <- ggplot() + 

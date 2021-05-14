@@ -35,13 +35,14 @@ all.ins <- c()
 all.del <- c()
 
 maxes <- c()
+max_names <- c()
 
 iint <- list()
 itip <- list()
 dint <- list()
 dtip <- list()
 
-finalCols <- c("pat", "rep", "vloop", "vlen", "count", "length", "rtt.mid")
+finalCols <- c('full.id',"pat", "rep", "vloop", "vlen", "count", "length", "rtt.mid")
 
 
 for (file in 1:length(ifolder)){
@@ -55,11 +56,11 @@ for (file in 1:length(ifolder)){
   iCSV$count <- unname(sapply(iCSV$indel, csvcount, delim=":"))
   dCSV$count <- unname(sapply(dCSV$indel, csvcount, delim=":"))
   
-  iCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(iCSV))
-  dCSV$pat <- rep(strsplit(filename, "\\.")[[1]][1], nrow(dCSV))
+  iCSV$full.id <- rep(full.id, nrow(iCSV))
+  dCSV$full.id <- rep(full.id, nrow(dCSV))
   
-  iCSV$header <- unname(mapply(labels, iCSV$header, iCSV$pat))
-  dCSV$header <- unname(mapply(labels, dCSV$header, dCSV$pat))
+  iCSV$header <- unname(mapply(labels, iCSV$header, iCSV$full.id))
+  dCSV$header <- unname(mapply(labels, dCSV$header, dCSV$full.id))
   
   # reads in the tree
   treename <- strsplit(filename, "\\.")[[1]][1]
@@ -78,18 +79,15 @@ for (file in 1:length(ifolder)){
   iCSV$rtt.mid <- midpoints
   dCSV$rtt.mid <- midpoints
   
-  res <- as.data.frame(t(unname(sapply(iCSV$pat, extractPat, removeLetter=T))))
+  res <- as.data.frame(t(unname(sapply(iCSV$full.id, extractPat, removeLetter=T))))
   colnames(res) <- c("pat", "rep")
   
   iCSV <- cbind(iCSV, res)
   dCSV <- cbind(dCSV, res)
   
-  iCSV$pat <- NULL
-  dCSV$pat <- NULL
-  
-
   # use the full tree lengths as the maximum cutoff
   maxes[file] <- max(rttlens,na.rm=T)
+  max_names[file] <- full.id
   
   # ----- TIP + INTERIOR INDEL COUNTS ---
   # Cumulative data frame split by interior vs tip
@@ -143,6 +141,22 @@ rm(iCSV)
 rm(dCSV)
 rm(ifolder)
 rm(dfolder)
+
+
+# ---- DATA LENGTHENING ---- 
+new.data <- lapply(all.data, function(x) as.data.frame(rbindlist(x[1:200])))   # arbitrarily choose to analyze the first 10 patients
+new.data <- lapply(new.data, function(x) split(x, x$vloop))
+
+sizes <- lapply(new.data, function(x){
+  sapply(split(x[[1]], x[[1]]$pat), nrow)
+})
+data <- new.data[[1]][[1]]
+patsize <- sizes[[1]]
+dump("data", "~/rate-modeling/v1.data")
+dump("patsize", "~/rate-modeling/patsize.data")
+
+rm(patsize )
+rm(data)
 
 # ---- DATA FLATTENING ----
 
