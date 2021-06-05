@@ -19,6 +19,227 @@ fit2 <- glm(y ~ offset(log(time)), data=df, family='poisson')
 coef(fit2)[[1]]
 
 
+# ---- REAL DATA -----
+
+new.data <- lapply(sub.data, function(x) {
+  tmp <- x[x$length > 0,]
+  split(tmp, tmp$vloop)
+})
+sizes <- lapply(new.data, function(x){
+  sapply(split(x[[2]], x[[2]]$pat), nrow)
+})
+
+
+lower <- matrix(nrow=5, ncol=4)
+upper <- matrix(nrow=5, ncol=4)
+
+est.rate <- function(counts, times, vlen, bs=FALSE){
+  r <- NA
+  tryCatch({
+    fit <- glm(counts ~ 1, offset=log(times), family='poisson')
+    # if (bs){
+    #   ln = sample(vlen,1)
+    # }else{
+    #   ln = median(vlen)
+    # }
+    ln = median(vlen)
+    r <- exp(coef(fit)[[1]]) / ln * 365 * 1000
+  },warning=function(cond){
+  })
+  return(r)
+}
+
+one.boot <- function(counts, times, vlen){
+  n <- length(counts)
+  sam <- sample(1:n, n, replace=T)
+  est.rate(counts[sam], times[sam], vlen[sam], T)
+}
+
+ci.rate <- function(counts, times, vlen, n=100){
+  mean.rate <- est.rate(counts, times, vlen)
+  
+  # split by full.id and select 
+  
+  boot <- replicate(n, one.boot(counts, times, vlen))
+  centered <- quantile(boot - mean.rate, c(0.025,0.975), na.rm=T)
+  ci <- c(mean.rate - centered[2], mean.rate - centered[1])
+  return(list(rate=mean.rate, ci=ci))
+}
+
+get.pats <- function(df){
+  counts <- sapply(df, function(x) sum(x$count))
+  which(counts != 0)
+}
+
+# ---- STANDARD INDEL RATE CALCULATION ----
+rates <- sapply(1:4, function(x){
+  print(paste0("main ",x))
+  z <- sapply(c(1,2,3,4,5), function(v){
+    print(paste0("vloop ",v))
+    df <- new.data[[x]][[v]]
+    df <- split(df, df$pat)
+    idx <- get.pats(df)
+    df <- do.call(rbind, df[idx])
+    res <- ci.rate(df$count, df$length, df$vlen)
+    lower[v,x] <<- res$ci[1]
+    upper[v,x] <<- res$ci[2]
+    res$rate
+  })
+  names(z) <- c('V1','V2','V3','V4','V5')
+  z
+})
+
+# ---- SPLIT BY PATIENT (BOXPLOT) ---- 
+
+new.data <- lapply(1:4, function(a){
+  lapply(1:5, function(b){
+    n <- new.data[[a]][[b]]
+    split(n, n$pat)
+  })
+})
+
+# ---- PATIENT-WISE INDEL RATES (BOXPLOT) ----
+rates <- lapply(1:4, function(x){
+  sapply(c(1,2,3,4,5), function(v){
+    sapply(1:24, function(p){
+      df <- new.data[[x]][[v]][[p]]
+      est.rate(df$count, df$length, df$vlen)
+    })
+  })
+})
+
+# Load final data frame 
+# (terminal, internal)
+final <- list(cbind(rates[[1]], rates[[2]]),
+              cbind(rates[[3]], rates[[4]]))
+ind <- c()
+ind[seq(1,10, by=2)] <- 1:5
+ind[seq(2,10, by=2)] <- 6:10
+
+
+# Graphical parameters
+par(mfrow=c(1,2), mar=c(6,2,2,1))
+lims <- list(c(20,0), c(0,20))
+
+cols <- c('dodgerblue','red')
+
+data <- final[[2]]
+data <- data[,ind]
+pos <- c(1.1,1.9,3.1,3.9, 5.1,5.9, 7.1, 7.9, 9.1,9.9)
+boxplot(data, xlab="Deletion Rate", horizontal=TRUE, at=pos, cex.axis=1.3,
+        cex.lab=1.6, ylim=c(20,0), yaxt='n', col=rep(cols, 5))
+axis(4, at=seq(0.5, 10.5, by=2), labels=F)
+axis(4, at=seq(1.5,9.5,by=2),tick=F, line=-0.3,
+     labels=c("V1","V2","V3","V4","V5"), las=1, cex.axis=1.5)
+data <- final[[1]]
+data <- data[,ind]
+xlabel <- expression(paste("      Insertion Rate\n(events/nt/year x 10"^"-3"*")"))
+boxplot(data, xlab="", at=pos,  cex.axis=1.3,
+        horizontal=TRUE, col=rep(c('dodgerblue','red')), cex.lab=1.3, ylim=c(0,20), yaxt='n')
+axis(2, at=seq(0.5, 10.5, by=2), labels=F)
+title(xlab=xlabel, cex.lab=1.6, line=4.3)
+legend(x=10, y=6.5, legend=c("Terminal Branches", "Internal Branches"), 
+       pch=c(22,22), pt.bg=cols, pt.cex=3, cex=1.4)
+
+# --- PLOT PREPARATION ---- 
+
+cols <- c('vloop', 'id', 'rate','lower','upper')
+f <- 365*1000
+irates <- reshape2::melt(rates[,1:2] )
+drates <- reshape2::melt(rates[,3:4] )
+irates <- cbind(irates, reshape2::melt(lower[,1:2])[,3] , reshape2::melt(upper[,1:2])[,3] )
+drates <- cbind(drates, reshape2::melt(lower[,3:4])[,3] , reshape2::melt(upper[,3:4])[,3] )
+
+colnames(irates) <- cols
+colnames(drates) <- cols
+
+irates$id <- as.factor(irates$id)
+drates$id <- as.factor(drates$id)
+
+levels(irates$id) <- c('terminal', 'internal')
+levels(drates$id) <- c('terminal', 'internal')
+
+## Manual fixing
+irates[8,4] <- 0
+drates[8,4] <- 0
+
+
+# Plotting 
+require(Rmisc)
+require(ggplot2)
+par(mar=c(3,3,3,2))
+iplot <- ggplot() + 
+  geom_bar(aes(vloop, rate, fill=id), data=irates, stat='identity', position="dodge") + 
+  scale_fill_manual(values=c( "dodgerblue", "red"), name="Type", labels=c("Terminal Branches","Internal Branches")) +
+  coord_flip() + geom_errorbar(aes(x=irates$vloop, fill=irates$id, ymax = irates$upper, ymin = irates$lower),
+                               width = 0.25, size=0.8,
+                               position = position_dodge(0.9)) +
+  scale_y_continuous(lim=c(0,11), expand=c(0,0)) + 
+  scale_x_discrete(limits = rev(levels(irates$vloop))) +
+  labs(#x="Variable Loop", 
+    y=substitute(paste(p1, 10^-3,p2), list(p1="         Insertion Rate\n    (events/nt/year x ", p2=")"))) + 
+  #title="Indel Rates",
+  #color="Subset") +
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),#element_line(color="black",size=0.3),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 4, r = 10, b = 5, l = 0, unit = "mm"),
+        panel.border=element_rect(fill=NA, size=1),
+        #axis.line.x = element_line(colour = "black"), 
+        #axis.line.y.left=element_line(colour="black"),
+        axis.title.y=element_blank(),
+        axis.title.x=element_text(size=22,margin=margin(t = 22, r = 3, b = 0, l = 22)),
+        axis.text.y = element_text(size=20, colour="black", margin=margin(t = 0, r = 10, b = 2, l = 0)),
+        axis.text.x=element_text(size=20, colour="black",margin=margin(t = 0, r = 20, b = 0, l = 0)),
+        #plot.title = element_text(size=22, hjust = 0.5),
+        legend.position=c(0.70,0.59),
+        legend.text=element_text(size=18), 
+        legend.background=element_rect(colour="black"),
+        legend.title=element_text(size=20),
+        legend.spacing.y = unit(2, "mm")
+  ) + geom_text(aes(y=c(1),x=c(3.25)),label="N/A", size=7)
+#iplot
+dplot <- ggplot() + 
+  geom_bar(aes(x=vloop, y=rate, fill=id), data=drates, stat='identity', position="dodge") + 
+  coord_flip() + scale_fill_manual(values=c( "dodgerblue", "red"))+
+  geom_errorbar(aes(x=drates$vloop, fill=drates$id, ymax = drates$upper, ymin = drates$lower),
+                width = 0.25, size=0.8,
+                position = position_dodge(0.9)) +
+  labs(x="Variable Loop", 
+       y="Deletion Rate") +
+  scale_y_reverse(lim=c(11,0), expand=c(0,0)) + 
+  scale_x_discrete(limits = rev(levels(drates$vloop))) +
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),#element_line(color="black",size=0.3),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        panel.border=element_rect(fill=NA, size=1),
+        #axis.line.x=element_line(colour = "black"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 4, r = 5, b = 13.5, l = 12, unit = "mm"),
+        #axis.line.y = element_line(colour = "black"), 
+        axis.text.y = element_blank(),
+        axis.title.y=element_text(size=22),
+        axis.title.x=element_text(size=22,margin=margin(t = 7, r = 3, b = 0, l = 12)),
+        axis.text = element_text(size=20, colour="black"),
+        plot.title = element_text(size=28, hjust = 0.5),
+        legend.position="none") #+ geom_text(aes(y=1,x= 3.25),label="N/A", size=7)
+multiplot(dplot,iplot, cols=2)
+
+# new.data <- lapply(1:2, function(a){
+#   lapply(1:5, function(b){
+#     n <- new.data[[a]][[b]]
+#     split(n, n$pat)
+#   })
+# })
+# 
+# new.data <- 
+
+
 # ---- Simulate Data RSTAN ---- 
 
 # Data import
@@ -35,22 +256,6 @@ stan.fit <- stan("~/vindels/2_within-host/stan_modeling/rate-new.stan",
                  control=list(adapt_delta=0.90))
 end <- proc.time() - start
 
-
-# ---- MAIN DATA ------
-# ---- REAL DATA RSTAN ITERATED ----
-
-
-# ---- PREPROCESSING ----
-# iint <- as.data.frame(rbindlist(iint))
-# itip <- as.data.frame(rbindlist(itip))
-# dint <- as.data.frame(rbindlist(dint))
-# dtip <- as.data.frame(rbindlist(dtip))
-
-# LOAD 9_6_unfixed here 
-
-# type 
-# vloop
-# data frame
 
 final.data <- list(itip, iint, dtip, dint)
 

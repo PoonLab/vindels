@@ -171,7 +171,7 @@ del <- del[-which(nchar(del$indel) > 80),]
 del <- del[-which(as.numeric(del$pos) > nchar(del$anc)),]
 
 
-# ---- CHECKPOINT 10_6_finished ---- 
+# ---- CHECKPOINT 10_2_finished ---- 
 
 
 # N - GLYC SITE OUTPUTS 
