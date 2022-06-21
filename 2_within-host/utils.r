@@ -266,9 +266,19 @@ restoreOtherIndels <- function(anc, tip, indel, pos){
     # retrieve the boundaries of the indel
     end <- as.numeric(pos)
     start <- as.numeric(pos) - nchar(indel) + 1
-    
+
     # make sure it ignores the indel sequence
     toIgnore <- start:end
+    
+    if (start < 0){
+      print(start)
+      print(end)
+      print(toIgnore)
+      print(anc)
+      print(tip)
+      print(indel)
+      print(pos)
+    }
     idx[toIgnore] <- F
     
     # fill in all other insertions / deletions that are not the one of interest ***

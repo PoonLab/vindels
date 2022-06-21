@@ -13,10 +13,10 @@ sep <- "\t"
 trefolder <- paste0(path,"7SampleTrees/new-final/prelim/")
 
 # CASE: Removed patients 49641 and 56549 because they are SUBTYPE B
-reg <- "49641|56549|108869"
-
-ifolder <- ifolder[!grepl(reg,ifolder)]
-dfolder <- dfolder[!grepl(reg,dfolder)]
+# reg <- "49641|56549|108869"
+# 
+# ifolder <- ifolder[!grepl(reg,ifolder)]
+# dfolder <- dfolder[!grepl(reg,dfolder)]
 
 # first20 <- "_1{0,1}[0-9]_|_20_"
 # 
@@ -115,18 +115,19 @@ for (file in 1:length(ifolder)){
 }
 setwd("~/vindels/2_within-host/")
 names(maxes) <- max_names
+## ========================================
+## RSESSION CHECKPOINT : 9_6_all_patients
+## ========================================
 
-# CHECKPOINT : 9_6_final_unprocessed
 
 patnames <- unname(sapply(names(iint), function(x){strsplit(x, "-")[[1]][1]}))
 pat.idx <- table(sapply(ifolder, function(x){
    strsplit(basename(x), "-")[[1]][1]
 }))
 
+numpats = length(unique(patnames))
 
-#all.data <- list(itip,iint,dtip,dint)
 all.data <- list(itip, iint, dtip, dint)
-# ---- CHECKPOINT 9_6_final_sample  (only 20 samples) ---- 
 
 rm(iint)
 rm(itip)
@@ -137,18 +138,196 @@ rm(dCSV)
 rm(ifolder)
 rm(dfolder)
 
-## ---- SAMPLE ----
+## ------ SAMPLE ------
 # Permanently choose a subset of 100 trees to examine 
 require(data.table)
 set.seed(0)
-idx <- as.vector(sapply(1:24, function(i){
+idx <- as.vector(sapply(1:numpats, function(i){
   sample(((i-1)*400+1):(i*400), 100, replace=FALSE)
 }))
 
 ## --- DATA SAMPLING -----
 sub.data <- lapply(all.data, function(x) as.data.frame(rbindlist(x[idx])))
-#sub.data <- lapply(sub.data, function(y) y[y$count>0,])
 
+# SUBDATA IS USED FOR BOTH SUBSEQUENT ANALYSES
+
+## INDEL RATES ANALYSIS
+# -----------------------------
+
+new.data <- lapply(sub.data, function(x) {
+  tmp <- x[x$length > 0,]
+  split(tmp, tmp$vloop)
+})
+sizes <- lapply(new.data, function(x){
+  sapply(split(x[[2]], x[[2]]$pat), nrow)
+})
+
+
+lower <- matrix(nrow=5, ncol=4)
+upper <- matrix(nrow=5, ncol=4)
+
+est.rate <- function(counts, times, vlen, bs=FALSE){
+  r <- NA
+  tryCatch({
+    fit <- glm(counts ~ 1, offset=log(times), family='poisson')
+    # if (bs){
+    #   ln = sample(vlen,1)
+    # }else{
+    #   ln = median(vlen)
+    # }
+    
+    ln = median(vlen)
+    
+    if(ln > 250){
+      ln <- 127
+    }
+    
+    r <- exp(coef(fit)[[1]]) / ln * 365 * 1000
+  },warning=function(cond){
+  })
+  return(r)
+}
+
+one.boot <- function(counts, times, vlen){
+  n <- length(counts)
+  sam <- sample(1:n, n, replace=T)
+  est.rate(counts[sam], times[sam], vlen[sam], T)
+}
+
+ci.rate <- function(vdata){
+  mean.rate <- est.rate(vdata$count, vdata$length, vdata$vlen)
+  
+  # split by full.id and select 
+  df <- split(vdata, vdata$full.id)
+  
+  bs.vals <- sapply(1:100, function(bs){
+    idx <- bs + seq(0,(numpats-1)*100,100)
+    count <- unlist(sapply(idx, function(i) df[[i]][,"count"]))
+    time <- unlist(sapply(idx, function(i) df[[i]][,"length"]))
+    vlen <- unlist(sapply(idx, function(i) df[[i]][,"vlen"]))
+    est.rate(count,time,vlen)
+  })
+  
+  centered <- quantile(bs.vals - mean.rate, c(0.025,0.975), na.rm=T)
+  ci <- c(mean.rate - centered[2], mean.rate - centered[1])
+  return(list(rate=mean.rate, ci=ci))
+}
+
+get.pats <- function(df){
+  counts <- sapply(df, function(x) sum(x$count))
+  which(counts != 0)
+}
+
+# ---- STANDARD INDEL RATE CALCULATION ----
+rates <- sapply(1:4, function(x){
+  print(paste0("main ",x))
+  z <- sapply(c(1,2,3,4,5), function(v){
+    print(paste0("vloop ",v))
+    # df <- split(df, df$pat)
+    # idx <- get.pats(df)
+    # df <- do.call(rbind, df[idx])
+    res <- ci.rate(new.data[[x]][[v]])
+    lower[v,x] <<- res$ci[1]
+    upper[v,x] <<- res$ci[2]
+    res$rate
+  })
+  names(z) <- c('V1','V2','V3','V4','V5')
+  z
+})
+
+
+## --- INDEL RATES HORIZONTAL BAR PLOT ---- 
+# PLOT PREP
+cols <- c('vloop', 'id', 'rate','lower','upper')
+f <- 365*1000
+irates <- reshape2::melt(rates[,1:2] )
+drates <- reshape2::melt(rates[,3:4] )
+irates <- cbind(irates, reshape2::melt(lower[,1:2])[,3] , reshape2::melt(upper[,1:2])[,3] )
+drates <- cbind(drates, reshape2::melt(lower[,3:4])[,3] , reshape2::melt(upper[,3:4])[,3] )
+
+colnames(irates) <- cols
+colnames(drates) <- cols
+
+irates$id <- as.factor(irates$id)
+drates$id <- as.factor(drates$id)
+
+levels(irates$id) <- c('terminal', 'internal')
+levels(drates$id) <- c('terminal', 'internal')
+
+## Manual fixing for vals bordering 0
+irates[8,3:5] <- 0
+drates[8,3:5] <- 0
+
+# Plotting 
+require(Rmisc)
+require(ggplot2)
+par(mar=c(3,3,3,2))
+iplot <- ggplot() + 
+  geom_bar(aes(vloop, rate, fill=id), data=irates, stat='identity', position="dodge") + 
+  scale_fill_manual(values=c( "dodgerblue", "red"), name="Type", labels=c("Terminal Branches","Internal Branches")) +
+  coord_flip() + geom_errorbar(aes(x=irates$vloop, fill=irates$id, ymax = irates$upper, ymin = irates$lower),
+                               width = 0.25, size=0.8,
+                               position = position_dodge(0.9)) +
+  scale_y_continuous(lim=c(0,9), expand=c(0,0)) + 
+  scale_x_discrete(limits = rev(levels(irates$vloop))) +
+  labs(#x="Variable Loop", 
+    y=substitute(paste(p1, 10^-3,p2), list(p1="         Insertion Rate\n    (events/nt/year x ", p2=")"))) + 
+  #title="Indel Rates",
+  #color="Subset") +
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),#element_line(color="black",size=0.3),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 4, r = 10, b = 5, l = 0, unit = "mm"),
+        panel.border=element_rect(fill=NA, size=1),
+        #axis.line.x = element_line(colour = "black"), 
+        #axis.line.y.left=element_line(colour="black"),
+        axis.title.y=element_blank(),
+        axis.title.x=element_text(size=22,margin=margin(t = 22, r = 3, b = 0, l = 22)),
+        axis.text.y = element_text(size=20, colour="black", margin=margin(t = 0, r = 10, b = 2, l = 0)),
+        axis.text.x=element_text(size=20, colour="black",margin=margin(t = 0, r = 20, b = 0, l = 0)),
+        #plot.title = element_text(size=22, hjust = 0.5),
+        legend.position=c(0.65,0.59),
+        legend.text=element_text(size=18), 
+        legend.background=element_rect(colour="black"),
+        legend.title=element_text(size=20),
+        legend.spacing.y = unit(2, "mm")
+  ) + geom_text(aes(y=c(0.7),x=c(3.25)),label="N/A", size=7)
+#iplot
+dplot <- ggplot() + 
+  geom_bar(aes(x=vloop, y=rate, fill=id), data=drates, stat='identity', position="dodge") + 
+  coord_flip() + scale_fill_manual(values=c( "dodgerblue", "red"))+
+  geom_errorbar(aes(x=drates$vloop, fill=drates$id, ymax = drates$upper, ymin = drates$lower),
+                width = 0.25, size=0.8,
+                position = position_dodge(0.9)) +
+  labs(x="Variable Loop", 
+       y="Deletion Rate") +
+  scale_y_reverse(lim=c(9,0), expand=c(0,0)) + 
+  scale_x_discrete(limits = rev(levels(drates$vloop))) +
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),#element_line(color="black",size=0.3),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        panel.border=element_rect(fill=NA, size=1),
+        #axis.line.x=element_line(colour = "black"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 4, r = 5, b = 13.5, l = 12, unit = "mm"),
+        #axis.line.y = element_line(colour = "black"), 
+        axis.text.y = element_blank(),
+        axis.title.y=element_text(size=22),
+        axis.title.x=element_text(size=22,margin=margin(t = 7, r = 3, b = 0, l = 12)),
+        axis.text = element_text(size=20, colour="black"),
+        plot.title = element_text(size=28, hjust = 0.5),
+        legend.position="none") + geom_text(aes(y=0.7,x=3.25),label="N/A", size=7)
+multiplot(dplot,iplot, cols=2)
+
+
+
+## INDEL TIMINGS ANALYSIS
+# -----------------------------
 # Samples one bootstrap from the all.data list structure
 bs.timing <- function(){
   bs.idx <- sample(idx, replace=T)
@@ -166,7 +345,6 @@ bins <- mx/interval
 bin.names <- as.character(seq(interval,mx,interval))
 
 
-# ---- INDEL TIMINGS -------
 timing.calc <- function(data, max.times=max.times){
   
   # find the mean counts across bins and across patients 
@@ -179,7 +357,7 @@ timing.calc <- function(data, max.times=max.times){
       sum(rtt.mid > (b-1)*interval & rtt.mid < b*interval)
     })
     names(res) <- bin.names
-    return(as.data.frame( t(res) / 100 / 2 / 24))
+    return(as.data.frame( t(res) / 100 / 2 / numpats))
   })
   
   # adjust the means for the number of patients
@@ -187,6 +365,7 @@ timing.calc <- function(data, max.times=max.times){
   lapply(counts, function(c) c / adj.factor)
 }
 
+# MOST UPDATE TO DATE METHOD 
 conf <- function(data, max.times=max.times){
   xsample <- timing.calc(data, max.times)
   
@@ -199,7 +378,7 @@ conf <- function(data, max.times=max.times){
     df2 <- split(x2, x2$full.id)
   
     sapply(1:100, function(bs){
-      idx <- bs + seq(0,2300,100)
+      idx <- bs + seq(0,(numpats-1)*100,100)
       rtt.mid <- unlist(lapply(idx, function(i){
         c(df1[[i]][df1[[i]]$count>0,'rtt.mid'], df2[[i]][df2[[i]]$count>0,'rtt.mid'])
       }))
@@ -207,7 +386,7 @@ conf <- function(data, max.times=max.times){
         sum(rtt.mid > (b-1)*interval & rtt.mid < b*interval)
       })
       names(res) <- bin.names
-      return( res / 2 / 24)
+      return( res / 2 / numpats)
     })
   })
 
@@ -227,7 +406,6 @@ conf <- function(data, max.times=max.times){
 }
 
 
-
 timing.conf <- function(n=100){
   # Create n bootstrap replicates and 
   res <- t(replicate(n, timing.calc(bs.timing(), max.times)))
@@ -245,33 +423,24 @@ timing.conf <- function(n=100){
     tmp
   })
 }
-# Old method (standard bootstrapping)
-#xsample <- timing.calc(sub.data, max.times)
-#timings <- timing.conf(500)
-#final <- lapply(1:2, function(i){rbind(xsample[[i]], timings[[i]])})
-
 
 # New method (patient-wise bootstrapping)
 final <- conf(sub.data, max.times)
-#final <- lapply(1:2, function(i){rbind(xsample[[i]], ci[[i]])})
 
 
-# ---- DATA PREP / EXPORT ----
+# ---- DATA  EXPORT ----
 
-data <- sub.vdata[[1]][[1]]
-patsize <- sizes[[1]]
-dump("data", "~/rate-modeling/v1.data")
-dump("patsize", "~/rate-modeling/patsize.data")
-
-rm(patsize )
-rm(data)
+# data <- sub.vdata[[1]][[1]]
+# patsize <- sizes[[1]]
+# dump("data", "~/rate-modeling/v1.data")
+# dump("patsize", "~/rate-modeling/patsize.data")
+# rm(patsize )
+# rm(data)
 
 
 # ----- INDEL TIMINGS PLOT -----
-final[[2]][2,"1200"] <- final[[2]][2,"1200"] * -1
-ymax <- 2.2
-#cairo_pdf("~/vindels/Figures/within-host/finalized/ins-timings.pdf",height=8, width=12)
-par(xpd=NA, mar=c(0,6,6.5,1), mfrow=c(2,1))
+ymax <- 2.1
+par(xpd=NA, mar=c(0,6,6,1), mfrow=c(2,1))
 data <- t(final[[1]])
 barplot(data[,1], col="dodgerblue", space=0, xaxt = "n",
         ylab="",
@@ -287,10 +456,7 @@ axis(2, 0:ymax, labels=c(0:ymax), tick=T,cex.axis=1.2, las=1)
 title(ylab="Insertions", cex.lab=1.4, line=2.2)
 par(xpd=F)
 abline(h=0,lwd=1)
-        #ylim=c(0,20))
-#axis(1, seq(0,15), labels=F, tick=T, line=0.5)
-#text(0:15,rep(-0.7,16), labels=seq(0,7500,500), srt=25, cex=1.1)
-#title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=5, cex.lab=1.4)
+
 # ---- DELETIONS ----
 
 #cairo_pdf("~/vindels/Figures/within-host/finalized/del-timings.pdf",height=8, width=12)
@@ -307,13 +473,19 @@ barplot(data[,1], col="red", space=0, xaxt = "n",
 arrows(1:nrow(data)-0.5, data[,2], 1:nrow(data)-0.5, data[,3], length=0.05, angle=90, code=3,lwd=1.5)
 axis(1, seq(0,bins,2), labels=F, tick=T, line=0.5)
 axis(2, 0:ymax, labels=c("",1:ymax), tick=T,cex.axis=1.2, las=1)
-text(seq(0,bins,2),rep(2.6,bins/2), labels=seq(0,mx,200), srt=0, cex=1.2)
+text(seq(0,bins,2),rep(2.35,bins/2), labels=seq(0,mx,200), srt=0, cex=1.2)
 title(xlab="Days After Estimated Start of Infection \n(Branch Midpoints)", line=4.75, cex.lab=1.4)
 title(ylab="Deletions", cex.lab=1.4, line=2.2)
 mtext("\t\t\t\t\tAverage Count Per Patient", side=2, line=4,cex=1.4)
 par(xpd=F)
 abline(h=0,lwd=1)
 #dev.off()
+
+
+
+
+
+## ---- SUPPLEMENTARY; NOT MAIN ------
 
 # --------- HISTOGRAMS (used for counts) -------------
 imaxes <- imaxes[!is.na(imaxes)]
@@ -367,40 +539,6 @@ hist(all.del,
      cex.main=cmain, 
      xlab="Days Since Start of Infection")
 
-
-# -------------
-# SURVIVAL PLOT FOR INDEL TIMINGS
-
-#imaxes <- imaxes[!is.na(imaxes)]
-#dmaxes <- dmaxes[!is.na(dmaxes)]
-
-# amalgamate the data sets 
-indel.max <- data.frame(max=c(imaxes,dmaxes), status=rep(1,length(imaxes)+length(dmaxes)), type=c(rep("Insertion",length(imaxes)), rep("Deletion", length(dmaxes))))
-
-imax <- data.frame(max=imaxes, status=rep(1,length(imaxes)))
-dmax <- data.frame(max=dmaxes, status=rep(1,length(dmaxes)))
-
-data <- imax
-
-fit <- survfit(Surv(max,status) ~ 1, data=data)
-require(survminer)
-require(ggfortify)
-plot <- autoplot(fit, facets=T, conf.int = F, surv.colour = "red")  + 
-  labs(x="Time (Days)",
-       y="Survival (%)",title = "Patient Max Dates")+
-  theme(panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 42, r = 10, b = 30, l = 20, unit = "pt"),
-        axis.line = element_line(colour = "black"),
-        axis.title.y=element_text(size=16,margin=margin(t = 0, r = 3, b = 0, l = 12)),
-        axis.title.x=element_text(size=16,margin=margin(t = 8, r = 3, b = 0, l = 0)),
-        strip.text.x = element_blank(),
-        axis.text.x = element_text(size=14),
-        axis.text.y = element_text(size=14),
-        plot.title=element_text(size=18,hjust=0.5)),
-axis.title = ,
-legend.position="none")#+ geom_text(aes(y=0.4,x=3 ),
-#label="N/A",
-#size=6)
 
 
 # ---- DATA FLATTENING ----

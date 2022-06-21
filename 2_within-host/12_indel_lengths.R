@@ -35,8 +35,8 @@ categorize <- function(seqList){
 
 path <- "~/PycharmProjects/hiv-withinhost/"
 #path <- "~/Lio/"
-ins <- read.csv(paste0(path,"12_lengths/all/ins-all.csv"), row.names=1, stringsAsFactors = F)
-del <- read.csv(paste0(path,"12_lengths/all/del-all.csv"), row.names=1, stringsAsFactors = F)
+ins <- read.csv(paste0(path,"12_lengths/all/ins-current.csv"), row.names=1, stringsAsFactors = F)
+del <- read.csv(paste0(path,"12_lengths/all/del-current.csv"), row.names=1, stringsAsFactors = F)
  
 
 ins$len <- nchar(ins$indel)
@@ -59,9 +59,8 @@ ins$bin <- factor(ins$bin,levels=labels)
 del$bin <- factor(del$bin,levels=labels)
 
 # table manipulation for data display
-itab <- as.matrix(table(ins$bin, ins$vloop)) / 20
-dtab <- as.matrix(table(del$bin, del$vloop) )/ 20
-
+itab <- as.matrix(table(ins$bin, ins$vloop)) / 200
+dtab <- as.matrix(table(del$bin, del$vloop) )/ 200
 require(vcd)
 
 idf <- as.data.frame(itab)
@@ -77,7 +76,7 @@ dround$count <- round(dround$count)
 
 
 # --- Mosaic Plot -----
-data <- dround
+data <- iround
 df <- data.frame(bin=factor(rep(data$bin, data$count),levels=labels), vloop = rep(data$vloop, data$count))
 
 # reorder the data frame 
@@ -114,7 +113,7 @@ idf$sign[c(45)] <- 1
 
 ddf$sign <- rep(2,45)
 # Higher
-ddf$sign[c(9,10,15,19,35,38,40)] <- 3
+ddf$sign[c(9,15,19,35,38,39,40)] <- 3
 # Lower
 ddf$sign[c(1,6,17,31,44,45)] <- 1
 
@@ -132,13 +131,12 @@ labels <- labels[length(labels):1]
 # STACK BAR PLOT 
 # -------------------------------------------
 require(RColorBrewer)
-pal <- c("gray28", "cyan","brown","blue4",  'tomato', 'dodgerblue',  'red',  "skyblue", 'darkred' )
+pal <- c("gray28", "cyan","darkorange","blue4",  'red', 'dodgerblue',  'darkred',  "skyblue", 'tomato4' )
 pal <- pal[length(pal):1]
 
 data <- ddf
 
 ymx <- 510
-
 
 #png(filename="~/vindels/Figures/within-host/finalized/del-length-v2", width=1200, height=700)
 par(mar=c(6,7,2,8), xpd=F)
@@ -176,10 +174,10 @@ for (i in seq(0.5,4.5)){
   }
 }
 par(xpd=NA)
-text(-0.48,ymx,"b)",cex=2)
+text(-0.62,ymx,"b)",cex=2)
 pal <- pal[length(pal):1]
 # legend(5.08,ymx*0.7,
-#        legend=labels,cex=1.5, 
+#        legend=labels,cex=1.5,
 #        pch=22,pt.cex=5,pt.bg=pal,
 #        y.intersp=1.3,
 #        x.intersp=1.0,

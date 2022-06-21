@@ -7,11 +7,17 @@ source("~/vindels/2_within-host/utils.r")
 
 path <- "~/PycharmProjects/hiv-withinhost/"
 
-ifolder <- Sys.glob(paste0(path,"9Indels/supp/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/supp/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/new-final/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/new-final/del/*.tsv"))
 
-# ifolder <- ifolder[grepl(newreg,ifolder)]
-# dfolder <- dfolder[grepl(newreg,dfolder)]
+# ifolder <- ifolder[grepl("111847",ifolder)]
+# dfolder <- dfolder[grepl("111847",dfolder)]
+
+# counts <- 0
+# for (file in ifolder){
+#   tre <- read.tree(file)
+#   counts <- counts + Ntip(tre)
+# }
 
 
 ins.sep <-list()
@@ -25,6 +31,7 @@ ins.final <- list()
 del.final <- list()
 
 for (file in 1:length(ifolder)){
+  
   print(file)
   filename <- basename(ifolder[file])
   
@@ -58,7 +65,7 @@ for (file in 1:length(ifolder)){
 
   
   # Load time-based branch lengths from the time-scaled trees
-  tre <- read.tree(paste0(path,"7_5_MCC/main/prelim/", strsplit(filename, "\\.tsv")[[1]], ".tree.sample"))
+  tre <- read.tree(paste0(path,"7SampleTrees/new-final/prelim/", strsplit(filename, "\\.tsv")[[1]], ".tree.sample"))
 
   res <- unname(sapply(iCSV$header, findAncestor, tree=tre)) 
   
@@ -176,14 +183,14 @@ del <- del[-which(as.numeric(del$pos) > nchar(del$anc)),]
 
 # N - GLYC SITE OUTPUTS 
 # ---------------------------------------------
-write.table(ins,paste0(path, "13_nglycs/all/ins-sep.csv"), row.names=F, sep="\t", quote=F)
-write.table(del,paste0(path, "13_nglycs/all/del-sep.csv"), row.names=F, sep="\t", quote=F)
+write.table(ins,paste0(path, "13_nglycs/all/ins-current.csv"), row.names=F, sep="\t", quote=F)
+write.table(del,paste0(path, "13_nglycs/all/del-current.csv"), row.names=F, sep="\t", quote=F)
 
 # INDEL LENGTHS OUTPUT 
 # ---------------------------------------------
 
-write.csv(ins, paste0(path,"12_lengths/all/ins-all.csv"))
-write.csv(del, paste0(path,"12_lengths/all/del-all.csv"))
+write.csv(ins, paste0(path,"12_lengths/all/ins-current.csv"))
+write.csv(del, paste0(path,"12_lengths/all/del-current.csv"))
 
 
 # ---- Indel Nucleotide Analysis ----
@@ -203,8 +210,8 @@ nt.del$vlen <- as.numeric(nt.del$vlen)
 nt.ins$vloop <- as.factor(nt.ins$vloop)
 nt.del$vloop <- as.factor(nt.del$vloop)
 
-levels(nt.ins$rep) <- as.character(1:20)
-levels(nt.del$rep) <- as.character(1:20)
+levels(nt.ins$rep) <- as.character(1:200)
+levels(nt.del$rep) <- as.character(1:200)
 
 nt.del$anc <- paste0(substr(nt.del$anc, 0, nt.del$pos - nchar(nt.del$indel)), substr(nt.del$anc, nt.del$pos+1, nchar(nt.del$anc)))
 
@@ -215,8 +222,8 @@ nt.del$anc <- gsub("-","",nt.del$anc)
 # DINUCLEOTIDE PROPORTIONS OUTPUT 
 # ------------------------------------
 
-write.csv(nt.ins[nt.ins$len>1,], paste0(path,"10_nucleotide/all/dinucl-ins.csv"))
-write.csv(nt.del[nt.del$len>1,], paste0(path,"10_nucleotide/all/dinucl-del.csv"))
+write.csv(nt.ins[nt.ins$len>1,], paste0(path,"10_nucleotide/all/dinucl-ins-current.csv"))
+write.csv(nt.del[nt.del$len>1,], paste0(path,"10_nucleotide/all/dinucl-del-current.csv"))
 
 # # FLANKING INSERTIONS (14) OUTPUT 
 # # ------------------------------------
@@ -335,12 +342,12 @@ del.nt$sign <- dsign
 # ---------------- 
 
 
-
-proportions <- function(df1, df2){
+nucl <- c("A","C","G","T")
+proportions_old <- function(df1, df2){
   total1 <- c(sum(nchar(df1[,'indel'])), sum(nchar(df1[,'anc'])))
   total2 <- c(sum(nchar(df2[,'indel'])), sum(nchar(df2[,'anc'])))
   
-  nucl <- c("A","C","G","T")
+ 
   result <- unname(sapply(nucl, function(nuc){
     iProps <-  sum(str_count(df1$indel, nuc)) / total1[1]
     dProps <-  sum(str_count(df2$indel, nuc)) / total2[1]
@@ -354,12 +361,71 @@ proportions <- function(df1, df2){
   return(result)
 }
 
+proportions <- function(df){
+  total <- c(sum(nchar(df[,'indel'])), sum(nchar(df[,'anc'])))
+  
+  nucl <- c("A","C","G","T")
+  result <- unname(sapply(nucl, function(nuc){
+    props <-  sum(str_count(df$indel, nuc)) / total[1]
+    vprops <-  sum(str_count(df$anc, nuc)) / total[2]
+    
+    return(c(props, vprops))
+  }))
+  colnames(result) <- nucl
+  return(result)
+}
+
+bootstrap <- function(dataframe, num_boot, reps){
+  # initialize
+  bs.props <- list()
+  for (n in 1:4){
+    bs.props[[paste0("n-",nucl[n])]] <- c()
+    bs.props[[paste0("v-",nucl[n])]] <- c()
+  }
+  
+  for (n in 1:num_boot){
+    # create the bootstrap sample 
+    bs.size = nrow(dataframe)/reps
+    sam <- sample(nrow(dataframe), bs.size, replace=T)
+    df.bs <- dataframe[sam,]
+    props <- proportions(df.bs)
+    
+    for (i in 1:4){
+      bs.props[[paste0("n-",nucl[i])]][n] <- unname(props[1,i])
+      bs.props[[paste0("v-",nucl[i])]][n] <- unname(props[2,i])
+    }
+  }
+  bs.props
+}
+
+conf_int <- function(dataframe, num_boot, reps, conf){
+  means = proportions(dataframe)
+  
+  bs.props = bootstrap(dataframe, num_boot, reps)
+  
+  crit_vals = c(0.5-(conf/2),0.5+(conf/2))
+  print(crit_vals)
+  bounds <- lapply(1:length(bs.props), function(i){
+    quantile(bs.props[[i]] - means[i], crit_vals, na.rm=T)
+  })
+  con.int <- t(sapply(1:length(bounds), function(j){
+    c(means[j] - bounds[[j]][[2]], means[j] - bounds[[j]][[1]])
+  }))
+  
+  final = cbind(t(means), con.int[seq(1,7,2),]) # add indel conf ints 
+  final = cbind(final, con.int[seq(2,8,2),])    # add vloop conf ints 
+  
+  colnames(final) <- c("N-mean", "V-mean",'N-lower',"N-upper",'V-lower','V-upper')
+  
+  final
+}
+
 bs.props <- list()
 for (n in 1:100){
   
   # create the bootstrap sample 
-  sam1 <- sample(nrow(nt.ins), nrow(nt.ins), replace=T)
-  sam2 <- sample(nrow(nt.del), nrow(nt.del), replace=T)
+  sam1 <- sample(nrow(nt.ins), nrow(nt.ins)/200, replace=T)
+  sam2 <- sample(nrow(nt.del), nrow(nt.del)/200, replace=T)
   
   df1.bs <- nt.ins[sam1,]
   df2.bs <- nt.del[sam2,]
@@ -374,7 +440,7 @@ for (n in 1:100){
   }
 }
 
-m.tab <- t(proportions(nt.ins, nt.del))
+m.tab <- t(proportions_old(nt.ins, nt.del))
 colnames(m.tab) <- c("ins","del","v-ins","v-del")
 
 med.x <- as.vector(m.tab[,c(3,4)])
@@ -453,6 +519,7 @@ indel.nt2$indel <- c(rep(0,80),rep(1,80))
 # -------------------------------------
 
 colors <- c( "limegreen","dodgerblue","red", "purple")
+colors <- c('green','dodgerblue','red', 'purple')
 require(scales)
 
 par(pty="s", xpd=F, mar=c(6,8,2,1),las=0)
@@ -461,25 +528,29 @@ ctext = 1.7
 
 
 lim = c(0.15,0.42)
-plot(x=med.x, y=med.y, pch=indel.nt[,5]+1, col=rep(colors,2),xlim=lim,ylim=lim,cex=0.03*sqrt(indel.nt$count),
-     cex.lab=clab, cex.axis=1.6,lwd=6, ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
+plot(NA,xlim=lim,ylim=lim,
+     cex.lab=clab, cex.axis=1.6, ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
 title(ylab="Proportion In Indels", line=5,cex.lab=clab)
 title(xlab="Proportion in Variable Loops", line=4,cex.lab=clab)
-
-points(x=indel.nt2$vprops, y=indel.nt2$props, pch=1, col=alpha(rep(rep(colors,each=20), times=2),0.6), ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
+abline(0,1)
+points(x=med.x, y=med.y, pch=indel.nt[,5]+1, col=rep(colors,2),cex=0.012*sqrt(indel.nt$count),lwd=4,)
+points(x=indel.nt2$vprops, y=indel.nt2$props, pch=1, col=alpha(rep(rep(colors,each=200), times=2),0.6), ylab='', xlab='',las=1)#, main="Nucleotide Proportions")
 
 sqn <- c(seq(1,8,2),seq(1,8,2)+1)
 
-abline(0,1)
-xpos <- c(0.18,0.162,0.28,0.375)
-ypos <- c(0.16, 0.215, 0.245, 0.395)
+
+
 # y error bars 
 arrows(med.x, lower.y[sqn], med.x, upper.y[sqn], length=0, angle=90, code=3,lwd=2)
 #arrows(0.175,0.153,0.167,0.162, length=0, lwd=1.2)
 # x error bars 
 arrows(lower.x[sqn], med.y, upper.x[sqn], med.y, length=0, angle=90, code=3,lwd=2)
 legend(0.368,0.24,legend=nucl, pch=21, cex=1.9, pt.lwd=1, pt.bg=colors, col='black',x.intersp = 1.6,y.intersp=1.1, pt.cex=4)
+# Labels 
+xpos <- c(0.205,0.19,0.285,0.37)
+ypos <- c(0.175, 0.22, 0.245, 0.395)
 text(xpos, ypos, cex=ctext, labels=c("C", "G", "T", "A"))
+arrows(xpos[1:2]-0.006, ypos[1:2]-0.002, c(0.19, 0.178), c(0.175, 0.21), length=0, angle=90, code=3,lwd=2)
 #legend(0.14,0.42,legend=c("Insertions", "Deletions"), pch=c(1,2),cex=1.3, lwd=2, col="black",x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
 pos <- c(0.36,0.24)
 rect(pos[1]+0.008 , pos[2]+0.003,pos[1]+0.058,pos[2]+0.053)
@@ -591,6 +662,8 @@ rm(del.props)
 require(RColorBrewer)
 require(scales)
 colors <- brewer.pal(4, "Set1")
+colors <- c('red','dodgerblue','green', 'purple')
+colors <- c('green','dodgerblue','red', 'purple')
 names <- c("Insertions", "Deletions")
 # ins = 0 ; del = 1
 i <- 1
@@ -606,101 +679,26 @@ par(pty="s", xpd=F, mar=c(6,6,2,1),las=1)
 
 lim = c(0.13,0.45)
 plot(NA,xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='')
+     cex.lab=1.3, cex.axis=1.4,cex.main=2.2, ylab='', xlab='')
 
 # CLOUDS 
-points(reps[,c(5,4)], pch=reps[,2]+20, col=as.numeric(reps$nt),cex=1, lwd=1.5)
+points(reps[,c(5,4)], pch=reps[,2]+20, col=alpha(colors[as.numeric(reps$nt)], 0.2),cex=1, lwd=1.5, alpha=0.3)
 
 # MEANS
-points(means[,c(3,2)], pch=means[,4]+20, bg=alpha(as.numeric(means[,1]),0.45),cex=4, lwd=1.5)
+points(means[,c(3,2)], pch=means[,4]+20, bg=alpha(colors[as.numeric(means[,1])],0.3),  cex=4, lwd=2)
 
 # LINE 
 abline(0,1)
 
 # TITLES 
-title(ylab=paste0("Proportion In ", names[i+1]), line=4.3,cex.lab=1.75)
-title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
+title(ylab=paste0("Proportion In ", names[i+1]), line=4.3,cex.lab=1.9)
+title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.9)
 
 # LEGEND 
-legend(0.41,0.22,legend=nucl, pch=21,cex=1.7, pt.bg=means[,1],x.intersp = 1.0,y.intersp=1.3, pt.cex=3.5)
-legend(0.355,0.22,legend=vloops2[-3], pch=c(21,22,24,25),cex=1.7, col="black", pt.lwd=4, x.intersp = 1.0,y.intersp=1.3, pt.cex=3.5)
+legend(0.41,0.22,legend=nucl, pch=22,cex=1.7, pt.bg=colors[as.numeric(means[,1])],x.intersp = 1.0,y.intersp=1.1, pt.cex=3.5)
+legend(0.355,0.22,legend=vloops2[-3], pch=c(21,22,24,25),cex=1.7, col="black", pt.lwd=4, x.intersp = 1.0,y.intersp=1.1, pt.cex=3.5)
 par(xpd=NA)
-text(-0.135, 0.55, labels="a)",cex=2)
+text(0.065, 0.45, labels="b)",cex=2)
 
-
-
-
-
-require(RColorBrewer)
-colors <- brewer.pal(4, "Set1")
-colors[1] <- 'white'
-
-cex=2
-par(pty="s", xpd=F, mar=c(6,6,2,1),las=1)
-
-lim = c(0.1,0.5)
-plot(NA,xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='')
-#text(0.187,0.475,labels="a)", cex=1.5)
-#text(0.245,0.452,labels="A", cex=1.5)
-abline(0,1)
-points(del.props[,c(3,2)], pch=del.props[,4]+20, bg=del.props[,1],cex=3.5)
-title(ylab="Proportion In Deletions", line=3.5,cex.lab=1.75)
-title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.44,0.25,legend=nucl, pch=21,cex=1.5, pt.bg=del.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-legend(0.36,0.25,legend=vloops2, pch=c(21,22,23,24,25),cex=1.5, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-par(xpd=NA)
-text(0, 0.5, labels="b)",cex=2)
-
-
-
-
-
-#TRASH
-# -----------------
-cex=2
-par(pty="s", xpd=NA, mar=c(6,8,4,1),las=0)
-
-lim = c(0.10,0.45)
-plot(del.props[,c(3,2)], pch=21, bg=colors,xlim=lim,ylim=lim,
-     cex.lab=1.3, cex.axis=1.3,cex.main=2.2, ylab='', xlab='',cex=3.5, main="Deletions")
-#text(0.187,0.475,labels="a)", cex=1.5)
-#text(0.245,0.452,labels="A", cex=1.5)
-title(ylab="Proportion Inside Deletions", line=3.5,cex.lab=1.75)
-title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-legend(0.38,0.22,legend=nucl, pch=21,cex=1.9, pt.bg=colors,x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
-par(xpd=F)
-abline(0,1)
-
-require(ggplot2)
-
-plot <- ggplot(ntcount, aes(x=nt, 
-                               y=props,
-                               width=1)) + geom_bar(colour="black",
-                                                    stat="identity", 
-                                                    fill="dodgerblue",
-                                                    position="dodge", 
-                                                    show.legend=F) 
-
-plot <- plot + labs(x="Nucleotide", 
-                    y="Proportion in Insertions")+scale_y_continuous(expand = c(0, 0),
-                                                                                                                                                     limits = c(0, 1))+theme(panel.grid.major.y = element_line(color="black",size=0.3),
-                                                                                                                                                                               panel.grid.major.x = element_blank(),
-                                                                                                                                                                               panel.grid.minor.y = element_blank(),
-                                                                                                                                                                               panel.grid.minor.x = element_blank(),
-                                                                                                                                                                               panel.spacing=unit(1, "mm"),
-                                                                                                                                                                               #panel.background=element_rect(fill="gray88",colour="white",size=0),
-                                                                                                                                                                               plot.margin =margin(t = 20, r = 20, b = 20, l = 8, unit = "pt"),
-                                                                                                                                                                               axis.line = element_line(colour = "black"), 
-                                                                                                                                                                               axis.title.y=element_text(size=20,margin=margin(t = 0, r = 15, b = 0, l = 0)),
-                                                                                                                                                                               axis.title.x=element_text(size=20,margin=margin(t = 15, r = 0, b = 0, l = 0)),
-                                                                                                                                                                               strip.text.x = element_text(size=16),
-                                                                                                                                                                               axis.text=element_text(size=14),
-                                                                                                                                                                               legend.position="none")
-
-
-
-
-# RANDOMIZATION TEST 
 
 

@@ -79,18 +79,22 @@ glycCount <- function(seq){
   csvcount(seq.glycs)
 }
 
-bootstrap <- function(sampl, n=1000){
-  replicate(n, mean(sample(sampl, replace=T)))
+bootstrap <- function(sampl, reps, n=1000){
+  replicate(n, mean(sample(sampl, length(sampl)/reps, replace=T)))
 }
 
 #PycharmProjects/hiv-withinhost/
 
-ins <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/all/ins-sep.csv",  sep="\t", stringsAsFactors = F)
-del <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/all/del-sep.csv", sep="\t", stringsAsFactors = F)
+ins <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/all/ins-current.csv",  sep="\t", stringsAsFactors = F)
+del <- read.csv("~/PycharmProjects/hiv-withinhost/13_nglycs/all/del-current.csv", sep="\t", stringsAsFactors = F)
 
+ins = ins[!grepl("[^ACGT]", ins$indel),]
+del = del[!grepl("[^ACGT]", del$indel),]
 
 ins <- ins[,-c(4,5,6)]
 del <- del[,-c(4,5,6)]
+
+del <- del[!(del$pos - nchar(del$indel) < 0),]
 
 
 # apply an adjust to the deletion locations to make them the same as insertions 
@@ -127,8 +131,8 @@ del.v <- split(del, del$vloop)
 ins.data <- data.frame()
 del.data <- data.frame()
 
-ins.rep <- matrix(nrow=100, ncol=4)
-del.rep <- matrix(nrow=100, ncol=4)
+ins.rep <- matrix(nrow=1000, ncol=4)
+del.rep <- matrix(nrow=1000, ncol=4)
 
 
 for (n in 1:5){
@@ -151,7 +155,7 @@ for (n in 1:5){
   
   iemean <- mean(iedist)
   # Boostraps for expected insertions
-  bs.means <- bootstrap(iedist)
+  bs.means <- bootstrap(iedist, 200)
   bs.q <- quantile(bs.means - iemean, c(0.025,0.975))
   
   ieconint <- c()
@@ -168,7 +172,7 @@ for (n in 1:5){
   demean <- mean(dedist)
   
   # Boostraps for expected deletions
-  bs.means <- bootstrap(dedist)
+  bs.means <- bootstrap(dedist, 200)
   bs.q <- quantile(bs.means - demean, c(0.025,0.975))
   
   deconint <- c()
@@ -183,7 +187,7 @@ for (n in 1:5){
   
   iomean <- mean(iobs)
   # Boostraps for observed insertions
-  bs.means <- bootstrap(iobs)
+  bs.means <- bootstrap(iobs, 200)
   bs.q <- quantile(bs.means - iomean, c(0.025,0.975))
   
   ioconint <- c()
@@ -195,7 +199,7 @@ for (n in 1:5){
   
   domean <- mean(dobs)
   # Boostraps for observed deletions
-  bs.means <- bootstrap(dobs)
+  bs.means <- bootstrap(dobs, 200)
   bs.q <- quantile(bs.means - domean, c(0.025,0.975))
   
   doconint <- c()
@@ -236,14 +240,14 @@ for (n in 1:5){
   doreps <- unname(sapply(split(dobs, del[del$vloop==n, 'rep']), mean))
   dereps <- unname(sapply(split(dedist, del[del$vloop==n, 'rep']), mean))
   
-  idx <- ((n-1)*20+1):(n*20)
-  ins.rep[idx, 1] <- rep(n,20)
-  ins.rep[idx, 2] <- 1:20
+  idx <- ((n-1)*200+1):(n*200)
+  ins.rep[idx, 1] <- rep(n,200)
+  ins.rep[idx, 2] <- 1:200
   ins.rep[idx, 3] <- iereps
   ins.rep[idx, 4] <- ioreps
   
-  del.rep[idx, 1] <- rep(n,20)
-  del.rep[idx, 2] <- 1:20
+  del.rep[idx, 1] <- rep(n,200)
+  del.rep[idx, 2] <- 1:200
   del.rep[idx, 3] <- dereps
   del.rep[idx, 4] <- doreps
   
@@ -262,10 +266,10 @@ par(pty="s", xpd=F, mar=c(7,7,3,1),las=0)
 data <- del.data
 d.rep <- del.rep
 v3offset <- 0
-data[3,1:6] <- data[3,1:6] + v3offset
-d.rep[41:60,3:4] <- d.rep[41:60,3:4] + v3offset
+#data[3,1:6] <- data[3,1:6] + v3offset
+#d.rep[41:60,3:4] <- d.rep[41:60,3:4] + v3offset
 
-sizes <- 0.15*sqrt(data$counts)
+sizes <- 0.06*sqrt(data$counts)
 sizes[3] <- 2.4
 
 lim = c(-0.85,0.5)
@@ -274,46 +278,46 @@ plot(data[,c('exp','obs')], pch=1, cex=sizes, lwd=c(10,10,5,10,10), col=alpha(co
      cex.lab=1.85, cex.axis=1.4,cex.main=1.8,las=1, ylab='', xlab='')#main="N-linked Glycosylation Site Changes")
 
 # CLOUDS 
-points(d.rep[,3], d.rep[,4], pch=1, col=colors[d.rep[,1]], cex=0.7, lwd=1.4)
+points(d.rep[,3], d.rep[,4], pch=1, col=alpha(colors[d.rep[,1]],0.4), cex=0.7, lwd=1.4)
 
 abline(0,1)
 title(ylab="Observed Change in PNGS Count\nPer Indel", line=4,cex.lab=1.7)
 title(xlab="Expected Change in PNGS Count\nPer Indel", line=5,cex.lab=1.7)
-arrows(data[,1], data[,5], data[,1], data[,6], length=0.035, angle=90, code=3)
-arrows(data[,2], data[,4], data[,3], data[,4], length=0.035, angle=90, code=3)
+#arrows(data[,1], data[,5], data[,1], data[,6], length=0.035, angle=90, code=3)
+#arrows(data[,2], data[,4], data[,3], data[,4], length=0.035, angle=90, code=3)
 
 # Insertion data points 
 i <- c(1,2,0,3,4)
 data <- ins.data[-3,]
 newcol <- colors[-3]
-sizes <- 0.15*sqrt(data$counts)
-i.rep <- ins.rep[-c(41:60),]
+sizes <- 0.06*sqrt(data$counts)
+i.rep <- ins.rep[-c(401:600),]
 
 # MEANS 
 points(data[,c("exp","obs")], pch=21, col=newcol, cex=sizes,lwd=1, bg=alpha(newcol,0.55))
 
 
 # CLOUDS 
-points(i.rep[,3], i.rep[,4], pch=21, col=newcol[i[i.rep[,1]]], cex=0.7, lwd=1.4,bg=alpha(newcol[i[i.rep[,1]]],0.8))
+points(i.rep[,3], i.rep[,4], pch=21, cex=0.7, lwd=1.4,bg=alpha(newcol[i[i.rep[,1]]],0.4),col=alpha(newcol[i[i.rep[,1]]],0.3))
 
 # CONFIDENCE INTERVALS 
-arrows(data[,1], data[,5], data[,1], data[,6], length=0.035, angle=90, code=3)
-arrows(data[,2], data[,4], data[,3], data[,4], length=0.035, angle=90, code=3)
+#arrows(data[,1], data[,5], data[,1], data[,6], length=0.035, angle=90, code=3)
+#arrows(data[,2], data[,4], data[,3], data[,4], length=0.035, angle=90, code=3)
 
 
 
-legend(0.25,-0.26,legend=vloops, pch=21,cex=1.5, pt.bg=colors,x.intersp = 1.7,y.intersp=1.2, pt.cex=2.8)
+legend(0.25,-0.26,legend=vloops, pch=21,cex=1.5, pt.bg=colors,x.intersp = 1.5,y.intersp=1.2, pt.cex=3.5)
 #legend(0.45,0.2,legend=c("Ins", "Del"), pch=c(21,1),cex=1.3, pt.bg=colors[1],col=colors[1], x.intersp = 1.0,y.intersp=1.3, pt.cex=3)
-rect(0.25,-0.23,0.47,-0.03)
-text(0.4, -0.09, labels="Ins", cex=1.5)
-text(0.4, -0.17, labels="Del", cex=1.5)
+rect(0.25,-0.23,0.453,-0.03)
+text(0.39, -0.09, labels="Ins", cex=1.5)
+text(0.39, -0.17, labels="Del", cex=1.5)
 points(c(0.30,0.30), c(-0.09, -0.17), pch=c(21,1), cex=2.5, lwd=7, col='black', bg='black')
 
 # positions for V1,V2,V3,V4,V5 (top set first )
-xposi <- c(-0.42, -0.16,-0.62, -0.02)
-yposi <- c(0.40, 0.15, 0.25, 0.08)
+xposi <- c(-0.41, -0.28,-0.61, 0.0)
+yposi <- c(0.53, 0.11, 0.42, 0.08)
 
-xposd <- c(-0.57, -0.26, -0.15, -0.83, -0.31)
+xposd <- c(-0.52, -0.26, -0.05, -0.86, -0.32)
 yposd <- c(-0.42, -0.41, -0.32,-0.67, -0.09)
 
 text(xposi, yposi, labels=c("V1","V2","V4","V5"),cex=1.2)

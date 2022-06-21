@@ -7,21 +7,21 @@ source("~/vindels/2_within-host/utils.r")
 
 # INSERTION PARSING ----------
 path <- "~/PycharmProjects/hiv-withinhost/"
-ifolder <- Sys.glob(paste0(path,"9Indels/new-skygrid/ins/*.tsv"))
-dfolder <- Sys.glob(paste0(path,"9Indels/new-skygrid/del/*.tsv"))
+ifolder <- Sys.glob(paste0(path,"9Indels/new-final/ins/*.tsv"))
+dfolder <- Sys.glob(paste0(path,"9Indels/new-final/del/*.tsv"))
 sep <- "\t"
-trefolder <- paste0(path,"7SampleTrees/prelim200/")
+trefolder <- paste0(path,"7SampleTrees/new-final/prelim/")
 
 # CASE: Removed patient 56552 because could not complete Historian runs 
 # CASE: Removed patients 49641 and 56549 because they are SUBTYPE B
 # CASE: Removed patient 28376 and B because of very bad Rsquared value 
-reg <- "56552|49641|56549|28376"
-newreg <- "30647"
-
-ifolder <- ifolder[!grepl(reg,ifolder)]
-dfolder <- dfolder[!grepl(reg,dfolder)]
-ifolder <- ifolder[grepl(newreg,ifolder)]
-dfolder <- dfolder[grepl(newreg,dfolder)]
+# reg <- "56552|49641|56549|28376"
+# newreg <- "30647"
+# 
+# ifolder <- ifolder[!grepl(reg,ifolder)]
+# dfolder <- dfolder[!grepl(reg,dfolder)]
+# ifolder <- ifolder[grepl(newreg,ifolder)]
+# dfolder <- dfolder[grepl(newreg,dfolder)]
 
 tally <- function(infolder){
   name <- basename(infolder)
@@ -132,8 +132,8 @@ dTotal <- dint
 
 
 require(data.table)
-iTotal <- as.data.frame(rbindlist(iTotal))
-dTotal <- as.data.frame(rbindlist(dTotal))
+# iTotal <- as.data.frame(rbindlist(iTotal))
+# dTotal <- as.data.frame(rbindlist(dTotal))
 # all.ins <- as.data.frame(rbindlist(csv.ins))
 # all.del <- as.data.frame(rbindlist(csv.del))
 
@@ -291,6 +291,96 @@ for (i in 1:length(irtt)){
 }
 
 
+
+
+# ---------------
+# STANDARD INDEL RATES 
+
+insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
+delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
+
+insrates <- data.frame(vloop=vloops,
+                       rate=apply(ins.df, 2, median),
+                       lower=ins.rep[1,],
+                       upper=ins.rep[2,])
+                       #lower=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                       #upper=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
+delrates <- data.frame(vloop=vloops,
+                       rate=apply(del.df, 2, median), 
+                       lower=del.rep[1,],
+                       upper=del.rep[2,])
+                       #lower=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
+                       #upper=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
+
+
+print(insrates)
+print(delrates)
+#indels <- cbind(insrates, delrates[,c(2,3)])
+
+# INDEL ABOVE/BELOW MULTIPLOTS
+# -------------------------------------
+
+require(Rmisc)
+require(ggplot2)
+
+g1 <- ggplot(insrates, aes(x=vloop, y=rate,width=0.8)) +
+  geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) +
+  geom_errorbar(aes(ymax = insrates$upper, ymin = insrates$lower),
+                width = 0.25, size=1.1) +
+  labs(x="Variable Loop",
+       y=expression(paste("       Insertion Rate \n (Events/Nt/Year x  ",10^-3 ,")", sep = "")))+
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) + # breaks=c(300,600,900,1200,1500)) +
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = 42, r = 10, b = 4, l = 20, unit = "pt"),
+        axis.line = element_line(colour = "black"),
+        axis.title.y=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
+        axis.title.x=element_blank(),
+        strip.text.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.text.y = element_text(size=14),
+        legend.position="none")#+ geom_text(aes(y=0.4,x=3 ),
+                                           #label="N/A",
+                                           #size=6)
+#g1
+
+
+g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) +
+  geom_bar(colour="black", stat="identity",fill="firebrick1",position="dodge",show.legend=F) +
+  geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower),
+                width = 0.25, size=1.1) +
+  geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower),
+                width = 0.25, size=1.1) +
+  labs(x="Variable Loop",
+       y="Deletion Rate")+
+  #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
+  scale_y_reverse(lim=c(6,0)) + #breaks=c(300,600,900,1200,1500))+
+  theme(panel.grid.major.y = element_line(color="black",size=0.3),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.spacing=unit(1, "mm"),
+        #panel.background=element_rect(fill="gray88",colour="white",size=0),
+        plot.margin =margin(t = -2, r = 10, b = 8, l = 26, unit = "pt"),
+        axis.line = element_line(colour = "black"),
+        axis.title.y=element_text(size=18,margin=margin(t = 0, r = 11, b = 0, l = 6)),
+        axis.title.x=element_text(size=18,margin=margin(t = 5, r = 0, b = 0, l = 0)),
+        strip.text.x = element_text(size=16),
+        axis.text.x=element_text(size=18),
+        axis.text.y=element_text(size=14),
+        legend.position="none")
+#+ geom_text(aes(y=0.5,x=3 ),label="N/A", size=6)
+
+multiplot(g1,g2)
+
+
+
+# EXTRA CODE:
+
 # --------------------------------
 # INSERTIONS VS DELETIONS 
 # Comparing insertion and deletion rates to each other 
@@ -383,87 +473,3 @@ wth.rates <- as.double(apply(indel.df, 2, median))
 wilcox.test(btw.rates,wth.rates, paired=T)
 
 
-
-# ---------------
-# STANDARD INDEL RATES 
-
-insrates <- data.frame(VLoop=vloops, iRate=irates, AdjRate=irates*10^3)
-delrates <- data.frame(VLoop=vloops, dRate=drates, AdjRate=drates*10^3)
-
-insrates <- data.frame(vloop=vloops,
-                       rate=apply(ins.df, 2, median),
-                       lower=ins.rep[1,],
-                       upper=ins.rep[2,])
-                       #lower=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
-                       #upper=apply(ins.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
-delrates <- data.frame(vloop=vloops,
-                       rate=apply(del.df, 2, median), 
-                       lower=del.rep[1,],
-                       upper=del.rep[2,])
-                       #lower=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[1]}), 
-                       #upper=apply(del.df,2,function(x){quantile(x, c(0.025,0.975))[2]}))
-
-
-print(insrates)
-print(delrates)
-#indels <- cbind(insrates, delrates[,c(2,3)])
-
-# INDEL ABOVE/BELOW MULTIPLOTS
-# -------------------------------------
-
-require(Rmisc)
-require(ggplot2)
-
-g1 <- ggplot(insrates, aes(x=vloop, y=rate,width=0.8)) +
-  geom_bar(colour="black", stat="identity",fill="dodgerblue",position="dodge",show.legend=F) +
-  geom_errorbar(aes(ymax = insrates$upper, ymin = insrates$lower),
-                width = 0.25, size=1.1) +
-  labs(x="Variable Loop",
-       y=expression(paste("       Insertion Rate \n (Events/Nt/Year x  ",10^-3 ,")", sep = "")))+
-  scale_y_continuous(expand = c(0, 0), limits = c(0, 6)) + # breaks=c(300,600,900,1200,1500)) +
-  theme(panel.grid.major.y = element_line(color="black",size=0.3),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.spacing=unit(1, "mm"),
-        #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = 42, r = 10, b = 4, l = 20, unit = "pt"),
-        axis.line = element_line(colour = "black"),
-        axis.title.y=element_text(size=18,margin=margin(t = 0, r = 3, b = 0, l = 12)),
-        axis.title.x=element_blank(),
-        strip.text.x = element_blank(),
-        axis.text.x = element_blank(),
-        axis.text.y = element_text(size=14),
-        legend.position="none")#+ geom_text(aes(y=0.4,x=3 ),
-                                           #label="N/A",
-                                           #size=6)
-#g1
-
-
-g2 <- ggplot(delrates, aes(x=vloop, y=rate,width=0.8)) +
-  geom_bar(colour="black", stat="identity",fill="firebrick1",position="dodge",show.legend=F) +
-  geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower),
-                width = 0.25, size=1.1) +
-  geom_errorbar(aes(ymax = delrates$upper, ymin = delrates$lower),
-                width = 0.25, size=1.1) +
-  labs(x="Variable Loop",
-       y="Deletion Rate")+
-  #scale_y_continuous(expand = c(0, 0),limits = c(0, 6))+
-  scale_y_reverse(lim=c(6,0)) + #breaks=c(300,600,900,1200,1500))+
-  theme(panel.grid.major.y = element_line(color="black",size=0.3),
-        panel.grid.major.x = element_blank(),
-        panel.grid.minor.y = element_blank(),
-        panel.grid.minor.x = element_blank(),
-        panel.spacing=unit(1, "mm"),
-        #panel.background=element_rect(fill="gray88",colour="white",size=0),
-        plot.margin =margin(t = -2, r = 10, b = 8, l = 26, unit = "pt"),
-        axis.line = element_line(colour = "black"),
-        axis.title.y=element_text(size=18,margin=margin(t = 0, r = 11, b = 0, l = 6)),
-        axis.title.x=element_text(size=18,margin=margin(t = 5, r = 0, b = 0, l = 0)),
-        strip.text.x = element_text(size=16),
-        axis.text.x=element_text(size=18),
-        axis.text.y=element_text(size=14),
-        legend.position="none")
-#+ geom_text(aes(y=0.5,x=3 ),label="N/A", size=6)
-
-multiplot(g1,g2)

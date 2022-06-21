@@ -3,12 +3,14 @@
 nucleotides <- c("A","C","G","T")
 
 
-total.ins <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/all/dinucl-ins.csv", stringsAsFactors = F, row.names=1)
-total.del <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/all/dinucl-del.csv", stringsAsFactors = F, row.names = 1)
+total.ins <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/all/dinucl-ins-current.csv", stringsAsFactors = F, row.names=1)
+total.del <- read.csv("~/PycharmProjects/hiv-withinhost/10_nucleotide/all/dinucl-del-current.csv", stringsAsFactors = F, row.names = 1)
 
 total.ins$anc <- gsub("-","",total.ins$anc)
 total.del$anc <- gsub("-","",total.del$anc)
 
+total.ins = total.ins[!grepl("[^ACGT]", total.ins$indel),]
+total.del = total.del[!grepl("[^ACGT]", total.del$indel),]
 
 dinucleotide <- function(seq){
   #initialize the matrix 
@@ -18,7 +20,7 @@ dinucleotide <- function(seq){
   dinucl[is.na(dinucl)] <- 0
   colnames(dinucl) <- nucleotides
   rownames(dinucl) <- nucleotides
-  
+  #print(seq)
   nts <- c()
   for (x in 1:4){for (y in 1:4){nts<- c(nts, paste0(nucleotides[x],nucleotides[y]))}}
   
@@ -167,17 +169,16 @@ plot(NA, xlim=lim,ylim=lim,
      las=1)
 text(x=di.ins[,"vprop"], y=di.ins[,"iprop"], labels=rownames(di.ins), cex=1.5)
 #text(x=0.02,y=0.15, cex=1.5, labels="Insertions")
-title(ylab="Proportion In Insertions", line=4.2,cex.lab=1.75)
-title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
+title(ylab="Proportion In Insertions", line=4.2,cex.lab=1.9)
+title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.9)
 abline(0,1)
 par(xpd=NA)
-text(-0.045, 0.15, labels="a)", cex=2)
+text(-0.040, 0.15, labels="a)", cex=2)
 #legend(0.38,0.24,legend=nucleotides, pch=21,cex=1.9, pt.bg=ins.props[,1],x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 #legend(0.10,0.45,legend=c("Insertions", "Deletions"), pch=c(22,23),cex=1.9, pt.bg="black",x.intersp = 1.0,y.intersp=1.0, pt.cex=3)
 
-# ex <- c(6,10,11,14 )
-# pnts <- di.del[ex,]
-# di.del <- di.del[-ex,]
+ex <- c(6,10,11,14 )
+pnts <- di.del
 
 cex=2
 par(pty="s", mar=c(6,8,2,1),las=0)
@@ -192,13 +193,13 @@ plot(NA, xlim=lim,ylim=lim,
      las=1)
 text(x=di.del[,"vprop"], y=di.del[,"dprop"], labels=rownames(di.del), cex=1.5)
 #text(x=0.02,y=0.15, cex=1.5, labels="Insertions")
-title(ylab="Proportion In Deletions", line=4.2,cex.lab=1.75)
-title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.75)
-points(x=pnts[,"vprop"], y=pnts[,"dprop"], pch=21, cex=1.3, bg="black")
-xcr <- c(0.017, 0.0307, 0.02,0.0293)
-ycr <- c(0.0293, 0.043, 0.039, 0.017)
-arrows(pnts[,"vprop"], pnts[,"dprop"], xcr, ycr, length=0)
-text(xcr+c(-0.005,0,-0.003,0),ycr+c(0,0.003,0.003,-0.004), labels=rownames(pnts), cex=1.2)
+title(ylab="Proportion In Deletions", line=4.2,cex.lab=1.9)
+title(xlab="Proportion in Variable Loops", line=3.5,cex.lab=1.9)
+# points(x=pnts[,"vprop"], y=pnts[,"dprop"], pch=21, cex=1.3, bg="black")
+# xcr <- c(0.017, 0.0307, 0.02,0.0293)
+# ycr <- c(0.0293, 0.043, 0.039, 0.017)
+# #arrows(pnts[,"vprop"], pnts[,"dprop"], xcr, ycr, length=0)
+# text(xcr+c(-0.005,0,-0.003,0),ycr+c(0,0.003,0.003,-0.004), labels=rownames(pnts), cex=1.2)
 abline(0,1)
 par(xpd=NA)
-text(-0.045, 0.15, labels="b)", cex=2)
+text(-0.040, 0.15, labels="b)", cex=2)

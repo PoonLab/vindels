@@ -42,7 +42,13 @@ est.rate <- function(counts, times, vlen, bs=FALSE){
     # }else{
     #   ln = median(vlen)
     # }
+    
     ln = median(vlen)
+    
+    if(ln > 250){
+      ln <- 127
+    }
+    
     r <- exp(coef(fit)[[1]]) / ln * 365 * 1000
   },warning=function(cond){
   })
@@ -55,13 +61,21 @@ one.boot <- function(counts, times, vlen){
   est.rate(counts[sam], times[sam], vlen[sam], T)
 }
 
-ci.rate <- function(counts, times, vlen, n=100){
-  mean.rate <- est.rate(counts, times, vlen)
+ci.rate <- function(vdata){
+  mean.rate <- est.rate(vdata$count, vdata$length, vdata$vlen)
   
   # split by full.id and select 
+  df <- split(vdata, vdata$full.id)
   
-  boot <- replicate(n, one.boot(counts, times, vlen))
-  centered <- quantile(boot - mean.rate, c(0.025,0.975), na.rm=T)
+  bs.vals <- sapply(1:100, function(bs){
+    idx <- bs + seq(0,(numpats-1)*100,100)
+    count <- unlist(sapply(idx, function(i) df[[i]][,"count"]))
+    time <- unlist(sapply(idx, function(i) df[[i]][,"length"]))
+    vlen <- unlist(sapply(idx, function(i) df[[i]][,"vlen"]))
+    est.rate(count,time,vlen)
+  })
+  
+  centered <- quantile(bs.vals - mean.rate, c(0.025,0.975), na.rm=T)
   ci <- c(mean.rate - centered[2], mean.rate - centered[1])
   return(list(rate=mean.rate, ci=ci))
 }
@@ -76,11 +90,10 @@ rates <- sapply(1:4, function(x){
   print(paste0("main ",x))
   z <- sapply(c(1,2,3,4,5), function(v){
     print(paste0("vloop ",v))
-    df <- new.data[[x]][[v]]
-    df <- split(df, df$pat)
-    idx <- get.pats(df)
-    df <- do.call(rbind, df[idx])
-    res <- ci.rate(df$count, df$length, df$vlen)
+    # df <- split(df, df$pat)
+    # idx <- get.pats(df)
+    # df <- do.call(rbind, df[idx])
+    res <- ci.rate(new.data[[x]][[v]])
     lower[v,x] <<- res$ci[1]
     upper[v,x] <<- res$ci[2]
     res$rate
@@ -98,10 +111,9 @@ new.data <- lapply(1:4, function(a){
   })
 })
 
-# ---- PATIENT-WISE INDEL RATES (BOXPLOT) ----
 rates <- lapply(1:4, function(x){
   sapply(c(1,2,3,4,5), function(v){
-    sapply(1:24, function(p){
+    sapply(1:numpats, function(p){
       df <- new.data[[x]][[v]][[p]]
       est.rate(df$count, df$length, df$vlen)
     })
@@ -160,8 +172,8 @@ levels(irates$id) <- c('terminal', 'internal')
 levels(drates$id) <- c('terminal', 'internal')
 
 ## Manual fixing
-irates[8,4] <- 0
-drates[8,4] <- 0
+irates[8,3:5] <- 0
+drates[8,3:5] <- 0
 
 
 # Plotting 
@@ -174,7 +186,7 @@ iplot <- ggplot() +
   coord_flip() + geom_errorbar(aes(x=irates$vloop, fill=irates$id, ymax = irates$upper, ymin = irates$lower),
                                width = 0.25, size=0.8,
                                position = position_dodge(0.9)) +
-  scale_y_continuous(lim=c(0,11), expand=c(0,0)) + 
+  scale_y_continuous(lim=c(0,9), expand=c(0,0)) + 
   scale_x_discrete(limits = rev(levels(irates$vloop))) +
   labs(#x="Variable Loop", 
     y=substitute(paste(p1, 10^-3,p2), list(p1="         Insertion Rate\n    (events/nt/year x ", p2=")"))) + 
@@ -195,12 +207,12 @@ iplot <- ggplot() +
         axis.text.y = element_text(size=20, colour="black", margin=margin(t = 0, r = 10, b = 2, l = 0)),
         axis.text.x=element_text(size=20, colour="black",margin=margin(t = 0, r = 20, b = 0, l = 0)),
         #plot.title = element_text(size=22, hjust = 0.5),
-        legend.position=c(0.70,0.59),
+        legend.position=c(0.65,0.59),
         legend.text=element_text(size=18), 
         legend.background=element_rect(colour="black"),
         legend.title=element_text(size=20),
         legend.spacing.y = unit(2, "mm")
-  ) + geom_text(aes(y=c(1),x=c(3.25)),label="N/A", size=7)
+  ) + geom_text(aes(y=c(0.7),x=c(3.25)),label="N/A", size=7)
 #iplot
 dplot <- ggplot() + 
   geom_bar(aes(x=vloop, y=rate, fill=id), data=drates, stat='identity', position="dodge") + 
@@ -210,7 +222,7 @@ dplot <- ggplot() +
                 position = position_dodge(0.9)) +
   labs(x="Variable Loop", 
        y="Deletion Rate") +
-  scale_y_reverse(lim=c(11,0), expand=c(0,0)) + 
+  scale_y_reverse(lim=c(9,0), expand=c(0,0)) + 
   scale_x_discrete(limits = rev(levels(drates$vloop))) +
   theme(panel.grid.major.y = element_line(color="black",size=0.3),
         panel.grid.major.x = element_blank(),#element_line(color="black",size=0.3),
@@ -227,7 +239,7 @@ dplot <- ggplot() +
         axis.title.x=element_text(size=22,margin=margin(t = 7, r = 3, b = 0, l = 12)),
         axis.text = element_text(size=20, colour="black"),
         plot.title = element_text(size=28, hjust = 0.5),
-        legend.position="none") #+ geom_text(aes(y=1,x= 3.25),label="N/A", size=7)
+        legend.position="none") + geom_text(aes(y=0.7,x=3.25),label="N/A", size=7)
 multiplot(dplot,iplot, cols=2)
 
 # new.data <- lapply(1:2, function(a){
